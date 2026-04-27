@@ -8,51 +8,74 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand : bleu confiance */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 214 95% 93%;
+    --primary-deep: 222 47% 11%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 214 95% 93%;
+    --accent-foreground: 221 83% 33%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-soft: 0 93% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 152 81% 92%;
 
-    --radius: 0.5rem;
+    --warning: 24 95% 53%;
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 33 100% 92%;
 
-    --sidebar-background: 0 0% 98%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+    --info-soft: 214 95% 93%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --radius: 0.625rem;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Sidebar */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 33% 20%;
+    --sidebar-ring: 221 83% 53%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    /* Gradients & shadows */
+    --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%), hsl(217 91% 60%));
+    --gradient-subtle: linear-gradient(180deg, hsl(210 40% 99%), hsl(210 40% 96%));
+    --gradient-success: linear-gradient(135deg, hsl(160 84% 39%), hsl(152 76% 50%));
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.04);
+    --shadow-card: 0 1px 3px 0 hsl(222 47% 11% / 0.06), 0 1px 2px -1px hsl(222 47% 11% / 0.04);
+    --shadow-elevated: 0 10px 30px -12px hsl(222 47% 11% / 0.12);
+    --shadow-glow: 0 0 0 4px hsl(221 83% 53% / 0.12);
 
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
@@ -100,6 +123,21 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  .font-mono-tabular {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }

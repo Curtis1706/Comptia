@@ -1,0 +1,34 @@
+/**
+ * GET fetcher for use with react-query's useQuery.
+ * Returns response.data directly from the standard ApiResponse envelope.
+ */
+export const fetcher = async <T = any>(url: string): Promise<T> => {
+  const res = await fetch(url);
+  const json = await res.json().catch(() => ({ success: false, error: "Réponse invalide" }));
+
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || `Erreur HTTP ${res.status}`);
+  }
+
+  return json.data as T;
+};
+
+/**
+ * Generic mutation helper — returns the full ApiResponse envelope
+ * so callers can check success/error themselves.
+ */
+export const mutate = async <T = any>(
+  url: string,
+  options: RequestInit
+): Promise<{ success: boolean; data?: T; error?: string; message?: string }> => {
+  const isFormData = options.body instanceof FormData;
+
+  const res = await fetch(url, {
+    headers: {
+      ...(!isFormData ? { "Content-Type": "application/json" } : {}),
+    },
+    ...options,
+  });
+
+  return res.json().catch(() => ({ success: false, error: "Réponse invalide" }));
+};

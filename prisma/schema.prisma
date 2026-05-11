@@ -1,0 +1,656 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  admin
+  accountant
+  expert
+  rh
+  viewer
+}
+
+enum CompanyType {
+  SARL
+  EIRL
+  SAS
+  MICRO
+  AUTO
+}
+
+enum TaxRegime {
+  auto_entrepreneur
+  micro
+  simplifie
+  reel
+}
+
+enum AccountType {
+  asset
+  liability
+  equity
+  revenue
+  expense
+}
+
+enum JournalType {
+  purchases
+  sales
+  bank
+  cash
+  payroll
+}
+
+enum EntryStatus {
+  draft
+  posted
+  validated
+}
+
+enum ThirdPartyType {
+  client
+  supplier
+}
+
+enum InvoiceType {
+  invoice
+  quote
+  credit_note
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  viewed
+  paid
+  overdue
+  cancelled
+}
+
+enum PaymentMethod {
+  bank_transfer
+  check
+  cash
+  credit_card
+}
+
+enum VatDeclarationType {
+  CA3
+  CA12
+}
+
+enum VatDeclarationStatus {
+  draft
+  submitted
+  accepted
+  rejected
+}
+
+enum DocumentType {
+  invoice
+  receipt
+  bank_statement
+  other
+}
+
+enum DocumentStatus {
+  uploaded
+  processing
+  processed
+  error
+}
+
+enum ContractType {
+  CDI
+  CDD
+  Stage
+  Alternance
+}
+
+enum EmployeeStatus {
+  active
+  inactive
+  suspended
+}
+
+enum PayrollStatus {
+  draft
+  validated
+  processed
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  VALIDATE
+  EXPORT
+  LOGIN
+  LOGOUT
+}
+
+enum ReconciliationStatus {
+  UNMATCHED
+  PARTIAL
+  MATCHED
+}
+
+// ============================================================
+// COMPANY (Tenant)
+// ============================================================
+
+model Company {
+  id                   String      @id @default(cuid())
+  name                 String
+  ifu                  String      @unique
+  rccm                 String?
+  type                 CompanyType @default(SARL)
+  tax_regime           TaxRegime   @default(reel)
+  sector               String      @default("")
+  address              String      @default("")
+  postal_code          String      @default("")
+  city                 String      @default("")
+  country              String      @default("Bénin")
+  phone                String?
+  email                String
+  website              String?
+  logo_url             String?
+  accounting_start_date DateTime   @default(now())
+  fiscal_year_end      String      @default("12-31")
+  created_at           DateTime    @default(now())
+  updated_at           DateTime    @updatedAt
+
+  // Relations
+  users          User[]
+  accounts       Account[]
+  journal_entries JournalEntry[]
+  third_parties  ThirdParty[]
+  invoices       Invoice[]
+  vat_declarations VatDeclaration[]
+  documents      Document[]
+  employees      Employee[]
+  payrolls       Payroll[]
+  audit_logs     AuditLog[]
+  bank_statements BankStatement[]
+  notifications  Notification[]
+
+  @@index([ifu])
+}
+
+// ============================================================
+// USER
+// ============================================================
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  name       String
+  role       UserRole @default(viewer)
+  company_id String
+  avatar_url String?
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company       Company        @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  journal_entries JournalEntry[]
+  invoices      Invoice[]
+  documents     Document[]
+  audit_logs    AuditLog[]
+  notifications Notification[]
+
+  @@index([company_id])
+  @@index([email])
+}
+
+// ============================================================
+// ACCOUNT (Plan Comptable)
+// ============================================================
+
+model Account {
+  code        String      @id
+  name        String
+  type        AccountType
+  company_id  String
+  parent_code String?
+  is_active   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  company      Company       @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  journal_lines JournalLine[]
+
+  @@index([company_id])
+  @@index([company_id, type])
+  @@index([company_id, is_active])
+  @@unique([code, company_id])
+}
+
+// ============================================================
+// JOURNAL ENTRY
+// ============================================================
+
+model JournalEntry {
+  id          String      @id @default(cuid())
+  date        DateTime
+  reference   String
+  description String
+  journal     JournalType
+  status      EntryStatus @default(draft)
+  document_id String?
+  company_id  String
+  created_by  String
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  company     Company       @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  created_by_user User      @relation(fields: [created_by], references: [id])
+  lines       JournalLine[]
+  document    Document?     @relation(fields: [document_id], references: [id])
+
+  @@index([company_id])
+  @@index([company_id, status])
+  @@index([company_id, journal])
+  @@index([company_id, date])
+  @@index([company_id, reference])
+}
+
+// ============================================================
+// JOURNAL LINE (Partie double)
+// ============================================================
+
+model JournalLine {
+  id                    String               @id @default(cuid())
+  entry_id              String
+  account_code          String
+  company_id            String
+  debit                 Decimal              @db.Decimal(15, 2) @default(0)
+  credit                Decimal              @db.Decimal(15, 2) @default(0)
+  description           String?
+  maturity_date         DateTime?
+  third_party           String?
+  lettering_code        String?              // Ex: AA, AB (Scoped by account/year)
+  reconciliation_status ReconciliationStatus @default(UNMATCHED)
+  bank_transaction_id   String?
+  created_at            DateTime             @default(now())
+
+  entry            JournalEntry     @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+  account          Account          @relation(fields: [account_code, company_id], references: [code, company_id])
+  bank_transaction BankTransaction? @relation(fields: [bank_transaction_id], references: [id])
+
+  @@index([entry_id])
+  @@index([account_code])
+  @@index([company_id])
+  @@index([lettering_code])
+  @@index([reconciliation_status])
+}
+
+// ============================================================
+// THIRD PARTY (Clients & Fournisseurs)
+// ============================================================
+
+model ThirdParty {
+  id            String         @id @default(cuid())
+  company_id    String
+  name          String
+  type          ThirdPartyType
+  ifu           String?
+  rccm          String?
+  address       String         @default("")
+  postal_code   String         @default("")
+  city          String         @default("")
+  country       String         @default("Bénin")
+  email         String
+  phone         String?
+  payment_terms Int?
+  is_active     Boolean        @default(true)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+
+  company  Company   @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+
+  @@index([company_id])
+  @@index([company_id, type])
+  @@index([company_id, is_active])
+}
+
+// ============================================================
+// INVOICE
+// ============================================================
+
+model Invoice {
+  id             String        @id @default(cuid())
+  company_id     String
+  reference      String
+  type           InvoiceType
+  client_id      String
+  issue_date     DateTime
+  due_date       DateTime
+  subtotal_ht    Decimal       @db.Decimal(15, 2) @default(0)
+  vat_amount     Decimal       @db.Decimal(15, 2) @default(0)
+  total_ttc      Decimal       @db.Decimal(15, 2) @default(0)
+  tax_regime     String        @default("reel")
+  status         InvoiceStatus @default(draft)
+  notes          String?
+  payment_method PaymentMethod?
+  document_id    String?
+  created_by     String
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  company    Company          @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  client     ThirdParty       @relation(fields: [client_id], references: [id])
+  created_by_user User        @relation(fields: [created_by], references: [id])
+  lines      InvoiceLine[]
+  payments   InvoicePayment[]
+
+  @@index([company_id])
+  @@index([company_id, status])
+  @@index([company_id, type])
+  @@index([company_id, client_id])
+  @@index([company_id, due_date])
+  @@unique([reference, company_id])
+}
+
+// ============================================================
+// INVOICE LINE
+// ============================================================
+
+model InvoiceLine {
+  id                 String  @id @default(cuid())
+  invoice_id         String
+  description        String
+  quantity           Decimal @db.Decimal(15, 4)
+  unit_price         Decimal @db.Decimal(15, 4)
+  vat_rate           Decimal @db.Decimal(5, 2)
+  amount             Decimal @db.Decimal(15, 2)
+  accounting_account String?
+  created_at         DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@index([invoice_id])
+}
+
+// ============================================================
+// INVOICE PAYMENT
+// ============================================================
+
+model InvoicePayment {
+  id             String    @id @default(cuid())
+  invoice_id     String
+  company_id     String
+  amount         Decimal   @db.Decimal(15, 2)
+  payment_date   DateTime
+  payment_method String
+  reference      String?
+  created_at     DateTime  @default(now())
+
+  invoice Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@index([invoice_id])
+  @@index([company_id])
+}
+
+// ============================================================
+// VAT DECLARATION
+// ============================================================
+
+model VatDeclaration {
+  id               String               @id @default(cuid())
+  company_id       String
+  period_start     DateTime
+  period_end       DateTime
+  declaration_type VatDeclarationType   @default(CA3)
+  ca_ht            Decimal              @db.Decimal(15, 2) @default(0)
+  vat_collected    Decimal              @db.Decimal(15, 2) @default(0)
+  purchases_ht     Decimal              @db.Decimal(15, 2) @default(0)
+  vat_deductible   Decimal              @db.Decimal(15, 2) @default(0)
+  vat_due          Decimal              @db.Decimal(15, 2) @default(0)
+  status           VatDeclarationStatus @default(draft)
+  submitted_at     DateTime?
+  created_at       DateTime             @default(now())
+  updated_at       DateTime             @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([company_id, status])
+  @@index([company_id, period_start])
+}
+
+// ============================================================
+// DOCUMENT (GED + OCR)
+// ============================================================
+
+model Document {
+  id                String         @id @default(cuid())
+  company_id        String
+  filename          String
+  original_filename String
+  type              DocumentType   @default(other)
+  file_url          String
+  file_size         Int
+  mime_type         String
+  extracted_data    Json?
+  status            DocumentStatus @default(uploaded)
+  journal_entry_id  String?
+  uploaded_by       String
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+
+  company         Company        @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  uploaded_by_user User          @relation(fields: [uploaded_by], references: [id])
+  journal_entries  JournalEntry[]
+
+  @@index([company_id])
+  @@index([company_id, status])
+  @@index([company_id, type])
+}
+
+// ============================================================
+// EMPLOYEE
+// ============================================================
+
+model Employee {
+  id                    String         @id @default(cuid())
+  company_id            String
+  first_name            String
+  last_name             String
+  email                 String
+  phone                 String?
+  position              String
+  department            String?
+  hire_date             DateTime
+  birth_date            DateTime?
+  address               String         @default("")
+  postal_code           String         @default("")
+  city                  String         @default("")
+  country               String         @default("Bénin")
+  social_security_number String?
+  contract_type         ContractType   @default(CDI)
+  base_salary           Decimal        @db.Decimal(15, 2)
+  status                EmployeeStatus @default(active)
+  created_at            DateTime       @default(now())
+  updated_at            DateTime       @updatedAt
+
+  company  Company   @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  payrolls Payroll[]
+
+  @@index([company_id])
+  @@index([company_id, status])
+  @@unique([email, company_id])
+}
+
+// ============================================================
+// PAYROLL (Bulletin de paie)
+// ============================================================
+
+model Payroll {
+  id                   String        @id @default(cuid())
+  company_id           String
+  employee_id          String
+  month                Int
+  year                 Int
+  period_start         DateTime
+  period_end           DateTime
+  base_salary          Decimal       @db.Decimal(15, 2)
+  gross_salary         Decimal       @db.Decimal(15, 2)
+  net_salary           Decimal       @db.Decimal(15, 2)
+  employer_cost        Decimal       @db.Decimal(15, 2) @default(0)
+  status               PayrollStatus @default(draft)
+  pdf_url              String?
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+
+  company       Company               @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  employee      Employee              @relation(fields: [employee_id], references: [id])
+  deductions    PayrollDeduction[]
+  contributions PayrollContribution[]
+
+  @@index([company_id])
+  @@index([company_id, employee_id])
+  @@index([company_id, year, month])
+  @@unique([employee_id, month, year])
+}
+
+// ============================================================
+// PAYROLL DEDUCTION (Cotisations salarié)
+// ============================================================
+
+model PayrollDeduction {
+  id         String  @id @default(cuid())
+  payroll_id String
+  label      String
+  rate       Decimal @db.Decimal(6, 4)
+  base       Decimal @db.Decimal(15, 2)
+  amount     Decimal @db.Decimal(15, 2)
+  created_at DateTime @default(now())
+
+  payroll Payroll @relation(fields: [payroll_id], references: [id], onDelete: Cascade)
+
+  @@index([payroll_id])
+}
+
+// ============================================================
+// PAYROLL CONTRIBUTION (Cotisations patronales)
+// ============================================================
+
+model PayrollContribution {
+  id         String  @id @default(cuid())
+  payroll_id String
+  label      String
+  rate       Decimal @db.Decimal(6, 4)
+  base       Decimal @db.Decimal(15, 2)
+  amount     Decimal @db.Decimal(15, 2)
+  created_at DateTime @default(now())
+
+  payroll Payroll @relation(fields: [payroll_id], references: [id], onDelete: Cascade)
+
+  @@index([payroll_id])
+}
+
+// ============================================================
+// AUDIT LOG (INSERT ONLY — jamais de UPDATE/DELETE)
+// ============================================================
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  company_id  String
+  user_id     String
+  action      AuditAction
+  resource    String
+  resource_id String
+  old_data    Json?
+  new_data    Json?
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime    @default(now())
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [id])
+
+  @@index([company_id])
+  @@index([company_id, resource])
+  @@index([company_id, resource, resource_id])
+  @@index([company_id, user_id])
+  @@index([created_at])
+}
+
+// ============================================================
+// BANK RECONCILIATION
+// ============================================================
+
+model BankStatement {
+  id           String   @id @default(cuid())
+  company_id   String
+  filename     String
+  upload_date  DateTime @default(now())
+  account_iban String?
+  period_start DateTime?
+  period_end   DateTime?
+  
+  company      Company           @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  transactions BankTransaction[]
+
+  @@index([company_id])
+}
+
+model BankTransaction {
+  id             String               @id @default(cuid())
+  statement_id   String
+  date           DateTime
+  description    String
+  amount         Decimal              @db.Decimal(15, 2)
+  reference      String?
+  status         ReconciliationStatus @default(UNMATCHED)
+  created_at     DateTime             @default(now())
+
+  statement      BankStatement @relation(fields: [statement_id], references: [id], onDelete: Cascade)
+  journal_lines  JournalLine[]
+
+  @@index([statement_id])
+  @@index([status])
+}
+// ============================================================
+// NOTIFICATION
+// ============================================================
+
+enum NotificationType {
+  info
+  success
+  warning
+  error
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  company_id String
+  user_id    String?          // Null if it's for all users of the company
+  title      String
+  message    String
+  type       NotificationType @default(info)
+  is_read    Boolean          @default(false)
+  link       String?
+  created_at DateTime         @default(now())
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([user_id])
+  @@index([is_read])
+}

@@ -1,9 +1,9 @@
 export const company = {
-  name: "Entreprise ABC SARL",
-  siret: "12345678901234",
-  regime: "Réel simplifié",
-  sector: "Services informatiques",
-  email: "contact@entreprise-abc.fr",
+  name: "Bénin Tech Solutions SARL",
+  ifu: "1234567890123",
+  regime: "Réel",
+  sector: "Services numériques",
+  email: "contact@benintech.bj",
 };
 
 export const kpis = {

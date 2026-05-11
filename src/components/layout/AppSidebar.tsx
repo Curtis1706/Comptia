@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   LayoutDashboard,
@@ -9,7 +11,6 @@ import {
   FolderOpen,
   Settings,
   ChevronDown,
-  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
@@ -102,8 +103,8 @@ export const AppSidebar = ({ open, onClose }: Props) => {
       >
         {/* logo */}
         <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-1 overflow-hidden shadow-glow">
+            <img src="/logo.png" alt="Comptia Logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <p className="font-display text-lg font-semibold leading-none text-white">Comptia</p>

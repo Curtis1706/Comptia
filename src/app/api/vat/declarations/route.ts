@@ -1,0 +1,193 @@
+import { NextRequest, NextResponse } from "next/server";
+import { withAuth } from "@/lib/auth-guard";
+import { successResponse, errorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
+import { prisma } from "@/lib/prisma";
+import { calculateVatForPeriod, validateDoubleEntry } from "@/lib/accounting";
+import { logAction } from "@/lib/audit";
+import { PaginationSchema } from "@/lib/validators";
+
+/**
+ * GET /api/vat/declarations
+ * Lists VAT declarations with filtering and pagination.
+ */
+export const GET = withAuth(async (req: NextRequest, { user }) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const pag = PaginationSchema.parse({
+      page: searchParams.get("page") ?? undefined,
+      limit: searchParams.get("limit") ?? undefined,
+    });
+
+    const status = searchParams.get("status");
+    const year = searchParams.get("year");
+
+    const where: any = { company_id: user.company_id };
+    if (status) where.status = status;
+    if (year) {
+      const y = parseInt(year);
+      where.period_start = {
+        gte: new Date(y, 0, 1),
+        lte: new Date(y, 11, 31),
+      };
+    }
+
+    const [declarations, total] = await Promise.all([
+      prisma.vatDeclaration.findMany({
+        where,
+        skip: (pag.page - 1) * pag.limit,
+        take: pag.limit,
+        orderBy: { period_start: "desc" },
+      }),
+      prisma.vatDeclaration.count({ where }),
+    ]);
+
+    return paginatedResponse(declarations, total, pag.page, pag.limit);
+  } catch (err) {
+    console.error("[GET /api/vat/declarations]", err);
+    return handlePrismaError(err);
+  }
+});
+
+/**
+ * POST /api/vat/declarations
+ * Creates a new VAT declaration (draft) and its associated accounting entry.
+ */
+export const POST = withAuth(async (req: NextRequest, { user }) => {
+  try {
+    const body = await req.json();
+    const { period_start, period_end, declaration_type } = body;
+
+    if (!period_start || !period_end) {
+      return errorResponse("Dates de période manquantes", 400);
+    }
+
+    const start = new Date(period_start);
+    const end = new Date(period_end);
+
+    // 1. Check for duplicates
+    const existing = await prisma.vatDeclaration.findFirst({
+      where: {
+        company_id: user.company_id,
+        period_start: start,
+        period_end: end,
+      },
+    });
+
+    if (existing) {
+      return errorResponse("Une déclaration existe déjà pour cette période", 409);
+    }
+
+    // 2. Calculate VAT
+    const vatData = await calculateVatForPeriod(prisma, user.company_id, start, end);
+
+    // 3. Transaction: Create declaration + draft accounting entry
+    const declaration = await prisma.$transaction(async (tx) => {
+      const decl = await tx.vatDeclaration.create({
+        data: {
+          company_id: user.company_id,
+          period_start: start,
+          period_end: end,
+          declaration_type: declaration_type || "CA3",
+          ca_ht: vatData.ca_ht,
+          vat_collected: vatData.vat_collected,
+          purchases_ht: vatData.purchases_ht,
+          vat_deductible: vatData.vat_deductible,
+          vat_due: vatData.vat_due,
+          status: "draft",
+        },
+      });
+
+      // 4. Generate accounting entry lines
+      const lines = [
+        {
+          account_code: "4457",
+          debit: vatData.vat_collected,
+          credit: 0,
+          description: `Régularisation TVA collectée ${period_start} - ${period_end}`,
+        },
+        {
+          account_code: "4456",
+          debit: 0,
+          credit: vatData.vat_deductible,
+          description: `Régularisation TVA déductible ${period_start} - ${period_end}`,
+        },
+      ];
+
+      if (vatData.vat_due > 0) {
+        lines.push({
+          account_code: "44551",
+          debit: 0,
+          credit: vatData.vat_due,
+          description: "TVA à payer",
+        });
+      } else if (vatData.vat_credit > 0) {
+        lines.push({
+          account_code: "44567",
+          debit: vatData.vat_credit,
+          credit: 0,
+          description: "Crédit de TVA à reporter",
+        });
+      }
+
+      const { isValid } = validateDoubleEntry(lines);
+      if (isValid) {
+        // Auto-create missing accounts to avoid FK violations
+        const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
+          "4457": { name: "TVA collectée", type: "liability" },
+          "4456": { name: "TVA déductible", type: "asset" },
+          "44551": { name: "TVA à payer", type: "liability" },
+          "44567": { name: "Crédit de TVA à reporter", type: "asset" },
+        };
+
+        const uniqueCodes = [...new Set(lines.map((l) => l.account_code))];
+        await Promise.all(
+          uniqueCodes.map((code) => {
+            const def = ACCOUNT_DEFAULTS[code] || { name: `Compte ${code}`, type: "asset" as const };
+            return tx.account.upsert({
+              where: { code_company_id: { code, company_id: user.company_id } },
+              create: { code, name: def.name, type: def.type, company_id: user.company_id },
+              update: {},
+            });
+          })
+        );
+
+        await tx.journalEntry.create({
+          data: {
+            date: new Date(),
+            reference: `VAT-${decl.id.slice(-4)}`,
+            description: `Déclaration TVA ${period_start} - ${period_end}`,
+            journal: "bank",
+            status: "draft",
+            company_id: user.company_id,
+            created_by: user.id,
+            lines: {
+              create: lines.map((l) => ({
+                account_code: l.account_code,
+                debit: l.debit,
+                credit: l.credit,
+                description: l.description,
+                company_id: user.company_id,
+              })),
+            },
+          },
+        });
+      }
+
+      return decl;
+    });
+
+    await logAction({
+      company_id: user.company_id,
+      user_id: user.id,
+      action: "CREATE",
+      resource: "VatDeclaration",
+      resource_id: declaration.id,
+      new_data: declaration,
+    });
+
+    return NextResponse.json(successResponse(declaration, "Déclaration créée"), { status: 201 });
+  } catch (err) {
+    console.error("[POST /api/vat/declarations]", err);
+    return handlePrismaError(err);
+  }
+});

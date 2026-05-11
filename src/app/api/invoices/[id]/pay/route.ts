@@ -9,7 +9,7 @@ import {
 } from "@/lib/api-response";
 import { RecordPaymentSchema } from "@/lib/validators";
 import { logAction } from "@/lib/audit";
-import { toNumber, generatePaymentEntries } from "@/lib/accounting";
+import { toNumber, generatePaymentEntryLines } from "@/lib/accounting";
 
 /**
  * POST /api/invoices/[id]/pay
@@ -62,7 +62,11 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       });
 
       // 3. Generate automatic JournalEntry
-      const entryLines = generatePaymentEntries(amount, payment_method);
+      const entryLines = generatePaymentEntryLines({
+        amount, 
+        client_id: invoice.client_id, 
+        payment_method
+      });
       const entryReference = `PAY-${invoice.reference}-${invoice.payments.length + 1}`;
 
       await tx.journalEntry.create({

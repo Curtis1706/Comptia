@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const PUBLIC_PATHS = [
+  "/",
   "/login",
   "/register",
   "/landing",
@@ -10,11 +11,13 @@ const PUBLIC_PATHS = [
   "/favicon.ico",
 ];
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Allow public paths
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isPublic = PUBLIC_PATHS.some((p) => 
+    p === "/" ? pathname === "/" : pathname.startsWith(p)
+  );
   if (isPublic) return NextResponse.next();
 
   // Validate JWT token

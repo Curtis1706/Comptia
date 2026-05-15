@@ -166,7 +166,7 @@ export const InvoicePDF = ({ invoice, company }: { invoice: any, company: any })
               company?.email || null
             ].filter(Boolean).join(' · ')}
           </Text>
-          <Text style={styles.footerText}>Document généré électroniquement par Brightbook Studio</Text>
+          <Text style={styles.footerText}>Document généré électroniquement par Comptia</Text>
         </View>
         
       </Page>

@@ -38,7 +38,7 @@ export const Parametres = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Configuration" subtitle="Personnalisez votre espace Brightbook Studio" />
+      <PageHeader title="Configuration" subtitle="Personnalisez votre espace Comptia" />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
         <nav className="space-y-1 rounded-xl border border-border bg-card p-2 shadow-card h-fit sticky top-20">

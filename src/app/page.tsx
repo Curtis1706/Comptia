@@ -1,13 +1,12 @@
-import Index from "@/views/Index";
-import { AppShell } from "@/components/layout/AppShell";
-import { Suspense } from "react";
+import LandingView from "@/views/LandingView";
+import { Metadata } from "next";
 
-export default function Home() {
-  return (
-    <AppShell>
-      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Chargement du tableau de bord...</div>}>
-        <Index />
-      </Suspense>
-    </AppShell>
-  );
+export const metadata: Metadata = {
+  title: "Comptia — La comptabilité intelligente pour les PME",
+  description:
+    "Facturation, comptabilité, rapprochement bancaire, TVA et reporting. Tout-en-un, cloud, sécurisé et 100% français.",
+};
+
+export default function HomePage() {
+  return <LandingView />;
 }

@@ -26,10 +26,20 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     const accountMap = new Map(accounts.map(a => [a.code, a.name]));
 
     // 3. Process Bilan and Income Statement
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      select: { initial_treasury_balance: true }
+    });
+    const initialBalance = Number(company?.initial_treasury_balance || 0);
+
     const balanceSheet = {
       actif: [] as { label: string; value: number }[],
       passif: [] as { label: string; value: number }[],
     };
+
+    if (initialBalance !== 0) {
+      balanceSheet.actif.push({ label: "Report de trésorerie initial", value: initialBalance });
+    }
 
     const incomeStatement = {
       produits: [] as { label: string; value: number }[],
@@ -91,7 +101,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       }
     });
 
-    const startingBalance = Number(initialBalanceResult._sum.debit || 0) - Number(initialBalanceResult._sum.credit || 0);
+    const startingBalance = (Number(initialBalanceResult._sum.debit || 0) - Number(initialBalanceResult._sum.credit || 0)) + initialBalance;
 
     const dailyMoves = await prisma.journalLine.findMany({
       where: {

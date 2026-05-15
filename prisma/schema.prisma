@@ -168,6 +168,7 @@ model Company {
   logo_url             String?
   accounting_start_date DateTime   @default(now())
   fiscal_year_end      String      @default("12-31")
+  initial_treasury_balance Decimal @db.Decimal(15, 2) @default(0)
   created_at           DateTime    @default(now())
   updated_at           DateTime    @updatedAt
 

@@ -170,6 +170,28 @@ const EntrepriseForm = () => {
           </div>
         </div>
 
+        <div className="rounded-xl border border-warning/20 bg-warning/5 p-4 space-y-4">
+          <div className="flex items-center gap-2 text-warning">
+            <Building className="h-4 w-4" />
+            <h3 className="text-sm font-bold uppercase tracking-wider">Trésorerie & Soldes</h3>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Solde de trésorerie initial (FCFA)</Label>
+              <Input 
+                name="initial_treasury_balance" 
+                type="number" 
+                step="0.01" 
+                defaultValue={company.initial_treasury_balance} 
+                placeholder="0.00"
+              />
+              <p className="text-[10px] text-muted-foreground italic">
+                Ce montant sera ajouté au solde calculé de vos comptes de classe 5.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end gap-3 border-t border-border pt-6">
           <Button variant="outline" type="button">Annuler</Button>
           <Button className="bg-gradient-primary hover:opacity-90 shadow-glow" type="submit" disabled={isSaving}>

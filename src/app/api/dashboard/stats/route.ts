@@ -23,7 +23,7 @@ export const GET = withAuth(async (req, { user }) => {
     const currentMonthEnd = endOfMonth(baseDate);
     
     // 1. Fetch KPIs (Global/Total for testing, or very broad range)
-    const [caStats, chargesStats, invoiceStats, bankBalance] = await Promise.all([
+    const [caStats, chargesStats, invoiceStats, bankBalance, company] = await Promise.all([
       prisma.journalLine.aggregate({
         where: {
           company_id: companyId,
@@ -53,12 +53,17 @@ export const GET = withAuth(async (req, { user }) => {
           account_code: { startsWith: "5" },
         },
         _sum: { debit: true, credit: true }
+      }),
+      prisma.company.findUnique({
+        where: { id: companyId },
+        select: { initial_treasury_balance: true }
       })
     ]);
 
     const totalCa = toNumber(caStats._sum.credit) - toNumber(caStats._sum.debit);
     const totalCharges = toNumber(chargesStats._sum.debit) - toNumber(chargesStats._sum.credit);
-    const treasury = toNumber(bankBalance._sum.debit) - toNumber(bankBalance._sum.credit);
+    const calculatedTreasury = toNumber(bankBalance._sum.debit) - toNumber(bankBalance._sum.credit);
+    const treasury = calculatedTreasury + toNumber(company?.initial_treasury_balance ?? 0);
 
     // 1b. Fetch KPIs for PREVIOUS month for growth calculation
     const prevMonthStart = startOfMonth(subMonths(baseDate, 1));

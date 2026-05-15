@@ -19,6 +19,7 @@ const UpdateCompanySchema = z.object({
   website: z.string().optional(),
   logo_url: z.string().optional(),
   fiscal_year_end: z.string().optional(),
+  initial_treasury_balance: z.preprocess((val) => val === "" ? 0 : Number(val), z.number()).optional(),
 });
 
 /**

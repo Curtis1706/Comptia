@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }>; children?: { label: string; to: string }[] };
 
 const items: Item[] = [
-  { label: "Tableau de bord", to: "/", icon: LayoutDashboard },
+  { label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
   {
     label: "Comptabilité", to: "/comptabilite", icon: Wallet,
     children: [

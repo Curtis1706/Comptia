@@ -16,7 +16,7 @@ import { Suspense } from "react";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");

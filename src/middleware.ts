@@ -18,13 +18,19 @@ export async function middleware(req: NextRequest) {
   const isPublic = PUBLIC_PATHS.some((p) => 
     p === "/" ? pathname === "/" : pathname.startsWith(p)
   );
-  if (isPublic) return NextResponse.next();
 
   // Validate JWT token
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   });
+
+  // Redirect authenticated users away from auth pages
+  if (token && (pathname === "/login" || pathname === "/register")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  if (isPublic) return NextResponse.next();
 
   // Unauthenticated API requests → 401
   if (!token && pathname.startsWith("/api/")) {

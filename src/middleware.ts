@@ -19,11 +19,21 @@ export async function middleware(req: NextRequest) {
     p === "/" ? pathname === "/" : pathname.startsWith(p)
   );
 
-  // Validate JWT token
-  const token = await getToken({
+  // Validate JWT token (check both next-auth and authjs session token cookie names for compatibility)
+  let token = await getToken({
     req,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   });
+
+  if (!token) {
+    token = await getToken({
+      req,
+      secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+      cookieName: process.env.NODE_ENV === "production"
+        ? "__Secure-authjs.session-token"
+        : "authjs.session-token",
+    });
+  }
 
   // Redirect authenticated users away from auth pages
   if (token && (pathname === "/login" || pathname === "/register")) {

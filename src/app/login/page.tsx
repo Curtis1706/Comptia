@@ -36,9 +36,10 @@ function LoginForm() {
       if (result?.error) {
         toast.error("Identifiants invalides. Veuillez réessayer.");
       } else {
-        toast.success("Connexion réussie !");
-        router.push(callbackUrl);
-        router.refresh();
+        toast.success("Connexion réussie ! Redirection...");
+        setTimeout(() => {
+          window.location.href = callbackUrl;
+        }, 800);
       }
     } catch (error) {
       toast.error("Une erreur est survenue lors de la connexion.");

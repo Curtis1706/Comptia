@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth-guard";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
-import { calculatePayroll, generatePayrollEntryLines } from "@/lib/payroll";
-import { validateDoubleEntry } from "@/lib/accounting";
+import { calculatePayroll } from "@/lib/payroll";
 import { logAction } from "@/lib/audit";
 
 /**
  * POST /api/payroll/payslips/generate
- * Generates payslips and accounting entries for active employees.
+ * Generates draft payslips for active employees.
  */
 export const POST = withAuth(async (req: NextRequest, { user }) => {
   try {
@@ -54,10 +53,20 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       const results = [];
 
       for (const employee of employees) {
-        // 3a. Calculate
+        // Supprimer le brouillon existant s'il y en a un pour ce mois/année
+        await tx.payroll.deleteMany({
+          where: {
+            employee_id: employee.id,
+            month,
+            year,
+            status: "draft"
+          }
+        });
+
+        // 3a. Calculate standard payroll (V1 Benin default rates)
         const calc = calculatePayroll(Number(employee.base_salary));
 
-        // 3b. Create Payroll record
+        // 3b. Create Payroll record (Draft)
         const payroll = await tx.payroll.create({
           data: {
             company_id: user.company_id,
@@ -69,81 +78,26 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
             base_salary: employee.base_salary,
             gross_salary: calc.gross_salary,
             net_salary: calc.net_salary,
-            employer_cost: calc.total_employer_cost,
+            employer_cost: calc.employer_cost,
             status: "draft",
-            deductions: {
-              create: calc.employee_deductions.map((d) => ({
-                label: d.name,
-                amount: d.amount,
-                rate: d.percentage / 100,
-                base: calc.gross_salary,
-              })),
-            },
-            contributions: {
-              create: calc.employer_contributions.map((c) => ({
-                label: c.name,
-                amount: c.amount,
-                rate: c.percentage / 100,
-                base: calc.gross_salary,
+            lines: {
+              create: calc.lines.map((l) => ({
+                type: l.type,
+                label: l.label,
+                amount: l.amount,
+                rate: l.rate,
+                base: l.base,
               })),
             },
           },
-          include: { deductions: true, contributions: true },
+          include: { lines: true },
         });
-
-        // 3c. Generate Accounting Entry
-        const entryLines = generatePayrollEntryLines(calc, employee.id);
-        const { isValid } = validateDoubleEntry(entryLines);
-
-        if (isValid) {
-          // Auto-create missing accounts to avoid FK violations
-          const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
-            "641": { name: "Rémunérations du personnel", type: "expense" },
-            "645": { name: "Charges sociales patronales", type: "expense" },
-            "421": { name: "Personnel - Salaires à payer", type: "liability" },
-            "431": { name: "Sécurité Sociale", type: "liability" },
-          };
-
-          const uniqueCodes = [...new Set(entryLines.map((l) => l.account_code))];
-          await Promise.all(
-            uniqueCodes.map((code) => {
-              const def = ACCOUNT_DEFAULTS[code] || { name: `Compte ${code}`, type: "expense" as const };
-              return tx.account.upsert({
-                where: { code_company_id: { code, company_id: user.company_id } },
-                create: { code, name: def.name, type: def.type, company_id: user.company_id },
-                update: {},
-              });
-            })
-          );
-
-          await tx.journalEntry.create({
-            data: {
-              date: periodEnd,
-              reference: `PAY-${year}-${String(month).padStart(2, "0")}-${employee.id.slice(-4)}`,
-              description: `Paie ${employee.first_name} ${employee.last_name} ${month}/${year}`,
-              journal: "payroll",
-              status: "posted",
-              company_id: user.company_id,
-              created_by: user.id,
-              lines: {
-                create: entryLines.map((l) => ({
-                  account_code: l.account_code,
-                  debit: l.debit,
-                  credit: l.credit,
-                  description: l.description,
-                  company_id: user.company_id,
-                  third_party: (l as any).third_party,
-                })),
-              },
-            },
-          });
-        }
 
         results.push(payroll);
       }
 
       return results;
-    });
+    }, { maxWait: 10000, timeout: 60000 });
 
     await logAction({
       company_id: user.company_id,
@@ -155,7 +109,7 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     });
 
     return NextResponse.json(
-      successResponse(payrolls, `${payrolls.length} bulletin(s) généré(s) avec succès`),
+      successResponse(payrolls, `${payrolls.length} bulletin(s) généré(s) en brouillon avec succès`),
       { status: 201 }
     );
   } catch (err) {

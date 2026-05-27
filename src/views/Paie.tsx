@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Plus, Send, Download, FileText, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, Send, FileText, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,8 @@ import { formatCFA } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { EmployeeModal } from "@/components/payroll/EmployeeModal";
+import { DownloadPayslipButton } from "@/components/payroll/DownloadPayslipButton";
+import { EditPayslipModal } from "@/components/payroll/EditPayslipModal";
 
 const tabs = [
   { id: "bulletins", label: "Bulletins" },
@@ -33,6 +35,7 @@ export const Paie = () => {
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [editPayslipId, setEditPayslipId] = useState<string | null>(null);
 
   const setTab = (t: Tab) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -152,6 +155,7 @@ export const Paie = () => {
             payslips={payslips} 
             loading={payslipsLoading} 
             onValidate={handleValidatePayslip}
+            onEdit={(id) => setEditPayslipId(id)}
           />
         ) : (
           <SalariesGrid 
@@ -170,6 +174,13 @@ export const Paie = () => {
         onClose={() => setIsEmployeeModalOpen(false)}
         onSuccess={() => queryClient.invalidateQueries({ queryKey: ["employees"] })}
         employee={selectedEmployee}
+      />
+
+      <EditPayslipModal
+        isOpen={!!editPayslipId}
+        onClose={() => setEditPayslipId(null)}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["payslips"] })}
+        payslipId={editPayslipId}
       />
     </div>
   );
@@ -193,7 +204,42 @@ const SelectPeriod = ({ period, onChange }: { period: any; onChange: (p: any) =>
   );
 };
 
-const BulletinsTable = ({ payslips, loading, onValidate }: { payslips: any[]; loading: boolean; onValidate: (id: string) => void }) => (
+const SendPayslipButton = ({ payslip }: { payslip: any }) => {
+  const handleSend = async () => {
+    const emp = payslip.employee;
+    const period = new Date(payslip.year, payslip.month - 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+    const text = [
+      `Bulletin de paie – ${period}`,
+      `Salarié : ${emp.first_name} ${emp.last_name}`,
+      `Poste : ${emp.position}`,
+      `Salaire brut : ${formatCFA(payslip.gross_salary)}`,
+      `Salaire net : ${formatCFA(payslip.net_salary)}`,
+      `Statut : ${payslip.status === "draft" ? "Brouillon" : payslip.status === "validated" ? "Validé" : "Traité"}`,
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Résumé copié dans le presse-papier", {
+        description: "Collez-le dans un e-mail ou un message.",
+      });
+    } catch {
+      toast.error("Impossible d'accéder au presse-papier");
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8"
+      onClick={handleSend}
+      title="Copier le résumé"
+    >
+      <Send className="h-4 w-4" />
+    </Button>
+  );
+};
+
+const BulletinsTable = ({ payslips, loading, onValidate, onEdit }: { payslips: any[]; loading: boolean; onValidate: (id: string) => void; onEdit: (id: string) => void }) => (
   <div className="overflow-x-auto">
     <table className="w-full text-sm">
       <thead>
@@ -253,16 +299,20 @@ const BulletinsTable = ({ payslips, loading, onValidate }: { payslips: any[]; lo
               <td className="px-4 py-3">
                 <div className="flex justify-end gap-1">
                   {p.status === "draft" && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => onValidate(p.id)}>
-                      <CheckCircle2 className="h-4 w-4" />
-                    </Button>
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => onEdit(p.id)} title="Éditer le bulletin">
+                        Éditer
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => onValidate(p.id)} title="Valider le bulletin">
+                        <CheckCircle2 className="h-4 w-4" />
+                      </Button>
+                    </>
                   )}
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Send className="h-4 w-4" />
-                  </Button>
+                  <DownloadPayslipButton
+                    payslipId={p.id}
+                    employeeName={`${p.employee.first_name} ${p.employee.last_name}`}
+                  />
+                  <SendPayslipButton payslip={p} />
                 </div>
               </td>
             </tr>

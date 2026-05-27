@@ -3,17 +3,19 @@ import { withAuth } from "@/lib/auth-guard";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
+import { generatePayrollEntryLines } from "@/lib/payroll";
+import { validateDoubleEntry } from "@/lib/accounting";
 
 /**
  * POST /api/payroll/payslips/[id]/validate
  */
-export const POST = withAuth(async (req: NextRequest, { user, params }) => {
+export const POST = withAuth(async (req: NextRequest, { user, params }: any) => {
   try {
-    const { id } = params as { id: string };
+    const { id } = params;
 
     const payroll = await prisma.payroll.findUnique({
       where: { id, company_id: user.company_id },
-      include: { employee: true },
+      include: { employee: true, lines: true },
     });
 
     if (!payroll) {
@@ -24,21 +26,72 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       return errorResponse("Ce bulletin a déjà été validé ou traité", 409);
     }
 
-    // 1. Transaction: Validate payroll and validate associated entry
+    // 1. Transaction: Validate payroll and create JournalEntry
     const updated = await prisma.$transaction(async (tx) => {
+      // Create accounting entries
+      const calcParams = {
+        base_salary: Number(payroll.base_salary),
+        gross_salary: Number(payroll.gross_salary),
+        net_salary: Number(payroll.net_salary),
+        employer_cost: Number(payroll.employer_cost),
+        lines: payroll.lines.map(l => ({
+          type: l.type,
+          label: l.label,
+          amount: Number(l.amount),
+          rate: l.rate ? Number(l.rate) : null,
+          base: l.base ? Number(l.base) : null
+        }))
+      };
+
+      const entryLines = generatePayrollEntryLines(calcParams, payroll.employee_id);
+      const { isValid } = validateDoubleEntry(entryLines);
+
+      if (isValid) {
+        // Auto-create missing accounts to avoid FK violations
+        const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
+          "641": { name: "Rémunérations du personnel", type: "expense" },
+          "645": { name: "Charges sociales patronales", type: "expense" },
+          "421": { name: "Personnel - Salaires à payer", type: "liability" },
+          "431": { name: "Sécurité Sociale", type: "liability" },
+        };
+
+        const uniqueCodes = [...new Set(entryLines.map((l) => l.account_code))];
+        await Promise.all(
+          uniqueCodes.map((code) => {
+            const def = ACCOUNT_DEFAULTS[code] || { name: `Compte ${code}`, type: "expense" as const };
+            return tx.account.upsert({
+              where: { code_company_id: { code, company_id: user.company_id } },
+              create: { code, name: def.name, type: def.type, company_id: user.company_id },
+              update: {},
+            });
+          })
+        );
+
+        await tx.journalEntry.create({
+          data: {
+            date: payroll.period_end,
+            reference: `PAY-${payroll.year}-${String(payroll.month).padStart(2, "0")}-${payroll.employee_id.slice(-4)}`,
+            description: `Paie ${payroll.employee.first_name} ${payroll.employee.last_name} ${payroll.month}/${payroll.year}`,
+            journal: "payroll",
+            status: "posted",
+            company_id: user.company_id,
+            created_by: user.id,
+            lines: {
+              create: entryLines.map((l) => ({
+                account_code: l.account_code,
+                debit: l.debit,
+                credit: l.credit,
+                description: l.description,
+                company_id: user.company_id,
+                third_party: (l as any).third_party,
+              })),
+            },
+          },
+        });
+      }
+
       const p = await tx.payroll.update({
         where: { id },
-        data: { status: "validated" },
-      });
-
-      // Find associated journal entry by reference pattern
-      const ref = `PAY-${payroll.year}-${String(payroll.month).padStart(2, "0")}-${payroll.employee_id.slice(-4)}`;
-      await tx.journalEntry.updateMany({
-        where: {
-          company_id: user.company_id,
-          reference: ref,
-          status: "posted", // Assuming it was posted as draft/posted
-        },
         data: { status: "validated" },
       });
 

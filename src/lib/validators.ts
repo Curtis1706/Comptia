@@ -24,7 +24,7 @@ export const CreateCompanySchema = z.object({
   rccm: rccmSchema,
   type: z.enum(["SARL", "EIRL", "SAS", "MICRO", "AUTO"]).default("SARL"),
   tax_regime: z
-    .enum(["auto_entrepreneur", "micro", "simplifie", "reel"])
+    .enum(["auto_entrepreneur", "micro", "simplifie", "reel", "tps"])
     .default("reel"),
   sector: z.string().default(""),
   address: z.string().default(""),
@@ -178,7 +178,7 @@ const InvoiceLineSchema = z.object({
   accounting_account: optionalString,
 });
 
-export const CreateInvoiceSchema = z.object({
+const BaseInvoiceSchema = z.object({
   type: z.enum(["invoice", "quote", "credit_note"]).default("invoice"),
   client_id: cuid,
   issue_date: z.coerce.date(),
@@ -189,9 +189,32 @@ export const CreateInvoiceSchema = z.object({
     .enum(["bank_transfer", "check", "cash", "credit_card"])
     .optional(),
   tax_regime: z.string().default("reel"),
+  mecef_dgi_code: optionalString,
+  mecef_nim: optionalString,
+  mecef_status: z.enum(["draft", "awaiting_manual_normalization", "normalized", "verification_failed"]).optional().default("draft"),
+  vat_exemption_reason: optionalString,
 });
 
-export const UpdateInvoiceSchema = CreateInvoiceSchema.partial();
+export const CreateInvoiceSchema = BaseInvoiceSchema.superRefine((data, ctx) => {
+  if (data.mecef_status === "normalized") {
+    if (!data.mecef_dgi_code) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le code MECeF/DGI est requis pour une facture normalisée",
+        path: ["mecef_dgi_code"],
+      });
+    }
+    if (!data.mecef_nim) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le NIM est requis pour une facture normalisée",
+        path: ["mecef_nim"],
+      });
+    }
+  }
+});
+
+export const UpdateInvoiceSchema = BaseInvoiceSchema.partial();
 
 export const RecordPaymentSchema = z.object({
   amount: z.number().positive("Montant positif requis"),

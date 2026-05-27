@@ -12,6 +12,9 @@ const CreateInvoiceSchema = z.object({
   due_date: z.string(),
   payment_method: z.enum(["bank_transfer", "check", "cash", "credit_card"]).optional(),
   notes: z.string().optional(),
+  mecef_dgi_code: z.string().optional(),
+  mecef_nim: z.string().optional(),
+  mecef_status: z.enum(["draft", "awaiting_manual_normalization", "normalized", "verification_failed"]).optional().default("draft"),
   lines: z.array(z.object({
     description: z.string().min(1),
     quantity: z.number().positive(),
@@ -19,6 +22,15 @@ const CreateInvoiceSchema = z.object({
     vat_rate: z.number().min(0).max(100),
     accounting_account: z.string().optional(),
   })).min(1),
+}).superRefine((data, ctx) => {
+  if (data.mecef_status === "normalized") {
+    if (!data.mecef_dgi_code) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Code MECeF/DGI requis pour la normalisation", path: ["mecef_dgi_code"] });
+    }
+    if (!data.mecef_nim) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "NIM requis pour la normalisation", path: ["mecef_nim"] });
+    }
+  }
 });
 
 /**
@@ -75,17 +87,25 @@ export const POST = withAuth(async (req, { user }) => {
 
     const { lines, client_id, ...invoiceData } = parsed.data;
 
-    // Verify client
-    const client = await prisma.thirdParty.findFirst({
-      where: { id: client_id, company_id: user.company_id },
-    });
+    // Verify client and company for tax regime
+    const [client, company] = await Promise.all([
+      prisma.thirdParty.findFirst({ where: { id: client_id, company_id: user.company_id } }),
+      prisma.company.findUnique({ where: { id: user.company_id } })
+    ]);
+    
     if (!client) return errorResponse("Client introuvable", 404);
+    if (!company) return errorResponse("Entreprise introuvable", 404);
+
+    const isTps = company.tax_regime === "tps";
+    const invoiceTaxRate = isTps ? 0 : 18;
+    const vatExemptionReason = isTps ? "Entreprise au régime TPS — TVA non applicable" : null;
 
     // Calculations
     const processedLines = lines.map(line => {
       const amount = line.quantity * line.unit_price;
-      const vat = amount * (line.vat_rate / 100);
-      return { ...line, amount, vat };
+      const finalVatRate = isTps ? 0 : line.vat_rate;
+      const vat = amount * (finalVatRate / 100);
+      return { ...line, vat_rate: finalVatRate, amount, vat };
     });
 
     const subtotal_ht = processedLines.reduce((acc, l) => acc + l.amount, 0);
@@ -115,6 +135,12 @@ export const POST = withAuth(async (req, { user }) => {
           due_date: new Date(invoiceData.due_date),
           notes: invoiceData.notes,
           payment_method: invoiceData.payment_method,
+          tax_regime: company.tax_regime,
+          tax_rate: invoiceTaxRate,
+          vat_exemption_reason: vatExemptionReason,
+          mecef_dgi_code: invoiceData.mecef_dgi_code,
+          mecef_nim: invoiceData.mecef_nim,
+          mecef_status: invoiceData.mecef_status,
           lines: {
             create: processedLines.map(l => ({
               description: l.description,

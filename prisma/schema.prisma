@@ -34,6 +34,7 @@ enum TaxRegime {
   micro
   simplifie
   reel
+  tps
 }
 
 enum AccountType {
@@ -76,6 +77,13 @@ enum InvoiceStatus {
   paid
   overdue
   cancelled
+}
+
+enum MecefStatus {
+  draft
+  awaiting_manual_normalization
+  normalized
+  verification_failed
 }
 
 enum PaymentMethod {
@@ -162,6 +170,7 @@ model Company {
   postal_code          String      @default("")
   city                 String      @default("")
   country              String      @default("Bénin")
+  currency             String      @default("XOF")
   phone                String?
   email                String
   website              String?
@@ -344,7 +353,14 @@ model Invoice {
   vat_amount     Decimal       @db.Decimal(15, 2) @default(0)
   total_ttc      Decimal       @db.Decimal(15, 2) @default(0)
   tax_regime     String        @default("reel")
+  tax_rate       Decimal       @db.Decimal(5, 2) @default(18)
+  vat_exemption_reason String?
+  statistical_tax_amount Decimal @db.Decimal(15, 2) @default(0)
+  community_levy_amount Decimal  @db.Decimal(15, 2) @default(0)
   status         InvoiceStatus @default(draft)
+  mecef_status   MecefStatus   @default(draft)
+  mecef_dgi_code String?
+  mecef_nim      String?
   notes          String?
   payment_method PaymentMethod?
   document_id    String?
@@ -519,8 +535,7 @@ model Payroll {
 
   company       Company               @relation(fields: [company_id], references: [id], onDelete: Cascade)
   employee      Employee              @relation(fields: [employee_id], references: [id])
-  deductions    PayrollDeduction[]
-  contributions PayrollContribution[]
+  lines         PayrollLine[]
 
   @@index([company_id])
   @@index([company_id, employee_id])
@@ -529,34 +544,17 @@ model Payroll {
 }
 
 // ============================================================
-// PAYROLL DEDUCTION (Cotisations salarié)
+// PAYROLL LINE (Ligne de bulletin : prime, retenue, cotisation)
 // ============================================================
 
-model PayrollDeduction {
+model PayrollLine {
   id         String  @id @default(cuid())
   payroll_id String
+  type       String  // 'earning', 'deduction', 'employer_contribution', 'tax'
   label      String
-  rate       Decimal @db.Decimal(6, 4)
-  base       Decimal @db.Decimal(15, 2)
-  amount     Decimal @db.Decimal(15, 2)
-  created_at DateTime @default(now())
-
-  payroll Payroll @relation(fields: [payroll_id], references: [id], onDelete: Cascade)
-
-  @@index([payroll_id])
-}
-
-// ============================================================
-// PAYROLL CONTRIBUTION (Cotisations patronales)
-// ============================================================
-
-model PayrollContribution {
-  id         String  @id @default(cuid())
-  payroll_id String
-  label      String
-  rate       Decimal @db.Decimal(6, 4)
-  base       Decimal @db.Decimal(15, 2)
-  amount     Decimal @db.Decimal(15, 2)
+  rate       Decimal? @db.Decimal(6, 4)
+  base       Decimal? @db.Decimal(15, 2)
+  amount     Decimal  @db.Decimal(15, 2)
   created_at DateTime @default(now())
 
   payroll Payroll @relation(fields: [payroll_id], references: [id], onDelete: Cascade)

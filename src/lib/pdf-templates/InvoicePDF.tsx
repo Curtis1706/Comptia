@@ -50,6 +50,10 @@ const styles = StyleSheet.create({
   notesLabel: { fontSize: 9, fontWeight: 'bold', color: '#374151', marginBottom: 4 },
   notesText: { fontSize: 8, color: '#6b7280', lineHeight: 1.4 },
 
+  mecefBlock: { marginTop: 20, padding: 10, borderTopWidth: 1, borderTopStyle: 'dashed', borderTopColor: '#9ca3af' },
+  mecefTitle: { fontSize: 9, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
+  mecefText: { fontSize: 8, color: '#4b5563', marginBottom: 2 },
+
   footer: { position: 'absolute', bottom: 30, left: 40, right: 40, textAlign: 'center' },
   footerText: { fontSize: 8, color: '#9ca3af', marginBottom: 2 },
   footerHighlight: { color: '#6b7280' }
@@ -59,6 +63,7 @@ export const InvoicePDF = ({ invoice, company }: { invoice: any, company: any })
   const isQuote = invoice.type === 'quote';
   const docTitle = isQuote ? 'DEVIS' : (invoice.type === 'credit_note' ? 'AVOIR' : 'FACTURE');
   const fallbackDate = new Date().toISOString();
+  const isTps = invoice.tax_regime === 'tps';
 
   return (
     <Document>
@@ -138,10 +143,17 @@ export const InvoicePDF = ({ invoice, company }: { invoice: any, company: any })
               <Text style={styles.summaryLabel}>Total HT</Text>
               <Text style={styles.summaryValue}>{formatCFA_simple(invoice?.subtotal_ht || 0)}</Text>
             </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>TVA</Text>
-              <Text style={styles.summaryValue}>{formatCFA_simple(invoice?.vat_amount || 0)}</Text>
-            </View>
+            {isTps ? (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>TVA</Text>
+                <Text style={{ fontSize: 8, color: '#6b7280', fontStyle: 'italic' }}>Non applicable (TPS)</Text>
+              </View>
+            ) : (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>TVA</Text>
+                <Text style={styles.summaryValue}>{formatCFA_simple(invoice?.vat_amount || 0)}</Text>
+              </View>
+            )}
             <View style={styles.grandTotalRow}>
               <Text style={styles.grandTotalLabel}>TOTAL TTC</Text>
               <Text style={styles.grandTotalValue}>{formatCFA_simple(invoice?.total_ttc || 0)}</Text>
@@ -154,6 +166,15 @@ export const InvoicePDF = ({ invoice, company }: { invoice: any, company: any })
           <View style={styles.notes}>
             <Text style={styles.notesLabel}>Notes & Conditions :</Text>
             <Text style={styles.notesText}>{String(invoice.notes)}</Text>
+          </View>
+        ) : null}
+
+        {/* SYGMEF / MECeF */}
+        {invoice?.mecef_dgi_code && invoice?.mecef_nim ? (
+          <View style={styles.mecefBlock}>
+            <Text style={styles.mecefTitle}>FACTURE NORMALISÉE</Text>
+            <Text style={styles.mecefText}>Code MECeF/DGI : {invoice.mecef_dgi_code}</Text>
+            <Text style={styles.mecefText}>NIM : {invoice.mecef_nim}</Text>
           </View>
         ) : null}
 

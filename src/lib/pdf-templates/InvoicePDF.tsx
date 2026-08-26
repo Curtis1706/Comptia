@@ -172,9 +172,14 @@ export const InvoicePDF = ({ invoice, company }: { invoice: any, company: any })
         {/* SYGMEF / MECeF */}
         {invoice?.mecef_dgi_code && invoice?.mecef_nim ? (
           <View style={styles.mecefBlock}>
-            <Text style={styles.mecefTitle}>FACTURE NORMALISÉE</Text>
+            <Text style={styles.mecefTitle}>FACTURE NORMALISÉE — DGI BÉNIN (e-MECeF)</Text>
             <Text style={styles.mecefText}>Code MECeF/DGI : {invoice.mecef_dgi_code}</Text>
             <Text style={styles.mecefText}>NIM : {invoice.mecef_nim}</Text>
+            {invoice?.mecef_qr_code ? (
+              <Text style={{ fontSize: 7, color: '#2563eb', marginTop: 2 }}>
+                Vérification en ligne DGI : {invoice.mecef_qr_code}
+              </Text>
+            ) : null}
           </View>
         ) : null}
 

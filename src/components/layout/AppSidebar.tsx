@@ -14,13 +14,25 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { fetcher } from "@/lib/fetcher";
+import { isModuleEnabledForSector } from "@/constants/sector-modules";
 
-type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }>; children?: { label: string; to: string }[] };
+type Item = {
+  key: string;
+  label: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children?: { label: string; to: string }[];
+};
 
 const items: Item[] = [
-  { label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
+  { key: "dashboard", label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
   {
-    label: "Comptabilité", to: "/comptabilite", icon: Wallet,
+    key: "comptabilite",
+    label: "Comptabilité",
+    to: "/comptabilite",
+    icon: Wallet,
     children: [
       { label: "Journal des opérations", to: "/comptabilite" },
       { label: "Comptes de tiers", to: "/comptabilite/tiers" },
@@ -29,7 +41,10 @@ const items: Item[] = [
     ],
   },
   {
-    label: "Facturation", to: "/facturation", icon: FileText,
+    key: "facturation",
+    label: "Facturation",
+    to: "/facturation",
+    icon: FileText,
     children: [
       { label: "Factures", to: "/facturation" },
       { label: "Devis", to: "/facturation?tab=devis" },
@@ -37,36 +52,52 @@ const items: Item[] = [
     ],
   },
   {
-    label: "Gestion TVA", to: "/tva", icon: Receipt,
+    key: "tva",
+    label: "Gestion TVA",
+    to: "/tva",
+    icon: Receipt,
     children: [
       { label: "Déclarations", to: "/tva" },
       { label: "Historique TVA", to: "/tva?tab=historique" },
     ],
   },
   {
-    label: "Paie", to: "/paie", icon: Briefcase,
+    key: "paie",
+    label: "Paie",
+    to: "/paie",
+    icon: Briefcase,
     children: [
       { label: "Bulletins", to: "/paie" },
       { label: "Salariés", to: "/paie?tab=salaries" },
     ],
   },
   {
-    label: "Reporting", to: "/reporting", icon: TrendingUp,
+    key: "reporting",
+    label: "Reporting",
+    to: "/reporting",
+    icon: TrendingUp,
     children: [
       { label: "Bilan", to: "/reporting" },
       { label: "Compte de résultat", to: "/reporting?tab=cr" },
+      { label: "DSF SYSCOHADA", to: "/reporting?tab=dsf" },
       { label: "Trésorerie", to: "/reporting?tab=tresorerie" },
     ],
   },
   {
-    label: "Documents", to: "/documents", icon: FolderOpen,
+    key: "documents",
+    label: "Documents",
+    to: "/documents",
+    icon: FolderOpen,
     children: [
       { label: "Factures reçues", to: "/documents" },
       { label: "Justificatifs", to: "/documents?tab=just" },
     ],
   },
   {
-    label: "Configuration", to: "/parametres", icon: Settings,
+    key: "parametres",
+    label: "Configuration",
+    to: "/parametres",
+    icon: Settings,
     children: [
       { label: "Plan comptable", to: "/parametres?tab=plan" },
       { label: "Entreprise", to: "/parametres" },
@@ -83,6 +114,16 @@ interface Props {
 
 export const AppSidebar = ({ open, onClose }: Props) => {
   const [expanded, setExpanded] = useState<string | null>("Comptabilité");
+
+  const { data: userRes } = useQuery<any>({
+    queryKey: ["me"],
+    queryFn: () => fetcher("/api/auth/me"),
+  });
+
+  const user = userRes?.data || userRes;
+  const sector = user?.company?.sector;
+
+  const visibleItems = items.filter((item) => isModuleEnabledForSector(sector, item.key));
 
   return (
     <>
@@ -114,7 +155,7 @@ export const AppSidebar = ({ open, onClose }: Props) => {
 
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="space-y-1">
-            {items.map((item) => {
+            {visibleItems.map((item) => {
               const isOpen = expanded === item.label;
               const Icon = item.icon;
               return (

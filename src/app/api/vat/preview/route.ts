@@ -13,7 +13,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     const { searchParams } = new URL(req.url);
     const startStr = searchParams.get("period_start");
     const endStr = searchParams.get("period_end");
-    const type = searchParams.get("type") || "CA3";
+    const type = searchParams.get("type") || "monthly";
 
     if (!startStr || !endStr) {
       return errorResponse("Période manquante", 400);

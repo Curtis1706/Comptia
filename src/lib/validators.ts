@@ -22,11 +22,28 @@ export const CreateCompanySchema = z.object({
   name: z.string().min(1, "Nom obligatoire"),
   ifu: ifuSchema,
   rccm: rccmSchema,
-  type: z.enum(["SARL", "EIRL", "SAS", "MICRO", "AUTO"]).default("SARL"),
+  type: z
+    .enum(["EI", "SARL", "SA", "SAS", "SNC", "SCS", "GIE", "SUARL", "COOP", "ASSOCIATION"])
+    .default("SARL"),
   tax_regime: z
     .enum(["auto_entrepreneur", "micro", "simplifie", "reel", "tps"])
     .default("reel"),
-  sector: z.string().default(""),
+  sector: z
+    .enum([
+      "commerce_general",
+      "services",
+      "btp",
+      "restauration",
+      "transport",
+      "sante",
+      "education",
+      "agriculture",
+      "industrie",
+      "profession_liberale",
+      "tech",
+      "autre",
+    ])
+    .default("services"),
   address: z.string().default(""),
   postal_code: z.string().default(""),
   city: z.string().default(""),
@@ -186,7 +203,17 @@ const BaseInvoiceSchema = z.object({
   lines: z.array(InvoiceLineSchema).min(1, "Au moins une ligne requise"),
   notes: optionalString,
   payment_method: z
-    .enum(["bank_transfer", "check", "cash", "credit_card"])
+    .enum([
+      "cash",
+      "bank_transfer",
+      "check",
+      "mobile_money_mtn",
+      "mobile_money_moov",
+      "mobile_money_celtiis",
+      "credit_card",
+      "western_union",
+      "other",
+    ])
     .optional(),
   tax_regime: z.string().default("reel"),
   mecef_dgi_code: optionalString,
@@ -219,7 +246,17 @@ export const UpdateInvoiceSchema = BaseInvoiceSchema.partial();
 export const RecordPaymentSchema = z.object({
   amount: z.number().positive("Montant positif requis"),
   payment_date: z.coerce.date(),
-  payment_method: z.enum(["bank_transfer", "check", "cash", "credit_card"]),
+  payment_method: z.enum([
+    "cash",
+    "bank_transfer",
+    "check",
+    "mobile_money_mtn",
+    "mobile_money_moov",
+    "mobile_money_celtiis",
+    "credit_card",
+    "western_union",
+    "other",
+  ]),
   reference: optionalString,
 });
 
@@ -228,7 +265,7 @@ export const RecordPaymentSchema = z.object({
 export const CreateVatDeclarationSchema = z.object({
   period_start: z.coerce.date(),
   period_end: z.coerce.date(),
-  declaration_type: z.enum(["CA3", "CA12"]).default("CA3"),
+  declaration_type: z.enum(["monthly", "quarterly"]).default("monthly"),
 });
 
 export const UpdateVatDeclarationSchema = z.object({

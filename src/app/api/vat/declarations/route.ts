@@ -80,6 +80,9 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     // 2. Calculate VAT
     const vatData = await calculateVatForPeriod(prisma, user.company_id, start, end);
 
+    // Calculate deadline: 15th of the month following period_end (DGI Bénin standard)
+    const deadlineDate = new Date(end.getFullYear(), end.getMonth() + 1, 15, 23, 59, 59);
+
     // 3. Transaction: Create declaration + draft accounting entry
     const declaration = await prisma.$transaction(async (tx) => {
       const decl = await tx.vatDeclaration.create({
@@ -87,26 +90,29 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
           company_id: user.company_id,
           period_start: start,
           period_end: end,
-          declaration_type: declaration_type || "CA3",
+          deadline_date: deadlineDate,
+          declaration_type: declaration_type || "monthly",
           ca_ht: vatData.ca_ht,
           vat_collected: vatData.vat_collected,
           purchases_ht: vatData.purchases_ht,
           vat_deductible: vatData.vat_deductible,
           vat_due: vatData.vat_due,
+          penalty_amount: 0,
           status: "draft",
         },
       });
 
-      // 4. Generate accounting entry lines
+      // 4. Generate SYSCOHADA accounting entry lines
+      // Debit 4431 (TVA facturée) / Credit 4452 (TVA récupérable)
       const lines = [
         {
-          account_code: "4457",
+          account_code: "4431",
           debit: vatData.vat_collected,
           credit: 0,
-          description: `Régularisation TVA collectée ${period_start} - ${period_end}`,
+          description: `Régularisation TVA facturée ${period_start} - ${period_end}`,
         },
         {
-          account_code: "4456",
+          account_code: "4452",
           debit: 0,
           credit: vatData.vat_deductible,
           description: `Régularisation TVA déductible ${period_start} - ${period_end}`,
@@ -115,17 +121,17 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
 
       if (vatData.vat_due > 0) {
         lines.push({
-          account_code: "44551",
+          account_code: "4441",
           debit: 0,
           credit: vatData.vat_due,
-          description: "TVA à payer",
+          description: "État, TVA due à reverser",
         });
       } else if (vatData.vat_credit > 0) {
         lines.push({
-          account_code: "44567",
+          account_code: "4449",
           debit: vatData.vat_credit,
           credit: 0,
-          description: "Crédit de TVA à reporter",
+          description: "État, crédit de TVA à reporter",
         });
       }
 
@@ -133,10 +139,10 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       if (isValid) {
         // Auto-create missing accounts to avoid FK violations
         const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
-          "4457": { name: "TVA collectée", type: "liability" },
-          "4456": { name: "TVA déductible", type: "asset" },
-          "44551": { name: "TVA à payer", type: "liability" },
-          "44567": { name: "Crédit de TVA à reporter", type: "asset" },
+          "4431": { name: "TVA facturée sur ventes", type: "liability" },
+          "4452": { name: "TVA récupérable sur achats", type: "asset" },
+          "4441": { name: "État, TVA due", type: "liability" },
+          "4449": { name: "État, crédit de TVA à reporter", type: "asset" },
         };
 
         const uniqueCodes = [...new Set(lines.map((l) => l.account_code))];
@@ -155,7 +161,7 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
           data: {
             date: new Date(),
             reference: `VAT-${decl.id.slice(-4)}`,
-            description: `Déclaration TVA ${period_start} - ${period_end}`,
+            description: `Déclaration TVA DGI ${period_start} - ${period_end}`,
             journal: "bank",
             status: "draft",
             company_id: user.company_id,

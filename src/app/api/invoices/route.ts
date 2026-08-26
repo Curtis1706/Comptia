@@ -3,6 +3,7 @@ import { withAuth } from "@/lib/auth-guard";
 import { successJson, errorResponse, zodErrorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 import { generateInvoiceReference, generateSalesEntryLines, generateCreditNoteEntryLines } from "@/lib/accounting";
+import { normalizeInvoice } from "@/lib/mecef";
 import * as z from "zod";
 
 const CreateInvoiceSchema = z.object({
@@ -10,7 +11,17 @@ const CreateInvoiceSchema = z.object({
   client_id: z.string().min(1),
   issue_date: z.string(),
   due_date: z.string(),
-  payment_method: z.enum(["bank_transfer", "check", "cash", "credit_card"]).optional(),
+  payment_method: z.enum([
+    "cash",
+    "bank_transfer",
+    "check",
+    "mobile_money_mtn",
+    "mobile_money_moov",
+    "mobile_money_celtiis",
+    "credit_card",
+    "western_union",
+    "other",
+  ]).optional(),
   notes: z.string().optional(),
   mecef_dgi_code: z.string().optional(),
   mecef_nim: z.string().optional(),
@@ -22,15 +33,6 @@ const CreateInvoiceSchema = z.object({
     vat_rate: z.number().min(0).max(100),
     accounting_account: z.string().optional(),
   })).min(1),
-}).superRefine((data, ctx) => {
-  if (data.mecef_status === "normalized") {
-    if (!data.mecef_dgi_code) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Code MECeF/DGI requis pour la normalisation", path: ["mecef_dgi_code"] });
-    }
-    if (!data.mecef_nim) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "NIM requis pour la normalisation", path: ["mecef_nim"] });
-    }
-  }
 });
 
 /**
@@ -153,7 +155,7 @@ export const POST = withAuth(async (req, { user }) => {
           },
         },
         include: { lines: true, client: true },
-      }) as any; // Cast as any to avoid complex Prisma include type issues in this transaction block
+      }) as any;
 
       // 2. If Invoice or Credit Note, create Ledger Entry
       if (invoice.type === "invoice" || invoice.type === "credit_note") {
@@ -179,10 +181,11 @@ export const POST = withAuth(async (req, { user }) => {
           "706": { name: "Prestations de services", type: "revenue" },
           "701": { name: "Ventes de marchandises", type: "revenue" },
           "707": { name: "Ventes de produits finis", type: "revenue" },
-          "4457": { name: "TVA collectée", type: "liability" },
-          "4456": { name: "TVA déductible", type: "asset" },
-          "512": { name: "Banque", type: "asset" },
-          "530": { name: "Caisse", type: "asset" },
+          "4431": { name: "TVA facturée sur ventes", type: "liability" },
+          "4452": { name: "TVA récupérable sur achats", type: "asset" },
+          "521": { name: "Banques locales", type: "asset" },
+          "541": { name: "Caisse siège", type: "asset" },
+          "585": { name: "Mobile Money", type: "asset" },
         };
 
         const uniqueCodes = [...new Set(entryLines.map((l: any) => l.account_code))];
@@ -234,6 +237,40 @@ export const POST = withAuth(async (req, { user }) => {
 
       return invoice;
     });
+
+    // 4. Normalisation e-MECeF automatique pour les factures et avoirs
+    if (result.type === "invoice" || result.type === "credit_note") {
+      try {
+        const mecefRes = await normalizeInvoice({
+          ...result,
+          company,
+          created_by_user: user,
+        });
+
+        const normalizedInvoice = await prisma.invoice.update({
+          where: { id: result.id },
+          data: {
+            mecef_status: "normalized",
+            mecef_dgi_code: mecefRes.codeMECeFDGI,
+            mecef_nim: mecefRes.nim,
+            mecef_qr_code: mecefRes.qrCode,
+          },
+          include: { lines: true, client: true },
+        });
+
+        return successJson(normalizedInvoice, "Facture créée et normalisée e-MECeF avec succès", 201);
+      } catch (mecefErr: any) {
+        console.error("[POST /api/invoices] e-MECeF normalization error:", mecefErr);
+        // En cas d'erreur de connexion, marquer en attente de normalisation
+        const pendingInvoice = await prisma.invoice.update({
+          where: { id: result.id },
+          data: { mecef_status: "awaiting_manual_normalization" },
+          include: { lines: true, client: true },
+        });
+
+        return successJson(pendingInvoice, "Facture créée (en attente de normalisation e-MECeF)", 201);
+      }
+    }
 
     return successJson(result, "Facture créée avec succès", 201);
   } catch (err) {

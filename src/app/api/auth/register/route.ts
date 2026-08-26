@@ -4,11 +4,12 @@ import { successJson, errorResponse, zodErrorResponse, handlePrismaError } from 
 import { RegisterSchema } from "@/lib/validators";
 import { logAction } from "@/lib/audit";
 import { rateLimit, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
+import { seedAccountsForCompany } from "../../../../../prisma/seed";
 import bcrypt from "bcryptjs";
 
 /**
  * POST /api/auth/register
- * Creates a new Company + Admin user (no auth required).
+ * Creates a new Company + Admin user and seeds the SYSCOHADA chart of accounts in a single transaction.
  */
 export async function POST(req: NextRequest) {
   // Rate limit: 5 registrations per IP per 15 minutes
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create company and admin user in a transaction
+    // Create company, admin user and seed SYSCOHADA chart of accounts in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const company = await tx.company.create({
         data: {
@@ -66,6 +67,9 @@ export async function POST(req: NextRequest) {
           created_at: true,
         },
       });
+
+      // Seed SYSCOHADA chart of accounts atomically
+      await seedAccountsForCompany(tx, company.id);
 
       return { company, user };
     });

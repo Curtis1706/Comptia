@@ -16,18 +16,19 @@ export const Rapprochement = () => {
   const [selectedBank, setSelectedBank] = useState<string[]>([]);
   const [selectedLedger, setSelectedLedger] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [treasurySource, setTreasurySource] = useState<"bank" | "mobile_money" | "cash">("bank");
 
-  // 1. Fetch Bank Transactions (Unmatched)
+  // 1. Fetch Bank / Mobile Money Transactions (Unmatched)
   const { data: bankRes, isLoading: bankLoading } = useQuery<any>({
-    queryKey: ["bank-transactions"],
-    queryFn: () => fetcher("/api/accounting/reconcile/bank"),
+    queryKey: ["bank-transactions", treasurySource],
+    queryFn: () => fetcher(`/api/accounting/reconcile/bank?source=${treasurySource}`),
   });
   const bankTransactions = bankRes?.data || [];
 
-  // 2. Fetch Ledger Entries (Unmatched Bank Journal)
+  // 2. Fetch Ledger Entries (Unmatched Bank / Mobile Money Journal)
   const { data: ledgerRes, isLoading: ledgerLoading } = useQuery<any>({
-    queryKey: ["ledger-entries"],
-    queryFn: () => fetcher("/api/accounting/reconcile/ledger"),
+    queryKey: ["ledger-entries", treasurySource],
+    queryFn: () => fetcher(`/api/accounting/reconcile/ledger?source=${treasurySource}`),
   });
   const ledgerEntries = ledgerRes?.data || [];
 
@@ -59,7 +60,7 @@ export const Rapprochement = () => {
       });
       const result = await res.json();
       if (result.success) {
-        toast.success("Rapprochement effectué !");
+        toast.success("Rapprochement validé avec succès !");
         setSelectedBank([]);
         setSelectedLedger([]);
         queryClient.invalidateQueries({ queryKey: ["bank-transactions"] });
@@ -77,8 +78,8 @@ export const Rapprochement = () => {
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Rapprochement Bancaire" 
-        subtitle="Faites correspondre vos relevés bancaires avec votre comptabilité"
+        title="Rapprochement Bancaire & Mobile Money" 
+        subtitle="Rapprochez vos relevés bancaires (521) et Mobile Money MTN/Moov/Celtiis (585) avec vos écritures"
         actions={
           <div className="flex items-center gap-4 rounded-lg border border-border bg-card p-1.5 px-4 shadow-sm">
             <div className="text-right">
@@ -99,6 +100,32 @@ export const Rapprochement = () => {
           </div>
         }
       />
+
+      {/* Sélecteur de compte de trésorerie */}
+      <div className="flex items-center gap-2 border-b border-border pb-3">
+        <span className="text-xs font-semibold text-muted-foreground mr-2">Compte de trésorerie :</span>
+        <Button
+          variant={treasurySource === "bank" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setTreasurySource("bank"); setSelectedBank([]); setSelectedLedger([]); }}
+        >
+          Banque (521)
+        </Button>
+        <Button
+          variant={treasurySource === "mobile_money" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setTreasurySource("mobile_money"); setSelectedBank([]); setSelectedLedger([]); }}
+        >
+          Mobile Money MTN / Moov / Celtiis (585)
+        </Button>
+        <Button
+          variant={treasurySource === "cash" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setTreasurySource("cash"); setSelectedBank([]); setSelectedLedger([]); }}
+        >
+          Caisse siège (541)
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left: Bank Side */}

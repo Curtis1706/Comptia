@@ -31,6 +31,7 @@ export const GET = withAuth(async (_req, { user }) => {
             ifu: true,
             type: true,
             tax_regime: true,
+            sector: true,
           },
         },
       },

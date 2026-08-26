@@ -1,9 +1,17 @@
 /**
- * Pure accounting business logic — no Prisma, no side effects.
+ * Pure accounting business logic — SYSCOHADA révisé & République du Bénin.
  * All amounts use number (converted from Prisma Decimal before calling).
  */
 
 import type { JournalLine, Invoice, InvoicePayment } from "@prisma/client";
+import {
+  CNSS_CEILING_MONTHLY,
+  CNSS_EMPLOYEE_RATE,
+  CNSS_EMPLOYER_RATE,
+  VPS_RATE,
+  IPTS_PROFESSIONAL_ALLOWANCE_RATE,
+  IPTS_BRACKETS,
+} from "@/constants/payroll";
 
 export type AccountType = "asset" | "liability" | "equity" | "revenue" | "expense";
 
@@ -100,30 +108,55 @@ export function isInvoiceOverdue(dueDate: Date): boolean {
   return new Date() > new Date(dueDate);
 }
 
-// ─── Payment entries generation ───────────────────────────────────────────────
+// ─── Payment entries generation (SYSCOHADA Bénin) ─────────────────────────────
 
 export type PaymentEntryLine = {
   account_code: string;
   debit: number;
   credit: number;
   description: string;
+  third_party?: string;
 };
 
 /**
+ * Maps a payment method to its appropriate SYSCOHADA treasury account.
+ * - cash -> 541 (Caisse siège)
+ * - bank_transfer, credit_card, western_union -> 521 (Banques locales)
+ * - check -> 511 (Effets / Valeurs à encaisser)
+ * - mobile_money_mtn, mobile_money_moov, mobile_money_celtiis -> 585 (Mobile Money / Transferts électroniques)
+ */
+export function getTreasuryAccountForPaymentMethod(paymentMethod?: string | null): string {
+  switch (paymentMethod) {
+    case "cash":
+      return "541";
+    case "check":
+      return "511";
+    case "mobile_money_mtn":
+    case "mobile_money_moov":
+    case "mobile_money_celtiis":
+      return "585";
+    case "bank_transfer":
+    case "credit_card":
+    case "western_union":
+    default:
+      return "521";
+  }
+}
+
+/**
  * Generates the journal lines for a payment of a client invoice.
- * Debit 512 (bank) / Credit 411 (client receivable)
+ * Debit Treasury (521/541/585/511) / Credit 411 (Clients)
  */
 export function generatePaymentEntryLines(params: {
   amount: number;
   client_id: string;
-  payment_method: string;
-}): any[] {
-  // Determine debit account based on payment method
-  const bankAccount = params.payment_method === "cash" ? "530" : "512";
+  payment_method?: string | null;
+}): PaymentEntryLine[] {
+  const treasuryAccount = getTreasuryAccountForPaymentMethod(params.payment_method);
 
   return [
     {
-      account_code: bankAccount,
+      account_code: treasuryAccount,
       debit: params.amount,
       credit: 0,
       description: "Encaissement client",
@@ -139,7 +172,8 @@ export function generatePaymentEntryLines(params: {
 }
 
 /**
- * Generates JournalLines for a sales entry from an invoice.
+ * Generates JournalLines for a sales entry from an invoice (SYSCOHADA).
+ * Debit 411 (Clients) / Credit 70x (Ventes) & Credit 4431 (TVA facturée)
  */
 export function generateSalesEntryLines(invoice: {
   client_id: string;
@@ -167,10 +201,10 @@ export function generateSalesEntryLines(invoice: {
     ...(invoice.vat_amount > 0
       ? [
           {
-            account_code: "4457",
+            account_code: "4431",
             debit: 0,
             credit: invoice.vat_amount,
-            description: "TVA sur ventes",
+            description: "TVA facturée sur ventes",
           },
         ]
       : []),
@@ -178,7 +212,7 @@ export function generateSalesEntryLines(invoice: {
 }
 
 /**
- * Generates JournalLines for a credit note (reversal).
+ * Generates JournalLines for a credit note (reversal in SYSCOHADA).
  */
 export function generateCreditNoteEntryLines(invoice: {
   client_id: string;
@@ -206,7 +240,7 @@ export function generateCreditNoteEntryLines(invoice: {
     ...(invoice.vat_amount > 0
       ? [
           {
-            account_code: "4457",
+            account_code: "4431",
             debit: invoice.vat_amount,
             credit: 0,
             description: "Avoir client - Régularisation TVA",
@@ -216,7 +250,7 @@ export function generateCreditNoteEntryLines(invoice: {
   ];
 }
 
-// ─── Payroll calculation ──────────────────────────────────────────────────────
+// ─── Payroll calculation (Bénin - CNSS, IPTS, VPS) ───────────────────────────
 
 export interface PayrollDeductionInput {
   label: string;
@@ -233,59 +267,101 @@ export interface PayrollResult {
 }
 
 /**
- * Applies standard French payroll deductions and employer contributions.
- * Rates as of 2024 (approximative — should be configurable in production).
+ * Calcule l'IPTS (Impôt Progressif sur Traitements et Salaires - Bénin)
+ * selon le barème mensuel progressif par tranches sur la base imposable nette d'abattement.
+ */
+export function calculateIPTS(monthlyTaxableBase: number): number {
+  let tax = 0;
+  let remaining = Math.max(0, monthlyTaxableBase);
+
+  for (const bracket of IPTS_BRACKETS) {
+    if (remaining <= 0) break;
+    const taxable = Math.min(remaining, bracket.limit);
+    tax += taxable * bracket.rate;
+    remaining -= taxable;
+  }
+
+  return Math.round(tax);
+}
+
+/**
+ * Calcule un bulletin de paie complet selon la législation sociale et fiscale béninoise :
+ * - CNSS salariale : 3.6% plafonné à 600 000 FCFA/mois
+ * - IPTS : Barème progressif sur base nette après 20% d'abattement pour frais professionnels
+ * - CNSS patronale : 15.4% plafonné à 600 000 FCFA/mois
+ * - VPS : 4% sur salaire brut total sans plafond
  */
 export function calculatePayroll(baseSalary: number): PayrollResult {
-  const gross = baseSalary; // simplified: no overtime
+  const gross = Math.max(0, Number(baseSalary) || 0);
 
-  const deductionRates: PayrollDeductionInput[] = [
-    { label: "Sécurité sociale maladie", rate: 0.75, base: gross },
-    { label: "Sécurité sociale vieillesse", rate: 6.9, base: gross },
-    { label: "Retraite complémentaire", rate: 3.15, base: gross },
-    { label: "Chômage", rate: 2.4, base: gross },
-    { label: "CSG déductible", rate: 6.8, base: gross * 0.9825 },
-    { label: "CSG/CRDS non déductible", rate: 2.9, base: gross * 0.9825 },
-  ];
+  // 1. Cotisation CNSS salariale (3.6% plafonnée)
+  const cnssBase = Math.min(gross, CNSS_CEILING_MONTHLY);
+  const cnssEmployeeAmount = Math.round(cnssBase * CNSS_EMPLOYEE_RATE);
 
-  const deductions = deductionRates.map((d) => ({
-    label: d.label,
-    rate: d.rate,
-    base: d.base,
-    amount: round2(d.base * (d.rate / 100)),
-  }));
+  // 2. Salaire imposable & Base IPTS (abattement forfaitaire de 20%)
+  const taxableSalary = Math.max(0, gross - cnssEmployeeAmount);
+  const taxableBaseIPTS = Math.round(taxableSalary * (1 - IPTS_PROFESSIONAL_ALLOWANCE_RATE));
+  const iptsAmount = calculateIPTS(taxableBaseIPTS);
 
-  const totalDeductions = deductions.reduce((s, d) => s + d.amount, 0);
-  const netSalary = round2(gross - totalDeductions);
-
-  // Employer contributions ~45% of gross (simplified)
-  const employerRate = 45;
-  const employerContribAmount = round2(gross * (employerRate / 100));
-  const contributions = [
+  const deductions = [
     {
-      label: "Cotisations patronales (global)",
-      rate: employerRate,
-      base: gross,
-      amount: employerContribAmount,
+      label: "Cotisation CNSS (Part ouvrière 3.6%)",
+      rate: round2(CNSS_EMPLOYEE_RATE * 100),
+      base: cnssBase,
+      amount: cnssEmployeeAmount,
+    },
+    {
+      label: "IPTS (Impôt progressif sur salaires)",
+      rate: taxableBaseIPTS > 0 ? round2((iptsAmount / taxableBaseIPTS) * 100) : 0,
+      base: taxableBaseIPTS,
+      amount: iptsAmount,
     },
   ];
+
+  const totalDeductions = cnssEmployeeAmount + iptsAmount;
+  const netSalary = Math.round(gross - totalDeductions);
+
+  // 3. Cotisations patronales
+  // CNSS Patronale (15.4% plafonnée)
+  const cnssEmployerAmount = Math.round(cnssBase * CNSS_EMPLOYER_RATE);
+  // VPS (4% non plafonné)
+  const vpsAmount = Math.round(gross * VPS_RATE);
+
+  const contributions = [
+    {
+      label: "Cotisation CNSS (Part patronale 15.4%)",
+      rate: round2(CNSS_EMPLOYER_RATE * 100),
+      base: cnssBase,
+      amount: cnssEmployerAmount,
+    },
+    {
+      label: "Versement Patronal sur Salaires (VPS 4%)",
+      rate: round2(VPS_RATE * 100),
+      base: gross,
+      amount: vpsAmount,
+    },
+  ];
+
+  const totalEmployerContributions = cnssEmployerAmount + vpsAmount;
+  const employerCost = Math.round(gross + totalEmployerContributions);
 
   return {
     gross_salary: round2(gross),
     net_salary: netSalary,
-    employer_cost: round2(gross + employerContribAmount),
+    employer_cost: employerCost,
     deductions,
     contributions,
   };
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-
-// ─── VAT Aggregation ──────────────────────────────────────────────────────────
+// ─── VAT Aggregation (SYSCOHADA Bénin) ────────────────────────────────────────
 
 /**
- * Aggregates ledger data for a specific period to calculate VAT.
+ * Agrège les écritures du grand livre pour une période donnée afin de calculer la TVA SYSCOHADA :
+ * - TVA collectée : comptes 443x (ou 4457 pour rétrocompatibilité)
+ * - TVA déductible : comptes 445x (4451, 4452, 4453, 4454)
+ * - TVA due = max(0, collectée - déductible)
+ * - Crédit TVA = max(0, déductible - collectée)
  */
 export async function calculateVatForPeriod(
   prisma: any,
@@ -319,18 +395,31 @@ export async function calculateVatForPeriod(
     const debit = typeof line.debit === "object" ? (line.debit as any).toNumber() : Number(line.debit);
     const credit = typeof line.credit === "object" ? (line.credit as any).toNumber() : Number(line.credit);
 
-    if (line.account_code.startsWith("4457")) {
+    // TVA collectée / facturée : classe 443x ou 4457
+    if (line.account_code.startsWith("443") || line.account_code.startsWith("4457")) {
       vatCollected += credit;
       details.push({ account_code: line.account_code, amount: credit, type: "collected" });
-    } else if (line.account_code.startsWith("4456")) {
+    }
+    // TVA déductible / récupérable : classe 445x (sauf 4457) ou 4456
+    else if (
+      (line.account_code.startsWith("445") && !line.account_code.startsWith("4457")) ||
+      line.account_code.startsWith("4456")
+    ) {
       vatDeductible += debit;
       details.push({ account_code: line.account_code, amount: debit, type: "deductible" });
-    } else if (line.account_code.startsWith("7")) {
+    }
+    // Chiffre d'affaires HT : classe 7
+    else if (line.account_code.startsWith("7")) {
       caHt += credit;
-    } else if (line.account_code.startsWith("6")) {
+    }
+    // Achats HT : classe 6
+    else if (line.account_code.startsWith("6")) {
       purchasesHt += debit;
     }
   }
+
+  const vatDue = Math.max(0, vatCollected - vatDeductible);
+  const vatCredit = Math.max(0, vatDeductible - vatCollected);
 
   return {
     period_start: start,
@@ -339,11 +428,13 @@ export async function calculateVatForPeriod(
     vat_collected: vatCollected,
     purchases_ht: purchasesHt,
     vat_deductible: vatDeductible,
-    vat_due: Math.max(0, vatCollected - vatDeductible),
-    vat_credit: Math.max(0, vatDeductible - vatCollected),
+    vat_due: vatDue,
+    vat_credit: vatCredit,
     line_details: details,
   };
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;

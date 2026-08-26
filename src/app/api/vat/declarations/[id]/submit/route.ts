@@ -24,13 +24,29 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       return errorResponse("Seules les déclarations en brouillon peuvent être soumises", 409);
     }
 
+    const now = new Date();
+    let penaltyAmount = 0;
+    const vatDue = Number(declaration.vat_due || 0);
+
+    if (declaration.deadline_date && now > new Date(declaration.deadline_date) && vatDue > 0) {
+      const deadline = new Date(declaration.deadline_date);
+      const diffTime = Math.abs(now.getTime() - deadline.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.max(0, Math.floor(diffDays / 30));
+
+      // 10% dès le premier jour de retard + 1% par mois supplémentaire
+      const penaltyRate = 0.10 + diffMonths * 0.01;
+      penaltyAmount = Math.round(vatDue * penaltyRate);
+    }
+
     // 1. Update declaration and validate associated journal entry
     const updated = await prisma.$transaction(async (tx) => {
       const decl = await tx.vatDeclaration.update({
         where: { id },
         data: {
           status: "submitted",
-          submitted_at: new Date(),
+          submitted_at: now,
+          penalty_amount: penaltyAmount,
         },
       });
 

@@ -39,7 +39,19 @@ const CreateInvoiceSchema = z.object({
   client_id: z.string().min(1, "Client obligatoire"),
   issue_date: z.string().min(1, "Date d'émission obligatoire"),
   due_date: z.string().min(1, "Date d'échéance obligatoire"),
-  payment_method: z.enum(["bank_transfer", "check", "cash", "credit_card"]).optional(),
+  payment_method: z
+    .enum([
+      "cash",
+      "bank_transfer",
+      "check",
+      "mobile_money_mtn",
+      "mobile_money_moov",
+      "mobile_money_celtiis",
+      "credit_card",
+      "western_union",
+      "other",
+    ])
+    .optional(),
   notes: z.string().optional(),
   mecef_dgi_code: z.string().optional(),
   mecef_nim: z.string().optional(),
@@ -231,10 +243,15 @@ export const InvoiceModal = ({ isOpen, onClose, onSuccess, defaultType = "invoic
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="mobile_money_mtn">MTN Mobile Money (MoMo)</SelectItem>
+                        <SelectItem value="mobile_money_moov">Moov Money (Moov Africa)</SelectItem>
+                        <SelectItem value="mobile_money_celtiis">Celtiis Cash / Money</SelectItem>
                         <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
-                        <SelectItem value="check">Chèque</SelectItem>
                         <SelectItem value="cash">Espèces</SelectItem>
+                        <SelectItem value="check">Chèque</SelectItem>
                         <SelectItem value="credit_card">Carte bancaire</SelectItem>
+                        <SelectItem value="western_union">Western Union / Transfert</SelectItem>
+                        <SelectItem value="other">Autre</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

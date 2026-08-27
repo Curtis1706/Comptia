@@ -59,3 +59,8 @@ next-env.d.ts
 /temp/
 *.cjs
 *.js.map
+
+# Security & Credentials documentation
+Comptia-Fiches-*.md
+homologation/codes-context.json
+*.docx

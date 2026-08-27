@@ -87,18 +87,25 @@ export interface MecefSecurityElements {
  */
 export function getMecefConfig() {
   const mode = (process.env.MECEF_MODE || "sandbox").toLowerCase() as MecefMode;
-  const nim = process.env.MECEF_NIM || "TS01019550";
-  const ifu = process.env.MECEF_IFU || "3202687290154";
+  const nim = process.env.MECEF_NIM || "";
+  const ifu = process.env.MECEF_IFU || "";
   const token = process.env.MECEF_TOKEN || "";
 
   const sandboxUrl = process.env.MECEF_SANDBOX_URL || "https://developper.impots.bj/sygmef-emcf/api";
   const productionUrl = process.env.MECEF_PRODUCTION_URL || "https://sygmef.impots.bj/emcf";
-  const verificationUrl = process.env.MECEF_VERIFICATION_URL || "https://developper.impots.bj/sygmef-test/verification";
+  const verificationUrl =
+    process.env.MECEF_VERIFICATION_URL ||
+    (mode === "production"
+      ? "https://mecef.impots.bj/verify"
+      : "https://developper.impots.bj/sygmef-test/verification");
 
   const baseUrl = mode === "production" ? productionUrl : sandboxUrl;
 
-  if (mode === "production" && (!token || !nim)) {
-    throw new Error("Configuration e-MECeF invalide : MECEF_TOKEN et MECEF_NIM sont obligatoires en production.");
+  if (mode !== "simulation" && (!token || !nim || !ifu)) {
+    const missing = [!token && "MECEF_TOKEN", !nim && "MECEF_NIM", !ifu && "MECEF_IFU"]
+      .filter(Boolean)
+      .join(", ");
+    throw new Error(`Configuration e-MECeF incomplète : variable(s) [${missing}] manquante(s) dans le fichier .env.`);
   }
 
   return {
@@ -320,16 +327,18 @@ export async function normalizeInvoice(invoice: {
 
   // Mode Simulation locale (hors réseau)
   if (config.mode === "simulation") {
+    const nim = config.nim || "SIM-TS01019550";
+    const ifu = config.ifu || "3202687290154";
     const rawCode = `TEST-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const now = new Date();
     const formattedDate = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-    const qrPayload = `F;${config.nim};${rawCode.replace(/-/g, "")};${config.ifu};${now.toISOString().replace(/[-:T.]/g, "").slice(0, 14)}`;
+    const qrPayload = `F;${nim};${rawCode.replace(/-/g, "")};${ifu};${now.toISOString().replace(/[-:T.]/g, "").slice(0, 14)}`;
     const qrCodeDataUrl = await QRCode.toDataURL(qrPayload, { margin: 1, width: 200 });
 
     const simSecurity: MecefSecurityElements = {
       codeMECeFDGI: rawCode,
       qrCode: qrCodeDataUrl,
-      nim: config.nim,
+      nim,
       counters: `1/1 ${invoice.type === "credit_note" ? "FA" : "FV"}`,
       dateTime: formattedDate,
       totalTTC: Number(invoice.total_ttc || 0),
@@ -356,10 +365,13 @@ export async function normalizeInvoice(invoice: {
     return simSecurity;
   }
 
-  // 1. Détermination du type de facture DGI
+  // 1. Détermination du type de facture DGI (FV, FA, EV, EA)
   let mecefType: MecefInvoiceType = "FV";
+  const hasExportLine = (invoice.lines || []).some((l: any) => l.tax_group === "C");
   if (invoice.type === "credit_note") {
-    mecefType = "FA";
+    mecefType = hasExportLine ? "EA" : "FA";
+  } else if (hasExportLine) {
+    mecefType = "EV";
   }
 
   // 2. Construction des articles en prix TTC (Arrondi XOF entier)

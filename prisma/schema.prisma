@@ -108,6 +108,21 @@ enum MecefStatus {
   verification_failed
 }
 
+enum MecefTaxGroup {
+  A
+  B
+  C
+  D
+  E
+  F
+}
+
+enum MecefAibRate {
+  none
+  rate_1
+  rate_5
+}
+
 enum PaymentMethod {
   cash
   bank_transfer
@@ -221,6 +236,7 @@ model Company {
   audit_logs     AuditLog[]
   bank_statements BankStatement[]
   notifications  Notification[]
+  mecef_logs     MecefLog[]
 
   @@index([ifu])
 }
@@ -373,38 +389,49 @@ model ThirdParty {
 // ============================================================
 
 model Invoice {
-  id             String        @id @default(cuid())
-  company_id     String
-  reference      String
-  type           InvoiceType
-  client_id      String
-  issue_date     DateTime
-  due_date       DateTime
-  subtotal_ht    Decimal       @db.Decimal(15, 2) @default(0)
-  vat_amount     Decimal       @db.Decimal(15, 2) @default(0)
-  total_ttc      Decimal       @db.Decimal(15, 2) @default(0)
-  tax_regime     String        @default("reel")
-  tax_rate       Decimal       @db.Decimal(5, 2) @default(18)
-  vat_exemption_reason String?
-  statistical_tax_amount Decimal @db.Decimal(15, 2) @default(0)
-  community_levy_amount Decimal  @db.Decimal(15, 2) @default(0)
-  status         InvoiceStatus @default(draft)
-  mecef_status   MecefStatus   @default(draft)
-  mecef_dgi_code String?
-  mecef_nim      String?
-  mecef_qr_code  String?
-  notes          String?
-  payment_method PaymentMethod?
-  document_id    String?
-  created_by     String
-  created_at     DateTime      @default(now())
-  updated_at     DateTime      @updatedAt
+  id                     String         @id @default(cuid())
+  company_id             String
+  reference              String
+  type                   InvoiceType
+  client_id              String
+  issue_date             DateTime
+  due_date               DateTime
+  subtotal_ht            Decimal        @db.Decimal(15, 2) @default(0)
+  vat_amount             Decimal        @db.Decimal(15, 2) @default(0)
+  total_ttc              Decimal        @db.Decimal(15, 2) @default(0)
+  tax_regime             String         @default("reel")
+  tax_rate               Decimal        @db.Decimal(5, 2) @default(18)
+  vat_exemption_reason   String?
+  statistical_tax_amount Decimal        @db.Decimal(15, 2) @default(0)
+  community_levy_amount  Decimal        @db.Decimal(15, 2) @default(0)
+  status                 InvoiceStatus  @default(draft)
+  mecef_status           MecefStatus    @default(draft)
+  mecef_dgi_code         String?
+  mecef_nim              String?
+  mecef_qr_code          String?
+  mecef_uid              String?
+  mecef_counters         String?
+  mecef_datetime         DateTime?
+  mecef_original_ref     String?
+  mecef_total_ttc        Decimal?       @db.Decimal(15, 2)
+  aib_rate               MecefAibRate   @default(none)
+  aib_amount             Decimal        @db.Decimal(15, 2) @default(0)
+  tourist_tax_amount     Decimal        @db.Decimal(15, 2) @default(0)
+  additional_description String?
+  commercial_message     String?
+  notes                  String?
+  payment_method         PaymentMethod?
+  document_id            String?
+  created_by             String
+  created_at             DateTime       @default(now())
+  updated_at             DateTime       @updatedAt
 
-  company    Company          @relation(fields: [company_id], references: [id], onDelete: Cascade)
-  client     ThirdParty       @relation(fields: [client_id], references: [id])
-  created_by_user User        @relation(fields: [created_by], references: [id])
-  lines      InvoiceLine[]
-  payments   InvoicePayment[]
+  company         Company          @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  client          ThirdParty       @relation(fields: [client_id], references: [id])
+  created_by_user User             @relation(fields: [created_by], references: [id])
+  lines           InvoiceLine[]
+  payments        InvoicePayment[]
+  mecef_logs      MecefLog[]
 
   @@index([company_id])
   @@index([company_id, status])
@@ -419,15 +446,17 @@ model Invoice {
 // ============================================================
 
 model InvoiceLine {
-  id                 String  @id @default(cuid())
+  id                 String         @id @default(cuid())
   invoice_id         String
   description        String
-  quantity           Decimal @db.Decimal(15, 4)
-  unit_price         Decimal @db.Decimal(15, 4)
-  vat_rate           Decimal @db.Decimal(5, 2)
-  amount             Decimal @db.Decimal(15, 2)
+  quantity           Decimal        @db.Decimal(15, 4)
+  unit_price         Decimal        @db.Decimal(15, 4)
+  vat_rate           Decimal        @db.Decimal(5, 2)
+  amount             Decimal        @db.Decimal(15, 2)
+  tax_group          MecefTaxGroup  @default(B)
+  tax_specific       Decimal?       @db.Decimal(15, 2)
   accounting_account String?
-  created_at         DateTime @default(now())
+  created_at         DateTime       @default(now())
 
   invoice Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
 
@@ -687,3 +716,30 @@ model Notification {
   @@index([user_id])
   @@index([is_read])
 }
+
+// ============================================================
+// MECEF LOG (Journalisation DGI)
+// ============================================================
+
+model MecefLog {
+  id            String   @id @default(cuid())
+  company_id    String
+  invoice_id    String?
+  mode          String              // simulation | sandbox | production
+  method        String              // POST | PUT | GET
+  endpoint      String
+  request_body  Json?
+  response_body Json?
+  http_status   Int?
+  error_code    String?
+  error_desc    String?
+  duration_ms   Int?
+  created_at    DateTime @default(now())
+
+  company       Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  invoice       Invoice? @relation(fields: [invoice_id], references: [id])
+
+  @@index([company_id, created_at])
+  @@index([invoice_id])
+}
+

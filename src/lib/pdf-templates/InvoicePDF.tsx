@@ -1,200 +1,567 @@
-import React from 'react';
-import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
-import { formatCFA_simple } from '@/lib/pdf-templates/pdf-utils';
+import React from "react";
+import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
+import { formatCFA_simple } from "@/lib/pdf-templates/pdf-utils";
+import { TAX_GROUP_LABELS, toMecefPrice, type MecefTaxGroup } from "@/lib/mecef-mapping";
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#1f2937' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 2, borderBottomColor: '#2563eb', paddingBottom: 20, marginBottom: 30 },
-  companyBlock: { width: '50%' },
-  companyName: { fontSize: 24, fontWeight: 'bold', color: '#1e3a8a', marginBottom: 5 },
-  companyText: { fontSize: 9, color: '#4b5563', marginBottom: 2 },
-  
-  invoiceTitleBlock: { width: '50%', alignItems: 'flex-end' },
-  invoiceTitle: { fontSize: 28, fontWeight: 'bold', color: '#2563eb', textTransform: 'uppercase', marginBottom: 5 },
-  invoiceRef: { fontSize: 12, color: '#6b7280', marginBottom: 15 },
-  
-  metaTable: { flexDirection: 'row', justifyContent: 'flex-end', width: '100%' },
-  metaColumn: { marginLeft: 20, alignItems: 'flex-end' },
-  metaLabel: { fontSize: 8, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 2 },
-  metaValue: { fontSize: 10, fontWeight: 'bold', color: '#1f2937' },
-
-  clientSection: { marginBottom: 40, padding: 15, backgroundColor: '#f3f4f6', borderRadius: 4, width: '50%' },
-  clientLabel: { fontSize: 8, color: '#6b7280', textTransform: 'uppercase', marginBottom: 5 },
-  clientName: { fontSize: 14, fontWeight: 'bold', color: '#111827', marginBottom: 3 },
-  clientText: { fontSize: 10, color: '#374151', marginBottom: 2 },
-
-  table: { width: '100%', marginBottom: 30 },
-  tableHeader: { flexDirection: 'row', backgroundColor: '#1e3a8a', padding: 8, borderRadius: 4 },
-  thDesc: { flex: 4, color: '#ffffff', fontSize: 9, fontWeight: 'bold' },
-  thQty: { flex: 1, color: '#ffffff', fontSize: 9, fontWeight: 'bold', textAlign: 'center' },
-  thPrice: { flex: 2, color: '#ffffff', fontSize: 9, fontWeight: 'bold', textAlign: 'right' },
-  thTotal: { flex: 2, color: '#ffffff', fontSize: 9, fontWeight: 'bold', textAlign: 'right' },
-  
-  tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#e5e7eb', padding: 8, paddingVertical: 12 },
-  tdDesc: { flex: 4, fontSize: 9, color: '#1f2937' },
-  tdQty: { flex: 1, fontSize: 9, color: '#4b5563', textAlign: 'center' },
-  tdPrice: { flex: 2, fontSize: 9, color: '#4b5563', textAlign: 'right' },
-  tdTotal: { flex: 2, fontSize: 9, fontWeight: 'bold', color: '#111827', textAlign: 'right' },
-
-  summaryBlock: { width: '100%', alignItems: 'flex-end', marginTop: 10 },
-  summaryBox: { width: '40%' },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
-  summaryLabel: { fontSize: 9, color: '#6b7280' },
-  summaryValue: { fontSize: 10, color: '#1f2937', fontWeight: 'bold' },
-  
-  grandTotalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, backgroundColor: '#f8fafc', borderTopWidth: 2, borderTopColor: '#2563eb', marginTop: 5 },
-  grandTotalLabel: { fontSize: 12, color: '#1e3a8a', fontWeight: 'bold', paddingLeft: 10 },
-  grandTotalValue: { fontSize: 14, color: '#2563eb', fontWeight: 'bold', paddingRight: 10 },
-
-  notes: { marginTop: 40, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#e5e7eb' },
-  notesLabel: { fontSize: 9, fontWeight: 'bold', color: '#374151', marginBottom: 4 },
-  notesText: { fontSize: 8, color: '#6b7280', lineHeight: 1.4 },
-
-  mecefBlock: { marginTop: 20, padding: 10, borderTopWidth: 1, borderTopStyle: 'dashed', borderTopColor: '#9ca3af' },
-  mecefTitle: { fontSize: 9, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
-  mecefText: { fontSize: 8, color: '#4b5563', marginBottom: 2 },
-
-  footer: { position: 'absolute', bottom: 30, left: 40, right: 40, textAlign: 'center' },
-  footerText: { fontSize: 8, color: '#9ca3af', marginBottom: 2 },
-  footerHighlight: { color: '#6b7280' }
+  page: {
+    padding: 30,
+    fontFamily: "Helvetica",
+    fontSize: 9,
+    color: "#111827",
+    backgroundColor: "#ffffff",
+  },
+  testBanner: {
+    backgroundColor: "#dc2626",
+    color: "#ffffff",
+    textAlign: "center",
+    padding: 4,
+    fontSize: 10,
+    fontWeight: "bold",
+    letterSpacing: 2,
+    marginBottom: 10,
+  },
+  testBannerBottom: {
+    backgroundColor: "#dc2626",
+    color: "#ffffff",
+    textAlign: "center",
+    padding: 4,
+    fontSize: 9,
+    fontWeight: "bold",
+    letterSpacing: 2,
+    marginTop: 10,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#1e3a8a",
+    paddingBottom: 12,
+    marginBottom: 12,
+  },
+  companyBlock: {
+    width: "55%",
+  },
+  companyName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1e3a8a",
+    marginBottom: 3,
+  },
+  companyText: {
+    fontSize: 8.5,
+    color: "#374151",
+    marginBottom: 1.5,
+  },
+  docTitleBlock: {
+    width: "45%",
+    alignItems: "flex-end",
+  },
+  docTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#1e3a8a",
+    textTransform: "uppercase",
+    marginBottom: 3,
+  },
+  docRef: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  docSubText: {
+    fontSize: 8.5,
+    color: "#4b5563",
+    marginBottom: 1.5,
+  },
+  clientBox: {
+    padding: 8,
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 10,
+    width: "55%",
+  },
+  clientBoxTitle: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#6b7280",
+    textTransform: "uppercase",
+    marginBottom: 3,
+  },
+  clientName: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  clientInfo: {
+    fontSize: 8.5,
+    color: "#374151",
+    marginBottom: 1,
+  },
+  descriptionBox: {
+    padding: 6,
+    backgroundColor: "#f8fafc",
+    borderLeftWidth: 3,
+    borderLeftColor: "#2563eb",
+    marginBottom: 10,
+  },
+  descriptionText: {
+    fontSize: 8.5,
+    color: "#334155",
+    fontStyle: "italic",
+  },
+  table: {
+    width: "100%",
+    marginBottom: 12,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#1e3a8a",
+    padding: 5,
+    borderRadius: 2,
+  },
+  th: {
+    color: "#ffffff",
+    fontSize: 8,
+    fontWeight: "bold",
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingVertical: 5,
+    paddingHorizontal: 2,
+  },
+  td: {
+    fontSize: 8.5,
+    color: "#1f2937",
+  },
+  taxSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  taxBreakdownTable: {
+    width: "60%",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  taxTableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#f3f4f6",
+    padding: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  taxTableRow: {
+    flexDirection: "row",
+    padding: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  totalsBox: {
+    width: "36%",
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 4,
+    padding: 6,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 2,
+  },
+  grandTotalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
+    borderTopWidth: 1.5,
+    borderTopColor: "#1e3a8a",
+    marginTop: 4,
+  },
+  paymentTable: {
+    width: "100%",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  securityBlock: {
+    borderWidth: 1.5,
+    borderColor: "#1e3a8a",
+    borderRadius: 4,
+    padding: 8,
+    backgroundColor: "#f8fafc",
+    marginBottom: 8,
+  },
+  securityTitle: {
+    fontSize: 8.5,
+    fontWeight: "bold",
+    color: "#1e3a8a",
+    textAlign: "center",
+    textTransform: "uppercase",
+    marginBottom: 6,
+    letterSpacing: 0.5,
+  },
+  securityContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  qrCodeImg: {
+    width: 65,
+    height: 65,
+    marginRight: 12,
+  },
+  securityLabelsCol: {
+    width: 100,
+  },
+  securityValuesCol: {
+    flex: 1,
+  },
+  securityLabel: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#4b5563",
+    marginBottom: 2.5,
+  },
+  securityValue: {
+    fontSize: 8.5,
+    color: "#111827",
+    fontFamily: "Courier",
+    fontWeight: "bold",
+    marginBottom: 2.5,
+  },
+  unprocessedWarning: {
+    color: "#dc2626",
+    fontSize: 11,
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: 6,
+  },
+  commercialMessage: {
+    textAlign: "center",
+    fontSize: 8.5,
+    fontStyle: "italic",
+    color: "#4b5563",
+    marginTop: 4,
+    marginBottom: 4,
+  },
 });
 
-export const InvoicePDF = ({ invoice, company }: { invoice: any, company: any }) => {
-  const isQuote = invoice.type === 'quote';
-  const docTitle = isQuote ? 'DEVIS' : (invoice.type === 'credit_note' ? 'AVOIR' : 'FACTURE');
-  const fallbackDate = new Date().toISOString();
-  const isTps = invoice.tax_regime === 'tps';
+export const InvoicePDF = ({ invoice, company }: { invoice: any; company: any }) => {
+  const mode = (process.env.MECEF_MODE || "sandbox").toLowerCase();
+  const isProduction = mode === "production";
+  const isQuote = invoice.type === "quote";
+
+  // Document Title selon nomenclature DGI
+  let docTitle = "FACTURE DE VENTE";
+  if (invoice.type === "credit_note") docTitle = "FACTURE D'AVOIR";
+  else if (invoice.type === "export_sale") docTitle = "FACTURE DE VENTE À L'EXPORTATION";
+  else if (invoice.type === "export_credit_note") docTitle = "FACTURE D'AVOIR À L'EXPORTATION";
+  else if (isQuote) docTitle = "DEVIS";
+
+  const nim = invoice.mecef_nim || process.env.MECEF_NIM || "TS01019550";
+  const invoiceSeq = invoice.mecef_counters?.split(" ")?.[0]?.replace("/", "-") || "1";
+  const invoiceNumFormatted = invoice.reference?.includes("-")
+    ? invoice.reference
+    : `${nim}-${invoiceSeq}`;
+
+  const issueDateStr = invoice.issue_date
+    ? new Date(invoice.issue_date).toLocaleDateString("fr-FR")
+    : new Date().toLocaleDateString("fr-FR");
+
+  // Items processing (TTC computation)
+  const lines = invoice.lines || [];
+  const processedLines = lines.map((line: any, idx: number) => {
+    const qty = Number(line.quantity || 1);
+    const unitPriceHT = Number(line.unit_price || 0);
+    const vatRate = Number(line.vat_rate || 0);
+    const taxGroup = (line.tax_group || (vatRate === 18 ? "B" : "A")) as MecefTaxGroup;
+    const priceTTC = toMecefPrice(unitPriceHT, vatRate);
+    const taxSpecific = line.tax_specific ? Number(line.tax_specific) : 0;
+    const lineTotalTTC = priceTTC * qty + taxSpecific;
+
+    return {
+      index: idx + 1,
+      name: line.description || "Article",
+      qty,
+      priceTTC,
+      taxGroup,
+      taxSpecific,
+      totalTTC: lineTotalTTC,
+      vatRate,
+    };
+  });
+
+  // Aggregated tax breakdown for official DGI table
+  const groupAgg: Record<
+    string,
+    { label: string; total: number; taxable: number; vat: number; rate: number }
+  > = {};
+
+  processedLines.forEach((l: any) => {
+    const g = l.taxGroup;
+    if (!groupAgg[g]) {
+      const rate = g === "B" || g === "D" ? 18 : 0;
+      groupAgg[g] = {
+        label: TAX_GROUP_LABELS[g as MecefTaxGroup] || `${g} - Groupe ${g}`,
+        total: 0,
+        taxable: 0,
+        vat: 0,
+        rate,
+      };
+    }
+    groupAgg[g].total += l.totalTTC;
+  });
+
+  // Calculate Base & VAT per group
+  Object.keys(groupAgg).forEach((g) => {
+    const item = groupAgg[g];
+    if (item.rate === 18) {
+      item.taxable = Math.round(item.total / 1.18);
+      item.vat = item.total - item.taxable;
+    } else {
+      item.taxable = item.total;
+      item.vat = 0;
+    }
+  });
+
+  const totalGeneralTTC = processedLines.reduce((s: number, l: any) => s + l.totalTTC, 0);
+  const aibAmount = Number(invoice.aib_amount || 0);
+  const touristTaxAmount = Number(invoice.tourist_tax_amount || 0);
+  const netToPay = totalGeneralTTC + aibAmount + touristTaxAmount;
+
+  const paymentMethodLabel = invoice.payment_method?.toUpperCase() || "ESPECES";
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        
-        {/* HEADER */}
+        {/* BANDEAU TEST DGI SI SANDBOX */}
+        {!isProduction && <Text style={styles.testBanner}>----- TEST FACTURE !!!! -----</Text>}
+
+        {/* HEADER / ÉMETTEUR & DOCUMENT */}
         <View style={styles.header}>
           <View style={styles.companyBlock}>
-            <Text style={styles.companyName}>{company?.name || 'Mon Entreprise'}</Text>
-            {company?.address ? <Text style={styles.companyText}>{company.address}</Text> : null}
-            {company?.city ? <Text style={styles.companyText}>{company.city}</Text> : null}
-            {company?.ifu ? <Text style={styles.companyText}>{`IFU: ${company.ifu}`}</Text> : null}
-            {company?.phone ? <Text style={styles.companyText}>{`Tél: ${company.phone}`}</Text> : null}
+            <Text style={styles.companyName}>{company?.name || "ENTREPRISE"}</Text>
+            {company?.ifu && <Text style={styles.companyText}>IFU : {company.ifu}</Text>}
+            {company?.rccm && <Text style={styles.companyText}>RCCM : {company.rccm}</Text>}
+            {company?.address && <Text style={styles.companyText}>Adresse : {company.address}</Text>}
+            {company?.city && <Text style={styles.companyText}>Ville : {company.city} (Bénin)</Text>}
+            {company?.phone && <Text style={styles.companyText}>Contact : {company.phone}</Text>}
+            <Text style={styles.companyText}>e-MCF NIM : {nim}</Text>
           </View>
-          
-          <View style={styles.invoiceTitleBlock}>
-            <Text style={styles.invoiceTitle}>{docTitle}</Text>
-            <Text style={styles.invoiceRef}>{`N° ${invoice?.reference || 'Brouillon'}`}</Text>
-            
-            <View style={styles.metaTable}>
-              <View style={styles.metaColumn}>
-                <Text style={styles.metaLabel}>Date d'émission</Text>
-                <Text style={styles.metaValue}>
-                  {new Date(invoice?.issue_date || fallbackDate).toLocaleDateString('fr-FR')}
+
+          <View style={styles.docTitleBlock}>
+            <Text style={styles.docTitle}>{docTitle}</Text>
+            <Text style={styles.docRef}>Facture # {invoiceNumFormatted}</Text>
+            <Text style={styles.docSubText}>Date : {issueDateStr}</Text>
+            <Text style={styles.docSubText}>
+              Vendeur : {invoice.created_by_user?.name || "Opérateur"}
+            </Text>
+            {invoice.mecef_original_ref && (
+              <Text style={[styles.docSubText, { fontWeight: "bold", color: "#1e3a8a" }]}>
+                Réf. fact. orig. : {invoice.mecef_original_ref}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* CLIENT BOX */}
+        {invoice.client?.name && (
+          <View style={styles.clientBox}>
+            <Text style={styles.clientBoxTitle}>CLIENT</Text>
+            <Text style={styles.clientName}>{invoice.client.name}</Text>
+            {invoice.client.ifu && <Text style={styles.clientInfo}>IFU : {invoice.client.ifu}</Text>}
+            {invoice.client.address && (
+              <Text style={styles.clientInfo}>Adresse : {invoice.client.address}</Text>
+            )}
+            {(invoice.client.phone || invoice.client.email) && (
+              <Text style={styles.clientInfo}>
+                Contact : {[invoice.client.phone, invoice.client.email].filter(Boolean).join(" - ")}
+              </Text>
+            )}
+          </View>
+        )}
+
+        {/* DESCRIPTION SUPPLÉMENTAIRE (3 LIGNES MAX) */}
+        {invoice.additional_description && (
+          <View style={styles.descriptionBox}>
+            {invoice.additional_description
+              .split("\n")
+              .filter(Boolean)
+              .slice(0, 3)
+              .map((line: string, i: number) => (
+                <Text key={i} style={styles.descriptionText}>
+                  {line}
                 </Text>
-              </View>
-              {!isQuote ? (
-                <View style={styles.metaColumn}>
-                  <Text style={styles.metaLabel}>Date d'échéance</Text>
-                  <Text style={styles.metaValue}>
-                    {new Date(invoice?.due_date || fallbackDate).toLocaleDateString('fr-FR')}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
+              ))}
           </View>
-        </View>
+        )}
 
-        {/* CLIENT INFO */}
-        <View style={styles.clientSection}>
-          <Text style={styles.clientLabel}>Adressé à</Text>
-          <Text style={styles.clientName}>{invoice?.client?.name || 'Client inconnu'}</Text>
-          {invoice?.client?.address ? <Text style={styles.clientText}>{invoice.client.address}</Text> : null}
-          {invoice?.client?.city ? <Text style={styles.clientText}>{invoice.client.city}</Text> : null}
-          {invoice?.client?.email ? <Text style={styles.clientText}>{invoice.client.email}</Text> : null}
-        </View>
-
-        {/* ITEMS TABLE */}
+        {/* TABLEAU DES ARTICLES (PRIX TTC) */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={styles.thDesc}>Désignation des prestations / produits</Text>
-            <Text style={styles.thQty}>Qté</Text>
-            <Text style={styles.thPrice}>Prix Unitaire</Text>
-            <Text style={styles.thTotal}>Montant HT</Text>
+            <Text style={[styles.th, { width: "5%" }]}>#</Text>
+            <Text style={[styles.th, { width: "45%" }]}>Désignation</Text>
+            <Text style={[styles.th, { width: "16%", textAlign: "right" }]}>P.U. (T.T.C.)</Text>
+            <Text style={[styles.th, { width: "12%", textAlign: "center" }]}>Quantité</Text>
+            <Text style={[styles.th, { width: "16%", textAlign: "right" }]}>Montant T.T.C.</Text>
+            <Text style={[styles.th, { width: "6%", textAlign: "center" }]}>G</Text>
           </View>
-          
-          {(invoice?.lines || []).map((line: any, i: number) => {
-            const qty = Number(line?.quantity || 0);
-            const price = Number(line?.unit_price || 0);
-            const total = qty * price;
-            
-            return (
-              <View key={i} style={styles.tableRow}>
-                <Text style={styles.tdDesc}>{String(line?.description || 'Ligne sans description')}</Text>
-                <Text style={styles.tdQty}>{String(qty)}</Text>
-                <Text style={styles.tdPrice}>{String(formatCFA_simple(price))}</Text>
-                <Text style={styles.tdTotal}>{String(formatCFA_simple(total))}</Text>
+
+          {processedLines.map((l: any) => (
+            <View key={l.index} style={styles.tableRow}>
+              <Text style={[styles.td, { width: "5%" }]}>{l.index}</Text>
+              <View style={{ width: "45%" }}>
+                <Text style={styles.td}>{l.name}</Text>
+                {l.taxSpecific > 0 && (
+                  <Text style={{ fontSize: 7, color: "#6b7280" }}>
+                    (Dont taxe spécifique : {formatCFA_simple(l.taxSpecific)} FCFA)
+                  </Text>
+                )}
               </View>
-            );
-          })}
+              <Text style={[styles.td, { width: "16%", textAlign: "right" }]}>
+                {formatCFA_simple(l.priceTTC)}
+              </Text>
+              <Text style={[styles.td, { width: "12%", textAlign: "center" }]}>{l.qty}</Text>
+              <Text style={[styles.td, { width: "16%", textAlign: "right", fontWeight: "bold" }]}>
+                {formatCFA_simple(l.totalTTC)}
+              </Text>
+              <Text style={[styles.td, { width: "6%", textAlign: "center", fontWeight: "bold" }]}>
+                [{l.taxGroup}]
+              </Text>
+            </View>
+          ))}
         </View>
 
-        {/* TOTALS */}
-        <View style={styles.summaryBlock}>
-          <View style={styles.summaryBox}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total HT</Text>
-              <Text style={styles.summaryValue}>{formatCFA_simple(invoice?.subtotal_ht || 0)}</Text>
+        {/* VENTILATION DES IMPÔTS & TOTAUX */}
+        <View style={styles.taxSection}>
+          {/* Tableau de ventilation des taxes DGI */}
+          <View style={styles.taxBreakdownTable}>
+            <View style={styles.taxTableHeader}>
+              <Text style={[styles.th, { width: "40%", color: "#374151" }]}>Groupe</Text>
+              <Text style={[styles.th, { width: "20%", textAlign: "right", color: "#374151" }]}>
+                Total
+              </Text>
+              <Text style={[styles.th, { width: "20%", textAlign: "right", color: "#374151" }]}>
+                Imposable
+              </Text>
+              <Text style={[styles.th, { width: "20%", textAlign: "right", color: "#374151" }]}>
+                Impôt
+              </Text>
             </View>
-            {isTps ? (
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>TVA</Text>
-                <Text style={{ fontSize: 8, color: '#6b7280', fontStyle: 'italic' }}>Non applicable (TPS)</Text>
+            {Object.keys(groupAgg).map((g) => {
+              const row = groupAgg[g];
+              return (
+                <View key={g} style={styles.taxTableRow}>
+                  <Text style={[styles.td, { width: "40%", fontSize: 7.5 }]}>{row.label}</Text>
+                  <Text style={[styles.td, { width: "20%", textAlign: "right" }]}>
+                    {formatCFA_simple(row.total)}
+                  </Text>
+                  <Text style={[styles.td, { width: "20%", textAlign: "right" }]}>
+                    {formatCFA_simple(row.taxable)}
+                  </Text>
+                  <Text style={[styles.td, { width: "20%", textAlign: "right" }]}>
+                    {formatCFA_simple(row.vat)}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Récapitulatif montants */}
+          <View style={styles.totalsBox}>
+            <View style={styles.totalRow}>
+              <Text style={{ fontSize: 8.5, color: "#4b5563" }}>Total Facture :</Text>
+              <Text style={{ fontSize: 9, fontWeight: "bold" }}>
+                {formatCFA_simple(totalGeneralTTC)} FCFA
+              </Text>
+            </View>
+            {aibAmount > 0 && (
+              <View style={styles.totalRow}>
+                <Text style={{ fontSize: 8, color: "#4b5563" }}>
+                  AIB ({invoice.aib_rate === "rate_1" ? "1%" : "5%"}) :
+                </Text>
+                <Text style={{ fontSize: 8.5 }}>{formatCFA_simple(aibAmount)} FCFA</Text>
               </View>
-            ) : (
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>TVA</Text>
-                <Text style={styles.summaryValue}>{formatCFA_simple(invoice?.vat_amount || 0)}</Text>
+            )}
+            {touristTaxAmount > 0 && (
+              <View style={styles.totalRow}>
+                <Text style={{ fontSize: 8, color: "#4b5563" }}>Taxe de séjour :</Text>
+                <Text style={{ fontSize: 8.5 }}>{formatCFA_simple(touristTaxAmount)} FCFA</Text>
               </View>
             )}
             <View style={styles.grandTotalRow}>
-              <Text style={styles.grandTotalLabel}>TOTAL TTC</Text>
-              <Text style={styles.grandTotalValue}>{formatCFA_simple(invoice?.total_ttc || 0)}</Text>
+              <Text style={{ fontSize: 9.5, fontWeight: "bold", color: "#1e3a8a" }}>NET À PAYER</Text>
+              <Text style={{ fontSize: 11, fontWeight: "bold", color: "#1e3a8a" }}>
+                {formatCFA_simple(netToPay)} FCFA
+              </Text>
             </View>
           </View>
         </View>
 
-        {/* NOTES & CONDITIONS */}
-        {invoice?.notes ? (
-          <View style={styles.notes}>
-            <Text style={styles.notesLabel}>Notes & Conditions :</Text>
-            <Text style={styles.notesText}>{String(invoice.notes)}</Text>
+        {/* RÉPARTITION DES PAIEMENTS */}
+        <View style={styles.paymentTable}>
+          <View style={styles.taxTableHeader}>
+            <Text style={[styles.th, { width: "50%", color: "#374151" }]}>Type de paiement</Text>
+            <Text style={[styles.th, { width: "50%", textAlign: "right", color: "#374151" }]}>
+              Payé
+            </Text>
           </View>
-        ) : null}
-
-        {/* SYGMEF / MECeF */}
-        {invoice?.mecef_dgi_code && invoice?.mecef_nim ? (
-          <View style={styles.mecefBlock}>
-            <Text style={styles.mecefTitle}>FACTURE NORMALISÉE — DGI BÉNIN (e-MECeF)</Text>
-            <Text style={styles.mecefText}>Code MECeF/DGI : {invoice.mecef_dgi_code}</Text>
-            <Text style={styles.mecefText}>NIM : {invoice.mecef_nim}</Text>
-            {invoice?.mecef_qr_code ? (
-              <Text style={{ fontSize: 7, color: '#2563eb', marginTop: 2 }}>
-                Vérification en ligne DGI : {invoice.mecef_qr_code}
-              </Text>
-            ) : null}
+          <View style={styles.taxTableRow}>
+            <Text style={[styles.td, { width: "50%" }]}>{paymentMethodLabel}</Text>
+            <Text style={[styles.td, { width: "50%", textAlign: "right", fontWeight: "bold" }]}>
+              {formatCFA_simple(netToPay)} FCFA
+            </Text>
           </View>
-        ) : null}
-
-        {/* FOOTER */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            {[
-              company?.name || 'Mon Entreprise',
-              company?.ifu ? `IFU: ${company.ifu}` : null,
-              company?.email || null
-            ].filter(Boolean).join(' · ')}
-          </Text>
-          <Text style={styles.footerText}>Document généré électroniquement par Comptia</Text>
         </View>
-        
+
+        {/* ÉLÉMENTS DE SÉCURITÉ DE LA FACTURE NORMALISÉE DGI */}
+        <View style={styles.securityBlock}>
+          <Text style={styles.securityTitle}>
+            --- ÉLÉMENTS DE SÉCURITÉ DE LA FACTURE NORMALISÉE ---
+          </Text>
+
+          {invoice.mecef_dgi_code ? (
+            <View style={styles.securityContent}>
+              {invoice.mecef_qr_code && (
+                <Image src={invoice.mecef_qr_code} style={styles.qrCodeImg} />
+              )}
+              <View style={styles.securityLabelsCol}>
+                <Text style={styles.securityLabel}>Code MECeF/DGI</Text>
+                <Text style={styles.securityLabel}>MECeF NIM</Text>
+                <Text style={styles.securityLabel}>MECeF Compteurs</Text>
+                <Text style={styles.securityLabel}>MECeF Heure</Text>
+              </View>
+              <View style={styles.securityValuesCol}>
+                <Text style={styles.securityValue}>{invoice.mecef_dgi_code}</Text>
+                <Text style={styles.securityValue}>{invoice.mecef_nim || nim}</Text>
+                <Text style={styles.securityValue}>{invoice.mecef_counters || "1/1 FV"}</Text>
+                <Text style={styles.securityValue}>
+                  {invoice.mecef_datetime
+                    ? new Date(invoice.mecef_datetime).toLocaleString("fr-FR")
+                    : issueDateStr}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.unprocessedWarning}>La facture n'est pas traitée !</Text>
+          )}
+        </View>
+
+        {/* MESSAGE COMMERCIAL */}
+        {invoice.commercial_message && (
+          <Text style={styles.commercialMessage}>« {invoice.commercial_message} »</Text>
+        )}
+
+        {/* BANDEAU TEST DGI BAS SI SANDBOX */}
+        {!isProduction && (
+          <Text style={styles.testBannerBottom}>----- TEST FACTURE !!!! -----</Text>
+        )}
       </Page>
     </Document>
   );

@@ -181,6 +181,48 @@ export async function generateFiscalAlerts(
     }
   }
 
+  // Alerte d'expiration du jeton DGI e-MECeF (échéance 27/02/2027 ou date du JWT)
+  try {
+    const token = process.env.MECEF_TOKEN;
+    if (token) {
+      const parts = token.split(".");
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
+        if (payload.exp) {
+          const expDate = new Date(payload.exp * 1000);
+          const diffMs = expDate.getTime() - today.getTime();
+          const daysToExpiry = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+          if ([60, 30, 15, 7, 3, 1].includes(daysToExpiry) || (daysToExpiry <= 7 && daysToExpiry > 0)) {
+            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+            const existing = await prisma.notification.findFirst({
+              where: {
+                company_id: companyId,
+                title: { contains: "MECEF_TOKEN" },
+                created_at: { gte: yesterday },
+              },
+            });
+
+            if (!existing) {
+              const notif = await prisma.notification.create({
+                data: {
+                  company_id: companyId,
+                  title: `[MECEF_TOKEN] Expiration du jeton DGI e-MECeF dans ${daysToExpiry} jour(s)`,
+                  message: `Votre jeton machine e-MECeF (NIM ${process.env.MECEF_NIM || "TS01019550"}) expire le ${expDate.toLocaleDateString("fr-FR")}. Pensez à renouveler le jeton sur le portail de la DGI pour éviter tout blocage de facturation.`,
+                  type: daysToExpiry <= 15 ? "error" : "warning",
+                  link: "/parametres?tab=mecef",
+                },
+              });
+              createdAlerts.push(notif);
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[FiscalAlerts] Erreur vérification expiration jeton e-MECeF:", err);
+  }
+
   return { count: createdAlerts.length, alerts: createdAlerts };
 }
 

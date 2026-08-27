@@ -158,6 +158,13 @@ export const POST = withAuth(async (req, { user }) => {
           mecef_dgi_code: invoiceData.mecef_dgi_code,
           mecef_nim: invoiceData.mecef_nim,
           mecef_status: invoiceData.mecef_status,
+          mecef_uid: invoiceData.mecef_uid,
+          mecef_original_ref: invoiceData.mecef_original_ref,
+          aib_rate: invoiceData.aib_rate || "none",
+          aib_amount: invoiceData.aib_amount || 0,
+          tourist_tax_amount: invoiceData.tourist_tax_amount || 0,
+          additional_description: invoiceData.additional_description,
+          commercial_message: invoiceData.commercial_message,
           lines: {
             create: processedLines.map(l => ({
               description: l.description,
@@ -165,6 +172,8 @@ export const POST = withAuth(async (req, { user }) => {
               unit_price: l.unit_price,
               vat_rate: l.vat_rate,
               amount: l.amount,
+              tax_group: l.tax_group || "B",
+              tax_specific: l.tax_specific || null,
               accounting_account: l.accounting_account,
             })),
           },

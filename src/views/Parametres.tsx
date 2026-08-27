@@ -14,10 +14,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { formatDateLong } from "@/lib/format";
 
+import { MecefDiagnostic } from "@/components/settings/MecefDiagnostic";
+
 const sections = [
   { id: "entreprise", label: "Entreprise", icon: Building2 },
   { id: "plan", label: "Plan comptable", icon: BookOpen },
   { id: "users", label: "Utilisateurs & Rôles", icon: Users },
+  { id: "mecef", label: "Certification e-MECeF", icon: ShieldCheck },
   { id: "integrations", label: "Intégrations", icon: Plug },
   { id: "security", label: "Sécurité & Audit", icon: Shield },
   { id: "billing", label: "Facturation Studio", icon: CreditCard },
@@ -63,6 +66,7 @@ export const Parametres = () => {
           {sec === "entreprise" && <EntrepriseForm />}
           {sec === "plan" && <PlanComptable />}
           {sec === "users" && <UsersTable />}
+          {sec === "mecef" && <MecefDiagnostic />}
           {sec === "integrations" && <Integrations />}
           {sec === "security" && <Audit />}
           {sec === "billing" && <Billing />}

@@ -208,6 +208,8 @@ const InvoiceLineSchema = z.object({
   quantity: z.number().positive(),
   unit_price: z.number().nonnegative(),
   vat_rate: z.number().min(0).max(100),
+  tax_group: z.enum(["A", "B", "C", "D", "E", "F"]).optional().default("B"),
+  tax_specific: z.number().min(0).optional(),
   accounting_account: optionalString,
 });
 
@@ -232,6 +234,13 @@ const BaseInvoiceSchema = z.object({
     ])
     .optional(),
   tax_regime: z.string().default("reel"),
+  aib_rate: z.enum(["none", "rate_1", "rate_5"]).optional().default("none"),
+  aib_amount: z.number().min(0).optional().default(0),
+  tourist_tax_amount: z.number().min(0).optional().default(0),
+  additional_description: optionalString,
+  commercial_message: optionalString,
+  mecef_original_ref: optionalString,
+  mecef_uid: optionalString,
   mecef_dgi_code: optionalString,
   mecef_nim: optionalString,
   mecef_status: z.enum(["draft", "awaiting_manual_normalization", "normalized", "verification_failed"]).optional().default("draft"),

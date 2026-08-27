@@ -2,10 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth-guard";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
+import { normalizeInvoice } from "@/lib/mecef";
 
 /**
  * POST /api/invoices/[id]/validate
- * Finalizes an invoice and its associated journal entry.
+ * Finalizes an invoice, its associated journal entry, and triggers e-MECeF normalization.
  */
 export const POST = withAuth(async (req, { user, params }) => {
   try {
@@ -13,7 +14,12 @@ export const POST = withAuth(async (req, { user, params }) => {
 
     const invoice = await prisma.invoice.findFirst({
       where: { id, company_id: user.company_id },
-      include: { lines: true }
+      include: {
+        lines: true,
+        client: true,
+        company: true,
+        created_by_user: true,
+      },
     });
 
     if (!invoice) return errorResponse("Facture introuvable", 404);
@@ -23,24 +29,24 @@ export const POST = withAuth(async (req, { user, params }) => {
       // 1. Update Invoice status
       const updated = await tx.invoice.update({
         where: { id },
-        data: { status: "sent" } // Or "validated" depending on terminology
+        data: { status: "sent" },
       });
 
       // 2. Find and update associated Journal Entry
       const entryPrefix = invoice.type === "invoice" ? "VTE" : "AVO";
       const entryRef = `${entryPrefix}-${invoice.reference}`;
       const entry = await tx.journalEntry.findFirst({
-        where: { 
+        where: {
           company_id: user.company_id,
           reference: entryRef,
-          status: "draft"
-        }
+          status: "draft",
+        },
       });
 
       if (entry) {
         await tx.journalEntry.update({
           where: { id: entry.id },
-          data: { status: "validated" }
+          data: { status: "validated" },
         });
       }
 
@@ -50,14 +56,29 @@ export const POST = withAuth(async (req, { user, params }) => {
         action: "UPDATE",
         resource: "Invoice",
         resource_id: id,
-        new_data: { status: "sent", entry_validated: !!entry }
+        new_data: { status: "sent", entry_validated: !!entry },
       });
 
       return updated;
     });
 
-    return successJson(result, "Facture validée avec succès. L'écriture comptable a été figée.");
+    // 3. Normalisation e-MECeF DGI (si devis, la DGI n'est pas appelée)
+    if (invoice.type !== "quote") {
+      try {
+        await normalizeInvoice(invoice);
+      } catch (mecefErr: any) {
+        console.warn("[e-MECeF] Normalisation différée lors de la validation:", mecefErr.message);
+      }
+    }
+
+    const finalInvoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: { lines: true, client: true },
+    });
+
+    return successJson(finalInvoice, "Facture validée avec succès. L'écriture comptable a été figée.");
   } catch (err) {
     return handlePrismaError(err);
   }
 });
+

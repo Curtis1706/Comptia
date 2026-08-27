@@ -42,14 +42,14 @@ export const ThirdParties = () => {
   const tabs: { id: ThirdPartyType; label: string }[] = [
     { id: "all", label: "Tous" },
     { id: "client", label: "Clients" },
-    { id: "supplier", label: "Fournisseurs" },
+    { id: "supplier", label: "Fournisseurs/Prestataires" },
   ];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Comptes de tiers"
-        subtitle="Clients et fournisseurs — soldes et coordonnées"
+        subtitle="Clients et Fournisseurs/Prestataires — soldes et coordonnées"
         actions={
           <Button
             size="sm"
@@ -186,8 +186,8 @@ export const ThirdParties = () => {
                           (tp.balance ?? 0) > 0
                             ? "text-success"
                             : (tp.balance ?? 0) < 0
-                            ? "text-destructive"
-                            : "text-muted-foreground"
+                              ? "text-destructive"
+                              : "text-muted-foreground"
                         )}
                       >
                         {tp.balance !== undefined

@@ -60,8 +60,8 @@ export const Lettrage = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Lettrage Tiers" 
+      <PageHeader
+        title="Lettrage Tiers"
         subtitle="Associez vos factures à leurs règlements pour équilibrer vos comptes de tiers"
         actions={
           <div className="flex items-center gap-4 rounded-lg border border-border bg-card p-1.5 px-4 shadow-sm">
@@ -71,8 +71,8 @@ export const Lettrage = () => {
                 {formatCFA(difference)}
               </p>
             </div>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className={cn("shadow-glow", isBalanced ? "bg-success hover:bg-success/90" : "bg-primary")}
               disabled={!isBalanced || isProcessing}
               onClick={handleLetter}
@@ -88,13 +88,13 @@ export const Lettrage = () => {
         <div className="border-b border-border p-4 bg-muted/20 flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <select 
+            <select
               value={accountFilter}
               onChange={(e) => setAccountFilter(e.target.value)}
               className="bg-transparent text-sm font-semibold outline-none focus:ring-0"
             >
               <option value="411">411 - Clients</option>
-              <option value="401">401 - Fournisseurs</option>
+              <option value="401">401 - Fournisseurs/Prestataires</option>
               <option value="421">421 - Personnel</option>
               <option value="444">444 - État (Impôts)</option>
             </select>
@@ -125,8 +125,8 @@ export const Lettrage = () => {
               ) : lines.length === 0 ? (
                 <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Aucune ligne en attente de lettrage pour ce compte</td></tr>
               ) : lines.map((l: any) => (
-                <tr 
-                  key={l.id} 
+                <tr
+                  key={l.id}
                   className={cn(
                     "hover:bg-muted/20 transition cursor-pointer",
                     selectedLines.includes(l.id) && "bg-primary-soft/50"
@@ -134,10 +134,10 @@ export const Lettrage = () => {
                   onClick={() => setSelectedLines(prev => prev.includes(l.id) ? prev.filter(id => id !== l.id) : [...prev, l.id])}
                 >
                   <td className="px-4 py-3">
-                    <input 
-                      type="checkbox" 
-                      readOnly 
-                      checked={selectedLines.includes(l.id)} 
+                    <input
+                      type="checkbox"
+                      readOnly
+                      checked={selectedLines.includes(l.id)}
                       className="rounded border-border text-primary focus:ring-primary"
                     />
                   </td>

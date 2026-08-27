@@ -10,8 +10,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -133,6 +135,7 @@ export const JournalEntryModal = ({ isOpen, onClose, onSuccess }: JournalEntryMo
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nouvelle écriture comptable</DialogTitle>
+          <DialogDescription className="sr-only">Création d'une nouvelle écriture comptable</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

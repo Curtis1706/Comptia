@@ -114,12 +114,27 @@ export const POST = withAuth(async (req, { user }) => {
     const vat_amount = processedLines.reduce((acc, l) => acc + l.vat, 0);
     const total_ttc = subtotal_ht + vat_amount;
 
-    // Sequence for reference
+    // Sequence for reference (robust sequence based on maximum existing sequence)
     const prefix = invoiceData.type === "invoice" ? "FAC" : invoiceData.type === "quote" ? "DEV" : "AVO";
-    const count = await prisma.invoice.count({
-      where: { company_id: user.company_id, type: invoiceData.type },
+    const currentYear = new Date().getFullYear();
+    const latestInvoice = await prisma.invoice.findFirst({
+      where: {
+        company_id: user.company_id,
+        type: invoiceData.type,
+        reference: { startsWith: `${prefix}-${currentYear}-` },
+      },
+      orderBy: { reference: "desc" },
     });
-    const reference = generateInvoiceReference(prefix, count + 1);
+
+    let nextSeq = 1;
+    if (latestInvoice) {
+      const parts = latestInvoice.reference.split("-");
+      const lastSeq = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(lastSeq)) {
+        nextSeq = lastSeq + 1;
+      }
+    }
+    const reference = generateInvoiceReference(prefix, nextSeq, currentYear);
 
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create Invoice
@@ -201,11 +216,16 @@ export const POST = withAuth(async (req, { user }) => {
         );
 
         const journalRef = invoice.type === "invoice" ? "VTE" : "AVO";
+        const entryRef = `${journalRef}-${invoice.reference}`;
+        const existingEntry = await tx.journalEntry.findFirst({
+          where: { company_id: user.company_id, reference: entryRef },
+        });
+        const finalEntryRef = existingEntry ? `${entryRef}-${Date.now().toString().slice(-4)}` : entryRef;
 
         await tx.journalEntry.create({
           data: {
             date: invoice.issue_date,
-            reference: `${journalRef}-${invoice.reference}`,
+            reference: finalEntryRef,
             description: `${invoice.type === "invoice" ? "Vente" : "Avoir"} - ${invoice.reference} - ${client.name}`,
             journal: "sales",
             status: "draft",

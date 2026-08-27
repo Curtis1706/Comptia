@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -151,6 +152,9 @@ export const InvoiceModal = ({ isOpen, onClose, onSuccess, defaultType = "invoic
             {currentType === "invoice" ? "Nouvelle Facture" : 
              currentType === "quote" ? "Nouveau Devis" : "Nouvel Avoir"}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Création d'un nouveau document de facturation (facture, devis ou avoir)
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

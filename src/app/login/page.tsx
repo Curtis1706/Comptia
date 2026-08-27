@@ -28,18 +28,16 @@ function LoginForm() {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        email: email.trim().toLowerCase(),
         password,
         redirect: false,
       });
 
-      if (result?.error) {
-        toast.error("Identifiants invalides. Veuillez réessayer.");
+      if (result?.error || !result?.ok) {
+        toast.error("Identifiants invalides ou compte inactif. Veuillez réessayer.");
       } else {
         toast.success("Connexion réussie ! Redirection...");
-        setTimeout(() => {
-          window.location.href = callbackUrl;
-        }, 800);
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       toast.error("Une erreur est survenue lors de la connexion.");

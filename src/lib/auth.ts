@@ -5,7 +5,8 @@ import bcrypt from "bcryptjs";
 import { logAction } from "./audit";
 
 export const authConfig: NextAuthConfig = {
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "c97efeaf4061c24b771c97663c4fafd8",
+  trustHost: true,
   pages: {
     signIn: "/login",
     error: "/login",
@@ -52,8 +53,10 @@ export const authConfig: NextAuthConfig = {
         const password = String(credentials.password);
 
         try {
-          const user = await prisma.user.findUnique({
-            where: { email },
+          const user = await prisma.user.findFirst({
+            where: {
+              email: { equals: email, mode: "insensitive" },
+            },
             select: {
               id: true,
               email: true,

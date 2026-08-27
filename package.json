@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "postinstall": "prisma generate",
-    "seed": "prisma db seed"
+    "seed": "prisma db seed",
+    "test:unit": "npx tsx src/test/run-all-tests.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

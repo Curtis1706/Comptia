@@ -25,9 +25,14 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
     const { email, password, name, company: companyData } = parsed.data;
+    const normalizedEmail = email.toLowerCase().trim();
 
-    // Check for duplicate email
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    // Check for duplicate email (case-insensitive)
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: { equals: normalizedEmail, mode: "insensitive" },
+      },
+    });
     if (existingUser) {
       return errorResponse("Cet email est déjà utilisé", 409);
     }
@@ -52,7 +57,7 @@ export async function POST(req: NextRequest) {
 
       const user = await tx.user.create({
         data: {
-          email,
+          email: normalizedEmail,
           password: hashedPassword,
           name,
           role: "admin",

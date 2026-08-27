@@ -162,9 +162,9 @@ export const GET = withAuth(async (req, { user }) => {
       color: COLORS[index % COLORS.length]
     })).sort((a, b) => b.value - a.value);
 
-    // 4. Recent Invoices
+    // 4. Recent Invoices (strictly invoices, excluding quotes and credit notes)
     const recentInvoices = await prisma.invoice.findMany({
-      where: { company_id: companyId },
+      where: { company_id: companyId, type: "invoice" },
       orderBy: { created_at: "desc" },
       take: 5,
       select: {

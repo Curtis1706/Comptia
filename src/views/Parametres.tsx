@@ -256,7 +256,17 @@ const PlanComptable = () => {
   );
 };
 
+import { InviteUserModal, ManageUserModal, UserRoleBadge } from "@/components/settings/UserModals";
+
 const UsersTable = () => {
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+
+  const { data: currentUser } = useQuery<any>({
+    queryKey: ["auth-me"],
+    queryFn: () => fetcher("/api/auth/me"),
+  });
+
   const { data: res, isLoading } = useQuery<any>({
     queryKey: ["users"],
     queryFn: () => fetcher("/api/users"),
@@ -270,7 +280,12 @@ const UsersTable = () => {
           <h2 className="font-display text-lg font-semibold">Équipe & Accès</h2>
           <p className="mt-1 text-sm text-muted-foreground">Gérez les collaborateurs et leurs permissions.</p>
         </div>
-        <Button className="bg-gradient-primary hover:opacity-90 shadow-glow">Inviter un utilisateur</Button>
+        <Button
+          onClick={() => setIsInviteOpen(true)}
+          className="bg-gradient-primary hover:opacity-90 shadow-glow"
+        >
+          <Users className="h-4 w-4 mr-2" /> Inviter un utilisateur
+        </Button>
       </div>
       <ul className="mt-6 divide-y divide-border rounded-xl border border-border bg-card shadow-card overflow-hidden">
         {isLoading ? (
@@ -282,17 +297,34 @@ const UsersTable = () => {
                 {u.name.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate">{u.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold truncate text-sm">{u.name}</p>
+                  {!u.is_active && (
+                    <span className="text-[10px] bg-destructive-soft text-destructive px-1.5 py-0.5 rounded font-semibold">
+                      Suspendu
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground truncate">{u.email}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase">{u.role}</span>
-                <Button variant="ghost" size="sm">Gérer</Button>
+                <UserRoleBadge role={u.role} />
+                <Button variant="ghost" size="sm" onClick={() => setSelectedUser(u)}>
+                  Gérer
+                </Button>
               </div>
             </li>
           ))
         )}
       </ul>
+
+      <InviteUserModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} />
+      <ManageUserModal
+        user={selectedUser}
+        currentUserRole={currentUser?.role}
+        isOpen={Boolean(selectedUser)}
+        onClose={() => setSelectedUser(null)}
+      />
     </div>
   );
 };

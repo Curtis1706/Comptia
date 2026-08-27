@@ -184,17 +184,60 @@ export const InvoiceModal = ({ isOpen, onClose, onSuccess, defaultType = "invoic
                 name="client_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Client</FormLabel>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const clientName = window.prompt("Nom du nouveau client (ex: Société Bénin Services SARL) :");
+                          if (!clientName || !clientName.trim()) return;
+                          const clientIfu = window.prompt("IFU du client (13 chiffres, optionnel) :") || undefined;
+                          
+                          try {
+                            const res = await fetch("/api/third-parties", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                name: clientName.trim(),
+                                type: "client",
+                                ifu: clientIfu?.trim() || undefined,
+                              }),
+                            });
+                            const result = await res.json();
+                            if (result.success) {
+                              toast.success(`Client « ${result.data.name} » créé`);
+                              setClients((prev) => [result.data, ...prev]);
+                              field.onChange(result.data.id);
+                            } else {
+                              toast.error(result.error || "Erreur lors de la création du client");
+                            }
+                          } catch (e) {
+                            toast.error("Erreur de communication avec le serveur");
+                          }
+                        }}
+                        className="text-xs text-primary hover:underline font-medium"
+                      >
+                        + Nouveau client
+                      </button>
+                    </div>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez un client" />
+                          <SelectValue placeholder={clients.length === 0 ? "Aucun client (cliquez sur + Nouveau)" : "Sélectionnez un client"} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {clients.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
+                        {clients.length === 0 ? (
+                          <div className="p-2 text-center text-xs text-muted-foreground">
+                            Aucun client enregistré. Cliquez sur « + Nouveau client » ci-dessus.
+                          </div>
+                        ) : (
+                          clients.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name} {c.ifu ? `(IFU: ${c.ifu})` : ""}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

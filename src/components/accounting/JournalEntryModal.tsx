@@ -32,7 +32,7 @@ import {
 import { toast } from "sonner";
 import { formatCFA } from "@/lib/format";
 import { fetcher } from "@/lib/fetcher";
-import { cn } from "@/lib/utils";
+import { AccountCombobox } from "./AccountCombobox";
 
 const CreateJournalEntrySchema = z.object({
   date: z.string().min(1, "Date obligatoire"),
@@ -88,8 +88,11 @@ export const JournalEntryModal = ({ isOpen, onClose, onSuccess }: JournalEntryMo
 
   useEffect(() => {
     if (isOpen) {
-      fetcher<any[]>("/api/accounts?limit=200")
-        .then((res) => setAccounts(Array.isArray(res) ? res : []))
+      fetcher<any>("/api/accounts?limit=500")
+        .then((res) => {
+          const list = Array.isArray(res) ? res : res?.data || [];
+          setAccounts(list);
+        })
         .catch(() => toast.error("Erreur lors du chargement du plan comptable"));
     }
   }, [isOpen]);
@@ -206,7 +209,7 @@ export const JournalEntryModal = ({ isOpen, onClose, onSuccess }: JournalEntryMo
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted/50 border-b">
-                      <th className="p-2 text-left w-48">N° Compte</th>
+                      <th className="p-2 text-left w-64 sm:w-72">N° Compte</th>
                       <th className="p-2 text-left">Libellé ligne</th>
                       <th className="p-2 text-right w-32">Débit</th>
                       <th className="p-2 text-right w-32">Crédit</th>
@@ -221,20 +224,18 @@ export const JournalEntryModal = ({ isOpen, onClose, onSuccess }: JournalEntryMo
                             control={form.control}
                             name={`lines.${index}.account_code`}
                             render={({ field }) => (
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormItem>
                                 <FormControl>
-                                  <SelectTrigger className="h-8">
-                                    <SelectValue placeholder="Compte" />
-                                  </SelectTrigger>
+                                  <AccountCombobox
+                                    accounts={accounts}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="Rechercher un compte..."
+                                    className="h-8"
+                                  />
                                 </FormControl>
-                                <SelectContent>
-                                  {accounts.map(acc => (
-                                    <SelectItem key={acc.code} value={acc.code}>
-                                      {acc.code} - {acc.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                <FormMessage />
+                              </FormItem>
                             )}
                           />
                         </td>

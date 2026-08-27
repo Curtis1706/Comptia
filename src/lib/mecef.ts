@@ -145,7 +145,7 @@ export async function normalizeInvoice(invoice: {
 
   // Simulation Sandbox conforme aux spécifications DGI Bénin
   const now = new Date();
-  const dateStr = now.toISOString().replace(/[-:T.]/g, "").slice(0, 14);
+  const dateStr = now.toISOString().replace(/[^0-9]/g, "").slice(0, 14);
   const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
   const dgiCode = `MECeF-${dateStr.slice(0, 8)}-${nim}-${randomSuffix}`;
   const uid = `DGI-${invoice.id || randomSuffix}-${dateStr}`;

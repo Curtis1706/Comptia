@@ -11,7 +11,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     // 1. Get all balances grouped by account code
     const accountBalances = await prisma.journalLine.groupBy({
       by: ["account_code"],
-      where: { entry: { company_id: companyId } },
+      where: { entry: { company_id: companyId, status: { in: ["posted", "validated"] } } },
       _sum: {
         debit: true,
         credit: true,
@@ -91,6 +91,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       where: {
         entry: {
           company_id: companyId,
+          status: { in: ["posted", "validated"] },
           date: { lt: startDate }
         },
         account_code: { in: cashAccounts }
@@ -107,6 +108,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       where: {
         entry: {
           company_id: companyId,
+          status: { in: ["posted", "validated"] },
           date: { gte: startDate }
         },
         account_code: { in: cashAccounts }

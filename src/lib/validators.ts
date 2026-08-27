@@ -100,15 +100,25 @@ export const ChangePasswordSchema = z
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 
+export const UserRoleEnum = z.enum([
+  "owner",
+  "admin",
+  "accountant",
+  "cashier",
+  "hr",
+  "expert",
+  "viewer",
+]);
+
 export const InviteUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1),
-  role: z.enum(["admin", "accountant", "expert", "rh", "viewer"]),
+  role: UserRoleEnum,
   password: z.string().min(8),
 });
 
 export const UpdateUserSchema = z.object({
-  role: z.enum(["admin", "accountant", "expert", "rh", "viewer"]).optional(),
+  role: UserRoleEnum.optional(),
   is_active: z.boolean().optional(),
   name: z.string().min(1).optional(),
 });
@@ -156,11 +166,17 @@ export const CreateJournalEntrySchema = BaseJournalEntrySchema.refine(
     const totalCredit = Math.round(
       d.lines.reduce((s, l) => s + l.credit * 100, 0)
     );
-    return totalDebit === totalCredit && totalDebit > 0;
+    return totalDebit === totalCredit;
   },
   {
     message:
       "Écriture déséquilibrée : le total des débits doit égaler le total des crédits",
+    path: ["lines"],
+  }
+).refine(
+  (d) => d.lines.reduce((s, l) => s + l.debit, 0) >= 0.01,
+  {
+    message: "Le montant total de l'écriture ne peut pas être nul",
     path: ["lines"],
   }
 );

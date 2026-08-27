@@ -15,19 +15,88 @@ import {
 
 export type AccountType = "asset" | "liability" | "equity" | "revenue" | "expense";
 
+// ─── Statuts comptabilisés ───────────────────────────────────────────────────
+
+/**
+ * Statuts d'écriture pris en compte dans les calculs comptables.
+ * Les brouillons (draft) sont exclus : ils ne sont pas comptabilisés.
+ */
+export const POSTED_STATUSES = ["posted", "validated"] as const;
+
+/**
+ * Clause Prisma réutilisable pour filtrer les lignes d'écriture
+ * sur les seules écritures comptabilisées d'une entreprise.
+ */
+export function postedEntryFilter(companyId: string) {
+  return {
+    company_id: companyId,
+    status: { in: [...POSTED_STATUSES] },
+  };
+}
+
 // ─── Double-entry validation ──────────────────────────────────────────────────
 
 /**
- * Validates that total debits === total credits (balanced journal entry).
- * Uses tolerance of 0.01 for rounding.
+ * Validates that total debits === total credits (balanced journal entry)
+ * and that the amount is strictly non-zero.
  */
 export function validateDoubleEntry(
   lines: Array<{ debit: number; credit: number }>
-): { isValid: boolean; totalDebit: number; totalCredit: number; difference: number } {
+): {
+  isValid: boolean;
+  isBalanced: boolean;
+  isNonZero: boolean;
+  totalDebit: number;
+  totalCredit: number;
+  difference: number;
+} {
   const totalDebit = lines.reduce((s, l) => s + (l.debit || 0), 0);
   const totalCredit = lines.reduce((s, l) => s + (l.credit || 0), 0);
   const difference = Math.abs(totalDebit - totalCredit);
-  return { isValid: difference < 0.01, totalDebit, totalCredit, difference };
+  const isBalanced = difference < 0.01;
+  const isNonZero = totalDebit >= 0.01;
+  return {
+    isValid: isBalanced && isNonZero,
+    isBalanced,
+    isNonZero,
+    totalDebit,
+    totalCredit,
+    difference,
+  };
+}
+
+// ─── Séquence des écritures comptables ────────────────────────────────────────
+
+/**
+ * Génère la prochaine référence séquentielle pour un journal donné.
+ * Format : {PREFIX}-{ANNEE}-{NUMERO sur 5 chiffres}
+ * Exemple : VAT-2026-00001
+ *
+ * À appeler DANS une transaction Prisma pour éviter les collisions.
+ */
+export async function nextEntryReference(
+  tx: any,
+  companyId: string,
+  prefix: string,
+  date: Date = new Date()
+): Promise<string> {
+  const year = date.getFullYear();
+  const pattern = `${prefix}-${year}-`;
+
+  const last = await tx.journalEntry.findFirst({
+    where: {
+      company_id: companyId,
+      reference: { startsWith: pattern },
+    },
+    orderBy: { reference: "desc" },
+    select: { reference: true },
+  });
+
+  const lastNumber = last
+    ? parseInt(last.reference.slice(pattern.length), 10) || 0
+    : 0;
+
+  return `${pattern}${String(lastNumber + 1).padStart(5, "0")}`;
 }
 
 // ─── Balance calculation ──────────────────────────────────────────────────────

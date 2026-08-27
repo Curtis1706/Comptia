@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type UserRole = "admin" | "accountant" | "expert" | "rh" | "viewer";
+export type UserRole = "owner" | "admin" | "accountant" | "cashier" | "hr" | "expert" | "viewer";
 
 export interface AuthenticatedUser {
   id: string;
@@ -91,10 +91,16 @@ export function requireRole(
   return null;
 }
 
-// ─── Admin-only shorthand ─────────────────────────────────────────────────────
+// ─── Admin & Owner shorthands ─────────────────────────────────────────────────
 
 export function requireAdmin(
   user: AuthenticatedUser
 ): NextResponse | null {
-  return requireRole(user, ["admin"]);
+  return requireRole(user, ["owner", "admin"]);
+}
+
+export function requireOwner(
+  user: AuthenticatedUser
+): NextResponse | null {
+  return requireRole(user, ["owner"]);
 }

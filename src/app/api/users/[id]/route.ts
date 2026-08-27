@@ -61,6 +61,14 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
 
     if (!old) return errorResponse("Utilisateur introuvable", 404);
 
+    if (old.role === "owner") {
+      return errorResponse("Le rôle du Propriétaire ne peut pas être modifié. Utilisez le transfert de propriété.", 403);
+    }
+
+    if (parsed.data.role === "owner") {
+      return errorResponse("Le rôle Propriétaire ne peut pas être attribué directement.", 403);
+    }
+
     const updated = await prisma.user.update({
       where: { id: params?.id },
       data: parsed.data,
@@ -98,6 +106,10 @@ export const DELETE = withAuth(async (_req, { user, params }) => {
     });
 
     if (!target) return errorResponse("Utilisateur introuvable", 404);
+
+    if (target.role === "owner") {
+      return errorResponse("Impossible de suspendre le Propriétaire de l'entreprise", 403);
+    }
 
     await prisma.user.update({
       where: { id: params?.id },

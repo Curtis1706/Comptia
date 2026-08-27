@@ -30,7 +30,7 @@ export const GET = withAuth(async (req: NextRequest, { user, params }) => {
         account_code: params?.code,
         company_id: user.company_id,
         entry: {
-          status: "validated",
+          status: { in: ["posted", "validated"] },
           ...(dateFrom || dateTo
             ? {
                 date: {

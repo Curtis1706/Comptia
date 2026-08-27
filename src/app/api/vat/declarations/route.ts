@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth-guard";
 import { successResponse, errorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
-import { calculateVatForPeriod, validateDoubleEntry } from "@/lib/accounting";
+import { calculateVatForPeriod, validateDoubleEntry, nextEntryReference } from "@/lib/accounting";
 import { logAction } from "@/lib/audit";
 import { PaginationSchema } from "@/lib/validators";
 
@@ -135,8 +135,11 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         });
       }
 
-      const { isValid } = validateDoubleEntry(lines);
-      if (isValid) {
+      const { isValid, isNonZero } = validateDoubleEntry(lines);
+      if (!isNonZero) {
+        // Période sans opération taxable : la déclaration est créée (obligation même à néant), mais sans écriture comptable.
+        console.info(`[VAT] Déclaration ${decl.id} sans mouvement : aucune écriture générée`);
+      } else if (isValid) {
         // Auto-create missing accounts to avoid FK violations
         const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
           "4431": { name: "TVA facturée sur ventes", type: "liability" },
@@ -157,10 +160,12 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
           })
         );
 
+        const vatRef = await nextEntryReference(tx, user.company_id, "VAT");
+
         await tx.journalEntry.create({
           data: {
             date: new Date(),
-            reference: `VAT-${decl.id.slice(-4)}`,
+            reference: vatRef,
             description: `Déclaration TVA DGI ${period_start} - ${period_end}`,
             journal: "bank",
             status: "draft",
@@ -179,7 +184,7 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         });
       }
 
-      return decl;
+      return { ...decl, has_accounting_entry: isValid && isNonZero };
     });
 
     await logAction({
@@ -191,7 +196,15 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       new_data: declaration,
     });
 
-    return NextResponse.json(successResponse(declaration, "Déclaration créée"), { status: 201 });
+    return NextResponse.json(
+      successResponse(
+        declaration,
+        declaration.has_accounting_entry
+          ? "Déclaration créée"
+          : "Déclaration créée à néant — aucune opération taxable sur la période"
+      ),
+      { status: 201 }
+    );
   } catch (err) {
     console.error("[POST /api/vat/declarations]", err);
     return handlePrismaError(err);

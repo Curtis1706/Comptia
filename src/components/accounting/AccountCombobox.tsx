@@ -23,6 +23,7 @@ export interface AccountOption {
   code: string;
   name: string;
   type?: string;
+  is_postable?: boolean;
 }
 
 interface AccountComboboxProps {
@@ -121,17 +122,23 @@ export function AccountCombobox({
               <CommandGroup heading={`Comptes disponibles (${filteredAccounts.length})`}>
                 {filteredAccounts.map((acc) => {
                   const isSelected = acc.code === value;
+                  const isNonPostable = acc.is_postable === false;
                   return (
                     <CommandItem
                       key={acc.code}
                       value={acc.code}
+                      disabled={isNonPostable}
                       onSelect={() => {
+                        if (isNonPostable) return;
                         onChange(acc.code);
                         setOpen(false);
                         setSearch("");
                       }}
                       className={cn(
-                        "flex items-center justify-between px-2.5 py-2 cursor-pointer text-xs rounded-md transition hover:bg-accent",
+                        "flex items-center justify-between px-2.5 py-2 text-xs rounded-md transition",
+                        isNonPostable
+                          ? "opacity-50 cursor-not-allowed bg-muted/30"
+                          : "cursor-pointer hover:bg-accent",
                         isSelected && "bg-primary-soft/50 font-medium"
                       )}
                     >
@@ -142,6 +149,11 @@ export function AccountCombobox({
                         <span className="truncate text-xs text-foreground">
                           {acc.name}
                         </span>
+                        {isNonPostable && (
+                          <span className="text-[10px] italic text-muted-foreground shrink-0">
+                            (compte de regroupement)
+                          </span>
+                        )}
                       </div>
                       {isSelected && (
                         <Check className="h-4 w-4 shrink-0 text-primary ml-2" />

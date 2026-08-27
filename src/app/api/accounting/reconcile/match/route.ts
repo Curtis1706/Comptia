@@ -19,7 +19,11 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         _sum: { amount: true }
       }),
       prisma.journalLine.aggregate({
-        where: { id: { in: ledger_ids } },
+        where: {
+          id: { in: ledger_ids },
+          company_id: user.company_id,
+          entry: { status: { in: ["posted", "validated"] } },
+        },
         _sum: { debit: true, credit: true }
       })
     ]);

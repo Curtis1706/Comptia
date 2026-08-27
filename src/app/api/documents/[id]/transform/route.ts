@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth-guard";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
-import { logAction } from "@/lib/audit";
+import { nextEntryReference } from "@/lib/accounting";
 
 export const POST = withAuth(async (req: NextRequest, { user, params }) => {
   try {
@@ -16,15 +16,17 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
 
     if (!document) return errorResponse("Document non trouvé", 404);
 
+    const ref = invoice_number || await nextEntryReference(prisma, user.company_id, "AC");
+
     // 1. Create the Journal Entry
     const entry = await prisma.journalEntry.create({
       data: {
         company_id: user.company_id,
         date: new Date(date),
-        description: `Saisie OCR: ${vendor_name} (Facture ${invoice_number || 'N/A'})`,
+        description: `Saisie OCR: ${vendor_name} (Facture ${ref})`,
         journal: "purchases",
         status: "draft",
-        reference: invoice_number,
+        reference: ref,
         lines: {
           create: [
             // Charge line (Debit)
@@ -38,7 +40,7 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
             // VAT line if any (Debit)
             ...(vat_amount ? [{
               company_id: user.company_id,
-              account_code: "4456", // TVA déductible
+              account_code: "4452", // TVA récupérable sur achats (SYSCOHADA)
               debit: Number(vat_amount),
               credit: 0,
               description: "TVA sur achat",

@@ -32,6 +32,9 @@ async function runTestSuite() {
   await runTest("Modules Conditionnels par Secteur", testSectorModules);
   await runTest("Calendrier & Alertes Fiscales DGI", testFiscalAlerts);
   await runTest("États Financiers DSF SYSCOHADA & TAFIRE", testDsfEngine);
+  await runTest("Vérification des 8 Bugs Corrigés (B1-B8)", async () => {
+    await import("./test-bug-fixes");
+  });
 
   console.log("\n================================================================");
   if (failed === 0) {

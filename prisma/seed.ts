@@ -288,6 +288,12 @@ export async function seedAccountsForCompany(
     throw new Error("Company ID is required to seed SYSCOHADA accounts.");
   }
 
+  // Un compte cité comme parent_code par un autre compte est un compte
+  // de regroupement : il ne peut pas recevoir d'écriture directe.
+  const parentCodes = new Set(
+    SYSCOHADA_PLAN.map((a) => a.parent_code).filter((c): c is string => Boolean(c))
+  );
+
   const accountRows = SYSCOHADA_PLAN.map((acc) => ({
     code: acc.code,
     name: acc.name,
@@ -295,6 +301,7 @@ export async function seedAccountsForCompany(
     company_id: companyId,
     parent_code: acc.parent_code ?? null,
     is_active: true,
+    is_postable: !parentCodes.has(acc.code),
   }));
 
   // Batch insert accounts for this tenant

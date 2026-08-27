@@ -14,7 +14,11 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
 
     // 1. Get lines and check balance
     const lines = await prisma.journalLine.findMany({
-      where: { id: { in: ids }, company_id: user.company_id },
+      where: {
+        id: { in: ids },
+        company_id: user.company_id,
+        entry: { status: { in: ["posted", "validated"] } },
+      },
       include: { entry: true }
     });
 
@@ -35,7 +39,10 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         company_id: user.company_id,
         account_code: accountCode,
         lettering_code: { not: null },
-        entry: { date: { gte: new Date(`${year}-01-01`), lte: new Date(`${year}-12-31`) } }
+        entry: {
+          status: { in: ["posted", "validated"] },
+          date: { gte: new Date(`${year}-01-01`), lte: new Date(`${year}-12-31`) }
+        }
       },
       orderBy: { lettering_code: "desc" },
       select: { lettering_code: true }

@@ -14,10 +14,12 @@ datasource db {
 // ============================================================
 
 enum UserRole {
+  owner
   admin
   accountant
+  cashier
+  hr
   expert
-  rh
   viewer
 }
 
@@ -262,6 +264,7 @@ model Account {
   company_id  String
   parent_code String?
   is_active   Boolean     @default(true)
+  is_postable Boolean     @default(true)
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
 
@@ -271,6 +274,7 @@ model Account {
   @@index([company_id])
   @@index([company_id, type])
   @@index([company_id, is_active])
+  @@index([company_id, is_postable])
   @@unique([code, company_id])
 }
 
@@ -301,6 +305,7 @@ model JournalEntry {
   @@index([company_id, journal])
   @@index([company_id, date])
   @@index([company_id, reference])
+  @@unique([company_id, reference])
 }
 
 // ============================================================

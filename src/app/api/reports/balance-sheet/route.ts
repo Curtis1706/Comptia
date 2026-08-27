@@ -21,7 +21,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       by: ["account_code"],
       where: {
         company_id: companyId,
-        entry: { date: { lte: dateAt }, status: "validated" },
+        entry: { date: { lte: dateAt }, status: { in: ["posted", "validated"] } },
         OR: [
           { account_code: { startsWith: "1" } },
           { account_code: { startsWith: "2" } },
@@ -88,7 +88,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     const plLines = await prisma.journalLine.aggregate({
       where: {
         company_id: companyId,
-        entry: { date: { lte: dateAt }, status: "validated" },
+        entry: { date: { lte: dateAt }, status: { in: ["posted", "validated"] } },
         OR: [
           { account_code: { startsWith: "6" } },
           { account_code: { startsWith: "7" } },

@@ -22,7 +22,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       by: ["account_code"],
       where: {
         company_id: companyId,
-        entry: { date: { gte: dateFrom, lte: dateTo }, status: "validated" },
+        entry: { date: { gte: dateFrom, lte: dateTo }, status: { in: ["posted", "validated"] } },
         OR: [
           { account_code: { startsWith: "6" } },
           { account_code: { startsWith: "7" } },

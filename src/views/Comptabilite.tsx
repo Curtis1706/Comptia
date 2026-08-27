@@ -213,8 +213,9 @@ export const Comptabilite = () => {
               className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="all">Tous les statuts</option>
-              <option value="draft">En attente (Brouillon)</option>
-              <option value="validated">Validés</option>
+              <option value="draft">Brouillon (non comptabilisé)</option>
+              <option value="posted">Comptabilisée</option>
+              <option value="validated">Validée</option>
             </select>
           </div>
 
@@ -237,10 +238,10 @@ export const Comptabilite = () => {
                   <input 
                     type="checkbox" 
                     onChange={(e) => {
-                      if (e.target.checked) setSelectedEntries(entries.filter((e: any) => e.status === "draft").map((e: any) => e.id));
+                      if (e.target.checked) setSelectedEntries(entries.filter((e: any) => e.status !== "validated").map((e: any) => e.id));
                       else setSelectedEntries([]);
                     }}
-                    checked={selectedEntries.length > 0 && selectedEntries.length === entries.filter((e: any) => e.status === "draft").length}
+                    checked={selectedEntries.length > 0 && selectedEntries.length === entries.filter((e: any) => e.status !== "validated").length}
                   />
                 </th>
                 <th className="px-4 py-3">Date</th>
@@ -265,6 +266,7 @@ export const Comptabilite = () => {
                     className={cn(
                       "border-b border-border last:border-0 transition hover:bg-muted/30",
                       op.status === "validated" && "bg-success-soft/5",
+                      op.status === "draft" && "opacity-80 italic",
                       selectedEntries.includes(op.entry_id) && "bg-primary-soft/50"
                     )}
                   >
@@ -282,7 +284,7 @@ export const Comptabilite = () => {
                     <td className="px-4 py-3 font-medium">{op.description}</td>
                     <td className="px-4 py-3 text-right tabular text-success">{op.debit > 0 ? formatCFA(op.debit) : ""}</td>
                     <td className="px-4 py-3 text-right tabular text-destructive">{op.credit > 0 ? formatCFA(op.credit) : ""}</td>
-                    <td className="px-4 py-3"><OperationStatusBadge status={op.status === "validated" ? "validee" : "attente"} /></td>
+                    <td className="px-4 py-3"><OperationStatusBadge status={op.status} /></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end items-center gap-1">
                         {op.status === "draft" && (

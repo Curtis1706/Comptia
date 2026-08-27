@@ -61,6 +61,7 @@ export const DELETE = withAuth(async (_req, { user, params }) => {
     if (!existing) return errorResponse("Compte introuvable", 404);
 
     // Check if account has journal lines before deactivating
+    // Note: On compte TOUTES les lignes, brouillons compris — un compte référencé par un brouillon ne doit pas être désactivé
     const hasLines = await prisma.journalLine.count({
       where: { account_code: params?.code, company_id: user.company_id },
     });

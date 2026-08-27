@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth-guard";
 import { successJson, errorResponse, zodErrorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
+import { validateDoubleEntry, nextEntryReference } from "@/lib/accounting";
 import * as z from "zod";
 
 const CreateJournalEntrySchema = z.object({
@@ -73,35 +74,51 @@ export const POST = withAuth(async (req, { user }) => {
 
     const { lines, journal, date, description } = parsed.data;
 
-    // Balance check
-    const totalDebit = lines.reduce((s, l) => s + l.debit, 0);
-    const totalCredit = lines.reduce((s, l) => s + l.credit, 0);
-    if (Math.abs(totalDebit - totalCredit) >= 0.01) {
-      return errorResponse("L'écriture n'est pas équilibrée", 422);
+    // 1. Balance and non-zero check (B3)
+    const { isBalanced, isNonZero, totalDebit, totalCredit, difference } =
+      validateDoubleEntry(lines);
+
+    if (!isBalanced) {
+      return errorResponse(
+        `L'écriture n'est pas équilibrée : débit ${totalDebit.toLocaleString("fr-FR")} FCFA, ` +
+        `crédit ${totalCredit.toLocaleString("fr-FR")} FCFA, écart ${difference.toLocaleString("fr-FR")} FCFA`,
+        422
+      );
+    }
+    if (!isNonZero) {
+      return errorResponse(
+        "L'écriture ne peut pas avoir un montant nul",
+        422
+      );
     }
 
-    // Reference generation: JOURNAL-YYYY-SEQUENCE
-    const year = new Date(date).getFullYear();
-    const count = await prisma.journalEntry.count({
-      where: { company_id: user.company_id, journal, date: {
-        gte: new Date(`${year}-01-01`),
-        lte: new Date(`${year}-12-31`),
-      } },
+    // 2. Validate accounts and block non-postable accounts (B5)
+    const codes = [...new Set(lines.map((l) => l.account_code))];
+    const accounts = await prisma.account.findMany({
+      where: { company_id: user.company_id, code: { in: codes } },
+      select: { code: true, name: true, is_postable: true },
     });
-    const reference = `${journal.toUpperCase()}-${year}-${String(count + 1).padStart(5, "0")}`;
+
+    const missing = codes.filter((c) => !accounts.some((a) => a.code === c));
+    if (missing.length > 0) {
+      return errorResponse(
+        `Compte inconnu : ${missing.join(", ")}`,
+        422
+      );
+    }
+
+    const nonPostable = accounts.filter((a) => !a.is_postable);
+    if (nonPostable.length > 0) {
+      return errorResponse(
+        `Écriture impossible sur un compte de regroupement : ` +
+        nonPostable.map((a) => `${a.code} — ${a.name}`).join(", ") +
+        `. Utilisez un sous-compte.`,
+        422
+      );
+    }
 
     const result = await prisma.$transaction(async (tx) => {
-      // Ensure all referenced accounts exist (upsert) to avoid FK violations
-      const uniqueCodes = [...new Set(lines.map((l) => l.account_code))];
-      await Promise.all(
-        uniqueCodes.map((code) =>
-          tx.account.upsert({
-            where: { code_company_id: { code, company_id: user.company_id } },
-            create: { code, name: `Compte ${code}`, type: "asset", company_id: user.company_id },
-            update: {},
-          })
-        )
-      );
+      const reference = await nextEntryReference(tx, user.company_id, journal.toUpperCase(), new Date(date));
 
       const entry = await tx.journalEntry.create({
         data: {
@@ -118,27 +135,27 @@ export const POST = withAuth(async (req, { user }) => {
               company_id: user.company_id,
               debit: line.debit,
               credit: line.credit,
-              description: line.description || description,
+              description: line.description,
               third_party: line.third_party,
             })),
           },
         },
-        include: { lines: true },
-      });
-
-      await logAction({
-        company_id: user.company_id,
-        user_id: user.id,
-        action: "CREATE",
-        resource: "JournalEntry",
-        resource_id: entry.id,
-        new_data: { reference: entry.reference, total: totalDebit },
+        include: { lines: true }
       });
 
       return entry;
     });
 
-    return successJson(result, "Écriture enregistrée", 201);
+    await logAction({
+      company_id: user.company_id,
+      user_id: user.id,
+      action: "CREATE",
+      resource: "JournalEntry",
+      resource_id: result.id,
+      new_data: { reference: result.reference, description: result.description, linesCount: lines.length },
+    });
+
+    return successJson(result, "Écriture créée avec succès", 201);
   } catch (err) {
     return handlePrismaError(err);
   }

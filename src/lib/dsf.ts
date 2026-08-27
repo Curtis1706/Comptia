@@ -85,7 +85,7 @@ async function getAccountBalancesMap(
   const whereClause: any = {
     entry: {
       company_id: companyId,
-      status: { in: ["posted", "validated", "draft"] }, // Inclut toutes écritures comptabilisées
+      status: { in: ["posted", "validated"] }, // Les brouillons ne sont pas comptabilisés
       date: { lte: endDate },
     },
   };

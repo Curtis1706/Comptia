@@ -22,12 +22,14 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     });
     const type = searchParams.get("type");
     const is_active = searchParams.get("is_active");
+    const postableOnly = searchParams.get("postable_only") === "true";
     const search = searchParams.get("search");
 
     const where = {
       company_id: user.company_id,
       ...(type && { type: type as "asset" | "liability" | "equity" | "revenue" | "expense" }),
       ...(is_active !== null && { is_active: is_active === "true" }),
+      ...(postableOnly && { is_postable: true }),
       ...(search && {
         OR: [
           { code: { contains: search } },

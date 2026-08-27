@@ -73,6 +73,10 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
 
     const { email, name, role, password } = parsed.data;
 
+    if (role === "owner") {
+      return errorResponse("Le rôle Propriétaire ne peut pas être attribué directement. Utilisez le transfert de propriété.", 403);
+    }
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return errorResponse("Cet email est déjà utilisé", 409);
 

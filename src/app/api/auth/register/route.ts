@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
           email: normalizedEmail,
           password: hashedPassword,
           name,
-          role: "admin",
+          role: "owner",
           company_id: company.id,
         },
         select: {

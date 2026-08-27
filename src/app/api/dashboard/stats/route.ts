@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth-guard";
 import { successJson, handlePrismaError } from "@/lib/api-response";
-import { toNumber } from "@/lib/accounting";
+import { toNumber, calculateVatForPeriod } from "@/lib/accounting";
 import { startOfMonth, endOfMonth, subMonths, format, subDays, startOfDay, endOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -28,6 +28,7 @@ export const GET = withAuth(async (req, { user }) => {
         where: {
           company_id: companyId,
           account_code: { startsWith: "7" },
+          entry: { status: { in: ["posted", "validated"] } },
         },
         _sum: { credit: true, debit: true }
       }),
@@ -35,6 +36,7 @@ export const GET = withAuth(async (req, { user }) => {
         where: {
           company_id: companyId,
           account_code: { startsWith: "6" },
+          entry: { status: { in: ["posted", "validated"] } },
         },
         _sum: { debit: true, credit: true }
       }),
@@ -51,6 +53,7 @@ export const GET = withAuth(async (req, { user }) => {
         where: {
           company_id: companyId,
           account_code: { startsWith: "5" },
+          entry: { status: { in: ["posted", "validated"] } },
         },
         _sum: { debit: true, credit: true }
       }),
@@ -73,7 +76,7 @@ export const GET = withAuth(async (req, { user }) => {
         where: {
           company_id: companyId,
           account_code: { startsWith: "7" },
-          entry: { date: { gte: prevMonthStart, lte: prevMonthEnd } }
+          entry: { status: { in: ["posted", "validated"] }, date: { gte: prevMonthStart, lte: prevMonthEnd } }
         },
         _sum: { credit: true, debit: true }
       }),
@@ -81,7 +84,7 @@ export const GET = withAuth(async (req, { user }) => {
         where: {
           company_id: companyId,
           account_code: { startsWith: "6" },
-          entry: { date: { gte: prevMonthStart, lte: prevMonthEnd } }
+          entry: { status: { in: ["posted", "validated"] }, date: { gte: prevMonthStart, lte: prevMonthEnd } }
         },
         _sum: { debit: true, credit: true }
       })
@@ -96,7 +99,6 @@ export const GET = withAuth(async (req, { user }) => {
     };
 
     // 2. Monthly History (Last 12 months)
-    // ... (rest of the history logic is already real)
     const monthlyHistory = [];
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(baseDate, i);
@@ -108,7 +110,7 @@ export const GET = withAuth(async (req, { user }) => {
           where: {
             company_id: companyId,
             account_code: { startsWith: "7" },
-            entry: { date: { gte: start, lte: end } }
+            entry: { status: { in: ["posted", "validated"] }, date: { gte: start, lte: end } }
           },
           _sum: { credit: true, debit: true }
         }),
@@ -116,7 +118,7 @@ export const GET = withAuth(async (req, { user }) => {
           where: {
             company_id: companyId,
             account_code: { startsWith: "6" },
-            entry: { date: { gte: start, lte: end } }
+            entry: { status: { in: ["posted", "validated"] }, date: { gte: start, lte: end } }
           },
           _sum: { debit: true, credit: true }
         })
@@ -130,13 +132,12 @@ export const GET = withAuth(async (req, { user }) => {
     }
 
     // 3. Expenses Breakdown
-    // ... (already real)
     const expenseGroups = await prisma.journalLine.groupBy({
       by: ["account_code"],
       where: {
         company_id: companyId,
         account_code: { startsWith: "6" },
-        entry: { date: { gte: currentMonthStart, lte: currentMonthEnd } }
+        entry: { status: { in: ["posted", "validated"] }, date: { gte: currentMonthStart, lte: currentMonthEnd } }
       },
       _sum: { debit: true, credit: true }
     });
@@ -177,28 +178,14 @@ export const GET = withAuth(async (req, { user }) => {
       }
     });
 
-    // 5. VAT Estimation
-    const [vatCollected, vatDeductible] = await Promise.all([
-      prisma.journalLine.aggregate({
-        where: {
-          company_id: companyId,
-          account_code: { startsWith: "4457" },
-          entry: { date: { gte: currentMonthStart, lte: currentMonthEnd } }
-        },
-        _sum: { credit: true, debit: true }
-      }),
-      prisma.journalLine.aggregate({
-        where: {
-          company_id: companyId,
-          account_code: { startsWith: "4456" },
-          entry: { date: { gte: currentMonthStart, lte: currentMonthEnd } }
-        },
-        _sum: { debit: true, credit: true }
-      })
-    ]);
-
-    const estimatedVat = (toNumber(vatCollected._sum.credit) - toNumber(vatCollected._sum.debit)) - 
-                       (toNumber(vatDeductible._sum.debit) - toNumber(vatDeductible._sum.credit));
+    // 5. VAT Estimation (SYSCOHADA source of truth)
+    const vatData = await calculateVatForPeriod(
+      prisma,
+      companyId,
+      currentMonthStart,
+      currentMonthEnd
+    );
+    const estimatedVat = vatData.vat_due;
 
     // 6. Sparkline data (Last 10 days)
     const sparks = { ca: [], charges: [] };
@@ -209,11 +196,11 @@ export const GET = withAuth(async (req, { user }) => {
       
       const [dayCa, dayCharges] = await Promise.all([
         prisma.journalLine.aggregate({
-          where: { company_id: companyId, account_code: { startsWith: "7" }, entry: { date: { gte: s, lte: e } } },
+          where: { company_id: companyId, account_code: { startsWith: "7" }, entry: { status: { in: ["posted", "validated"] }, date: { gte: s, lte: e } } },
           _sum: { credit: true, debit: true }
         }),
         prisma.journalLine.aggregate({
-          where: { company_id: companyId, account_code: { startsWith: "6" }, entry: { date: { gte: s, lte: e } } },
+          where: { company_id: companyId, account_code: { startsWith: "6" }, entry: { status: { in: ["posted", "validated"] }, date: { gte: s, lte: e } } },
           _sum: { debit: true, credit: true }
         })
       ]);

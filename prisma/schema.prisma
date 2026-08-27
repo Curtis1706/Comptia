@@ -255,7 +255,8 @@ model User {
 // ============================================================
 
 model Account {
-  code        String      @id
+  id          String      @id @default(cuid())
+  code        String
   name        String
   type        AccountType
   company_id  String

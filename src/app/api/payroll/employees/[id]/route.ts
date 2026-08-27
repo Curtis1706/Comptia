@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
@@ -25,11 +25,44 @@ const UpdateEmployeeSchema = z.object({
 });
 
 /**
- * PUT /api/payroll/employees/[id]
+ * GET /api/payroll/employees/[id]
+ * Requires 'read' on employees.
  */
-export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "employees", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
-    const { id } = params as { id: string };
+    const employee = await prisma.employee.findUnique({
+      where: { id, company_id: user.company_id },
+      include: {
+        payrolls: {
+          take: 10,
+          orderBy: { year: "desc", month: "desc" },
+        },
+      },
+    });
+
+    if (!employee) return errorResponse("Salarié non trouvé", 404);
+    return NextResponse.json(successResponse(employee));
+  } catch (err) {
+    return handlePrismaError(err);
+  }
+}
+
+/**
+ * PUT /api/payroll/employees/[id]
+ * Requires 'write' on employees.
+ */
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "employees", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
+  try {
     const body = await req.json();
     const data = UpdateEmployeeSchema.parse(body);
 
@@ -41,12 +74,12 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
       return errorResponse("Salarié non trouvé", 404);
     }
 
-    // Protection for SSN if already set
-    if (existing.social_security_number && data.social_security_number && existing.social_security_number !== data.social_security_number) {
-       // We allow it for now but user mentioned "Ne pas modifier social_security_number si déjà défini" 
-       // Actually, I'll follow the user's specific instruction:
-       // "Ne pas modifier social_security_number si déjà défini (données sensibles)"
-       delete (data as any).social_security_number;
+    if (
+      existing.social_security_number &&
+      data.social_security_number &&
+      existing.social_security_number !== data.social_security_number
+    ) {
+      delete (data as any).social_security_number;
     }
 
     const updated = await prisma.employee.update({
@@ -58,10 +91,12 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "UPDATE",
-      resource: "Employee",
-      resource_id: id,
-      old_data: existing,
-      new_data: updated,
+      entity: "Employee",
+      entity_id: id,
+      details: {
+        old_data: existing,
+        new_data: updated,
+      },
     });
 
     return NextResponse.json(successResponse(updated, "Salarié mis à jour"));
@@ -70,27 +105,40 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
     if (err instanceof z.ZodError) return errorResponse(err.errors[0].message, 400);
     return handlePrismaError(err);
   }
-});
+}
 
 /**
- * GET /api/payroll/employees/[id]
+ * DELETE /api/payroll/employees/[id]
+ * Requires 'full' on employees.
  */
-export const GET = withAuth(async (req: NextRequest, { user, params }) => {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "employees", "full");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
-    const { id } = params as { id: string };
-    const employee = await prisma.employee.findUnique({
+    const existing = await prisma.employee.findUnique({
       where: { id, company_id: user.company_id },
-      include: {
-        payrolls: {
-          take: 10,
-          orderBy: { year: "desc", month: "desc" }
-        }
-      }
     });
 
-    if (!employee) return errorResponse("Salarié non trouvé", 404);
-    return NextResponse.json(successResponse(employee));
+    if (!existing) return errorResponse("Salarié non trouvé", 404);
+
+    await prisma.employee.update({
+      where: { id },
+      data: { status: "inactive" },
+    });
+
+    await logAction({
+      company_id: user.company_id,
+      user_id: user.id,
+      action: "DELETE",
+      entity: "Employee",
+      entity_id: id,
+    });
+
+    return NextResponse.json(successResponse(null, "Salarié désactivé"));
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

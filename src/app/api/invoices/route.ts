@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, zodErrorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 import { generateInvoiceReference, generateSalesEntryLines, generateCreditNoteEntryLines } from "@/lib/accounting";
@@ -38,7 +38,11 @@ const CreateInvoiceSchema = z.object({
 /**
  * GET /api/invoices
  */
-export const GET = withAuth(async (req, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "invoices", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -76,12 +80,16 @@ export const GET = withAuth(async (req, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * POST /api/invoices
  */
-export const POST = withAuth(async (req, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "invoices", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const parsed = CreateInvoiceSchema.safeParse(body);
@@ -305,4 +313,4 @@ export const POST = withAuth(async (req, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

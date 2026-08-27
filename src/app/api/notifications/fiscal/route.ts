@@ -1,41 +1,86 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
-import { successJson, handlePrismaError } from "@/lib/api-response";
+import { requirePermission } from "@/lib/require-permission";
+import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { generateFiscalAlerts, checkOverdueInvoices } from "@/lib/fiscal-alerts";
 
 /**
- * POST /api/notifications/fiscal
- * Triggers fiscal alerts calculation and checks overdue invoices for the tenant.
+ * Vérifie si la requête provient d'un CRON externe avec CRON_SECRET valide.
  */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+function isCronAuthorized(req: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) return false;
+
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  return token === cronSecret;
+}
+
+/**
+ * POST /api/notifications/fiscal
+ * Triggers fiscal alerts calculation and checks overdue invoices.
+ */
+export async function POST(req: Request) {
+  let companyId: string | null = null;
+
+  if (isCronAuthorized(req)) {
+    // Si appelé par CRON global, on peut traiter l'entreprise passée en query ou toutes
+    const { searchParams } = new URL(req.url);
+    companyId = searchParams.get("company_id");
+  } else {
+    const permCheck = await requirePermission(req, "notifications", "write");
+    if (!permCheck.ok) return permCheck.response;
+    companyId = permCheck.user.company_id;
+  }
+
+  if (!companyId) {
+    return errorResponse("company_id manquant pour le cron", 400);
+  }
+
   try {
     const today = new Date();
 
     const [fiscalResult, invoicesResult] = await Promise.all([
-      generateFiscalAlerts(prisma, user.company_id, today),
-      checkOverdueInvoices(prisma, user.company_id, today),
+      generateFiscalAlerts(prisma, companyId, today),
+      checkOverdueInvoices(prisma, companyId, today),
     ]);
 
-    return successJson({
-      fiscalAlertsCreated: fiscalResult.count,
-      overdueInvoicesUpdated: invoicesResult.updatedCount,
-      overdueNotificationsCreated: invoicesResult.notificationsCreated,
-    }, "Vérification des échéances fiscales et des retards effectuée avec succès");
+    return successJson(
+      {
+        fiscalAlertsCreated: fiscalResult.count,
+        overdueInvoicesUpdated: invoicesResult.updatedCount,
+        overdueNotificationsCreated: invoicesResult.notificationsCreated,
+      },
+      "Vérification des échéances fiscales et des retards effectuée avec succès"
+    );
   } catch (err) {
     console.error("[POST /api/notifications/fiscal]", err);
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * GET /api/notifications/fiscal
- * Returns status and overview of upcoming fiscal deadlines for the current month/quarter.
+ * Returns upcoming fiscal deadlines.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  let companyId: string | null = null;
+
+  if (isCronAuthorized(req)) {
+    const { searchParams } = new URL(req.url);
+    companyId = searchParams.get("company_id");
+  } else {
+    const permCheck = await requirePermission(req, "notifications", "read");
+    if (!permCheck.ok) return permCheck.response;
+    companyId = permCheck.user.company_id;
+  }
+
+  if (!companyId) {
+    return errorResponse("company_id manquant", 400);
+  }
+
   try {
     const today = new Date();
-    const result = await generateFiscalAlerts(prisma, user.company_id, today);
+    const result = await generateFiscalAlerts(prisma, companyId, today);
 
     return successJson({
       today: today.toISOString(),
@@ -46,4 +91,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/notifications/fiscal]", err);
     return handlePrismaError(err);
   }
-});
+}

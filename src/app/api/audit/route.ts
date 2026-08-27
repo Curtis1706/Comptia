@@ -1,16 +1,16 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth, requireAdmin } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { paginatedResponse, handlePrismaError } from "@/lib/api-response";
 import { PaginationSchema } from "@/lib/validators";
 
 /**
  * GET /api/audit
- * Lists audit logs for the current company (admin/expert only).
+ * Lists audit logs for the company. Requires 'read' on audit_log.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
-  const adminError = requireAdmin(user);
-  if (adminError) return adminError;
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "audit_log", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
 
   try {
     const { searchParams } = new URL(req.url);
@@ -24,10 +24,10 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     const [logs, total] = await Promise.all([
       prisma.auditLog.findMany({
         where,
-        include: { 
-          user: { 
-            select: { name: true, email: true, avatar_url: true } 
-          } 
+        include: {
+          user: {
+            select: { name: true, email: true, avatar_url: true },
+          },
         },
         skip: (pag.page - 1) * pag.limit,
         take: pag.limit,
@@ -41,4 +41,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/audit]", err);
     return handlePrismaError(err);
   }
-});
+}

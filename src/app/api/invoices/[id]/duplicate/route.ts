@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import {
   successJson,
   errorResponse,
@@ -11,12 +10,17 @@ import { logAction } from "@/lib/audit";
 
 /**
  * POST /api/invoices/[id]/duplicate
- * Creates a new draft invoice based on an existing one.
+ * Creates a new draft invoice based on an existing one. Requires 'write' on invoices.
  */
-export const POST = withAuth(async (_req, { user, params }) => {
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
     const existing = await prisma.invoice.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
       include: { lines: true },
     });
 
@@ -36,7 +40,7 @@ export const POST = withAuth(async (_req, { user, params }) => {
         client_id: existing.client_id,
         company_id: user.company_id,
         issue_date: new Date(),
-        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default +30 days
+        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         subtotal_ht: existing.subtotal_ht,
         vat_amount: existing.vat_amount,
         total_ttc: existing.total_ttc,
@@ -63,13 +67,13 @@ export const POST = withAuth(async (_req, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "Invoice",
-      resource_id: duplicated.id,
-      new_data: { duplicated_from: existing.id, reference },
+      entity: "Invoice",
+      entity_id: duplicated.id,
+      details: { duplicated_from: existing.id, reference },
     });
 
     return successJson(duplicated, "Facture dupliquée en brouillon", 201);
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

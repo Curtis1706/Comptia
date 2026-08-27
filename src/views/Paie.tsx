@@ -13,19 +13,26 @@ import { toast } from "sonner";
 import { EmployeeModal } from "@/components/payroll/EmployeeModal";
 import { DownloadPayslipButton } from "@/components/payroll/DownloadPayslipButton";
 import { EditPayslipModal } from "@/components/payroll/EditPayslipModal";
+import { PermissionGate } from "@/components/PermissionGate";
+import { usePermissions } from "@/hooks/usePermissions";
 
-const tabs = [
-  { id: "bulletins", label: "Bulletins" },
-  { id: "salaries", label: "Salariés" },
+const allTabs = [
+  { id: "bulletins", label: "Bulletins", module: "payroll" },
+  { id: "salaries", label: "Salariés", module: "employees" },
 ] as const;
-type Tab = (typeof tabs)[number]["id"];
 
 export const Paie = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const tab = (searchParams.get("tab") as Tab) || "bulletins";
+  const { canRead, canWrite } = usePermissions();
+
+  const accessibleTabs = allTabs.filter((t) => canRead(t.module as any));
+  const requestedTab = searchParams.get("tab") || "bulletins";
+  const tab = accessibleTabs.some((t) => t.id === requestedTab)
+    ? requestedTab
+    : accessibleTabs[0]?.id || "bulletins";
 
   const [selectedPeriod, setSelectedPeriod] = useState({
     month: new Date().getMonth() + 1,
@@ -37,7 +44,7 @@ export const Paie = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [editPayslipId, setEditPayslipId] = useState<string | null>(null);
 
-  const setTab = (t: Tab) => {
+  const setTab = (t: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (t === "bulletins") params.delete("tab");
     else params.set("tab", t);
@@ -47,13 +54,13 @@ export const Paie = () => {
   const { data: employeesRes, isLoading: employeesLoading } = useQuery<any>({
     queryKey: ["employees", tab],
     queryFn: () => fetcher("/api/payroll/employees"),
-    enabled: tab === "salaries" || tab === "bulletins",
+    enabled: tab === "salaries" && canRead("employees"),
   });
 
   const { data: payslipsRes, isLoading: payslipsLoading } = useQuery<any>({
     queryKey: ["payslips", selectedPeriod],
     queryFn: () => fetcher(`/api/payroll/payslips?month=${selectedPeriod.month}&year=${selectedPeriod.year}`),
-    enabled: tab === "bulletins",
+    enabled: tab === "bulletins" && canRead("payroll"),
   });
 
   const employees = Array.isArray(employeesRes) ? employeesRes : [];
@@ -103,31 +110,35 @@ export const Paie = () => {
         subtitle="Gérez vos salariés et générez vos bulletins en un clic"
         actions={
           tab === "salaries" ? (
-            <Button 
-              size="sm" 
-              className="bg-gradient-primary hover:opacity-90"
-              onClick={() => {
-                setSelectedEmployee(null);
-                setIsEmployeeModalOpen(true);
-              }}
-            >
-              <Plus className="mr-1 h-4 w-4" /> Nouveau salarié
-            </Button>
+            <PermissionGate module="employees" level="write">
+              <Button 
+                size="sm" 
+                className="bg-gradient-primary hover:opacity-90 shadow-glow"
+                onClick={() => {
+                  setSelectedEmployee(null);
+                  setIsEmployeeModalOpen(true);
+                }}
+              >
+                <Plus className="mr-1 h-4 w-4" /> Nouveau salarié
+              </Button>
+            </PermissionGate>
           ) : (
             <div className="flex gap-2">
                <SelectPeriod 
                  period={selectedPeriod} 
                  onChange={setSelectedPeriod} 
                />
-               <Button 
-                size="sm" 
-                className="bg-gradient-primary hover:opacity-90"
-                onClick={handleGenerate}
-                disabled={isGenerating}
-               >
-                {isGenerating ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileText className="mr-1 h-4 w-4" />}
-                Générer {new Date(selectedPeriod.year, selectedPeriod.month - 1).toLocaleDateString("fr-FR", { month: "long" })}
-               </Button>
+               <PermissionGate module="payroll" level="write">
+                 <Button 
+                  size="sm" 
+                  className="bg-gradient-primary hover:opacity-90 shadow-glow"
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                 >
+                  {isGenerating ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileText className="mr-1 h-4 w-4" />}
+                  Générer {new Date(selectedPeriod.year, selectedPeriod.month - 1).toLocaleDateString("fr-FR", { month: "long" })}
+                 </Button>
+               </PermissionGate>
             </div>
           )
         }
@@ -135,7 +146,7 @@ export const Paie = () => {
 
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
         <div className="flex items-center gap-1 border-b border-border px-2 pt-2">
-          {tabs.map((t) => (
+          {accessibleTabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}

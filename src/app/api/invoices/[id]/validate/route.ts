@@ -1,17 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 import { normalizeInvoice } from "@/lib/mecef";
 
 /**
  * POST /api/invoices/[id]/validate
- * Finalizes an invoice, its associated journal entry, and triggers e-MECeF normalization.
+ * Finalizes an invoice, its associated journal entry, and triggers e-MECeF normalization. Requires 'validate' on invoices.
  */
-export const POST = withAuth(async (req, { user, params }) => {
-  try {
-    const { id } = params;
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "validate");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
+  try {
     const invoice = await prisma.invoice.findFirst({
       where: { id, company_id: user.company_id },
       include: {
@@ -54,9 +57,9 @@ export const POST = withAuth(async (req, { user, params }) => {
         company_id: user.company_id,
         user_id: user.id,
         action: "UPDATE",
-        resource: "Invoice",
-        resource_id: id,
-        new_data: { status: "sent", entry_validated: !!entry },
+        entity: "Invoice",
+        entity_id: id,
+        details: { status: "sent", entry_validated: !!entry },
       });
 
       return updated;
@@ -80,5 +83,4 @@ export const POST = withAuth(async (req, { user, params }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
-
+}

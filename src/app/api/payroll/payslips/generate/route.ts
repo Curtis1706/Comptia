@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { calculatePayroll } from "@/lib/payroll";
@@ -7,9 +7,13 @@ import { logAction } from "@/lib/audit";
 
 /**
  * POST /api/payroll/payslips/generate
- * Generates draft payslips for active employees.
+ * Generates draft payslips for active employees. Requires 'write' on payroll.
  */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "payroll", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const { month, year, employee_ids } = body;
@@ -49,63 +53,63 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     const periodEnd = new Date(year, month, 0);
 
     // 3. Transactional generation
-    const payrolls = await prisma.$transaction(async (tx) => {
-      const results = [];
+    const payrolls = await prisma.$transaction(
+      async (tx) => {
+        const results = [];
 
-      for (const employee of employees) {
-        // Supprimer le brouillon existant s'il y en a un pour ce mois/année
-        await tx.payroll.deleteMany({
-          where: {
-            employee_id: employee.id,
-            month,
-            year,
-            status: "draft"
-          }
-        });
-
-        // 3a. Calculate standard payroll (V1 Benin default rates)
-        const calc = calculatePayroll(Number(employee.base_salary));
-
-        // 3b. Create Payroll record (Draft)
-        const payroll = await tx.payroll.create({
-          data: {
-            company_id: user.company_id,
-            employee_id: employee.id,
-            month,
-            year,
-            period_start: periodStart,
-            period_end: periodEnd,
-            base_salary: employee.base_salary,
-            gross_salary: calc.gross_salary,
-            net_salary: calc.net_salary,
-            employer_cost: calc.employer_cost,
-            status: "draft",
-            lines: {
-              create: calc.lines.map((l) => ({
-                type: l.type,
-                label: l.label,
-                amount: l.amount,
-                rate: l.rate,
-                base: l.base,
-              })),
+        for (const employee of employees) {
+          await tx.payroll.deleteMany({
+            where: {
+              employee_id: employee.id,
+              month,
+              year,
+              status: "draft",
             },
-          },
-          include: { lines: true },
-        });
+          });
 
-        results.push(payroll);
-      }
+          const calc = calculatePayroll(Number(employee.base_salary));
 
-      return results;
-    }, { maxWait: 10000, timeout: 60000 });
+          const payroll = await tx.payroll.create({
+            data: {
+              company_id: user.company_id,
+              employee_id: employee.id,
+              month,
+              year,
+              period_start: periodStart,
+              period_end: periodEnd,
+              base_salary: employee.base_salary,
+              gross_salary: calc.gross_salary,
+              net_salary: calc.net_salary,
+              employer_cost: calc.employer_cost,
+              status: "draft",
+              lines: {
+                create: calc.lines.map((l) => ({
+                  type: l.type,
+                  label: l.label,
+                  amount: l.amount,
+                  rate: l.rate,
+                  base: l.base,
+                })),
+              },
+            },
+            include: { lines: true },
+          });
+
+          results.push(payroll);
+        }
+
+        return results;
+      },
+      { maxWait: 10000, timeout: 60000 }
+    );
 
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "Payroll",
-      resource_id: `${month}/${year}`,
-      new_data: { count: payrolls.length, month, year },
+      entity: "Payroll",
+      entity_id: `${month}/${year}`,
+      details: { count: payrolls.length, month, year },
     });
 
     return NextResponse.json(
@@ -116,4 +120,4 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     console.error("[POST /api/payroll/payslips/generate]", err);
     return handlePrismaError(err);
   }
-});
+}

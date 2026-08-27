@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import {
   successJson,
   errorResponse,
@@ -13,12 +12,17 @@ import { toNumber, generatePaymentEntryLines } from "@/lib/accounting";
 
 /**
  * POST /api/invoices/[id]/pay
- * Records a payment for an invoice and generates automatic accounting entries.
+ * Records a payment for an invoice and generates automatic accounting entries. Requires 'write' on invoices.
  */
-export const POST = withAuth(async (req: NextRequest, { user, params }) => {
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
     const invoice = await prisma.invoice.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
       include: { payments: true },
     });
 
@@ -37,7 +41,7 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
     const totalTtc = toNumber(invoice.total_ttc);
     const remaining = Math.round((totalTtc - totalPaid) * 100) / 100;
 
-    if (amount > remaining + 0.01) { // 0.01 tolerance for float issues
+    if (amount > remaining + 0.01) {
       return errorResponse(`Le montant dépasse le solde restant (${remaining} €)`, 400);
     }
 
@@ -45,7 +49,7 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       // 1. Create InvoicePayment
       const payment = await tx.invoicePayment.create({
         data: {
-          invoice_id: params?.id!,
+          invoice_id: id,
           company_id: user.company_id,
           amount,
           payment_date,
@@ -57,15 +61,15 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       // 2. Update Invoice Status
       const isPaid = Math.abs(remaining - amount) < 0.01;
       await tx.invoice.update({
-        where: { id: params?.id },
-        data: { status: isPaid ? "paid" : "sent" }, // Or viewed
+        where: { id },
+        data: { status: isPaid ? "paid" : "sent" },
       });
 
       // 3. Generate automatic JournalEntry
       const entryLines = generatePaymentEntryLines({
-        amount, 
-        client_id: invoice.client_id, 
-        payment_method
+        amount,
+        client_id: invoice.client_id,
+        payment_method,
       });
       const entryReference = `PAY-${invoice.reference}-${invoice.payments.length + 1}`;
 
@@ -75,7 +79,7 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
           reference: entryReference,
           description: `Paiement facture ${invoice.reference}`,
           journal: "bank",
-          status: "validated", // Auto-validated for payments
+          status: "validated",
           company_id: user.company_id,
           created_by: user.id,
           lines: {
@@ -85,7 +89,7 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
               debit: l.debit,
               credit: l.credit,
               description: l.description,
-              third_party: invoice.client_id, // Link to client
+              third_party: invoice.client_id,
             })),
           },
         },
@@ -98,9 +102,9 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "InvoicePayment",
-      resource_id: result.id,
-      new_data: { amount, payment_method, invoice_reference: invoice.reference },
+      entity: "InvoicePayment",
+      entity_id: result.id,
+      details: { amount, payment_method, invoice_reference: invoice.reference },
     });
 
     return successJson(result, "Paiement enregistré et écritures comptables générées", 201);
@@ -108,4 +112,4 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
     console.error("[POST /api/invoices/[id]/pay]", err);
     return handlePrismaError(err);
   }
-});
+}

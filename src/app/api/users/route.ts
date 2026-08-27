@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth, requireAdmin } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import {
   successJson,
   paginatedResponse,
@@ -26,11 +25,12 @@ const USER_SELECT = {
 
 /**
  * GET /api/users
- * Lists all users in the company (admin only).
+ * Lists all users in the company. Requires 'read' on user_management.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
-  const adminError = requireAdmin(user);
-  if (adminError) return adminError;
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "user_management", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
 
   try {
     const { searchParams } = new URL(req.url);
@@ -56,15 +56,16 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * POST /api/users
- * Invites a new user to the company (admin only).
+ * Invites a new user to the company. Requires 'write' on user_management.
  */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
-  const adminError = requireAdmin(user);
-  if (adminError) return adminError;
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "user_management", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
 
   try {
     const body = await req.json();
@@ -74,7 +75,10 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     const { email, name, role, password } = parsed.data;
 
     if (role === "owner") {
-      return errorResponse("Le rôle Propriétaire ne peut pas être attribué directement. Utilisez le transfert de propriété.", 403);
+      return errorResponse(
+        "Le rôle Propriétaire ne peut pas être attribué directement. Utilisez le transfert de propriété.",
+        403
+      );
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -96,13 +100,13 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "User",
-      resource_id: newUser.id,
-      new_data: { email, name, role },
+      entity: "User",
+      entity_id: newUser.id,
+      details: { email, name, role },
     });
 
     return successJson(newUser, "Utilisateur créé avec succès", 201);
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
@@ -19,13 +19,18 @@ const UpdateCompanySchema = z.object({
   website: z.string().optional(),
   logo_url: z.string().optional(),
   fiscal_year_end: z.string().optional(),
-  initial_treasury_balance: z.preprocess((val) => val === "" ? 0 : Number(val), z.number()).optional(),
+  initial_treasury_balance: z.preprocess((val) => (val === "" ? 0 : Number(val)), z.number()).optional(),
 });
 
 /**
  * GET /api/company
+ * Requires 'read' on company_settings.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "company_settings", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const company = await prisma.company.findUnique({
       where: { id: user.company_id },
@@ -34,12 +39,17 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * PATCH /api/company
+ * Requires 'write' on company_settings.
  */
-export const PATCH = withAuth(async (req: NextRequest, { user }) => {
+export async function PATCH(req: Request) {
+  const permCheck = await requirePermission(req, "company_settings", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const data = UpdateCompanySchema.parse(body);
@@ -59,10 +69,12 @@ export const PATCH = withAuth(async (req: NextRequest, { user }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "UPDATE",
-      resource: "Company",
-      resource_id: user.company_id,
-      old_data: existing,
-      new_data: updated,
+      entity: "Company",
+      entity_id: user.company_id,
+      details: {
+        old_data: existing,
+        new_data: updated,
+      },
     });
 
     return NextResponse.json(successResponse(updated, "Configuration mise à jour"));
@@ -71,4 +83,4 @@ export const PATCH = withAuth(async (req: NextRequest, { user }) => {
     if (err instanceof z.ZodError) return errorResponse(err.errors[0].message, 400);
     return handlePrismaError(err);
   }
-});
+}

@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { calculateVatForPeriod, validateDoubleEntry, nextEntryReference } from "@/lib/accounting";
 import { logAction } from "@/lib/audit";
 import { PaginationSchema } from "@/lib/validators";
+import { NextResponse } from "next/server";
 
 /**
  * GET /api/vat/declarations
- * Lists VAT declarations with filtering and pagination.
+ * Lists VAT declarations. Requires 'read' on vat_declarations.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "vat_declarations", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const pag = PaginationSchema.parse({
@@ -46,13 +50,17 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/vat/declarations]", err);
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * POST /api/vat/declarations
- * Creates a new VAT declaration (draft) and its associated accounting entry.
+ * Creates a new VAT declaration (draft) and its associated accounting entry. Requires 'write' on vat_declarations.
  */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "vat_declarations", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const { period_start, period_end, declaration_type } = body;
@@ -103,7 +111,6 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       });
 
       // 4. Generate SYSCOHADA accounting entry lines
-      // Debit 4431 (TVA facturée) / Credit 4452 (TVA récupérable)
       const lines = [
         {
           account_code: "4431",
@@ -137,11 +144,12 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
 
       const { isValid, isNonZero } = validateDoubleEntry(lines);
       if (!isNonZero) {
-        // Période sans opération taxable : la déclaration est créée (obligation même à néant), mais sans écriture comptable.
         console.info(`[VAT] Déclaration ${decl.id} sans mouvement : aucune écriture générée`);
       } else if (isValid) {
-        // Auto-create missing accounts to avoid FK violations
-        const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
+        const ACCOUNT_DEFAULTS: Record<
+          string,
+          { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }
+        > = {
           "4431": { name: "TVA facturée sur ventes", type: "liability" },
           "4452": { name: "TVA récupérable sur achats", type: "asset" },
           "4441": { name: "État, TVA due", type: "liability" },
@@ -191,9 +199,9 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "VatDeclaration",
-      resource_id: declaration.id,
-      new_data: declaration,
+      entity: "VatDeclaration",
+      entity_id: declaration.id,
+      details: declaration,
     });
 
     return NextResponse.json(
@@ -209,4 +217,4 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     console.error("[POST /api/vat/declarations]", err);
     return handlePrismaError(err);
   }
-});
+}

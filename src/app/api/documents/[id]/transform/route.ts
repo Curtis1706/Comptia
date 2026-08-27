@@ -1,22 +1,30 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { nextEntryReference } from "@/lib/accounting";
+import { logAction } from "@/lib/audit";
 
-export const POST = withAuth(async (req: NextRequest, { user, params }) => {
+/**
+ * POST /api/documents/[id]/transform
+ * Creates a journal entry from OCR data. Requires 'write' on documents.
+ */
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "documents", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
-    const { id } = await params;
     const body = await req.json();
     const { vendor_name, amount, date, vat_amount, invoice_number, account_code } = body;
 
     const document = await prisma.document.findUnique({
-      where: { id, company_id: user.company_id }
+      where: { id, company_id: user.company_id },
     });
 
     if (!document) return errorResponse("Document non trouvé", 404);
 
-    const ref = invoice_number || await nextEntryReference(prisma, user.company_id, "AC");
+    const ref = invoice_number || (await nextEntryReference(prisma, user.company_id, "AC"));
 
     // 1. Create the Journal Entry
     const entry = await prisma.journalEntry.create({
@@ -32,52 +40,56 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
             // Charge line (Debit)
             {
               company_id: user.company_id,
-              account_code: account_code || "606", // Default to General Supplies
+              account_code: account_code || "606",
               debit: Number(amount) - Number(vat_amount || 0),
               credit: 0,
               description: `Achat ${vendor_name}`,
             },
             // VAT line if any (Debit)
-            ...(vat_amount ? [{
-              company_id: user.company_id,
-              account_code: "4452", // TVA récupérable sur achats (SYSCOHADA)
-              debit: Number(vat_amount),
-              credit: 0,
-              description: "TVA sur achat",
-            }] : []),
+            ...(vat_amount
+              ? [
+                  {
+                    company_id: user.company_id,
+                    account_code: "4452",
+                    debit: Number(vat_amount),
+                    credit: 0,
+                    description: "TVA sur achat",
+                  },
+                ]
+              : []),
             // Supplier line (Credit)
             {
               company_id: user.company_id,
-              account_code: "401", // Fournisseurs
+              account_code: "401",
               debit: 0,
               credit: Number(amount),
               description: `Dette ${vendor_name}`,
-            }
-          ]
-        }
-      }
+            },
+          ],
+        },
+      },
     });
 
-    // 2. Mark document as used
+    // 2. Mark document as processed
     await prisma.document.update({
       where: { id },
-      data: { 
+      data: {
         status: "processed",
-        extracted_data: body // Store final corrected data
-      }
+        extracted_data: body,
+      },
     });
 
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "JournalEntry",
-      resource_id: entry.id,
-      new_data: { from_document: id, amount }
+      entity: "JournalEntry",
+      entity_id: entry.id,
+      details: { from_document: id, amount },
     });
 
     return successJson(entry, "Opération créée avec succès");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

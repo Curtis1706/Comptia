@@ -1,32 +1,32 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, handlePrismaError } from "@/lib/api-response";
 import { toNumber } from "@/lib/accounting";
 
 /**
  * GET /api/reports/profit-loss
- * Generates the Profit & Loss statement (Compte de Résultat) for a period.
- * Classes 6 (Expenses) and 7 (Revenue).
+ * Generates the Profit & Loss statement (Compte de Résultat) for a period. Requires 'read' on reporting.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "reporting", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
-    const dateFrom = searchParams.get("date_from") ? new Date(searchParams.get("date_from")!) : new Date(new Date().getFullYear(), 0, 1);
+    const dateFrom = searchParams.get("date_from")
+      ? new Date(searchParams.get("date_from")!)
+      : new Date(new Date().getFullYear(), 0, 1);
     const dateTo = searchParams.get("date_to") ? new Date(searchParams.get("date_to")!) : new Date();
 
     const companyId = user.company_id;
 
-    // Fetch account totals for classes 6 and 7
     const lines = await prisma.journalLine.groupBy({
       by: ["account_code"],
       where: {
         company_id: companyId,
         entry: { date: { gte: dateFrom, lte: dateTo }, status: { in: ["posted", "validated"] } },
-        OR: [
-          { account_code: { startsWith: "6" } },
-          { account_code: { startsWith: "7" } },
-        ],
+        OR: [{ account_code: { startsWith: "6" } }, { account_code: { startsWith: "7" } }],
       },
       _sum: { debit: true, credit: true },
     });
@@ -83,4 +83,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

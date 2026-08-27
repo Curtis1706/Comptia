@@ -1,13 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
-import { successResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
+import { requirePermission } from "@/lib/require-permission";
+import { handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { PaginationSchema } from "@/lib/validators";
 
 /**
  * GET /api/audit/logs
+ * Requires 'read' on audit_log.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "audit_log", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const pag = PaginationSchema.parse({
@@ -30,9 +34,9 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
         orderBy: { created_at: "desc" },
         include: {
           user: {
-            select: { name: true, email: true, avatar_url: true }
-          }
-        }
+            select: { name: true, email: true, avatar_url: true },
+          },
+        },
       }),
       prisma.auditLog.count({ where }),
     ]);
@@ -42,4 +46,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/audit/logs]", err);
     return handlePrismaError(err);
   }
-});
+}

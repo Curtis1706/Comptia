@@ -1,10 +1,13 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "validate");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { ids } = await req.json();
 
@@ -12,29 +15,28 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       return errorResponse("Aucun ID fourni", 400);
     }
 
-    // Update status to 'validated'
     const updated = await prisma.journalEntry.updateMany({
       where: {
         id: { in: ids },
         company_id: user.company_id,
-        status: "draft" // Only validate drafts
+        status: "draft",
       },
       data: {
-        status: "validated"
-      }
+        status: "validated",
+      },
     });
 
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
       action: "VALIDATE",
-      resource: "JournalEntry",
-      resource_id: "multiple",
-      new_data: { count: updated.count, ids }
+      entity: "JournalEntry",
+      entity_id: "multiple",
+      details: { count: updated.count, ids },
     });
 
     return successJson({ count: updated.count }, `${updated.count} écritures validées avec succès`);
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

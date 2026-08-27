@@ -1,17 +1,20 @@
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { getMecefConfig } from "@/lib/mecef";
 
 /**
  * GET /api/mecef/diagnostic
- * Renvoie l'état de connexion e-MECeF, les dates de validité du jeton et les 50 derniers logs.
+ * Renvoie l'état de connexion e-MECeF, les dates de validité du jeton et les 50 derniers logs. Requires 'read' on mecef_settings.
  */
-export const GET = withAuth(async (req, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "mecef_settings", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const config = getMecefConfig();
 
-    // Decode JWT exp
     let expDate: Date | null = null;
     let daysRemaining: number | null = null;
     let tokenValid = false;
@@ -32,7 +35,6 @@ export const GET = withAuth(async (req, { user }) => {
       }
     }
 
-    // Fetch last 50 logs for the company
     const logs = await prisma.mecefLog.findMany({
       where: { company_id: user.company_id },
       orderBy: { created_at: "desc" },
@@ -56,4 +58,4 @@ export const GET = withAuth(async (req, { user }) => {
   } catch (err: any) {
     return errorResponse(err.message || "Erreur de chargement du diagnostic e-MECeF", 500);
   }
-});
+}

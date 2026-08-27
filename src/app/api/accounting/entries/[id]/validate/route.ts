@@ -1,19 +1,21 @@
 import { prisma } from "@/lib/prisma";
-import { withAuth, requireRole } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 
 /**
  * POST /api/accounting/entries/[id]/validate
- * Validates a journal entry (irreversible). Requires accountant or admin role.
+ * Validates a journal entry (irreversible). Requires 'validate' level on accounting_entries.
  */
-export const POST = withAuth(async (_req, { user, params }) => {
-  const roleError = requireRole(user, ["admin", "accountant"]);
-  if (roleError) return roleError;
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "accounting_entries", "validate");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
   try {
     const entry = await prisma.journalEntry.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
       include: { lines: true },
     });
 
@@ -24,7 +26,7 @@ export const POST = withAuth(async (_req, { user, params }) => {
     }
 
     const updated = await prisma.journalEntry.update({
-      where: { id: params?.id },
+      where: { id },
       data: { status: "validated" },
     });
 
@@ -32,14 +34,16 @@ export const POST = withAuth(async (_req, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "VALIDATE",
-      resource: "JournalEntry",
-      resource_id: params?.id ?? "",
-      old_data: { status: entry.status },
-      new_data: { status: "validated" },
+      entity: "JournalEntry",
+      entity_id: id,
+      details: {
+        reference: entry.reference,
+        status: "validated",
+      },
     });
 
     return successJson(updated, "Écriture validée définitivement");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

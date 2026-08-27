@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
 
 /**
  * POST /api/documents/[id]/link
- * Associates a document with a journal entry.
+ * Associates a document with a journal entry. Requires 'write' on documents.
  */
-export const POST = withAuth(async (req: NextRequest, { user, params }) => {
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "documents", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
-    const { id } = params as { id: string };
     const { journal_entry_id } = await req.json();
 
     if (!journal_entry_id) {
@@ -37,9 +41,9 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "UPDATE",
-      resource: "Document",
-      resource_id: id,
-      new_data: { journal_entry_id },
+      entity: "Document",
+      entity_id: id,
+      details: { journal_entry_id },
     });
 
     return NextResponse.json(successResponse(null, "Document lié avec succès"));
@@ -47,4 +51,4 @@ export const POST = withAuth(async (req: NextRequest, { user, params }) => {
     console.error("[POST /api/documents/[id]/link]", err);
     return handlePrismaError(err);
   }
-});
+}

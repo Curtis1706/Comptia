@@ -1,16 +1,19 @@
-import { withAuth } from "@/lib/auth-guard";
-import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/require-permission";
+import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { confirmInvoice, normalizeInvoice, getMecefConfig } from "@/lib/mecef";
 
 /**
  * POST /api/invoices/[id]/retry-mecef
- * Relance la normalisation e-MECeF pour une facture en attente ou rejetée.
+ * Relance la normalisation e-MECeF pour une facture en attente ou rejetée. Requires 'write' on invoices.
  */
-export const POST = withAuth(async (req, { user, params }) => {
-  try {
-    const { id } = params;
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
+  try {
     const invoice = await prisma.invoice.findFirst({
       where: { id, company_id: user.company_id },
       include: {
@@ -73,7 +76,10 @@ export const POST = withAuth(async (req, { user, params }) => {
           "Facture normalisée avec succès auprès de la DGI"
         );
       } catch (confirmError: any) {
-        console.warn("[e-MECeF Retry] Échec de la confirmation avec l'UID existant, tentative de re-création complète :", confirmError.message);
+        console.warn(
+          "[e-MECeF Retry] Échec de la confirmation avec l'UID existant, tentative de re-création complète :",
+          confirmError.message
+        );
       }
     }
 
@@ -95,11 +101,13 @@ export const POST = withAuth(async (req, { user, params }) => {
     );
   } catch (error: any) {
     console.error("[e-MECeF Retry] Erreur fatale :", error);
-    await prisma.invoice.update({
-      where: { id: params.id },
-      data: { mecef_status: "verification_failed" },
-    }).catch(() => {});
+    await prisma.invoice
+      .update({
+        where: { id },
+        data: { mecef_status: "verification_failed" },
+      })
+      .catch(() => {});
 
     return errorResponse(error.message || "Échec de la relance e-MECeF", 502);
   }
-});
+}

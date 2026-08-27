@@ -1,13 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
-import { successResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
+import { requirePermission } from "@/lib/require-permission";
+import { handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { PaginationSchema } from "@/lib/validators";
 
 /**
  * GET /api/documents/list
+ * Requires 'read' on documents.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "documents", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const pag = PaginationSchema.parse({
@@ -30,4 +34,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/documents/list]", err);
     return handlePrismaError(err);
   }
-});
+}

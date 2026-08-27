@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
@@ -8,11 +8,15 @@ import { validateDoubleEntry } from "@/lib/accounting";
 
 /**
  * POST /api/payroll/payslips/[id]/validate
+ * Requires 'validate' on payroll.
  */
-export const POST = withAuth(async (req: NextRequest, { user, params }: any) => {
-  try {
-    const { id } = params;
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "payroll", "validate");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
+  try {
     const payroll = await prisma.payroll.findUnique({
       where: { id, company_id: user.company_id },
       include: { employee: true, lines: true },
@@ -26,29 +30,29 @@ export const POST = withAuth(async (req: NextRequest, { user, params }: any) => 
       return errorResponse("Ce bulletin a déjà été validé ou traité", 409);
     }
 
-    // 1. Transaction: Validate payroll and create JournalEntry
     const updated = await prisma.$transaction(async (tx) => {
-      // Create accounting entries
       const calcParams = {
         base_salary: Number(payroll.base_salary),
         gross_salary: Number(payroll.gross_salary),
         net_salary: Number(payroll.net_salary),
         employer_cost: Number(payroll.employer_cost),
-        lines: payroll.lines.map(l => ({
+        lines: payroll.lines.map((l) => ({
           type: l.type,
           label: l.label,
           amount: Number(l.amount),
           rate: l.rate ? Number(l.rate) : null,
-          base: l.base ? Number(l.base) : null
-        }))
+          base: l.base ? Number(l.base) : null,
+        })),
       };
 
       const entryLines = generatePayrollEntryLines(calcParams, payroll.employee_id);
       const { isValid } = validateDoubleEntry(entryLines);
 
       if (isValid) {
-        // Auto-create missing accounts to avoid FK violations
-        const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
+        const ACCOUNT_DEFAULTS: Record<
+          string,
+          { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }
+        > = {
           "641": { name: "Rémunérations du personnel", type: "expense" },
           "645": { name: "Charges sociales patronales", type: "expense" },
           "421": { name: "Personnel - Salaires à payer", type: "liability" },
@@ -102,8 +106,8 @@ export const POST = withAuth(async (req: NextRequest, { user, params }: any) => 
       company_id: user.company_id,
       user_id: user.id,
       action: "VALIDATE",
-      resource: "Payroll",
-      resource_id: id,
+      entity: "Payroll",
+      entity_id: id,
     });
 
     return NextResponse.json(successResponse(updated, "Bulletin validé avec succès"));
@@ -111,4 +115,4 @@ export const POST = withAuth(async (req: NextRequest, { user, params }: any) => 
     console.error("[POST /api/payroll/payslips/[id]/validate]", err);
     return handlePrismaError(err);
   }
-});
+}

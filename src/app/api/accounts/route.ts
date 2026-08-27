@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth, requireAdmin } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import {
   successJson,
   paginatedResponse,
@@ -10,10 +9,13 @@ import {
 } from "@/lib/api-response";
 import { CreateAccountSchema, PaginationSchema } from "@/lib/validators";
 import { logAction } from "@/lib/audit";
-import { toNumber } from "@/lib/accounting";
 
 /** GET /api/accounts */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "chart_of_accounts", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const pag = PaginationSchema.parse({
@@ -52,10 +54,14 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /** POST /api/accounts */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "chart_of_accounts", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const parsed = CreateAccountSchema.safeParse(body);
@@ -77,13 +83,13 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "Account",
-      resource_id: code,
-      new_data: account,
+      entity: "Account",
+      entity_id: code,
+      details: account,
     });
 
     return successJson(account, "Compte créé", 201);
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

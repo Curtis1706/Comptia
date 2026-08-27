@@ -1,9 +1,12 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, handlePrismaError } from "@/lib/api-response";
 
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const accountCode = searchParams.get("account") || "411";
@@ -13,15 +16,15 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
         company_id: user.company_id,
         account_code: { startsWith: accountCode },
         lettering_code: null,
-        entry: { status: { in: ["posted", "validated"] } }
+        entry: { status: { in: ["posted", "validated"] } },
       },
       include: {
-        entry: true
+        entry: true,
       },
-      orderBy: { entry: { date: "asc" } }
+      orderBy: { entry: { date: "asc" } },
     });
     return successJson(lines);
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

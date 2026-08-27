@@ -1,20 +1,21 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, handlePrismaError } from "@/lib/api-response";
 import { toNumber } from "@/lib/accounting";
 
 /**
  * GET /api/invoices/stats
- * Returns KPIs for invoices (total revenue, unpaid, overdue, etc.)
+ * Returns KPIs for invoices. Requires 'read' on invoices.
  */
-export const GET = withAuth(async (_req, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "invoices", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const companyId = user.company_id;
 
-    // We use aggregate and count for efficiency
     const [stats, unpaidStats] = await Promise.all([
-      // Total revenue (paid and pending invoices)
       prisma.invoice.aggregate({
         where: {
           company_id: companyId,
@@ -24,7 +25,6 @@ export const GET = withAuth(async (_req, { user }) => {
         _sum: { total_ttc: true, subtotal_ht: true, vat_amount: true },
         _count: { id: true },
       }),
-      // Unpaid invoices (sent, viewed, overdue)
       prisma.invoice.aggregate({
         where: {
           company_id: companyId,
@@ -36,7 +36,6 @@ export const GET = withAuth(async (_req, { user }) => {
       }),
     ]);
 
-    // Count by status
     const countsByStatus = await prisma.invoice.groupBy({
       by: ["status"],
       where: { company_id: companyId, type: "invoice" },
@@ -60,4 +59,4 @@ export const GET = withAuth(async (_req, { user }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

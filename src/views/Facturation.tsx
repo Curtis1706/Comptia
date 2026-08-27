@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { InvoiceModal } from "@/components/invoices/InvoiceModal";
 import { DownloadPdfButton } from "@/components/invoices/DownloadPdfButton";
+import { PermissionGate } from "@/components/PermissionGate";
 import { toast } from "sonner";
 
 const tabs = [
@@ -73,18 +74,23 @@ export const Facturation = () => {
         title="Facturation & e-MECeF"
         subtitle="Émission de factures, devis, avoirs et normalisation certifiée DGI Bénin"
         actions={
-          <Button
-            size="sm"
-            className="bg-gradient-primary hover:opacity-90 shadow-glow"
-            onClick={() => setIsModalOpen(true)}
+          <PermissionGate
+            module={tab === "devis" ? "quotes" : tab === "avoirs" ? "credit_notes" : "invoices"}
+            level="write"
           >
-            <Plus className="mr-1.5 h-4 w-4" />{" "}
-            {tab === "devis"
-              ? "Nouveau devis"
-              : tab === "avoirs"
-              ? "Nouvel avoir"
-              : "Nouvelle facture"}
-          </Button>
+            <Button
+              size="sm"
+              className="bg-gradient-primary hover:opacity-90 shadow-glow"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus className="mr-1.5 h-4 w-4" />{" "}
+              {tab === "devis"
+                ? "Nouveau devis"
+                : tab === "avoirs"
+                ? "Nouvel avoir"
+                : "Nouvelle facture"}
+            </Button>
+          </PermissionGate>
         }
       />
 
@@ -337,28 +343,30 @@ const InvoiceTable = ({ query }: { query: string }) => {
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1">
                     {inv.status === "draft" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-success hover:bg-success/10"
-                        title="Valider et normaliser"
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(`/api/invoices/${inv.id}/validate`, { method: "POST" });
-                            const result = await res.json();
-                            if (result.success) {
-                              toast.success(result.message);
-                              queryClient.invalidateQueries({ queryKey: ["invoices"] });
-                            } else {
-                              toast.error(result.error);
+                      <PermissionGate module="invoices" level="validate">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-success hover:bg-success/10"
+                          title="Valider et normaliser"
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`/api/invoices/${inv.id}/validate`, { method: "POST" });
+                              const result = await res.json();
+                              if (result.success) {
+                                toast.success(result.message);
+                                queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                              } else {
+                                toast.error(result.error);
+                              }
+                            } catch {
+                              toast.error("Erreur lors de la validation");
                             }
-                          } catch {
-                            toast.error("Erreur lors de la validation");
-                          }
-                        }}
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                      </Button>
+                          }}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                      </PermissionGate>
                     )}
                     <DownloadPdfButton invoiceId={inv.id} />
                     <Button variant="ghost" size="icon" className="h-8 w-8">

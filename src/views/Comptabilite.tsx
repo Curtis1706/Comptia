@@ -13,6 +13,7 @@ import { formatCFA, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JournalEntryModal } from "@/components/accounting/JournalEntryModal";
+import { PermissionGate } from "@/components/PermissionGate";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -113,8 +114,6 @@ export const Comptabilite = () => {
       const text = e.target?.result as string;
       const lines = text.split("\n").map(l => l.split(",").map(c => c.trim()));
       
-      // Header check: date,journal,description,account,debit,credit
-      // Assuming simple format: Date, Journal, Description, Account, Debit, Credit
       const entriesMap: Record<string, any> = {};
 
       lines.slice(1).forEach((cols, idx) => {
@@ -161,28 +160,32 @@ export const Comptabilite = () => {
         subtitle="Toutes vos écritures comptables centralisées"
         actions={
           <>
-            <input 
-              type="file" 
-              id="csv-import" 
-              className="hidden" 
-              accept=".csv" 
-              onChange={handleImportCSV}
-            />
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => document.getElementById("csv-import")?.click()}
-            >
-              <Upload className="mr-1 h-4 w-4" /> Importer CSV
-            </Button>
+            <PermissionGate module="accounting_entries" level="write">
+              <input 
+                type="file" 
+                id="csv-import" 
+                className="hidden" 
+                accept=".csv" 
+                onChange={handleImportCSV}
+              />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => document.getElementById("csv-import")?.click()}
+              >
+                <Upload className="mr-1 h-4 w-4" /> Importer CSV
+              </Button>
+            </PermissionGate>
             <Button variant="outline" size="sm" onClick={exportCSV}><Download className="mr-1 h-4 w-4" /> Exporter</Button>
-            <Button 
-              size="sm" 
-              className="bg-gradient-primary hover:opacity-90"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <Plus className="mr-1 h-4 w-4" /> Nouvelle opération
-            </Button>
+            <PermissionGate module="accounting_entries" level="write">
+              <Button 
+                size="sm" 
+                className="bg-gradient-primary hover:opacity-90 shadow-glow"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <Plus className="mr-1.5 h-4 w-4" /> Nouvelle opération
+              </Button>
+            </PermissionGate>
           </>
         }
       />
@@ -219,15 +222,17 @@ export const Comptabilite = () => {
             </select>
           </div>
 
-          <Button 
-            variant={selectedEntries.length > 0 ? "default" : "outline"} 
-            size="sm" 
-            disabled={selectedEntries.length === 0}
-            onClick={handleBulkValidate}
-            className={selectedEntries.length > 0 ? "bg-success hover:bg-success/90" : ""}
-          >
-            <CheckCircle2 className="mr-1 h-4 w-4" /> Valider sélection ({selectedEntries.length})
-          </Button>
+          <PermissionGate module="accounting_entries" level="validate">
+            <Button 
+              variant={selectedEntries.length > 0 ? "default" : "outline"} 
+              size="sm" 
+              disabled={selectedEntries.length === 0}
+              onClick={handleBulkValidate}
+              className={selectedEntries.length > 0 ? "bg-success hover:bg-success/90" : ""}
+            >
+              <CheckCircle2 className="mr-1 h-4 w-4" /> Valider sélection ({selectedEntries.length})
+            </Button>
+          </PermissionGate>
         </div>
 
         <div className="overflow-x-auto">
@@ -288,14 +293,16 @@ export const Comptabilite = () => {
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end items-center gap-1">
                         {op.status === "draft" && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-destructive"
-                            onClick={() => handleDeleteEntry(op.entry_id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <PermissionGate module="accounting_entries" level="full">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive"
+                              onClick={() => handleDeleteEntry(op.entry_id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </PermissionGate>
                         )}
                         <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>

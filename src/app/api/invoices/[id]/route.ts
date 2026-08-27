@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import {
   successJson,
   errorResponse,
@@ -18,10 +17,15 @@ const INVOICE_INCLUDE = {
 };
 
 /** GET /api/invoices/[id] */
-export const GET = withAuth(async (_req, { user, params }) => {
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
     const invoice = await prisma.invoice.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
       include: INVOICE_INCLUDE,
     });
 
@@ -31,13 +35,18 @@ export const GET = withAuth(async (_req, { user, params }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /** PUT /api/invoices/[id] */
-export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
     const existing = await prisma.invoice.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
     });
 
     if (!existing) return errorResponse("Facture introuvable", 404);
@@ -73,10 +82,10 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
         total_ttc = subtotal_ht + vat_amount;
 
         // Delete old lines and create new ones
-        await tx.invoiceLine.deleteMany({ where: { invoice_id: params?.id } });
+        await tx.invoiceLine.deleteMany({ where: { invoice_id: id } });
         await tx.invoiceLine.createMany({
           data: linesData.map((l) => ({
-            invoice_id: params?.id!,
+            invoice_id: id,
             description: l.description,
             quantity: l.quantity,
             unit_price: l.unit_price,
@@ -88,7 +97,7 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
       }
 
       return tx.invoice.update({
-        where: { id: params?.id },
+        where: { id },
         data: {
           ...(data.client_id && { client_id: data.client_id }),
           ...(data.issue_date && { issue_date: data.issue_date }),
@@ -108,23 +117,30 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "UPDATE",
-      resource: "Invoice",
-      resource_id: params?.id ?? "",
-      old_data: existing,
-      new_data: data,
+      entity: "Invoice",
+      entity_id: id,
+      details: {
+        old_data: existing,
+        new_data: data,
+      },
     });
 
     return successJson(serializeInvoice(updated), "Facture mise à jour");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /** DELETE /api/invoices/[id] — Mark as cancelled */
-export const DELETE = withAuth(async (_req, { user, params }) => {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "invoices", "full");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
     const existing = await prisma.invoice.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
     });
 
     if (!existing) return errorResponse("Facture introuvable", 404);
@@ -133,7 +149,7 @@ export const DELETE = withAuth(async (_req, { user, params }) => {
     }
 
     const updated = await prisma.invoice.update({
-      where: { id: params?.id },
+      where: { id },
       data: { status: "cancelled" },
     });
 
@@ -141,17 +157,19 @@ export const DELETE = withAuth(async (_req, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "DELETE",
-      resource: "Invoice",
-      resource_id: params?.id ?? "",
-      old_data: { status: existing.status },
-      new_data: { status: "cancelled" },
+      entity: "Invoice",
+      entity_id: id,
+      details: {
+        status: "cancelled",
+        reference: existing.reference,
+      },
     });
 
     return successJson(serializeInvoice(updated), "Facture annulée");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 function serializeInvoice(invoice: any) {
   return {

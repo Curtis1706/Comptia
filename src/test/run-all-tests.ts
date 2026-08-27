@@ -5,6 +5,7 @@ import { testSectorModules } from "./unit/sector-modules.test";
 import { testFiscalAlerts } from "./unit/fiscal-alerts.test";
 import { testAuthConfiguration } from "./unit/auth.test";
 import { testDsfEngine } from "./unit/dsf.test";
+import { testPermissionsMatrix } from "./unit/permissions.test";
 
 async function runTestSuite() {
   console.log("================================================================");
@@ -26,6 +27,7 @@ async function runTestSuite() {
   };
 
   await runTest("Authentification NextAuth v5 & Validations", testAuthConfiguration);
+  await runTest("Matrice de Permissions & Rôles RBAC", testPermissionsMatrix);
   await runTest("Moteur de Paie & Barème IPTS Bénin", testPayrollEngine);
   await runTest("TVA Bénin 18% & Écritures SYSCOHADA", testVatAndAccountingEngine);
   await runTest("Intégration API e-MECeF DGI Bénin", testMecefEngine);

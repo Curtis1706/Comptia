@@ -1,16 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, notFoundResponse, handlePrismaError, errorResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
+import { calculatePayroll } from "@/lib/payroll";
+import { logAction } from "@/lib/audit";
 
 /**
  * GET /api/payroll/payslips/[id]
- * Returns a single payslip with employee, deductions and contributions
+ * Returns a single payslip. Requires 'read' on payroll.
  */
-export const GET = withAuth(async (req: NextRequest, { user, params }: any) => {
-  try {
-    const { id } = params;
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "payroll", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
+  try {
     const payslip = await prisma.payroll.findFirst({
       where: {
         id,
@@ -31,17 +36,19 @@ export const GET = withAuth(async (req: NextRequest, { user, params }: any) => {
     console.error("[GET /api/payroll/payslips/[id]]", err);
     return handlePrismaError(err);
   }
-});
-
-import { calculatePayroll } from "@/lib/payroll";
+}
 
 /**
  * PATCH /api/payroll/payslips/[id]
- * Updates a draft payslip's lines and recalculates totals.
+ * Updates a draft payslip. Requires 'write' on payroll.
  */
-export const PATCH = withAuth(async (req: NextRequest, { user, params }: any) => {
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "payroll", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
   try {
-    const { id } = params;
     const body = await req.json();
     const { customLines } = body;
 
@@ -62,13 +69,11 @@ export const PATCH = withAuth(async (req: NextRequest, { user, params }: any) =>
       return errorResponse("Impossible de modifier un bulletin validé ou traité", 409);
     }
 
-    // 1. Recalculate everything
     const calc = calculatePayroll(Number(payroll.base_salary), customLines);
 
-    // 2. Transaction: Delete old lines, update payroll, create new lines
     const updated = await prisma.$transaction(async (tx) => {
       await tx.payrollLine.deleteMany({
-        where: { payroll_id: id }
+        where: { payroll_id: id },
       });
 
       return tx.payroll.update({
@@ -78,16 +83,16 @@ export const PATCH = withAuth(async (req: NextRequest, { user, params }: any) =>
           net_salary: calc.net_salary,
           employer_cost: calc.employer_cost,
           lines: {
-            create: calc.lines.map(l => ({
+            create: calc.lines.map((l) => ({
               type: l.type,
               label: l.label,
               amount: l.amount,
               rate: l.rate,
-              base: l.base
-            }))
-          }
+              base: l.base,
+            })),
+          },
         },
-        include: { lines: true }
+        include: { lines: true },
       });
     });
 
@@ -96,4 +101,40 @@ export const PATCH = withAuth(async (req: NextRequest, { user, params }: any) =>
     console.error("[PATCH /api/payroll/payslips/[id]]", err);
     return handlePrismaError(err);
   }
-});
+}
+
+/**
+ * DELETE /api/payroll/payslips/[id]
+ * Requires 'full' on payroll.
+ */
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "payroll", "full");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
+
+  try {
+    const existing = await prisma.payroll.findFirst({
+      where: { id, company_id: user.company_id },
+    });
+
+    if (!existing) return errorResponse("Bulletin introuvable", 404);
+    if (existing.status !== "draft") {
+      return errorResponse("Impossible de supprimer un bulletin validé", 403);
+    }
+
+    await prisma.payroll.delete({ where: { id } });
+
+    await logAction({
+      company_id: user.company_id,
+      user_id: user.id,
+      action: "DELETE",
+      entity: "Payroll",
+      entity_id: id,
+    });
+
+    return NextResponse.json(successResponse({ deleted: true }, "Bulletin supprimé"));
+  } catch (err) {
+    return handlePrismaError(err);
+  }
+}

@@ -1,14 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { calculateVatForPeriod } from "@/lib/accounting";
 
 /**
  * GET /api/vat/preview
- * Calculates VAT preview for a given period without persisting.
+ * Calculates VAT preview for a given period without persisting. Requires 'read' on vat_declarations.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "vat_declarations", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const startStr = searchParams.get("period_start");
@@ -29,4 +33,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/vat/preview]", err);
     return errorResponse("Erreur lors du calcul de la TVA");
   }
-});
+}

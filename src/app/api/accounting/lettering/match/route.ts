@@ -1,10 +1,13 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { ids } = await req.json();
 
@@ -12,14 +15,13 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       return errorResponse("Veuillez sélectionner au moins deux écritures", 400);
     }
 
-    // 1. Get lines and check balance
     const lines = await prisma.journalLine.findMany({
       where: {
         id: { in: ids },
         company_id: user.company_id,
         entry: { status: { in: ["posted", "validated"] } },
       },
-      include: { entry: true }
+      include: { entry: true },
     });
 
     const debitTotal = lines.reduce((s, l) => s + Number(l.debit), 0);
@@ -32,8 +34,6 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     const accountCode = lines[0].account_code;
     const year = lines[0].entry.date.getFullYear();
 
-    // 2. Generate Next Lettering Code
-    // Fetch last used code for this account and year
     const lastLine = await prisma.journalLine.findFirst({
       where: {
         company_id: user.company_id,
@@ -41,42 +41,41 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         lettering_code: { not: null },
         entry: {
           status: { in: ["posted", "validated"] },
-          date: { gte: new Date(`${year}-01-01`), lte: new Date(`${year}-12-31`) }
-        }
+          date: { gte: new Date(`${year}-01-01`), lte: new Date(`${year}-12-31`) },
+        },
       },
       orderBy: { lettering_code: "desc" },
-      select: { lettering_code: true }
+      select: { lettering_code: true },
     });
 
     const nextCode = generateNextCode(lastLine?.lettering_code || null);
 
-    // 3. Update lines
     await prisma.journalLine.updateMany({
       where: { id: { in: ids } },
-      data: { lettering_code: nextCode }
+      data: { lettering_code: nextCode },
     });
 
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
       action: "UPDATE",
-      resource: "Lettering",
-      resource_id: nextCode,
-      new_data: { ids, account: accountCode, year }
+      entity: "Lettering",
+      entity_id: nextCode,
+      details: { ids, account: accountCode, year },
     });
 
     return successJson({ code: nextCode }, "Lettrage effectué avec succès");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 function generateNextCode(lastCode: string | null): string {
   if (!lastCode) return "AA";
-  
+
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let [c1, c2] = lastCode.split("");
-  
+
   let i2 = alphabet.indexOf(c2);
   let i1 = alphabet.indexOf(c1);
 
@@ -86,8 +85,6 @@ function generateNextCode(lastCode: string | null): string {
     i2 = 0;
     i1++;
   }
-  
-  // If we overflow ZZ, we should probably add a 3rd char, but AA-ZZ is 676 combinations per account/year.
-  // Sufficient for most SMEs.
+
   return alphabet[i1 % 26] + alphabet[i2 % 26];
 }

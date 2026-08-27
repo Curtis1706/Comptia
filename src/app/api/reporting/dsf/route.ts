@@ -1,14 +1,17 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { generateFullDsfReport } from "@/lib/dsf";
 
 /**
  * GET /api/reporting/dsf
- * Returns complete SYSCOHADA DSF (Bilan, Compte de Résultat avec SIG, TAFIRE) for a fiscal year.
+ * Returns complete SYSCOHADA DSF for a fiscal year. Requires 'read' on dsf.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "dsf", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const yearParam = searchParams.get("fiscal_year") || searchParams.get("year");
@@ -25,4 +28,4 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/reporting/dsf]", err);
     return handlePrismaError(err);
   }
-});
+}

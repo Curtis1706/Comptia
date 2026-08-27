@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth, requireAdmin } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import {
   successJson,
   errorResponse,
@@ -23,13 +22,15 @@ const USER_SELECT = {
 };
 
 /** GET /api/users/[id] */
-export const GET = withAuth(async (_req, { user, params }) => {
-  const adminError = requireAdmin(user);
-  if (adminError) return adminError;
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "user_management", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
   try {
     const target = await prisma.user.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
       select: USER_SELECT,
     });
 
@@ -38,14 +39,16 @@ export const GET = withAuth(async (_req, { user, params }) => {
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /** PUT /api/users/[id] — Modify role/status */
-export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
-  const adminError = requireAdmin(user);
-  if (adminError) return adminError;
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "user_management", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
-  if (params?.id === user.id) {
+  if (id === user.id) {
     return errorResponse("Vous ne pouvez pas modifier votre propre rôle", 400);
   }
 
@@ -55,14 +58,17 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
     const old = await prisma.user.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
       select: USER_SELECT,
     });
 
     if (!old) return errorResponse("Utilisateur introuvable", 404);
 
     if (old.role === "owner") {
-      return errorResponse("Le rôle du Propriétaire ne peut pas être modifié. Utilisez le transfert de propriété.", 403);
+      return errorResponse(
+        "Le rôle du Propriétaire ne peut pas être modifié. Utilisez le transfert de propriété.",
+        403
+      );
     }
 
     if (parsed.data.role === "owner") {
@@ -70,7 +76,7 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
     }
 
     const updated = await prisma.user.update({
-      where: { id: params?.id },
+      where: { id },
       data: parsed.data,
       select: USER_SELECT,
     });
@@ -79,30 +85,34 @@ export const PUT = withAuth(async (req: NextRequest, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "UPDATE",
-      resource: "User",
-      resource_id: updated.id,
-      old_data: old,
-      new_data: parsed.data,
+      entity: "User",
+      entity_id: updated.id,
+      details: {
+        old_data: old,
+        new_data: parsed.data,
+      },
     });
 
     return successJson(updated, "Utilisateur mis à jour");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 /** DELETE /api/users/[id] — Soft delete (suspend) */
-export const DELETE = withAuth(async (_req, { user, params }) => {
-  const adminError = requireAdmin(user);
-  if (adminError) return adminError;
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const permCheck = await requirePermission(req, "user_management", "full");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+  const { id } = await context.params;
 
-  if (params?.id === user.id) {
+  if (id === user.id) {
     return errorResponse("Vous ne pouvez pas suspendre votre propre compte", 400);
   }
 
   try {
     const target = await prisma.user.findFirst({
-      where: { id: params?.id, company_id: user.company_id },
+      where: { id, company_id: user.company_id },
     });
 
     if (!target) return errorResponse("Utilisateur introuvable", 404);
@@ -112,7 +122,7 @@ export const DELETE = withAuth(async (_req, { user, params }) => {
     }
 
     await prisma.user.update({
-      where: { id: params?.id },
+      where: { id },
       data: { is_active: false },
     });
 
@@ -120,14 +130,12 @@ export const DELETE = withAuth(async (_req, { user, params }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "DELETE",
-      resource: "User",
-      resource_id: params?.id ?? "",
-      old_data: { is_active: true },
-      new_data: { is_active: false },
+      entity: "User",
+      entity_id: id,
     });
 
     return successJson(null, "Utilisateur suspendu");
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

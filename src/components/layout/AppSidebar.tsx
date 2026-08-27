@@ -17,92 +17,103 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import { isModuleEnabledForSector } from "@/constants/sector-modules";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Module } from "@/lib/permissions";
 
 type Item = {
   key: string;
+  module: Module;
   label: string;
   to: string;
   icon: React.ComponentType<{ className?: string }>;
-  children?: { label: string; to: string }[];
+  children?: { label: string; to: string; module?: Module }[];
 };
 
 const items: Item[] = [
-  { key: "dashboard", label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
+  { key: "dashboard", module: "dashboard", label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
   {
     key: "comptabilite",
+    module: "accounting_entries",
     label: "Comptabilité",
     to: "/comptabilite",
     icon: Wallet,
     children: [
-      { label: "Journal des opérations", to: "/comptabilite" },
-      { label: "Comptes de tiers", to: "/comptabilite/tiers" },
-      { label: "Rapprochement bancaire", to: "/comptabilite/rapprochement" },
-      { label: "Lettrage", to: "/comptabilite/lettrage" },
+      { label: "Journal des opérations", to: "/comptabilite", module: "accounting_entries" },
+      { label: "Comptes de tiers", to: "/comptabilite/tiers", module: "third_parties" },
+      { label: "Rapprochement bancaire", to: "/comptabilite/rapprochement", module: "bank_reconciliation" },
+      { label: "Lettrage", to: "/comptabilite/lettrage", module: "accounting_entries" },
     ],
   },
   {
     key: "facturation",
+    module: "invoices",
     label: "Facturation",
     to: "/facturation",
     icon: FileText,
     children: [
-      { label: "Factures", to: "/facturation" },
-      { label: "Devis", to: "/facturation?tab=devis" },
-      { label: "Avoirs", to: "/facturation?tab=avoirs" },
+      { label: "Factures", to: "/facturation", module: "invoices" },
+      { label: "Devis", to: "/facturation?tab=devis", module: "quotes" },
+      { label: "Avoirs", to: "/facturation?tab=avoirs", module: "credit_notes" },
     ],
   },
   {
     key: "tva",
+    module: "vat_declarations",
     label: "Gestion TVA",
     to: "/tva",
     icon: Receipt,
     children: [
-      { label: "Déclarations", to: "/tva" },
-      { label: "Historique TVA", to: "/tva?tab=historique" },
+      { label: "Déclarations", to: "/tva", module: "vat_declarations" },
+      { label: "Historique TVA", to: "/tva?tab=historique", module: "vat_declarations" },
     ],
   },
   {
     key: "paie",
+    module: "payroll",
     label: "Paie",
     to: "/paie",
     icon: Briefcase,
     children: [
-      { label: "Bulletins", to: "/paie" },
-      { label: "Salariés", to: "/paie?tab=salaries" },
+      { label: "Bulletins", to: "/paie", module: "payroll" },
+      { label: "Salariés", to: "/paie?tab=salaries", module: "employees" },
     ],
   },
   {
     key: "reporting",
+    module: "reporting",
     label: "Reporting",
     to: "/reporting",
     icon: TrendingUp,
     children: [
-      { label: "Bilan", to: "/reporting" },
-      { label: "Compte de résultat", to: "/reporting?tab=cr" },
-      { label: "DSF SYSCOHADA", to: "/reporting?tab=dsf" },
-      { label: "Trésorerie", to: "/reporting?tab=tresorerie" },
+      { label: "Bilan", to: "/reporting", module: "reporting" },
+      { label: "Compte de résultat", to: "/reporting?tab=cr", module: "reporting" },
+      { label: "DSF SYSCOHADA", to: "/reporting?tab=dsf", module: "dsf" },
+      { label: "Trésorerie", to: "/reporting?tab=tresorerie", module: "reporting" },
     ],
   },
   {
     key: "documents",
+    module: "documents",
     label: "Documents",
     to: "/documents",
     icon: FolderOpen,
     children: [
-      { label: "Factures reçues", to: "/documents" },
-      { label: "Justificatifs", to: "/documents?tab=just" },
+      { label: "Factures reçues", to: "/documents", module: "documents" },
+      { label: "Justificatifs", to: "/documents?tab=just", module: "documents" },
     ],
   },
   {
     key: "parametres",
+    module: "company_settings",
     label: "Configuration",
     to: "/parametres",
     icon: Settings,
     children: [
-      { label: "Plan comptable", to: "/parametres?tab=plan" },
-      { label: "Entreprise", to: "/parametres" },
-      { label: "Utilisateurs & Rôles", to: "/parametres?tab=users" },
-      { label: "Intégrations", to: "/parametres?tab=integrations" },
+      { label: "Plan comptable", to: "/parametres?tab=plan", module: "chart_of_accounts" },
+      { label: "Entreprise", to: "/parametres", module: "company_settings" },
+      { label: "Certification e-MECeF", to: "/parametres?tab=mecef", module: "mecef_settings" },
+      { label: "Utilisateurs & Rôles", to: "/parametres?tab=users", module: "user_management" },
+      { label: "Intégrations", to: "/parametres?tab=integrations", module: "company_settings" },
     ],
   },
 ];
@@ -123,7 +134,36 @@ export const AppSidebar = ({ open, onClose }: Props) => {
   const user = userRes?.data || userRes;
   const sector = user?.company?.sector;
 
-  const visibleItems = items.filter((item) => isModuleEnabledForSector(sector, item.key));
+  const { hasAccess } = usePermissions();
+
+  const isSettingsAccessible =
+    hasAccess("company_settings") ||
+    hasAccess("chart_of_accounts") ||
+    hasAccess("user_management") ||
+    hasAccess("mecef_settings") ||
+    hasAccess("audit_log") ||
+    hasAccess("subscription_billing");
+
+  const visibleItems = items
+    .filter((item) => {
+      const sectorOk = isModuleEnabledForSector(sector, item.key);
+      if (!sectorOk) return false;
+
+      if (item.key === "parametres") {
+        return isSettingsAccessible;
+      }
+
+      if (item.key === "paie") {
+        return hasAccess("payroll") || hasAccess("employees");
+      }
+
+      return hasAccess(item.module);
+    })
+    .map((item) => {
+      if (!item.children) return item;
+      const visibleChildren = item.children.filter((c) => !c.module || hasAccess(c.module));
+      return { ...item, children: visibleChildren.length > 0 ? visibleChildren : undefined };
+    });
 
   return (
     <>

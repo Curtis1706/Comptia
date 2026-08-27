@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Building2, BookOpen, Users, Plug, Shield, CreditCard, Loader2, Save, Mail, Phone, MapPin, Building, ShieldCheck } from "lucide-react";
+import { Building2, BookOpen, Users, Plug, Shield, CreditCard, Loader2, Save, Mail, Phone, MapPin, Building, ShieldCheck, Sliders } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,24 +15,46 @@ import { toast } from "sonner";
 import { formatDateLong } from "@/lib/format";
 
 import { MecefDiagnostic } from "@/components/settings/MecefDiagnostic";
+import { PermissionsMatrix } from "@/components/settings/PermissionsMatrix";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Module, Permission } from "@/lib/permissions";
 
-const sections = [
-  { id: "entreprise", label: "Entreprise", icon: Building2 },
-  { id: "plan", label: "Plan comptable", icon: BookOpen },
-  { id: "users", label: "Utilisateurs & Rôles", icon: Users },
-  { id: "mecef", label: "Certification e-MECeF", icon: ShieldCheck },
-  { id: "integrations", label: "Intégrations", icon: Plug },
-  { id: "security", label: "Sécurité & Audit", icon: Shield },
-  { id: "billing", label: "Facturation Studio", icon: CreditCard },
-] as const;
-type Sec = (typeof sections)[number]["id"];
+interface SettingSection {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  module: Module;
+  level: Permission;
+}
+
+const allSections: SettingSection[] = [
+  { id: "entreprise", label: "Entreprise", icon: Building2, module: "company_settings", level: "read" },
+  { id: "plan", label: "Plan comptable", icon: BookOpen, module: "chart_of_accounts", level: "read" },
+  { id: "users", label: "Utilisateurs & Rôles", icon: Users, module: "user_management", level: "read" },
+  { id: "permissions", label: "Rôles et permissions", icon: Sliders, module: "user_management", level: "write" },
+  { id: "mecef", label: "Certification e-MECeF", icon: ShieldCheck, module: "mecef_settings", level: "read" },
+  { id: "integrations", label: "Intégrations", icon: Plug, module: "company_settings", level: "read" },
+  { id: "security", label: "Sécurité & Audit", icon: Shield, module: "audit_log", level: "read" },
+  { id: "billing", label: "Facturation Studio", icon: CreditCard, module: "subscription_billing", level: "read" },
+];
 
 export const Parametres = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const sec = (searchParams.get("tab") as Sec) || "entreprise";
-  const setSec = (s: Sec) => {
+  const requestedSec = searchParams.get("tab") || "entreprise";
+
+  const { canRead, canWrite, isLoading } = usePermissions();
+
+  const accessibleSections = allSections.filter((s) => {
+    return s.level === "write" ? canWrite(s.module) : canRead(s.module);
+  });
+
+  const sec = accessibleSections.some((s) => s.id === requestedSec)
+    ? requestedSec
+    : accessibleSections[0]?.id || "entreprise";
+
+  const setSec = (s: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (s === "entreprise") params.delete("tab");
     else params.set("tab", s);
@@ -45,7 +67,7 @@ export const Parametres = () => {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
         <nav className="space-y-1 rounded-xl border border-border bg-card p-2 shadow-card h-fit sticky top-20">
-          {sections.map((s) => (
+          {accessibleSections.map((s) => (
             <button
               key={s.id}
               onClick={() => setSec(s.id)}
@@ -66,6 +88,7 @@ export const Parametres = () => {
           {sec === "entreprise" && <EntrepriseForm />}
           {sec === "plan" && <PlanComptable />}
           {sec === "users" && <UsersTable />}
+          {sec === "permissions" && <PermissionsMatrix />}
           {sec === "mecef" && <MecefDiagnostic />}
           {sec === "integrations" && <Integrations />}
           {sec === "security" && <Audit />}

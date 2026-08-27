@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, zodErrorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 import { validateDoubleEntry, nextEntryReference } from "@/lib/accounting";
@@ -9,19 +9,27 @@ const CreateJournalEntrySchema = z.object({
   date: z.string().min(1),
   journal: z.enum(["purchases", "sales", "bank", "cash", "payroll"]),
   description: z.string().min(3),
-  lines: z.array(z.object({
-    account_code: z.string().min(1),
-    description: z.string().optional(),
-    debit: z.number().min(0),
-    credit: z.number().min(0),
-    third_party: z.string().optional(),
-  })).min(2),
+  lines: z
+    .array(
+      z.object({
+        account_code: z.string().min(1),
+        description: z.string().optional(),
+        debit: z.number().min(0),
+        credit: z.number().min(0),
+        third_party: z.string().optional(),
+      })
+    )
+    .min(2),
 });
 
 /**
  * GET /api/accounting/entries
  */
-export const GET = withAuth(async (req, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -45,10 +53,10 @@ export const GET = withAuth(async (req, { user }) => {
     const [entries, total] = await Promise.all([
       prisma.journalEntry.findMany({
         where,
-        include: { 
+        include: {
           lines: {
-            include: { account: true }
-          }
+            include: { account: true },
+          },
         },
         orderBy: { date: "desc" },
         skip: (page - 1) * limit,
@@ -58,105 +66,74 @@ export const GET = withAuth(async (req, { user }) => {
     ]);
 
     return paginatedResponse(entries, total, page, limit);
-  } catch (err) {
+  } catch (err: any) {
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * POST /api/accounting/entries
  */
-export const POST = withAuth(async (req, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const parsed = CreateJournalEntrySchema.safeParse(body);
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const { lines, journal, date, description } = parsed.data;
+    const data = parsed.data;
 
-    // 1. Balance and non-zero check (B3)
-    const { isBalanced, isNonZero, totalDebit, totalCredit, difference } =
-      validateDoubleEntry(lines);
-
-    if (!isBalanced) {
-      return errorResponse(
-        `L'écriture n'est pas équilibrée : débit ${totalDebit.toLocaleString("fr-FR")} FCFA, ` +
-        `crédit ${totalCredit.toLocaleString("fr-FR")} FCFA, écart ${difference.toLocaleString("fr-FR")} FCFA`,
-        422
-      );
-    }
-    if (!isNonZero) {
-      return errorResponse(
-        "L'écriture ne peut pas avoir un montant nul",
-        422
-      );
+    // 1. Validation de l'équilibre comptable
+    const validation = validateDoubleEntry(data.lines);
+    if (!validation.isValid) {
+      return errorResponse(`Écriture comptable invalide : ${validation.error}`, 400);
     }
 
-    // 2. Validate accounts and block non-postable accounts (B5)
-    const codes = [...new Set(lines.map((l) => l.account_code))];
-    const accounts = await prisma.account.findMany({
-      where: { company_id: user.company_id, code: { in: codes } },
-      select: { code: true, name: true, is_postable: true },
-    });
+    // 2. Génération de la référence séquentielle
+    const reference = await nextEntryReference(prisma, user.company_id, data.journal);
 
-    const missing = codes.filter((c) => !accounts.some((a) => a.code === c));
-    if (missing.length > 0) {
-      return errorResponse(
-        `Compte inconnu : ${missing.join(", ")}`,
-        422
-      );
-    }
-
-    const nonPostable = accounts.filter((a) => !a.is_postable);
-    if (nonPostable.length > 0) {
-      return errorResponse(
-        `Écriture impossible sur un compte de regroupement : ` +
-        nonPostable.map((a) => `${a.code} — ${a.name}`).join(", ") +
-        `. Utilisez un sous-compte.`,
-        422
-      );
-    }
-
-    const result = await prisma.$transaction(async (tx) => {
-      const reference = await nextEntryReference(tx, user.company_id, journal.toUpperCase(), new Date(date));
-
-      const entry = await tx.journalEntry.create({
-        data: {
-          date: new Date(date),
-          reference,
-          description,
-          journal,
-          status: "draft",
-          company_id: user.company_id,
-          created_by: user.id,
-          lines: {
-            create: lines.map(line => ({
-              account_code: line.account_code,
-              company_id: user.company_id,
-              debit: line.debit,
-              credit: line.credit,
-              description: line.description,
-              third_party: line.third_party,
-            })),
-          },
+    // 3. Création transactionnelle
+    const entry = await prisma.journalEntry.create({
+      data: {
+        company_id: user.company_id,
+        reference,
+        journal: data.journal,
+        date: new Date(data.date),
+        description: data.description,
+        status: "draft",
+        created_by: user.id,
+        lines: {
+          create: data.lines.map((l) => ({
+            company_id: user.company_id,
+            account_code: l.account_code,
+            description: l.description || data.description,
+            debit: l.debit,
+            credit: l.credit,
+            third_party: l.third_party,
+          })),
         },
-        include: { lines: true }
-      });
-
-      return entry;
+      },
+      include: {
+        lines: {
+          include: { account: true },
+        },
+      },
     });
 
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "JournalEntry",
-      resource_id: result.id,
-      new_data: { reference: result.reference, description: result.description, linesCount: lines.length },
+      entity: "JournalEntry",
+      entity_id: entry.id,
+      details: { reference, journal: data.journal, total: validation.totalDebit },
     });
 
-    return successJson(result, "Écriture créée avec succès", 201);
-  } catch (err) {
+    return successJson(entry, "Écriture comptable enregistrée en brouillon", 201);
+  } catch (err: any) {
     return handlePrismaError(err);
   }
-});
+}

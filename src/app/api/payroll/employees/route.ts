@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-guard";
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError, paginatedResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
@@ -26,8 +26,13 @@ const CreateEmployeeSchema = z.object({
 
 /**
  * GET /api/payroll/employees
+ * Requires 'read' on employees.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "employees", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const pag = PaginationSchema.parse({
@@ -62,12 +67,17 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     console.error("[GET /api/payroll/employees]", err);
     return handlePrismaError(err);
   }
-});
+}
 
 /**
  * POST /api/payroll/employees
+ * Requires 'write' on employees.
  */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "employees", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const body = await req.json();
     const data = CreateEmployeeSchema.parse(body);
@@ -83,9 +93,9 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "Employee",
-      resource_id: employee.id,
-      new_data: employee,
+      entity: "Employee",
+      entity_id: employee.id,
+      details: employee,
     });
 
     return NextResponse.json(successResponse(employee, "Salarié créé"), { status: 201 });
@@ -94,4 +104,4 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
     if (err instanceof z.ZodError) return errorResponse(err.errors[0].message, 400);
     return handlePrismaError(err);
   }
-});
+}

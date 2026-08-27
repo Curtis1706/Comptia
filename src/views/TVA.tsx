@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Clock, AlertTriangle, Download, Plus, Loader2, Calendar, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { PermissionGate } from "@/components/PermissionGate";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher, mutate } from "@/lib/fetcher";
 import { formatCFA, formatDateLong } from "@/lib/format";
@@ -95,15 +96,17 @@ export const TVA = () => {
         title="Gestion TVA (DGI Bénin)"
         subtitle="Déclarations conformes au taux standard de 18% et comptes SYSCOHADA"
         actions={
-          <Button 
-            size="sm" 
-            className="bg-gradient-primary hover:opacity-90"
-            onClick={handleSubmitDeclaration}
-            disabled={isSubmitting || previewLoading}
-          >
-            {isSubmitting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Plus className="mr-1 h-4 w-4" />}
-            Soumettre la déclaration DGI
-          </Button>
+          <PermissionGate module="vat_declarations" level="validate">
+            <Button 
+              size="sm" 
+              className="bg-gradient-primary hover:opacity-90 shadow-glow"
+              onClick={handleSubmitDeclaration}
+              disabled={isSubmitting || previewLoading}
+            >
+              {isSubmitting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Plus className="mr-1 h-4 w-4" />}
+              Soumettre la déclaration DGI
+            </Button>
+          </PermissionGate>
         }
       />
 

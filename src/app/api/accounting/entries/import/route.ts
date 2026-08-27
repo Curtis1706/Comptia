@@ -1,14 +1,17 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { logAction } from "@/lib/audit";
 
 /**
  * POST /api/accounting/entries/import
- * Expects an array of entries with lines.
+ * Expects an array of entries with lines. Requires 'write' on accounting_entries.
  */
-export const POST = withAuth(async (req: NextRequest, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "write");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const { entries } = await req.json();
 
@@ -23,17 +26,21 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         // Simple balance check
         const totalDebit = data.lines.reduce((s: number, l: any) => s + Number(l.debit || 0), 0);
         const totalCredit = data.lines.reduce((s: number, l: any) => s + Number(l.credit || 0), 0);
-        
+
         if (Math.abs(totalDebit - totalCredit) >= 0.01) continue; // Skip unbalanced entries
 
         // Reference generation
         const year = new Date(data.date).getFullYear();
         const journal = data.journal || "bank";
         const count = await tx.journalEntry.count({
-          where: { company_id: user.company_id, journal, date: {
-            gte: new Date(`${year}-01-01`),
-            lte: new Date(`${year}-12-31`),
-          } },
+          where: {
+            company_id: user.company_id,
+            journal,
+            date: {
+              gte: new Date(`${year}-01-01`),
+              lte: new Date(`${year}-12-31`),
+            },
+          },
         });
         const reference = `${journal.toUpperCase()}-IMP-${year}-${String(count + 1).padStart(5, "0")}`;
 
@@ -66,13 +73,13 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       company_id: user.company_id,
       user_id: user.id,
       action: "CREATE",
-      resource: "JournalEntry",
-      resource_id: "multiple-import",
-      new_data: { count: results.length }
+      entity: "JournalEntry",
+      entity_id: "multiple-import",
+      details: { count: results.length },
     });
 
     return successJson({ count: results.length }, `${results.length} écritures importées avec succès`);
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}

@@ -1,10 +1,13 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, handlePrismaError } from "@/lib/api-response";
 import { subDays, format } from "date-fns";
 
-export const GET = withAuth(async (req: NextRequest, { user }) => {
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "reporting", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
+
   try {
     const companyId = user.company_id;
 
@@ -23,12 +26,12 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       where: { company_id: companyId },
       select: { code: true, name: true },
     });
-    const accountMap = new Map(accounts.map(a => [a.code, a.name]));
+    const accountMap = new Map(accounts.map((a) => [a.code, a.name]));
 
     // 3. Process Bilan and Income Statement
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { initial_treasury_balance: true }
+      select: { initial_treasury_balance: true },
     });
     const initialBalance = Number(company?.initial_treasury_balance || 0);
 
@@ -65,10 +68,13 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       }
       // Bilan
       else {
-        // Simple logic for Bilan assignment based on code prefix
-        // 1, 16, 40, 42, 43, 44 -> Passif
-        // 2, 3, 41, 5 -> Actif
-        if (code.startsWith("1") || code.startsWith("40") || code.startsWith("42") || code.startsWith("43") || code.startsWith("44")) {
+        if (
+          code.startsWith("1") ||
+          code.startsWith("40") ||
+          code.startsWith("42") ||
+          code.startsWith("43") ||
+          code.startsWith("44")
+        ) {
           balanceSheet.passif.push({ label: name, value: Math.abs(credit - debit) });
         } else {
           balanceSheet.actif.push({ label: name, value: Math.abs(debit - credit) });
@@ -77,60 +83,59 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     });
 
     // 4. Cashflow (last 30 days)
-    // We fetch entries for accounts starting with '5'
     const last30Days = Array.from({ length: 30 }, (_, i) => {
       const d = subDays(new Date(), 29 - i);
       return format(d, "yyyy-MM-dd");
     });
 
-    // For a real cashflow, we calculate the starting balance at (today - 30 days)
     const startDate = subDays(new Date(), 30);
-    const cashAccounts = accounts.filter(a => a.code.startsWith("5")).map(a => a.code);
+    const cashAccounts = accounts.filter((a) => a.code.startsWith("5")).map((a) => a.code);
 
     const initialBalanceResult = await prisma.journalLine.aggregate({
       where: {
         entry: {
           company_id: companyId,
           status: { in: ["posted", "validated"] },
-          date: { lt: startDate }
+          date: { lt: startDate },
         },
-        account_code: { in: cashAccounts }
+        account_code: { in: cashAccounts },
       },
       _sum: {
         debit: true,
         credit: true,
-      }
+      },
     });
 
-    const startingBalance = (Number(initialBalanceResult._sum.debit || 0) - Number(initialBalanceResult._sum.credit || 0)) + initialBalance;
+    const startingBalance =
+      Number(initialBalanceResult._sum.debit || 0) -
+      Number(initialBalanceResult._sum.credit || 0) +
+      initialBalance;
 
     const dailyMoves = await prisma.journalLine.findMany({
       where: {
         entry: {
           company_id: companyId,
           status: { in: ["posted", "validated"] },
-          date: { gte: startDate }
+          date: { gte: startDate },
         },
-        account_code: { in: cashAccounts }
+        account_code: { in: cashAccounts },
       },
       select: {
         debit: true,
         credit: true,
-        entry: { select: { date: true } }
-      }
+        entry: { select: { date: true } },
+      },
     });
 
-    // Sum up by day
-    const cashflowMoves = last30Days.map(day => {
+    const cashflowMoves = last30Days.map((day) => {
       const dayTotal = dailyMoves
-        .filter(m => format(m.entry.date, "yyyy-MM-dd") === day)
+        .filter((m) => format(m.entry.date, "yyyy-MM-dd") === day)
         .reduce((sum, m) => sum + Number(m.debit) - Number(m.credit), 0);
       return { day: format(new Date(day), "dd/MM"), cashMove: dayTotal };
     });
 
-    // Accumulate cashflow starting from initial balance
     let runningCash = startingBalance;
-    const accumulatedCashflow = cashflowMoves.map(c => {
+    const accumulatedCashflow = cashflowMoves.map((c) => {
       runningCash += c.cashMove;
       return { day: c.day, cash: runningCash };
     });
@@ -143,29 +148,29 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
     const netIncome = totalRevenue - totalExpenses;
 
     const ratios = [
-      { 
-        label: "Solvabilité", 
-        value: totalLiabilities > 0 ? (totalAssets / totalLiabilities).toFixed(2) : "N/A", 
-        desc: "Actif / Passif", 
-        trend: "+0,05 vs mois dernier" 
+      {
+        label: "Solvabilité",
+        value: totalLiabilities > 0 ? (totalAssets / totalLiabilities).toFixed(2) : "N/A",
+        desc: "Actif / Passif",
+        trend: "+0,05 vs mois dernier",
       },
-      { 
-        label: "Résultat Net", 
-        value: formatCFA_simple(netIncome), 
-        desc: "Bénéfice/Perte", 
-        trend: netIncome > 0 ? "Positif" : "Négatif" 
+      {
+        label: "Résultat Net",
+        value: formatCFA_simple(netIncome),
+        desc: "Bénéfice/Perte",
+        trend: netIncome > 0 ? "Positif" : "Négatif",
       },
-      { 
-        label: "Marge nette", 
-        value: totalRevenue > 0 ? ((netIncome / totalRevenue) * 100).toFixed(1) + "%" : "0%", 
-        desc: "Résultat / CA", 
-        trend: "+1,2% vs 2024" 
+      {
+        label: "Marge nette",
+        value: totalRevenue > 0 ? ((netIncome / totalRevenue) * 100).toFixed(1) + "%" : "0%",
+        desc: "Résultat / CA",
+        trend: "+1,2% vs 2024",
       },
-      { 
-        label: "Trésorerie", 
-        value: formatCFA_simple(runningCash), 
-        desc: "Disponible", 
-        trend: "Stable" 
+      {
+        label: "Trésorerie",
+        value: formatCFA_simple(runningCash),
+        desc: "Disponible",
+        trend: "Stable",
       },
     ];
 
@@ -173,12 +178,12 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       balanceSheet,
       incomeStatement,
       cashflow: accumulatedCashflow,
-      ratios
+      ratios,
     });
   } catch (err) {
     return handlePrismaError(err);
   }
-});
+}
 
 function formatCFA_simple(val: number) {
   return new Intl.NumberFormat("fr-FR").format(val) + " F";

@@ -1,7 +1,5 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth, requireRole } from "@/lib/auth-guard";
-import { handlePrismaError } from "@/lib/api-response";
+import { requirePermission } from "@/lib/require-permission";
 import { logAction } from "@/lib/audit";
 import { toNumber } from "@/lib/accounting";
 
@@ -15,12 +13,12 @@ const JOURNAL_LABELS: Record<string, string> = {
 
 /**
  * GET /api/accounting/entries/export
- * Exports all validated journal entries in FEC (Fichier d'Échange Comptable) format.
- * Legal CSV format required by the DGFIP.
+ * Exports all validated journal entries in FEC format. Requires 'read' on accounting_entries.
  */
-export const GET = withAuth(async (req: NextRequest, { user }) => {
-  const roleError = requireRole(user, ["admin", "accountant", "expert"]);
-  if (roleError) return roleError;
+export async function GET(req: Request) {
+  const permCheck = await requirePermission(req, "accounting_entries", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
 
   try {
     const { searchParams } = new URL(req.url);
@@ -46,7 +44,6 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       orderBy: [{ date: "asc" }, { reference: "asc" }],
     });
 
-    // FEC header (pipe-separated)
     const header =
       "JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib|CompAuxNum|CompAuxLib|PieceRef|PieceDate|EcritureLib|Debit|Credit|EcritureLet|DateLet|ValidDate|Montantdevise|Idevise";
 
@@ -75,11 +72,11 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
           sanitizeFec(line.description ?? entry.description),
           formatFecAmount(debit),
           formatFecAmount(credit),
-          "", // EcritureLet (lettrage)
-          "", // DateLet
+          "",
+          "",
           validDate,
-          "", // Montantdevise
-          "", // Idevise
+          "",
+          "",
         ].join("|");
 
         rows.push(row);
@@ -88,14 +85,13 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
 
     const csv = rows.join("\r\n");
 
-    // Log export
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
       action: "EXPORT",
-      resource: "JournalEntry",
-      resource_id: "FEC",
-      new_data: { entries_count: entries.length },
+      entity: "JournalEntry",
+      entity_id: "FEC",
+      details: { entries_count: entries.length },
     });
 
     return new Response(csv, {
@@ -112,7 +108,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-});
+}
 
 function formatFecDate(date: Date): string {
   return date.toISOString().split("T")[0].replace(/-/g, "");

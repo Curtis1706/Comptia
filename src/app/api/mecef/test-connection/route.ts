@@ -1,12 +1,15 @@
-import { withAuth } from "@/lib/auth-guard";
+import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse } from "@/lib/api-response";
 import { getInfoStatus, getInvoiceTypes, getTaxGroups, getPaymentTypes } from "@/lib/mecef";
 
 /**
  * POST /api/mecef/test-connection
- * Effectue un appel en direct vers les 4 endpoints de contrôle DGI.
+ * Requires 'read' on mecef_settings.
  */
-export const POST = withAuth(async (req, { user }) => {
+export async function POST(req: Request) {
+  const permCheck = await requirePermission(req, "mecef_settings", "read");
+  if (!permCheck.ok) return permCheck.response;
+  const { user } = permCheck;
   const company_id = user.company_id;
 
   try {
@@ -32,4 +35,4 @@ export const POST = withAuth(async (req, { user }) => {
       502
     );
   }
-});
+}

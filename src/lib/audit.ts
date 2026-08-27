@@ -1,14 +1,17 @@
 import { prisma } from "./prisma";
 import type { AuditAction } from "@prisma/client";
 
-interface AuditLogParams {
+export interface AuditLogParams {
   company_id: string;
   user_id: string;
   action: AuditAction;
-  resource: string;
-  resource_id: string;
-  old_data?: object;
-  new_data?: object;
+  resource?: string;
+  resource_id?: string;
+  entity?: string;
+  entity_id?: string;
+  details?: object | any;
+  old_data?: object | any;
+  new_data?: object | any;
   ip_address?: string;
   user_agent?: string;
 }
@@ -20,19 +23,19 @@ interface AuditLogParams {
  */
 export async function logAction(params: AuditLogParams): Promise<void> {
   try {
+    const resource = params.resource || params.entity || "General";
+    const resource_id = String(params.resource_id || params.entity_id || "");
+    const newData = params.new_data || params.details;
+
     await prisma.auditLog.create({
       data: {
         company_id: params.company_id,
         user_id: params.user_id,
         action: params.action,
-        resource: params.resource,
-        resource_id: params.resource_id,
-        old_data: params.old_data
-          ? (params.old_data as object)
-          : undefined,
-        new_data: params.new_data
-          ? (params.new_data as object)
-          : undefined,
+        resource,
+        resource_id,
+        old_data: params.old_data ? (params.old_data as object) : undefined,
+        new_data: newData ? (newData as object) : undefined,
         ip_address: params.ip_address,
         user_agent: params.user_agent,
       },

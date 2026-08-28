@@ -2,7 +2,27 @@
 
 import React from "react";
 
-import { Bell, Menu, Search, Plus, User as UserIcon, LogOut, Settings as SettingsIcon, CreditCard, Check, Info, AlertTriangle, XCircle } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Search,
+  Plus,
+  User as UserIcon,
+  LogOut,
+  Settings as SettingsIcon,
+  CreditCard,
+  Check,
+  Info,
+  AlertTriangle,
+  XCircle,
+  Crown,
+  Shield,
+  BookOpen,
+  Receipt,
+  Users,
+  Award,
+  Eye,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePathname, useRouter } from "next/navigation";
@@ -26,6 +46,49 @@ import { cn } from "@/lib/utils";
 import { GlobalSearch } from "./GlobalSearch";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ROLE_LABELS, UserRole } from "@/lib/permissions";
+import { usePermissions } from "@/hooks/usePermissions";
+
+const ROLE_HEADER_CONFIG: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }>; badgeCls: string }
+> = {
+  owner: {
+    label: "Propriétaire",
+    icon: Crown,
+    badgeCls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
+  },
+  admin: {
+    label: "Administrateur",
+    icon: Shield,
+    badgeCls: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
+  },
+  accountant: {
+    label: "Comptable",
+    icon: BookOpen,
+    badgeCls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  },
+  cashier: {
+    label: "Caissier",
+    icon: Receipt,
+    badgeCls: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30",
+  },
+  hr: {
+    label: "Ressources Humaines",
+    icon: Users,
+    badgeCls: "bg-pink-500/15 text-pink-600 dark:text-pink-400 border-pink-500/30",
+  },
+  expert: {
+    label: "Expert-comptable",
+    icon: Award,
+    badgeCls: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30",
+  },
+  viewer: {
+    label: "Observateur",
+    icon: Eye,
+    badgeCls: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30",
+  },
+};
 
 const titles: Record<string, string> = {
   "/": "Tableau de bord",
@@ -53,6 +116,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { hasAccess } = usePermissions();
   const title = titles[pathname] ?? "Comptia";
 
   const { data: user, isLoading: userLoading } = useQuery<any>({
@@ -75,6 +139,13 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
   const unreadCount = notifData?.unreadCount || 0;
 
   const initials = user?.name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "??";
+  const userRole = (user?.role as UserRole) || "viewer";
+  const roleInfo = ROLE_HEADER_CONFIG[userRole] || {
+    label: ROLE_LABELS[userRole] || userRole || "Membre",
+    icon: Shield,
+    badgeCls: "bg-muted text-muted-foreground border-border",
+  };
+  const RoleIcon = roleInfo.icon;
 
   const markAsRead = async (id: string) => {
     try {
@@ -96,6 +167,14 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
 
   const [searchOpen, setSearchOpen] = React.useState(false);
 
+  const canCreateInvoice = hasAccess("invoices");
+  const canAccessSettings =
+    hasAccess("company_settings") ||
+    hasAccess("chart_of_accounts") ||
+    hasAccess("user_management") ||
+    hasAccess("mecef_settings");
+  const canAccessBilling = hasAccess("subscription_billing") || userRole === "owner";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-xl lg:px-8">
       <GlobalSearch open={searchOpen} setOpen={setSearchOpen} />
@@ -111,10 +190,10 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
         <h1 className="font-display text-lg font-semibold leading-tight text-foreground">{title}</h1>
       </div>
 
-      <div className="ml-auto flex items-center gap-2 lg:gap-4">
+      <div className="ml-auto flex items-center gap-2 lg:gap-3">
         <button 
           onClick={() => setSearchOpen(true)}
-          className="relative hidden h-9 w-64 items-center gap-2 rounded-lg border border-border bg-secondary px-3 text-sm text-muted-foreground transition hover:bg-muted md:flex lg:w-80"
+          className="relative hidden h-9 w-64 items-center gap-2 rounded-lg border border-border bg-secondary px-3 text-sm text-muted-foreground transition hover:bg-muted md:flex lg:w-72"
         >
           <Search className="h-4 w-4" />
           <span>Rechercher...</span>
@@ -123,14 +202,16 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
           </kbd>
         </button>
 
-        <Button 
-          size="sm" 
-          className="hidden bg-gradient-primary shadow-sm hover:opacity-90 sm:inline-flex"
-          onClick={() => router.push("/facturation?action=new")}
-        >
-          <Plus className="mr-1 h-4 w-4" />
-          Nouvelle facture
-        </Button>
+        {canCreateInvoice && (
+          <Button 
+            size="sm" 
+            className="hidden bg-gradient-primary shadow-sm hover:opacity-90 sm:inline-flex"
+            onClick={() => router.push("/facturation?action=new")}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Nouvelle facture
+          </Button>
+        )}
 
         <Popover>
           <PopoverTrigger asChild>
@@ -215,9 +296,10 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
           </PopoverContent>
         </Popover>
 
+        {/* User Profile Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative flex h-10 items-center gap-3 rounded-full border border-border bg-secondary p-1 pr-3 transition hover:bg-muted">
+            <Button variant="ghost" className="relative flex h-10 items-center gap-2.5 rounded-full border border-border bg-secondary p-1 pr-3 transition hover:bg-muted">
               {userLoading ? (
                 <Skeleton className="h-8 w-8 rounded-full" />
               ) : (
@@ -234,44 +316,69 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
                 ) : (
                   <>
                     <p className="text-xs font-semibold leading-tight text-foreground">{user?.name}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{user?.role || "Membre"}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <RoleIcon className="h-3 w-3 text-muted-foreground" />
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{roleInfo.label}</p>
+                    </div>
                   </>
                 )}
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+          <DropdownMenuContent className="w-60" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal p-3 bg-muted/30">
+              <div className="flex flex-col space-y-1.5">
+                <p className="text-sm font-semibold leading-none text-foreground">{user?.name}</p>
+                <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
+                <div className="pt-1">
+                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", roleInfo.badgeCls)}>
+                    <RoleIcon className="h-3 w-3" />
+                    {roleInfo.label}
+                  </span>
+                </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/parametres")}>
-                <UserIcon className="mr-2 h-4 w-4" />
-                <span>Profil & Compte</span>
+              <DropdownMenuItem onClick={() => router.push("/parametres")} className="cursor-pointer">
+                <UserIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>Mon profil & Compte</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/parametres?tab=billing")}>
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Facturation Studio</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/parametres")}>
-                <SettingsIcon className="mr-2 h-4 w-4" />
-                <span>Paramètres</span>
-              </DropdownMenuItem>
+              {canAccessBilling && (
+                <DropdownMenuItem onClick={() => router.push("/parametres?tab=billing")} className="cursor-pointer">
+                  <CreditCard className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>Facturation Studio</span>
+                </DropdownMenuItem>
+              )}
+              {canAccessSettings && (
+                <DropdownMenuItem onClick={() => router.push("/parametres")} className="cursor-pointer">
+                  <SettingsIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>Paramètres de l'entreprise</span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
-              className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-              onClick={() => signOut()}
+              className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer font-medium"
+              onClick={() => signOut({ callbackUrl: "/login" })}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Déconnexion</span>
+              <span>Se déconnecter</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Direct Logout Icon Button in Header for fast 1-click access */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          title="Déconnexion directe"
+          aria-label="Se déconnecter"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
       </div>
     </header>
   );

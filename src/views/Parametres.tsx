@@ -2,7 +2,23 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Building2, BookOpen, Users, Plug, Shield, CreditCard, Loader2, Save, Mail, Phone, MapPin, Building, ShieldCheck, Sliders } from "lucide-react";
+import {
+  Building2,
+  BookOpen,
+  Users,
+  Plug,
+  Shield,
+  CreditCard,
+  Loader2,
+  Save,
+  Mail,
+  Phone,
+  MapPin,
+  Building,
+  ShieldCheck,
+  Sliders,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +34,8 @@ import { MecefDiagnostic } from "@/components/settings/MecefDiagnostic";
 import { PermissionsMatrix } from "@/components/settings/PermissionsMatrix";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Module, Permission } from "@/lib/permissions";
+import { InviteUserModal, ManageUserModal, UserRoleBadge } from "@/components/settings/UserModals";
+import { signOut } from "next-auth/react";
 
 interface SettingSection {
   id: string;
@@ -46,6 +64,11 @@ export const Parametres = () => {
 
   const { canRead, canWrite, isLoading } = usePermissions();
 
+  const { data: currentUser } = useQuery<any>({
+    queryKey: ["auth-me"],
+    queryFn: () => fetcher("/api/auth/me"),
+  });
+
   const accessibleSections = allSections.filter((s) => {
     return s.level === "write" ? canWrite(s.module) : canRead(s.module);
   });
@@ -61,28 +84,68 @@ export const Parametres = () => {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const userInitials =
+    currentUser?.name
+      ?.split(" ")
+      .map((n: string) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "??";
+
   return (
     <div className="space-y-6">
       <PageHeader title="Configuration" subtitle="Personnalisez votre espace Comptia" />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
-        <nav className="space-y-1 rounded-xl border border-border bg-card p-2 shadow-card h-fit sticky top-20">
-          {accessibleSections.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSec(s.id)}
-              className={cn(
-                "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition",
-                sec === s.id
-                  ? "bg-primary text-primary-foreground shadow-glow font-medium"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[250px_1fr]">
+        <div className="space-y-4">
+          <nav className="space-y-1 rounded-xl border border-border bg-card p-2 shadow-card h-fit">
+            {accessibleSections.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSec(s.id)}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition",
+                  sec === s.id
+                    ? "bg-primary text-primary-foreground shadow-glow font-medium"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                )}
+              >
+                <s.icon className="h-4 w-4" />
+                {s.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* User session & quick logout card */}
+          <div className="rounded-xl border border-border bg-card p-4 shadow-card space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Session active</p>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-primary text-xs font-bold text-white shadow-sm overflow-hidden">
+                {currentUser?.avatar_url ? (
+                  <img src={currentUser.avatar_url} alt={currentUser?.name} className="h-full w-full object-cover" />
+                ) : (
+                  userInitials
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-foreground truncate leading-tight">{currentUser?.name || "Utilisateur"}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{currentUser?.email}</p>
+              </div>
+            </div>
+            <div className="pt-0.5">
+              <UserRoleBadge role={currentUser?.role || "viewer"} />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+              onClick={() => signOut({ callbackUrl: "/login" })}
             >
-              <s.icon className="h-4 w-4" />
-              {s.label}
-            </button>
-          ))}
-        </nav>
+              <LogOut className="h-3.5 w-3.5 mr-1.5" />
+              Se déconnecter
+            </Button>
+          </div>
+        </div>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-card min-h-[500px]">
           {sec === "entreprise" && <EntrepriseForm />}
@@ -282,8 +345,6 @@ const PlanComptable = () => {
     </div>
   );
 };
-
-import { InviteUserModal, ManageUserModal, UserRoleBadge } from "@/components/settings/UserModals";
 
 const UsersTable = () => {
   const [isInviteOpen, setIsInviteOpen] = useState(false);

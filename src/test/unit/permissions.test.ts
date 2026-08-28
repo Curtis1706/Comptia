@@ -9,9 +9,13 @@ import {
   getAccessibleModules,
   MODULES,
 } from "@/lib/permissions";
+import {
+  checkStructuralInvariants,
+  checkInvariants,
+} from "@/lib/permission-invariants";
 
 export async function testPermissionsMatrix() {
-  console.log("\n🧪 [TEST] Matrice de Permissions & Rôles RBAC (Fiche P1)");
+  console.log("\n🧪 [TEST] Matrice de Permissions & Rôles RBAC (Fiche P1 & P2)");
 
   const matrix = DEFAULT_PERMISSIONS;
 
@@ -85,6 +89,33 @@ export async function testPermissionsMatrix() {
   console.assert(meetsLevel("full", "validate") === true, "full >= validate");
   console.assert(meetsLevel("none", "read") === false, "none < read");
   console.log("  ✅ Hiérarchie de niveaux meetsLevel (none < read < write < validate < full) validée");
+
+  // 9. Séparation des Invariants Structurels (R1-R4) vs R5
+  // R1: owner immutability
+  const r1Check = checkStructuralInvariants("owner", "invoices", "read");
+  console.assert(r1Check?.rule === "R1", "R1 doit bloquer modification owner");
+
+  // R2: subscription_billing owner-only
+  const r2Check = checkStructuralInvariants("admin", "subscription_billing", "read");
+  console.assert(r2Check?.rule === "R2", "R2 doit bloquer subscription_billing pour admin");
+
+  // R3: user_management owner/admin-only
+  const r3Check = checkStructuralInvariants("accountant", "user_management", "read");
+  console.assert(r3Check?.rule === "R3", "R3 doit bloquer user_management pour accountant");
+
+  // R4: cabinet_management expert-only
+  const r4CheckInvalid = checkStructuralInvariants("admin", "cabinet_management", "write");
+  console.assert(r4CheckInvalid?.rule === "R4", "R4 doit bloquer cabinet_management pour admin");
+  const r4CheckValid = checkStructuralInvariants("expert", "cabinet_management", "full");
+  console.assert(r4CheckValid === null, "R4 doit autoriser cabinet_management pour expert");
+
+  // R5: Actor privilege check
+  const r5Violation = checkInvariants("cashier", "invoices", "full", {
+    role: "cashier",
+    effective: { ...matrix.cashier, invoices: "write" },
+  });
+  console.assert(r5Violation?.rule === "R5", "R5 doit bloquer attribution d'un droit supérieur au sien");
+  console.log("  ✅ Invariants structurels (R1–R4) & Autorisation (R5) validés");
 
   return true;
 }

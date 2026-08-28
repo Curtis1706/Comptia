@@ -79,6 +79,18 @@ export async function middleware(req: NextRequest) {
   }
 
   const userRole = ((token.role as string) || "viewer") as UserRole;
+
+  // =========================================================================
+  // NOTE D'ARCHITECTURE DE SÉCURITÉ (RBAC & EDGE RUNTIME) :
+  // Le middleware Next.js s'exécute dans l'Edge Runtime sans accès direct à Prisma.
+  // Ce contrôle de page fournit un confort de navigation optimiste et une
+  // redirection immédiate basée sur les rôles par défaut.
+  //
+  // LA SÉCURITÉ RÉELLE ET STRICTE est assurée côté serveur par `requirePermission()`
+  // sur l'ensemble des 59 routes API et dans les Server/Client Components avec `usePermissions()`.
+  // Si une entreprise personnalise sa matrice RBAC, les routes API bloquent
+  // formellement toute action non autorisée même si l'URL de page était visitée.
+  // =========================================================================
   const matrix = DEFAULT_PERMISSIONS;
 
   // 3. Protection des routes de pages (P4)

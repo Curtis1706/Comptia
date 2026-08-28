@@ -6,13 +6,13 @@ export interface InvariantViolation {
 }
 
 /**
- * Vérifie les 5 invariants stricts pour empêcher toute élévation de privilèges ou rupture de cohérence.
+ * Vérifie les invariants structurels (R1 à R4) sur la donnée elle-même.
+ * Ces règles sont valables tant à l'écriture qu'à la lecture/reconstitution de la matrice.
  */
-export function checkInvariants(
+export function checkStructuralInvariants(
   role: UserRole,
   module: Module,
-  permission: Permission,
-  actor: { role: UserRole; effective: Record<Module, Permission> }
+  permission: Permission
 ): InvariantViolation | null {
   // R1 — La matrice du propriétaire n'est pas modifiable
   if (role === "owner") {
@@ -23,7 +23,7 @@ export function checkInvariants(
   }
 
   // R2 — L'abonnement reste exclusivement réservé à l'owner
-  if (module === "subscription_billing" && role !== "owner" && permission !== "none") {
+  if (module === "subscription_billing" && permission !== "none") {
     return {
       rule: "R2",
       message: "L'abonnement reste réservé au propriétaire.",
@@ -33,7 +33,7 @@ export function checkInvariants(
   // R3 — La gestion des utilisateurs ne peut être accordée qu'au propriétaire ou à un administrateur
   if (
     module === "user_management" &&
-    !["owner", "admin"].includes(role) &&
+    role !== "admin" &&
     permission !== "none"
   ) {
     return {
@@ -51,7 +51,26 @@ export function checkInvariants(
     };
   }
 
-  // R5 — Nul ne peut accorder un niveau supérieur au sien sur un module
+  return null;
+}
+
+/**
+ * Vérifie l'ensemble des 5 invariants stricts (R1 à R5), incluant la règle d'autorisation R5
+ * qui valide les droits de l'acteur effectuant la modification.
+ */
+export function checkInvariants(
+  role: UserRole,
+  module: Module,
+  permission: Permission,
+  actor: { role: UserRole; effective: Record<Module, Permission> }
+): InvariantViolation | null {
+  // 1. Invariants structurels R1 à R4
+  const structuralViolation = checkStructuralInvariants(role, module, permission);
+  if (structuralViolation) {
+    return structuralViolation;
+  }
+
+  // 2. R5 — Nul ne peut accorder un niveau supérieur au sien sur un module (règle d'écriture)
   const actorLevel = actor.effective?.[module] || "none";
   if (!meetsLevel(actorLevel, permission)) {
     return {

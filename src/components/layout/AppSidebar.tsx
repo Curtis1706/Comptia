@@ -11,6 +11,13 @@ import {
   FolderOpen,
   Settings,
   ChevronDown,
+  LogOut,
+  Crown,
+  Shield,
+  BookOpen,
+  Users,
+  Award,
+  Eye,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
@@ -18,7 +25,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import { isModuleEnabledForSector } from "@/constants/sector-modules";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Module } from "@/lib/permissions";
+import { Module, ROLE_LABELS, UserRole } from "@/lib/permissions";
+import { signOut } from "next-auth/react";
 
 type Item = {
   key: string;
@@ -27,6 +35,16 @@ type Item = {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   children?: { label: string; to: string; module?: Module }[];
+};
+
+const ROLE_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; textColor: string }> = {
+  owner: { label: "Propriétaire", icon: Crown, textColor: "text-amber-400" },
+  admin: { label: "Administrateur", icon: Shield, textColor: "text-indigo-400" },
+  accountant: { label: "Comptable", icon: BookOpen, textColor: "text-emerald-400" },
+  cashier: { label: "Caissier", icon: Receipt, textColor: "text-cyan-400" },
+  hr: { label: "Ressources Humaines", icon: Users, textColor: "text-pink-400" },
+  expert: { label: "Expert-comptable", icon: Award, textColor: "text-purple-400" },
+  viewer: { label: "Observateur", icon: Eye, textColor: "text-slate-400" },
 };
 
 const items: Item[] = [
@@ -165,6 +183,22 @@ export const AppSidebar = ({ open, onClose }: Props) => {
       return { ...item, children: visibleChildren.length > 0 ? visibleChildren : undefined };
     });
 
+  const initials =
+    user?.name
+      ?.split(" ")
+      .map((n: string) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "??";
+
+  const userRole = (user?.role as UserRole) || "viewer";
+  const roleConfig = ROLE_CONFIG[userRole] || {
+    label: ROLE_LABELS[userRole] || userRole || "Membre",
+    icon: Shield,
+    textColor: "text-primary",
+  };
+  const RoleIcon = roleConfig.icon;
+
   return (
     <>
       {/* mobile overlay */}
@@ -244,11 +278,43 @@ export const AppSidebar = ({ open, onClose }: Props) => {
           </ul>
         </nav>
 
-        <div className="m-3 rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-4">
-          <p className="text-xs font-semibold text-white">Plan Pro</p>
-          <p className="mt-1 text-xs text-sidebar-foreground/70">12 / 50 factures ce mois</p>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-border">
-            <div className="h-full w-[24%] rounded-full bg-gradient-primary" />
+        {/* Plan summary badge if owner or admin */}
+        {(userRole === "owner" || userRole === "admin") && (
+          <div className="mx-3 mb-2 rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
+            <p className="text-xs font-semibold text-white">Plan Entreprise Pro</p>
+            <p className="mt-0.5 text-[11px] text-sidebar-foreground/70">Gestion illimitée & e-MECeF</p>
+          </div>
+        )}
+
+        {/* User profile & Logout Footer for all roles */}
+        <div className="border-t border-sidebar-border bg-sidebar/90 p-3">
+          <div className="flex items-center gap-2.5 rounded-xl border border-sidebar-border bg-sidebar-accent/60 p-2 shadow-sm">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-primary text-xs font-bold text-white shadow-sm overflow-hidden">
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt={user?.name || "Avatar"} className="h-full w-full object-cover" />
+              ) : (
+                initials
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-xs font-semibold text-white leading-tight">
+                {user?.name || "Utilisateur"}
+              </p>
+              <div className="mt-0.5 flex items-center gap-1">
+                <RoleIcon className={cn("h-3 w-3 shrink-0", roleConfig.textColor)} />
+                <span className="truncate text-[10px] font-medium text-sidebar-foreground/80">
+                  {roleConfig.label}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              title="Se déconnecter"
+              aria-label="Se déconnecter"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/70 transition hover:bg-destructive hover:text-white active:scale-95"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </aside>

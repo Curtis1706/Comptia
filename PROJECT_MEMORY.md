@@ -208,6 +208,19 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npx tsc --noEmit` : **0 erreur**.
   - `pnpm build` : **0 erreur** (55 pages compilées).
 
+### 2026-09-14 — Optimisation Mobile-First de la Page /demo (Formulaire Exclusif sur Mobile)
+
+- **Actions effectuées** :
+  - **Panneau gauche (Présentation)** :
+    - Configuré en `hidden lg:flex lg:w-1/2` : masqué sur mobile pour éliminer tout scroll superflu et afficher directement le formulaire de planification.
+  - **Panneau droit (Formulaire)** :
+    - Occupe 100% de la largeur sur mobile (`w-full lg:w-1/2`).
+    - Ajout d'un en-tête mobile exclusif (`lg:hidden`) comprenant le logo Ceilow vectoriel et un lien de retour rapide vers l'accueil (`ArrowLeft`).
+- **Validation technique (Règle 18)** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `pnpm build` : **0 erreur** (55 pages compilées).
+
+
 
 
 

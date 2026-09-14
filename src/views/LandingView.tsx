@@ -77,16 +77,16 @@ export default function LandingView() {
               Se connecter
             </Link>
             <Link
-              href="/register"
+              href="/demo"
               className="hidden sm:inline-flex items-center justify-center text-[14px] font-semibold text-ink bg-primary hover:brightness-95 px-5 py-2.5 rounded-xl transition-all shadow-sm min-h-[44px]"
             >
-              Démarrer gratuitement
+              Demander une démo
             </Link>
             <Link
-              href="/register"
+              href="/demo"
               className="sm:hidden inline-flex items-center justify-center text-xs font-semibold text-ink bg-primary hover:brightness-95 px-3 py-2 rounded-lg transition-all shadow-sm min-h-[44px]"
             >
-              Démarrer
+              Démo
             </Link>
             <button
               type="button"
@@ -135,10 +135,10 @@ export default function LandingView() {
             <div className="pt-3 border-t border-border flex flex-col gap-2.5">
               <Link
                 className="min-h-[44px] flex items-center justify-center text-sm font-semibold text-ink bg-primary hover:brightness-95 px-4 py-2.5 rounded-xl transition-all shadow-sm text-center"
-                href="/register"
+                href="/demo"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Démarrer gratuitement
+                Demander une démo
               </Link>
               <Link
                 className="min-h-[44px] flex items-center justify-center text-sm font-semibold text-ink border border-border hover:bg-background-secondary px-4 py-2.5 rounded-xl transition-colors text-center"
@@ -167,7 +167,7 @@ export default function LandingView() {
 
           {/* Centered Subtitle */}
           <p className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed px-1 sm:px-0">
-            Ceilow automatise vos factures certifiées e-MECeF, vos déclarations fiscales et votre suivi de trésorerie en FCFA. Pensé pour les dirigeants, PME et indépendants au Bénin.
+            Ceilow s'occupe de vos factures, de votre comptabilité et de vos déclarations fiscales et sociales, pour que vous puissiez vous concentrer sur votre entreprise.
           </p>
 
           {/* Centered CTAs */}
@@ -179,12 +179,12 @@ export default function LandingView() {
               <span>Souscrire</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <a
-              href="mailto:contact@ceilow.bj?subject=Demande%20de%20d%C3%A9monstration%20Ceilow"
+            <Link
+              href="/demo"
               className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-background border border-border text-ink font-semibold text-[15px] sm:text-base hover:bg-background-secondary transition-all"
             >
               Demander une démo
-            </a>
+            </Link>
           </div>
 
           {/* Browser Mockup (Inspired by SaaS Template, Clean White & Bordered) */}
@@ -429,10 +429,10 @@ export default function LandingView() {
             </p>
             <div className="mt-6">
               <Link
-                href="/register"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-ink font-semibold text-sm hover:brightness-95 transition-all shadow-sm gap-2"
+                href="/demo"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-ink font-semibold text-sm hover:brightness-95 transition-all shadow-sm gap-2 min-h-[44px]"
               >
-                <span>Créer un compte gratuit</span>
+                <span>Demander une démo</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -899,38 +899,15 @@ export default function LandingView() {
                   Rejoignez les entreprises béninoises qui gèrent leur comptabilité, facturation et TVA depuis Ceilow.
                 </p>
 
-                {/* Boutons d'action */}
-                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
+                {/* Bouton d'action unique et centré */}
+                <div className="mt-8 flex items-center justify-center w-full sm:w-auto">
                   <Link
-                    href="/register"
+                    href="/demo"
                     className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-ink font-semibold text-[15px] hover:brightness-95 transition-all shadow-sm active:scale-95"
                   >
-                    <span>Démarrer gratuitement</span>
+                    <span>Demander une démo</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <a
-                    href="mailto:contact@ceilow.bj"
-                    className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-ink border border-border text-white font-semibold text-[15px] hover:border-primary hover:text-primary transition-all shadow-sm"
-                  >
-                    <Headphones className="w-4 h-4 text-primary" />
-                    <span>Parler à un expert</span>
-                  </a>
-                </div>
-
-                {/* Puces de réassurance */}
-                <div className="mt-8 pt-6 border-t border-border/20 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-border">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    Données sécurisées
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    Conforme e-MECeF &amp; DGI
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    Support en français inclus
-                  </span>
                 </div>
               </div>
             </div>
@@ -954,7 +931,7 @@ export default function LandingView() {
                 />
               </Link>
               <p className="mt-3 text-sm text-border max-w-sm leading-relaxed">
-                Ceilow — La gestion financière, tout simplement.
+                Ceilow, La gestion financière, tout simplement.
               </p>
             </div>
 

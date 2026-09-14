@@ -11,11 +11,14 @@ const PUBLIC_PATHS = [
   "/",
   "/login",
   "/register",
+  "/demo",
   "/landing",
   "/access-denied",
   "/api/auth",
   "/_next",
   "/favicon.ico",
+  "/logo",
+  "/images",
 ];
 
 const PAGE_ROUTE_MODULES: { prefix: string; module: Module }[] = [

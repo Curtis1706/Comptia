@@ -888,11 +888,6 @@ export default function LandingView() {
 
               {/* Contenu de la bannière */}
               <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-                {/* Badge e-MECeF */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-semibold mb-6">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                  <span>Prêt pour votre clôture e-MECeF</span>
-                </div>
 
                 {/* Titre */}
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display tracking-tight text-white leading-tight">

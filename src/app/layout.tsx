@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Poppins, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -8,31 +8,25 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const poppins = Poppins({
-  weight: ["500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-poppins",
-});
-
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains",
 });
 
 export const metadata: Metadata = {
-  title: "Comptia — Comptabilité moderne pour PME",
-  description: "Logiciel de comptabilité SaaS pour PME et micro-entreprises : facturation, TVA, paie, reporting.",
-  authors: [{ name: "Comptia" }],
-  openGraph: {
-    title: "Comptia — Comptabilité moderne pour PME",
-    description: "Facturation, TVA, paie, reporting. Tout-en-un, simple et sécurisé.",
-    type: "website",
-    images: ["https://lovable.dev/opengraph-image-p98pqg.png"],
+  title: "Ceilow — Comptabilité, TVA et Facturation automatisées au Bénin",
+  description:
+    "La plateforme de gestion financière pour les PME et indépendants au Bénin : facturation certifiée e-MECeF, TVA, comptabilité et trésorerie sans prise de tête.",
+  authors: [{ name: "Ceilow" }],
+  icons: {
+    icon: "/logo/picto_ceilow_web_jaune.svg",
+    shortcut: "/logo/picto_ceilow_web_jaune.svg",
+    apple: "/logo/picto_ceilow_web_jaune.svg",
   },
-  twitter: {
-    card: "summary_large_image",
-    site: "@Lovable",
-    images: ["https://lovable.dev/opengraph-image-p98pqg.png"],
+  openGraph: {
+    title: "Ceilow — Comptabilité, TVA et Facturation au Bénin",
+    description: "La gestion financière des entreprises béninoises, simplifiée et automatisée.",
+    type: "website",
   },
 };
 
@@ -42,9 +36,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr" className="scroll-smooth">
       <body
-        className={`${inter.variable} ${poppins.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-ink`}
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>

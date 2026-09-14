@@ -4,9 +4,9 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Comptia — La comptabilité intelligente pour les PME",
+  title: "Ceilow — Comptabilité, TVA et Facturation automatisées au Bénin",
   description:
-    "Facturation, comptabilité, rapprochement bancaire, TVA et reporting. Tout-en-un, cloud, sécurisé et 100% français.",
+    "Factures certifiées e-MECeF, déclarations TVA, rapprochement bancaire et comptabilité automatisée pour PME et indépendants au Bénin.",
 };
 
 export default async function HomePage() {

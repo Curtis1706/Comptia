@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FeaturesEight } from "@/components/landing/FeaturesEight";
+import { ShowcaseSections } from "@/components/landing/ShowcaseSections";
 import {
   FileText,
   CreditCard,
@@ -31,7 +32,6 @@ import {
 
 export default function LandingView() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"facturation" | "rapprochement" | "comptabilite" | "tva" | "reporting">("facturation");
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-ink selection:bg-primary selection:text-ink font-sans">
@@ -176,14 +176,14 @@ export default function LandingView() {
               href="/register"
               className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-ink font-semibold text-[15px] sm:text-base hover:brightness-95 transition-all shadow-sm active:scale-95"
             >
-              <span>Démarrer gratuitement</span>
+              <span>Souscrire</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <a
-              href="#produit"
+              href="mailto:contact@ceilow.bj?subject=Demande%20de%20d%C3%A9monstration%20Ceilow"
               className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-background border border-border text-ink font-semibold text-[15px] sm:text-base hover:bg-background-secondary transition-all"
             >
-              Découvrir les fonctionnalités
+              Demander une démo
             </a>
           </div>
 
@@ -537,10 +537,12 @@ export default function LandingView() {
 
                 {/* Secondary Image preview */}
                 <div className="rounded-xl overflow-hidden border border-border bg-background flex items-center gap-4 p-3">
-                  <img
-                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                    src="https://lh3.googleusercontent.com/aida/AEtjO1W39k6bpgoRgYqPRgM4PbW0gExXuVfyOfnpWPj8Mec9EhjPnsNg75Wrxhbc_1I_4LrGlZCRo7hFY_EzeWLXFDE9Cum7Blcbhq9GD71SXILGyb4-bTCx5Smj8vHb4gQgxY603c3vuI1qH2pl1n2qMDdASM9uxUtg899WrZSlXrC1c3-dOdibytgiF6c8FLzj3v0D-plE0JfN9fG45L12m6skPSITZjWoN_rYcdO92urbJj-F-69GVMu7Vjw"
+                  <Image
+                    src="/images/finance-manager.jpg"
                     alt="Responsable administrative et financière"
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                   />
                   <div>
                     <div className="text-xs font-bold text-ink">Compatibilité bancaire béninoise</div>
@@ -554,321 +556,8 @@ export default function LandingView() {
           </div>
         </section>
 
-        {/* ── 5. MODULES EN ONGLETS DYNAMIQUES ───────────────────────────── */}
-        <section className="w-full py-20 bg-background-secondary border-t border-border" id="produit">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink max-w-3xl tracking-tight">
-              Chaque module, pensé pour votre activité
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-              Explorez les fonctionnalités clés qui réunissent vos opérations quotidiennes dans un espace unique et intuitif.
-            </p>
-
-            {/* Tab buttons */}
-            <div className="mt-8 inline-flex flex-wrap justify-center p-1.5 bg-background border border-border rounded-xl gap-1">
-              {[
-                { id: "facturation", label: "Facturation" },
-                { id: "rapprochement", label: "Rapprochement bancaire" },
-                { id: "comptabilite", label: "Comptabilité officielle" },
-                { id: "tva", label: "Déclarations TVA" },
-                { id: "reporting", label: "Tableaux de bord" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-all min-h-[44px] flex items-center justify-center ${
-                    activeTab === tab.id
-                      ? "bg-primary text-ink shadow-sm"
-                      : "text-muted-foreground hover:text-ink hover:bg-background-secondary"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab 1: Facturation */}
-            {activeTab === "facturation" && (
-              <div className="mt-10 w-full bg-background border border-border p-5 sm:p-8 rounded-xl text-left shadow-sm">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                  <div className="lg:col-span-7">
-                    <h3 className="text-xl sm:text-2xl font-bold font-display text-ink">
-                      De la commande au règlement, sans friction
-                    </h3>
-                    <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                      Éditez devis, factures et avoirs conformes aux règles de la DGI en quelques secondes. Calculs automatiques hors-taxes, TVA et net à payer avec mention du QR code e-MECeF.
-                    </p>
-
-                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-ink">
-                          <Check className="w-3 h-3" />
-                        </div>
-                        <span className="text-sm font-medium text-ink">Génération PDF immédiate</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-ink">
-                          <Check className="w-3 h-3" />
-                        </div>
-                        <span className="text-sm font-medium text-ink">Suivi des statuts (Brouillon → Encaissé)</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-ink">
-                          <Check className="w-3 h-3" />
-                        </div>
-                        <span className="text-sm font-medium text-ink">Relances polies pour retards de paiement</span>
-                      </div>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-ink">
-                          <Check className="w-3 h-3" />
-                        </div>
-                        <span className="text-sm font-medium text-ink">Calcul de la TVA 18% automatique</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
-                      <Link
-                        href="/register"
-                        className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ink text-white text-xs sm:text-sm font-semibold hover:bg-black transition-all"
-                      >
-                        <span>Créer une facture test</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Photo Side-card */}
-                  <div className="lg:col-span-5 rounded-xl overflow-hidden border border-border bg-background-secondary">
-                    <img
-                      className="w-full h-48 sm:h-56 object-cover object-center"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuqJWdgiwhXHYjh4Z6SRbjORLP52CEI1qeWdkqlxFRcLSXuA8lap9Ap8bUzk_7xHzY432vTJXxEalVkfT7BUNoQsxvJ4rFs4iczmfUnwXDEPsmEHAjhq3jIWr_lVU0T6aUlAA1c7rlGyIUXHKCWYNEKcin_hcGII54vMQwfIbbQdYKRFNluXQ9SFlMtokVGext7TKyo6Ac7KE3DEtA3oHjj_zMCRWcGy4hI-EZIOQTatqMSOW6njMY"
-                      alt="Entrepreneur béninois consultant ses factures"
-                    />
-                    <div className="p-3.5 bg-background border-t border-border">
-                      <div className="text-xs font-semibold text-ink">Accès mobile et suivi instantané</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        Envoyez des factures et vérifiez vos encaissements depuis votre smartphone sur le terrain.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Desktop Table (lg and above) */}
-                <div className="mt-8 hidden lg:block overflow-x-auto border border-border rounded-xl">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead className="bg-background-secondary text-muted-foreground font-semibold uppercase tracking-wider border-b border-border">
-                      <tr>
-                        <th className="py-3 px-4 font-mono">Numéro</th>
-                        <th className="py-3 px-4">Client</th>
-                        <th className="py-3 px-4">IFU Client</th>
-                        <th className="py-3 px-4 text-right">Montant (FCFA)</th>
-                        <th className="py-3 px-4 text-center">Statut</th>
-                        <th className="py-3 px-4 text-right">Certification</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border font-mono">
-                      <tr className="hover:bg-background-secondary/50 transition-colors">
-                        <td className="py-3 px-4 font-semibold text-ink">FAC-2025-0089</td>
-                        <td className="py-3 px-4 font-sans font-medium text-ink">Bénin Agro Industries SARL</td>
-                        <td className="py-3 px-4 text-muted-foreground">3201849201948</td>
-                        <td className="py-3 px-4 text-right font-bold text-ink tabular-nums">4 850 000 FCFA</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-sans font-semibold bg-success/25 text-success-deep border border-success/40">
-                            Payé
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right font-sans text-xs font-medium text-success-deep">
-                          Certifiée e-MECeF
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-background-secondary/50 transition-colors">
-                        <td className="py-3 px-4 font-semibold text-ink">FAC-2025-0090</td>
-                        <td className="py-3 px-4 font-sans font-medium text-ink">Société Portuaire de Cotonou</td>
-                        <td className="py-3 px-4 text-muted-foreground">3200948219482</td>
-                        <td className="py-3 px-4 text-right font-bold text-ink tabular-nums">12 300 000 FCFA</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-sans font-semibold bg-warning/20 text-ink border border-warning/40">
-                            En attente
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right font-sans text-xs font-medium text-success-deep">
-                          Certifiée e-MECeF
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-background-secondary/50 transition-colors">
-                        <td className="py-3 px-4 font-semibold text-ink">FAC-2025-0091</td>
-                        <td className="py-3 px-4 font-sans font-medium text-ink">Cabinet Conseil Ganhi</td>
-                        <td className="py-3 px-4 text-muted-foreground">3201485920193</td>
-                        <td className="py-3 px-4 text-right font-bold text-ink tabular-nums">1 450 000 FCFA</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-sans font-semibold bg-success/25 text-success-deep border border-success/40">
-                            Payé
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right font-sans text-xs font-medium text-success-deep">
-                          Certifiée e-MECeF
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile & Tablet Stacked Cards (below lg) - Ceilow Rule 10 */}
-                <div className="mt-6 lg:hidden space-y-3">
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl space-y-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-semibold text-ink">FAC-2025-0089</span>
-                      <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-sans font-semibold bg-success/25 text-success-deep border border-success/40">
-                        Payé
-                      </span>
-                    </div>
-                    <div className="text-sm font-semibold text-ink">Bénin Agro Industries SARL</div>
-                    <div className="text-xs text-muted-foreground font-mono">IFU : 3201849201948</div>
-                    <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-                      <span className="font-sans text-success-deep font-medium">Certifiée e-MECeF</span>
-                      <span className="font-mono font-bold text-ink tabular-nums text-sm">4 850 000 FCFA</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl space-y-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-semibold text-ink">FAC-2025-0090</span>
-                      <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-sans font-semibold bg-warning/20 text-ink border border-warning/40">
-                        En attente
-                      </span>
-                    </div>
-                    <div className="text-sm font-semibold text-ink">Société Portuaire de Cotonou</div>
-                    <div className="text-xs text-muted-foreground font-mono">IFU : 3200948219482</div>
-                    <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-                      <span className="font-sans text-success-deep font-medium">Certifiée e-MECeF</span>
-                      <span className="font-mono font-bold text-ink tabular-nums text-sm">12 300 000 FCFA</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl space-y-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-semibold text-ink">FAC-2025-0091</span>
-                      <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-sans font-semibold bg-success/25 text-success-deep border border-success/40">
-                        Payé
-                      </span>
-                    </div>
-                    <div className="text-sm font-semibold text-ink">Cabinet Conseil Ganhi</div>
-                    <div className="text-xs text-muted-foreground font-mono">IFU : 3201485920193</div>
-                    <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-                      <span className="font-sans text-success-deep font-medium">Certifiée e-MECeF</span>
-                      <span className="font-mono font-bold text-ink tabular-nums text-sm">1 450 000 FCFA</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 2: Rapprochement */}
-            {activeTab === "rapprochement" && (
-              <div className="mt-10 w-full bg-background border border-border p-6 sm:p-8 rounded-xl text-left shadow-sm">
-                <h3 className="text-2xl font-bold font-display text-ink">
-                  Synchronisation bancaire sans ressaisie
-                </h3>
-                <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Importez vos relevés bancaires ou connectez vos comptes : Ceilow associe chaque virement à sa facture correspondante en un instant.
-                </p>
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Toutes banques béninoises</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Formats standards acceptés de toutes les institutions financières locales.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Rapprochement assisté</h4>
-                    <p className="text-xs text-muted-foreground mt-1">L&apos;outil repère automatiquement le client, la date et le montant exact.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Écart zéro</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Votre solde bancaire et vos comptes comptables restent toujours en harmonie.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 3: Comptabilité */}
-            {activeTab === "comptabilite" && (
-              <div className="mt-10 w-full bg-background border border-border p-6 sm:p-8 rounded-xl text-left shadow-sm">
-                <h3 className="text-2xl font-bold font-display text-ink">
-                  Une comptabilité officielle, sans complexité technique
-                </h3>
-                <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Chaque facture ou encaissement génère ses écritures conformes sans que vous n&apos;ayez besoin d&apos;être comptable de métier.
-                </p>
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Journaux automatiques</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Ventes, achats et banque tenus à jour sans double saisie manuelle.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Grand livre &amp; balance</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Vos documents obligatoires sont générés en 1 clic pour votre expert-comptable.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Conformité légale</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Règles comptables et fiscales locales intégrées et toujours à jour.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 4: TVA */}
-            {activeTab === "tva" && (
-              <div className="mt-10 w-full bg-background border border-border p-6 sm:p-8 rounded-xl text-left shadow-sm">
-                <h3 className="text-2xl font-bold font-display text-ink">
-                  Vos déclarations fiscales prêtes le 15 de chaque mois
-                </h3>
-                <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Ceilow calcule en direct votre TVA collectée, votre TVA déductible et le montant exact à reverser à la DGI. Zéro pénalité, zéro calcul erroné.
-                </p>
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Taux officiel 18%</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Prise en charge des taux légaux, exonérations et régimes spécifiques au Bénin.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Formulaire prérempli</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Report direct des chiffres dans le portail de télédéclaration fiscale.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Piste d&apos;audit probante</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Chaque montant de TVA est rattaché à son justificatif et sa facture d&apos;origine.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 5: Reporting */}
-            {activeTab === "reporting" && (
-              <div className="mt-10 w-full bg-background border border-border p-6 sm:p-8 rounded-xl text-left shadow-sm">
-                <h3 className="text-2xl font-bold font-display text-ink">
-                  Votre santé financière claire en un coup d&apos;œil
-                </h3>
-                <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Comprenez immédiatement vos rentrées d&apos;argent, vos postes de dépenses et votre solde bancaire disponible sans calculs compliqués.
-                </p>
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Trésorerie nette en FCFA</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Vision claire de ce que vous pouvez dépenser ou investir en toute sécurité.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Comparaison mois par mois</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Mesurez l&apos;évolution de votre chiffre d&apos;affaires par rapport au mois précédent.</p>
-                  </div>
-                  <div className="p-4 bg-background-secondary border border-border rounded-xl">
-                    <h4 className="font-bold text-sm text-ink font-display">Impayés sous contrôle</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Identifiez immédiatement les clients en retard pour déclencher les relances.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
+        {/* ── 5. VITRINE IMMERSIVE CHOWCASE (STYLE CHARIOW) ────────────── */}
+        <ShowcaseSections />
 
         {/* ── 6. GRILLE DES 12 FONCTIONNALITÉS (21ST.DEV FEATURES 8 BENTO) ── */}
         <FeaturesEight />
@@ -1132,48 +821,66 @@ export default function LandingView() {
           </div>
         </section>
 
-        {/* ── 10. BANNIÈRE CTA FINALE (AVEC LIGNES EN VAGUES EN BACKGROUND) ── */}
+        {/* ── 10. BANNIÈRE CTA FINALE (LIGNES TOPOGRAPHIQUES DORÉES LUMINEUSES) ── */}
         <section className="w-full py-16 sm:py-20 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative bg-ink rounded-2xl sm:rounded-3xl py-14 sm:py-20 px-6 sm:px-12 text-center text-white border border-border/30 overflow-hidden shadow-xl">
-              {/* Lignes de vagues dorées en background */}
+            <div className="relative bg-ink rounded-2xl sm:rounded-3xl py-14 sm:py-20 px-6 sm:px-12 text-center text-white border border-border/30 overflow-hidden shadow-2xl">
+              {/* Lueur et lignes dorées lumineuses en background (subtiles, brillantes, sans encombrer) */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                {/* Halo lumineux doré central qui fait briller l'espace */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[750px] h-[280px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+
                 <svg
-                  className="absolute w-[180%] sm:w-[130%] lg:w-full h-full left-1/2 -translate-x-1/2 top-0 opacity-25"
-                  viewBox="0 0 1440 480"
+                  className="absolute inset-0 w-full h-full"
+                  viewBox="0 0 1200 480"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                   preserveAspectRatio="none"
                 >
+                  <defs>
+                    <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                      <stop offset="25%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
+                      <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.9" />
+                      <stop offset="75%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient id="goldSoft" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                      <stop offset="30%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
+                      <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity="0.5" />
+                      <stop offset="85%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                    </linearGradient>
+                    <filter id="goldShineFilter" x="-10%" y="-10%" width="120%" height="120%">
+                      <feGaussianBlur stdDeviation="1.5" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+
+                  {/* Vague supérieure dorée */}
                   <path
-                    d="M-100 280 C200 120, 500 360, 800 220 C1100 80, 1350 300, 1600 180"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M-100 320 C220 160, 520 400, 820 260 C1120 120, 1370 340, 1600 220"
-                    stroke="hsl(var(--primary))"
+                    d="M-50 130 C220 50, 480 180, 750 95 C980 25, 1120 150, 1250 100"
+                    stroke="url(#goldGlow)"
                     strokeWidth="1.2"
+                    filter="url(#goldShineFilter)"
                   />
                   <path
-                    d="M-100 240 C180 80, 480 320, 780 180 C1080 40, 1330 260, 1600 140"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="1"
-                    strokeDasharray="6 6"
-                  />
-                  <path
-                    d="M-100 360 C240 200, 540 440, 840 300 C1140 160, 1390 380, 1600 260"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="1"
-                  />
-                  <path
-                    d="M-100 200 C160 40, 460 280, 760 140 C1060 0, 1310 220, 1600 100"
-                    stroke="hsl(var(--primary))"
+                    d="M-50 170 C240 90, 500 220, 770 135 C1000 65, 1140 190, 1250 140"
+                    stroke="url(#goldSoft)"
                     strokeWidth="0.8"
                   />
+
+                  {/* Vague inférieure dorée */}
                   <path
-                    d="M-100 400 C260 240, 560 480, 860 340 C1160 200, 1410 420, 1600 300"
-                    stroke="hsl(var(--primary))"
+                    d="M-50 350 C260 420, 540 300, 820 385 C1020 445, 1160 330, 1250 365"
+                    stroke="url(#goldGlow)"
+                    strokeWidth="1.2"
+                    filter="url(#goldShineFilter)"
+                  />
+                  <path
+                    d="M-50 310 C240 380, 520 260, 800 345 C1000 405, 1140 290, 1250 325"
+                    stroke="url(#goldSoft)"
                     strokeWidth="0.8"
                   />
                 </svg>
@@ -1208,7 +915,7 @@ export default function LandingView() {
                   </Link>
                   <a
                     href="mailto:contact@ceilow.bj"
-                    className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white/5 border border-border/40 text-white font-semibold text-[15px] hover:bg-white/10 transition-all"
+                    className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-ink border border-border text-white font-semibold text-[15px] hover:border-primary hover:text-primary transition-all shadow-sm"
                   >
                     <Headphones className="w-4 h-4 text-primary" />
                     <span>Parler à un expert</span>
@@ -1236,37 +943,9 @@ export default function LandingView() {
         </section>
       </main>
 
-      {/* ── 11. FOOTER (AVEC LIGNES EN VAGUES & SOCIAL LINKS) ───────────── */}
-      <footer className="relative w-full bg-ink text-white border-t border-border/20 overflow-hidden">
-        {/* Lignes de vagues subtiles en background du footer */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <svg
-            className="absolute w-[180%] sm:w-[130%] lg:w-full h-full left-1/2 -translate-x-1/2 top-0 opacity-15"
-            viewBox="0 0 1440 400"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M-100 180 C250 320, 600 60, 950 240 C1250 380, 1450 120, 1600 200"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1.2"
-            />
-            <path
-              d="M-100 220 C270 360, 620 100, 970 280 C1270 420, 1470 160, 1600 240"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1"
-            />
-            <path
-              d="M-100 140 C230 280, 580 20, 930 200 C1230 340, 1430 80, 1600 160"
-              stroke="hsl(var(--primary))"
-              strokeWidth="0.8"
-              strokeDasharray="4 6"
-            />
-          </svg>
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      {/* ── 11. FOOTER SOBRE & ÉPURÉ ─────────────────────────────────────── */}
+      <footer className="w-full bg-ink text-white border-t border-border/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 pb-12 border-b border-border/20">
             {/* Logo officiel sombre / jaune */}
             <div className="col-span-2 flex flex-col justify-start">

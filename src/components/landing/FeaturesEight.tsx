@@ -66,7 +66,7 @@ export function FeaturesEight() {
     {
       icon: Command,
       tag: "Productivité",
-      title: "Recherche rapide (Ctrl+K)",
+      title: "Recherche rapide",
       desc: "Trouvez n'importe quelle facture ou client en 1 seconde.",
     },
     {

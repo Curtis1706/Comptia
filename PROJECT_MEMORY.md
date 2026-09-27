@@ -347,3 +347,16 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - Suite de tests unitaires automatisée (npm run test:unit) : **9/9 modules validés avec succès (100%)**, incluant l'alignement de l'assertion MECeF sur le standard officiel DGI à 24 caractères (6 groupes de 4).
   - Guide de recette pas à pas fourni à l'utilisateur pour les tests manuels et la vérification des critères d'acceptation.
 
+### 2026-09-28 — Résolution Définitive de l'Upload de Documents (Fiche S2 / Serverless EROFS)
+
+- **Problème diagnostiqué** : Erreur 500 sur `POST /api/documents/upload` causée par une tentative d'écriture sur le système de fichiers en lecture seule (`EROFS`) en environnement serverless/cloud, due à la présence résiduelle d'anciens dossiers dans `public/uploads` et à l'absence de try/catch autour de `fs.writeFileSync`.
+- **Actions effectuées** :
+  - `src/lib/storage.ts` : détection exhaustive des environnements serverless (`VERCEL`, `VERCEL_ENV`, `VERCEL_REGION`, `AWS_REGION`, `NODE_ENV === "production"`), écriture exclusive dans `os.tmpdir()` (`/tmp`) en production avec gestion de fallback systématique sur toute tentative d'écriture.
+  - `src/app/api/documents/upload/route.ts` : validation tolérante des types MIME et extensions (PDF, JPEG, PNG, WEBP), sauvegarde miroir du fichier en base64 dans `extracted_data._raw_base64` pour garantir la persistance permanente entre les réveils/redémarrages de conteneurs serverless.
+  - `src/app/api/documents/[id]/file/route.ts` : mécanisme de restauration automatique depuis `extracted_data._raw_base64` vers `/tmp` si le conteneur serverless a été recyclé.
+  - `src/lib/ocr.ts` : lecture du buffer depuis `/tmp` ou fallback base64, préservation du contenu brut lors de la mise à jour OCR.
+  - `src/views/Documents.tsx` : sécurisation de la capture d'erreur pour afficher un toast explicite sans crash.
+- **Validation technique** :
+  - `npx tsc --noEmit` : 0 erreur.
+  - `npm run test:unit` : 9/9 modules validés (100%).
+  - `pnpm build` : 55 pages et routes compilées avec succès.

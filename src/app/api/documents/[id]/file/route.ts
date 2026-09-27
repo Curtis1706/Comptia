@@ -26,7 +26,19 @@ export async function GET(
       return errorResponse("Document introuvable", 404);
     }
 
-    const buffer = await storage.getFileBuffer(doc.file_url);
+    let buffer = await storage.getFileBuffer(doc.file_url);
+
+    // Fallback de haute disponibilité : restauration depuis la sauvegarde base64 en base de données
+    if (!buffer && (doc.extracted_data as any)?._raw_base64) {
+      try {
+        buffer = Buffer.from((doc.extracted_data as any)._raw_base64, "base64");
+        // Restauration dans le stockage temporaire pour les lectures suivantes
+        await storage.uploadFile(buffer, doc.filename, user.company_id).catch(() => {});
+      } catch (decodeErr) {
+        console.warn("[GET /api/documents/[id]/file] Échec décodage base64:", decodeErr);
+      }
+    }
+
     if (!buffer) {
       return errorResponse("Fichier physique introuvable ou expiré", 404);
     }

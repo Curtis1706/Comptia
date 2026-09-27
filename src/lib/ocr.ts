@@ -17,12 +17,22 @@ export async function processOCR(
   companyId: string
 ): Promise<void> {
   await prisma.document.update({
-    where: { id: documentId, company_id: companyId },
+    where: { id: documentId },
     data: { status: "processing" },
   });
 
   try {
-    const buffer = await storage.getFileBuffer(fileUrl);
+    let buffer = await storage.getFileBuffer(fileUrl);
+    if (!buffer) {
+      const existingDoc = await prisma.document.findUnique({
+        where: { id: documentId },
+        select: { extracted_data: true },
+      });
+      if ((existingDoc?.extracted_data as any)?._raw_base64) {
+        buffer = Buffer.from((existingDoc!.extracted_data as any)._raw_base64, "base64");
+      }
+    }
+
     if (!buffer) {
       throw new Error(`Fichier introuvable pour le traitement OCR : ${fileUrl}`);
     }
@@ -51,11 +61,20 @@ export async function processOCR(
 
     const extracted = parseOCRText(text);
 
+    const docBeforeUpdate = await prisma.document.findUnique({
+      where: { id: documentId },
+      select: { extracted_data: true },
+    });
+    const currentData = (docBeforeUpdate?.extracted_data as Record<string, any>) || {};
+
     await prisma.document.update({
       where: { id: documentId },
       data: {
         status: "processed",
-        extracted_data: extracted as any,
+        extracted_data: {
+          ...currentData,
+          ...extracted,
+        } as any,
       },
     });
   } catch (error) {

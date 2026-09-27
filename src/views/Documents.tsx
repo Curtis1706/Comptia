@@ -57,16 +57,21 @@ export const Documents = () => {
         method: "POST",
         body: formData,
       });
-      const result = await res.json();
-      if (result.success) {
+      let result: any = null;
+      try {
+        result = await res.json();
+      } catch {
+        result = { success: false, error: `Erreur serveur (${res.status})` };
+      }
+      if (result.success && result.data) {
         setDocuments((prev) => [result.data, ...prev]);
         toast.success("Fichier uploadé, OCR en cours...");
         pollDocumentStatus(result.data.id);
       } else {
-        toast.error(result.error);
+        toast.error(result.error || "Erreur lors de l'upload");
       }
-    } catch (e) {
-      toast.error("Erreur lors de l'upload");
+    } catch (e: any) {
+      toast.error(e?.message || "Erreur réseau lors de l'upload");
     } finally {
       setIsUploading(false);
     }

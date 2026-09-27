@@ -3,6 +3,7 @@ import { successJson, errorResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
 import { storage } from "@/lib/storage";
+import { after } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -72,16 +73,25 @@ export async function POST(req: Request) {
       },
     });
 
-    // 3. Déclenchement OCR asynchrone découplé en tâche de fond
+    // 3. Déclenchement OCR via after() — exécuté APRÈS l'envoi de la réponse
+    //    Sur Vercel, after() maintient la lambda active pour terminer le travail.
     const shouldProcess = safeMime.startsWith("image/") || safeMime === "application/pdf";
     if (shouldProcess) {
-      setTimeout(() => {
-        import("@/lib/ocr")
-          .then(({ processOCR }) => processOCR(doc.id, fileUrl, user.company_id))
-          .catch((ocrErr) => {
-            console.error("[POST /api/documents/upload] Erreur OCR en tâche de fond :", ocrErr);
-          });
-      }, 50);
+      after(async () => {
+        try {
+          const { processOCR } = await import("@/lib/ocr");
+          await processOCR(doc.id, fileUrl, user.company_id);
+        } catch (ocrErr) {
+          console.error("[POST /api/documents/upload] Erreur OCR après réponse :", ocrErr);
+          // Marquer le document en erreur pour que le frontend ne reste pas bloqué
+          try {
+            await prisma.document.update({
+              where: { id: doc.id },
+              data: { status: "error" },
+            });
+          } catch {}
+        }
+      });
     }
 
     // 4. Piste d'audit

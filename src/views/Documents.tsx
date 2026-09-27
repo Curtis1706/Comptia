@@ -32,18 +32,18 @@ export const Documents = () => {
     queryFn: () => fetcher("/api/documents/list"),
     refetchInterval: (query: any) => {
       // Auto-refetch while any document is still processing
-      const docs = query?.state?.data?.data || [];
-      return docs.some((d: any) => d.status === "processing" || d.status === "uploaded") ? 3000 : false;
+      const docs = query?.state?.data || [];
+      return Array.isArray(docs) && docs.some((d: any) => d.status === "processing" || d.status === "uploaded") ? 3000 : false;
     },
   });
 
-  const documents: any[] = docsRes?.data || [];
+  const documents: any[] = Array.isArray(docsRes) ? docsRes : docsRes?.data || [];
 
   const setDocuments = (updater: (prev: any[]) => any[]) => {
-    queryClient.setQueryData(["documents"], (old: any) => ({
-      ...old,
-      data: updater(old?.data || []),
-    }));
+    queryClient.setQueryData(["documents"], (old: any) => {
+      const prev = Array.isArray(old) ? old : old?.data || [];
+      return updater(prev);
+    });
   };
 
   const handleFileUpload = async (file: File) => {

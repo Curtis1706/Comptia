@@ -149,7 +149,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
 
   const markAsRead = async (id: string) => {
     try {
-      await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
+      await fetch(`/api/notifications/${id}/read`, { method: "PATCH", credentials: "include" });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (e) {
       console.error(e);
@@ -158,7 +158,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
 
   const markAllAsRead = async () => {
     try {
-      await fetch("/api/notifications", { method: "PATCH" });
+      await fetch("/api/notifications", { method: "PATCH", credentials: "include" });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (e) {
       console.error(e);

@@ -80,6 +80,7 @@ export const ThirdParties = () => {
       const res = await fetch(`/api/third-parties/${tp.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ is_active: !tp.is_active }),
       });
       const result = await res.json();
@@ -108,6 +109,7 @@ export const ThirdParties = () => {
     try {
       const res = await fetch(`/api/third-parties/${tp.id}`, {
         method: "DELETE",
+        credentials: "include",
       });
       const result = await res.json();
       if (result.success) {
@@ -440,6 +442,7 @@ const ThirdPartyModal = ({
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(form),
       });
       const result = await res.json();

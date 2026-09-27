@@ -365,3 +365,29 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `next.config.ts` : ajout de `serverExternalPackages: ["pdfjs-dist", "tesseract.js", "pg"]`, empêchant Turbopack de corrompre les binaires et workers au packaging serverless.
   - `src/app/api/documents/upload/route.ts` : ajout des configurations de segment `dynamic = "force-dynamic"`, `runtime = "nodejs"`, `maxDuration = 60`, et découplage du moteur OCR via import dynamique asynchrone pour ne pas alourdir l'initialisation de la lambda d'upload.
   - `src/views/Documents.tsx` : ajout systématique de `credentials: "include"` sur la requête multipart de téléversement (règle 15 Ceilow).
+
+### 2026-09-28 — Correction Systémique : `credentials: "include"` sur Tous les `fetch()` du Frontend
+
+- **Problème diagnostiqué** : L'upload de documents fonctionnait une première fois puis "plus rien" ne se passait. Cause racine : le polling de statut OCR (`pollDocumentStatus`) et le `fetcher` global utilisaient `fetch()` sans `credentials: "include"`, ce qui empêchait l'envoi des cookies de session NextAuth sur Vercel. L'endpoint `GET /api/documents/:id` retournait donc 401, le polling ne voyait jamais le statut `"processed"`, et expirait silencieusement après 60 secondes.
+- **Portée du problème** : Ce n'était pas isolé aux documents. L'audit complet a révélé que la quasi-totalité des appels `fetch()` dans le frontend (views + composants) omettaient `credentials: "include"`, rendant toutes les mutations (créer, modifier, supprimer, valider) silencieusement non authentifiées sur Vercel en production.
+- **Actions effectuées** :
+  - `src/lib/fetcher.ts` : ajout de `credentials: "include"` sur `fetcher()` et `mutate()` (impact global sur toutes les requêtes React Query GET et mutations).
+  - `src/hooks/usePermissions.ts` : ajout de `credentials: "include"` sur la récupération des permissions.
+  - `src/views/Documents.tsx` : ajout sur `pollDocumentStatus` et `handleTransform`.
+  - `src/views/Facturation.tsx` : ajout sur 5 appels (retry-mecef x2, create invoice, validate, convert).
+  - `src/views/Comptabilite.tsx` : ajout sur 3 appels (bulk-validate, delete, import CSV).
+  - `src/views/Rapprochement.tsx` : ajout sur le rapprochement bancaire.
+  - `src/views/Lettrage.tsx` : ajout sur le lettrage comptable.
+  - `src/views/Parametres.tsx` : ajout sur la sauvegarde des parametres entreprise.
+  - `src/views/ThirdParties.tsx` : ajout sur 3 appels (toggle active, delete, create/update).
+  - `src/components/layout/AppHeader.tsx` : ajout sur les notifications (mark read, mark all read).
+  - `src/components/settings/PermissionsMatrix.tsx` : ajout sur 4 appels (load, audit, update, reset).
+  - `src/components/settings/UserModals.tsx` : ajout sur 4 appels (create user, update, toggle status, transfer ownership).
+  - `src/components/settings/MecefDiagnostic.tsx` : ajout sur test-connection.
+  - `src/components/payroll/EmployeeModal.tsx` : ajout sur create/update employee.
+  - `src/components/invoices/InvoiceModal.tsx` : ajout sur 2 appels (create invoice, quick-create client).
+  - `src/components/accounting/JournalEntryModal.tsx` : ajout sur create entry.
+- **Validation technique** :
+  - `npx tsc --noEmit` : 0 erreur.
+  - Build en cours de verification.
+- **Lecon retenue** : Toute nouvelle utilisation de `fetch()` en dehors de `fetcher`/`mutate` DOIT inclure `credentials: "include"`. Idealement, centraliser tous les appels via `fetcher`/`mutate` pour eviter ce type de regression.

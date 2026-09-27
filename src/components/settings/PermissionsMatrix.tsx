@@ -116,7 +116,7 @@ export function PermissionsMatrix() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["permissions-admin"],
     queryFn: async () => {
-      const res = await fetch("/api/permissions");
+      const res = await fetch("/api/permissions", { credentials: "include" });
       if (!res.ok) throw new Error("Erreur de chargement des permissions");
       const json = await res.json();
       return json.data || json;
@@ -127,7 +127,7 @@ export function PermissionsMatrix() {
   const { data: auditData } = useQuery({
     queryKey: ["audit-permission-changes"],
     queryFn: async () => {
-      const res = await fetch("/api/audit?limit=20");
+      const res = await fetch("/api/audit?limit=20", { credentials: "include" });
       if (!res.ok) return [];
       const json = await res.json();
       const items = json.data?.items || json.data || [];
@@ -151,6 +151,7 @@ export function PermissionsMatrix() {
       const res = await fetch("/api/permissions", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       const json = await res.json();
@@ -180,6 +181,7 @@ export function PermissionsMatrix() {
       const res = await fetch("/api/permissions/reset", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ role }),
       });
       const json = await res.json();

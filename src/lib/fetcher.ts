@@ -3,7 +3,7 @@
  * Returns response.data directly from the standard ApiResponse envelope.
  */
 export const fetcher = async <T = any>(url: string): Promise<T> => {
-  const res = await fetch(url);
+  const res = await fetch(url, { credentials: "include" });
   const json = await res.json().catch(() => ({ success: false, error: "Réponse invalide" }));
 
   if (res.status === 401) {
@@ -32,6 +32,7 @@ export const mutate = async <T = any>(
   const isFormData = options.body instanceof FormData;
 
   const res = await fetch(url, {
+    credentials: "include",
     headers: {
       ...(!isFormData ? { "Content-Type": "application/json" } : {}),
     },

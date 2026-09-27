@@ -37,7 +37,7 @@ export function MecefDiagnostic() {
   const handleTestConnection = async () => {
     setTesting(true);
     try {
-      const resp = await fetch("/api/mecef/test-connection", { method: "POST" });
+      const resp = await fetch("/api/mecef/test-connection", { method: "POST", credentials: "include" });
       const result = await resp.json();
       if (resp.ok && result.success) {
         toast.success("Connexion DGI e-MECeF opérationnelle !");

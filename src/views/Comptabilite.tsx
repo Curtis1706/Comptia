@@ -55,6 +55,7 @@ export const Comptabilite = () => {
       const res = await fetch("/api/accounting/entries/bulk-validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ ids: selectedEntries }),
       });
       const result = await res.json();
@@ -73,7 +74,7 @@ export const Comptabilite = () => {
   const handleDeleteEntry = async (id: string) => {
     if (!confirm("Supprimer cette écriture ?")) return;
     try {
-      const res = await fetch(`/api/accounting/entries/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/accounting/entries/${id}`, { method: "DELETE", credentials: "include" });
       const result = await res.json();
       if (result.success) {
         toast.success(result.message);
@@ -128,6 +129,7 @@ export const Comptabilite = () => {
         const res = await fetch("/api/accounting/entries/import", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ entries: parseResult.entries }),
         });
         const result = await res.json();

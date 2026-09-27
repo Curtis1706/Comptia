@@ -200,6 +200,7 @@ export const InvoiceModal = ({
       const res = await fetch("/api/invoices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 
@@ -288,6 +289,7 @@ export const InvoiceModal = ({
                             const res = await fetch("/api/third-parties", {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
+                              credentials: "include",
                               body: JSON.stringify({
                                 name: clientName.trim(),
                                 type: "client",

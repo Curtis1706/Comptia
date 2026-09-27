@@ -41,6 +41,7 @@ export const Lettrage = () => {
       const res = await fetch("/api/accounting/lettering/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ ids: selectedLines }),
       });
       const result = await res.json();

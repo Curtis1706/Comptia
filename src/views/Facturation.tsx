@@ -260,7 +260,7 @@ const InvoiceTable = ({ query }: { query: string }) => {
 
   const handleRetryMecef = async (invoiceId: string) => {
     try {
-      const resp = await fetch(`/api/invoices/${invoiceId}/retry-mecef`, { method: "POST" });
+      const resp = await fetch(`/api/invoices/${invoiceId}/retry-mecef`, { method: "POST", credentials: "include" });
       const result = await resp.json();
       if (resp.ok && result.success) {
         toast.success(result.message || "Facture normalisée avec succès");
@@ -292,6 +292,7 @@ const InvoiceTable = ({ query }: { query: string }) => {
         const resp = await fetch("/api/invoices", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify(entry.payload),
         });
         const result = await resp.json();
@@ -400,7 +401,7 @@ const InvoiceTable = ({ query }: { query: string }) => {
                           title="Valider et normaliser"
                           onClick={async () => {
                             try {
-                              const res = await fetch(`/api/invoices/${inv.id}/validate`, { method: "POST" });
+                              const res = await fetch(`/api/invoices/${inv.id}/validate`, { method: "POST", credentials: "include" });
                               const result = await res.json();
                               if (result.success) {
                                 toast.success(result.message);
@@ -449,7 +450,7 @@ const InvoicesList = ({ type, query }: { type: string; query: string }) => {
 
   const handleRetryMecef = async (invoiceId: string) => {
     try {
-      const resp = await fetch(`/api/invoices/${invoiceId}/retry-mecef`, { method: "POST" });
+      const resp = await fetch(`/api/invoices/${invoiceId}/retry-mecef`, { method: "POST", credentials: "include" });
       const result = await resp.json();
       if (resp.ok && result.success) {
         toast.success(result.message || "Avoir normalisé avec succès");
@@ -469,7 +470,7 @@ const InvoicesList = ({ type, query }: { type: string; query: string }) => {
     if (!confirmed) return;
     setConvertingId(quote.id);
     try {
-      const resp = await fetch(`/api/invoices/${quote.id}/convert`, { method: "POST" });
+      const resp = await fetch(`/api/invoices/${quote.id}/convert`, { method: "POST", credentials: "include" });
       const result = await resp.json();
       if (resp.ok && result.success) {
         toast.success(result.message || "Devis converti en facture avec succès");

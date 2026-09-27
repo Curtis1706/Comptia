@@ -80,7 +80,7 @@ export const Documents = () => {
 
   const pollDocumentStatus = (docId: string) => {
     const interval = setInterval(async () => {
-      const res = await fetch(`/api/documents/${docId}`).then((r) => r.json());
+      const res = await fetch(`/api/documents/${docId}`, { credentials: "include" }).then((r) => r.json());
       if (res.data?.status === "processed" || res.data?.status === "error") {
         clearInterval(interval);
         setDocuments((prev) => prev.map((d) => (d.id === docId ? res.data : d)));
@@ -125,6 +125,7 @@ export const Documents = () => {
       const res = await fetch(`/api/documents/${selectedDoc.id}/transform`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           ...ocrFields,
           account_code: accountCode,

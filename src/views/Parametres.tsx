@@ -194,6 +194,7 @@ const EntrepriseForm = () => {
       const res = await fetch("/api/company", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
       const result = await res.json();

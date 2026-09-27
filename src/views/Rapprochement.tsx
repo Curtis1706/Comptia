@@ -53,6 +53,7 @@ export const Rapprochement = () => {
       const res = await fetch("/api/accounting/reconcile/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           bank_ids: selectedBank,
           ledger_ids: selectedLedger,

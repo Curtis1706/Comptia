@@ -175,8 +175,15 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
     hasAccess("mecef_settings");
   const canAccessBilling = hasAccess("subscription_billing") || userRole === "owner";
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-xl lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background px-4 lg:px-8">
       <GlobalSearch open={searchOpen} setOpen={setSearchOpen} />
       
       <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar} aria-label="Ouvrir la navigation">
@@ -360,7 +367,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer font-medium"
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Se déconnecter</span>
@@ -375,7 +382,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
           className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           title="Déconnexion directe"
           aria-label="Se déconnecter"
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={handleSignOut}
         >
           <LogOut className="h-4 w-4" />
         </Button>

@@ -97,6 +97,25 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     });
     if (!tp) return errorResponse("Tiers introuvable", 404);
 
+    // Vérifier si des opérations comptables ou factures existent pour ce tiers
+    const invoicesCount = await prisma.invoice.count({
+      where: { client_id: id },
+    });
+
+    const linesCount = await prisma.journalLine.count({
+      where: {
+        company_id: user.company_id,
+        third_party: { equals: tp.name, mode: "insensitive" },
+      },
+    });
+
+    if (invoicesCount > 0 || linesCount > 0) {
+      return errorResponse(
+        "Ce tiers possède des opérations comptables associées. Pour préserver la piste d'audit, désactivez-le au lieu de le supprimer.",
+        409
+      );
+    }
+
     await prisma.thirdParty.update({
       where: { id },
       data: { is_active: false },

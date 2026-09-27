@@ -118,10 +118,16 @@ export const Dashboard = () => {
   const currentMonthLong = date ? format(date, "MMMM", { locale: fr }) : "...";
   const currentMonthYear = date ? format(date, "MMMM yyyy", { locale: fr }) : "...";
 
+  const userRole = me?.role || "viewer";
+  const isCashier = userRole === "cashier";
+  const isHr = userRole === "hr";
+  const canCreateInvoice = ["owner", "admin", "accountant", "cashier"].includes(userRole);
+  const canCreateEntry = ["owner", "admin", "accountant"].includes(userRole);
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <PageHeader
-        title={`Bonjour ${userName} 👋`}
+        title={`Bonjour ${userName}`}
         subtitle={`Voici un aperçu de votre activité — ${currentMonthYear}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -143,34 +149,50 @@ export const Dashboard = () => {
               </PopoverContent>
             </Popover>
 
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="flex-1 sm:flex-none hover:bg-muted/50 bg-card"
-              onClick={() => setIsInvoiceModalOpen(true)}
-            >
-              <Plus className="mr-1 h-4 w-4" /> Facture
-            </Button>
-            <Button 
-              size="sm" 
-              className="flex-1 sm:flex-none bg-gradient-primary hover:opacity-90 shadow-md"
-              onClick={() => setIsEntryModalOpen(true)}
-            >
-              <Plus className="mr-1 h-4 w-4" /> Opération
-            </Button>
+            {canCreateInvoice && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="flex-1 sm:flex-none hover:bg-muted/50 bg-card"
+                onClick={() => setIsInvoiceModalOpen(true)}
+              >
+                <Plus className="mr-1 h-4 w-4" /> Facture
+              </Button>
+            )}
+
+            {canCreateEntry && (
+              <Button 
+                size="sm" 
+                className="flex-1 sm:flex-none bg-primary text-ink font-medium hover:opacity-90 shadow-sm"
+                onClick={() => setIsEntryModalOpen(true)}
+              >
+                <Plus className="mr-1 h-4 w-4" /> Opération
+              </Button>
+            )}
           </div>
         }
       />
 
-      {/* KPI grid */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-        <KpiCard title="Chiffre d'affaires" value={formatCFA(kpis.ca)} growth={kpis.caGrowth} icon={TrendingUp} tone="primary" spark data={kpis.caSpark} />
-        <KpiCard title="Charges totales" value={formatCFA(kpis.charges)} growth={kpis.chargesGrowth} icon={TrendingDown} tone="warning" spark data={kpis.chargesSpark} />
-        <KpiCard title="Résultat net" value={formatCFA(kpis.netResult)} growth={kpis.netResultGrowth} icon={PiggyBank} tone="success" spark />
-        <KpiCard title="Trésorerie" value={formatCFA(kpis.tresorerie)} growth={kpis.tresorerieGrowth} icon={Wallet} tone="primary" spark />
-        <KpiCard title="TVA à payer" value={formatCFA(kpis.tvaAPayer)} icon={Receipt} tone="warning" subtitle="Estimation" />
-        <KpiCard title="Factures impayées" value={`${kpis.facturesImpayees}`} icon={AlertTriangle} tone="destructive" subtitle={`${formatCFA(kpis.facturesImpayeesMontant)} en attente`} />
-      </div>
+      {/* KPI grid conditioned by role */}
+      {isCashier ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-2">
+          <KpiCard title="Chiffre d'affaires" value={formatCFA(kpis.ca)} growth={kpis.caGrowth} icon={TrendingUp} tone="primary" spark data={kpis.caSpark} />
+          <KpiCard title="Factures impayées" value={`${kpis.facturesImpayees}`} icon={AlertTriangle} tone="destructive" subtitle={`${formatCFA(kpis.facturesImpayeesMontant)} en attente`} />
+        </div>
+      ) : isHr ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-2">
+          <KpiCard title="Masse salariale nette" value={formatCFA(kpis.payrollTotal || 0)} icon={Receipt} tone="primary" subtitle="Salaires nets période" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+          <KpiCard title="Chiffre d'affaires" value={formatCFA(kpis.ca)} growth={kpis.caGrowth} icon={TrendingUp} tone="primary" spark data={kpis.caSpark} />
+          <KpiCard title="Charges totales" value={formatCFA(kpis.charges)} growth={kpis.chargesGrowth} icon={TrendingDown} tone="warning" spark data={kpis.chargesSpark} />
+          <KpiCard title="Résultat net" value={formatCFA(kpis.netResult)} growth={kpis.netResultGrowth} icon={PiggyBank} tone="success" spark />
+          <KpiCard title="Trésorerie" value={formatCFA(kpis.tresorerie)} growth={kpis.tresorerieGrowth} icon={Wallet} tone="primary" spark />
+          <KpiCard title="TVA à payer" value={formatCFA(kpis.tvaAPayer)} icon={Receipt} tone="warning" subtitle="Estimation" />
+          <KpiCard title="Factures impayées" value={`${kpis.facturesImpayees}`} icon={AlertTriangle} tone="destructive" subtitle={`${formatCFA(kpis.facturesImpayeesMontant)} en attente`} />
+        </div>
+      )}
 
       {/* Charts row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

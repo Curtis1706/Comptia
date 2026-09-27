@@ -66,8 +66,8 @@ export async function POST(req: Request) {
     });
 
     return successJson(doc, "Fichier uploadé avec succès", 201);
-  } catch (err) {
-    console.error("[POST /api/documents/upload]", err);
-    return handlePrismaError(err);
+  } catch (err: any) {
+    console.error("[POST /api/documents/upload] Erreur:", err);
+    return errorResponse(err?.message || "Erreur lors du téléversement du fichier", 500);
   }
 }

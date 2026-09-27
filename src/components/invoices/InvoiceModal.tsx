@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { formatCFA } from "@/lib/format";
 import { fetcher } from "@/lib/fetcher";
 import { deriveTaxGroup, deriveAibRate, toMecefPrice, TAX_GROUP_LABELS } from "@/lib/mecef-mapping";
+import { enqueueInvoice } from "@/lib/offline-queue";
 
 const CreateInvoiceSchema = z.object({
   type: z.enum(["invoice", "quote", "credit_note"]),
@@ -187,6 +188,15 @@ export const InvoiceModal = ({
         tourist_tax_amount: watchTouristTax,
       };
 
+      // Détection de la connectivité avant la requête
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueueInvoice(payload as Record<string, unknown>);
+        toast.info("Facture enregistrée en local. Elle sera transmise dès le retour du réseau.");
+        onClose();
+        form.reset();
+        return;
+      }
+
       const res = await fetch("/api/invoices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -203,7 +213,22 @@ export const InvoiceModal = ({
         toast.error(result.error || "Erreur lors de la création");
       }
     } catch (error) {
-      toast.error("Une erreur inattendue est survenue");
+      // En cas de coupure réseau (TypeError: Failed to fetch), mise en file d attente
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        const payload = {
+          ...values,
+          aib_amount,
+          tourist_tax_amount: watchTouristTax,
+        };
+        enqueueInvoice(payload as Record<string, unknown>);
+        toast.warning(
+          "Pas de connexion Internet. La facture a été sauvegardée en local et sera transmise dès le retour du réseau."
+        );
+        onClose();
+        form.reset();
+      } else {
+        toast.error("Une erreur inattendue est survenue");
+      }
     } finally {
       setIsSubmitting(false);
     }

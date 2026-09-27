@@ -1,6 +1,7 @@
 import Tesseract from "tesseract.js";
 import { prisma } from "./prisma";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { storage } from "./storage";
 
 // Fix for pdfjs in Node environment
 if (typeof window === "undefined" && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -21,12 +22,16 @@ export async function processOCR(
   });
 
   try {
-    const filePath = `./public${fileUrl}`;
+    const buffer = await storage.getFileBuffer(fileUrl);
+    if (!buffer) {
+      throw new Error(`Fichier introuvable pour le traitement OCR : ${fileUrl}`);
+    }
+
     let text = "";
 
     if (fileUrl.toLowerCase().endsWith(".pdf")) {
-      // 1. PDF Extraction via pdfjs-dist
-      const data = new Uint8Array(require("fs").readFileSync(filePath));
+      // 1. Extraction PDF via pdfjs-dist
+      const data = new Uint8Array(buffer);
       const loadingTask = pdfjs.getDocument({ data });
       const pdf = await loadingTask.promise;
       
@@ -39,8 +44,8 @@ export async function processOCR(
       }
       text = fullText;
     } else {
-      // 2. Image Extraction via Tesseract
-      const { data: { text: tesseractText } } = await Tesseract.recognize(filePath, "fra+eng");
+      // 2. Extraction image via Tesseract
+      const { data: { text: tesseractText } } = await Tesseract.recognize(buffer, "fra+eng");
       text = tesseractText;
     }
 

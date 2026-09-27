@@ -202,8 +202,9 @@ export async function GET(req: Request) {
     // 2. Invoices
     let invoiceStats = { _sum: { total_ttc: 0 }, _count: { id: 0 } };
     let recentInvoices: any[] = [];
+    let caFromInvoices = 0;
     if (hasInvoices) {
-      const [invAgg, invList] = await Promise.all([
+      const [invAgg, invList, invCaAgg] = await Promise.all([
         prisma.invoice.aggregate({
           where: {
             company_id: companyId,
@@ -226,9 +227,20 @@ export async function GET(req: Request) {
             client: { select: { name: true } },
           },
         }),
+        !hasAccounting
+          ? prisma.invoice.aggregate({
+              where: {
+                company_id: companyId,
+                type: "invoice",
+                status: { in: ["sent", "paid", "partially_paid"] },
+              },
+              _sum: { subtotal_ht: true },
+            })
+          : Promise.resolve({ _sum: { subtotal_ht: 0 } }),
       ]);
       invoiceStats = invAgg as any;
       recentInvoices = invList;
+      caFromInvoices = toNumber(invCaAgg._sum.subtotal_ht);
     }
 
     // 3. Treasury (Bank Reconciliation)
@@ -285,7 +297,7 @@ export async function GET(req: Request) {
     const result = {
       available,
       kpis: {
-        ca: hasAccounting ? totalCa : 0,
+        ca: hasAccounting ? totalCa : hasInvoices ? caFromInvoices : 0,
         caGrowth: hasAccounting ? calculateGrowth(totalCa, prevCa) : 0,
         caSpark: sparks.ca,
         charges: hasAccounting ? totalCharges : 0,

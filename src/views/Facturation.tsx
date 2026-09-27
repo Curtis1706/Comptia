@@ -13,6 +13,8 @@ import {
   AlertTriangle,
   ShieldCheck,
   Loader2,
+  Clock,
+  FileCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,7 @@ import { InvoiceModal } from "@/components/invoices/InvoiceModal";
 import { DownloadPdfButton } from "@/components/invoices/DownloadPdfButton";
 import { PermissionGate } from "@/components/PermissionGate";
 import { toast } from "sonner";
+import { getQueuedInvoices, dequeueInvoice, incrementAttempts } from "@/lib/offline-queue";
 
 const tabs = [
   { id: "factures", label: "Factures de vente" },
@@ -183,8 +186,8 @@ export function MecefBadge({ invoice, onRetry }: { invoice: any; onRetry?: () =>
   if (invoice.mecef_status === "awaiting_manual_normalization") {
     return (
       <div className="flex items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-600 uppercase">
-          ⏳ En attente DGI
+        <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 border border-warning/20 px-2 py-0.5 text-[10px] font-bold text-warning uppercase">
+          <Clock className="h-3 w-3" /> En attente DGI
         </span>
         {onRetry && (
           <Button
@@ -247,6 +250,7 @@ export function MecefBadge({ invoice, onRetry }: { invoice: any; onRetry?: () =>
 
 const InvoiceTable = ({ query }: { query: string }) => {
   const queryClient = useQueryClient();
+  const [retransmitting, setRetransmitting] = useState(false);
   const { data: res, isLoading } = useQuery<any>({
     queryKey: ["invoices", query],
     queryFn: () => fetcher(`/api/invoices?type=invoice${query ? `&search=${query}` : ""}`),
@@ -273,27 +277,72 @@ const InvoiceTable = ({ query }: { query: string }) => {
     (i) => i.mecef_status === "awaiting_manual_normalization" || i.mecef_status === "verification_failed"
   );
 
+  const handleRetransmitAll = async () => {
+    setRetransmitting(true);
+    // 1. Retransmettre les factures serveur en attente DGI
+    for (const inv of pendingInvoices) {
+      await handleRetryMecef(inv.id);
+    }
+    // 2. Vider la file locale (factures créées hors-ligne)
+    const queued = getQueuedInvoices();
+    let successCount = 0;
+    for (const entry of queued) {
+      incrementAttempts(entry.id);
+      try {
+        const resp = await fetch("/api/invoices", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(entry.payload),
+        });
+        const result = await resp.json();
+        if (resp.ok && result.success) {
+          dequeueInvoice(entry.id);
+          successCount++;
+        }
+      } catch {
+        // Pas de réseau : on laisse en file
+      }
+    }
+    if (successCount > 0) {
+      toast.success(`${successCount} facture(s) locale(s) transmise(s) avec succès.`);
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["invoice-stats"] });
+    }
+    setRetransmitting(false);
+  };
+
+  const offlineCount = getQueuedInvoices().length;
+  const showBanner = pendingInvoices.length > 0 || offlineCount > 0;
+
+
   return (
     <div className="overflow-x-auto space-y-3">
-      {pendingInvoices.length > 0 && (
-        <div className="m-4 flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800">
+      {showBanner && (
+        <div className="m-4 flex items-center justify-between p-3 rounded-xl bg-warning/10 border border-warning/20 text-xs text-ink">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+            <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
             <span>
-              <strong>{pendingInvoices.length} facture(s)</strong> en attente de confirmation auprès de la DGI (e-MECeF).
+              {pendingInvoices.length > 0 && (
+                <><strong>{pendingInvoices.length} facture(s)</strong> en attente de confirmation auprès de la DGI (e-MECeF). </>
+              )}
+              {offlineCount > 0 && (
+                <><strong>{offlineCount} facture(s)</strong> sauvegardées en local (hors-ligne).</>
+              )}
             </span>
           </div>
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-xs bg-white text-amber-800 border-amber-400 hover:bg-amber-50"
-            onClick={async () => {
-              for (const inv of pendingInvoices) {
-                await handleRetryMecef(inv.id);
-              }
-            }}
+            className="h-7 text-xs"
+            disabled={retransmitting}
+            onClick={handleRetransmitAll}
           >
-            <RefreshCw className="h-3.5 w-3.5 mr-1" /> Retransmettre tout
+            {retransmitting ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5 mr-1" />
+            )}
+            Retransmettre tout
           </Button>
         </div>
       )}
@@ -388,6 +437,9 @@ const InvoiceTable = ({ query }: { query: string }) => {
 
 const InvoicesList = ({ type, query }: { type: string; query: string }) => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [convertingId, setConvertingId] = useState<string | null>(null);
   const { data: res, isLoading } = useQuery<any>({
     queryKey: ["invoices", type, query],
     queryFn: () => fetcher(`/api/invoices?type=${type}${query ? `&search=${query}` : ""}`),
@@ -410,6 +462,33 @@ const InvoicesList = ({ type, query }: { type: string; query: string }) => {
     }
   };
 
+  const handleConvertToInvoice = async (quote: any) => {
+    const confirmed = window.confirm(
+      `Convertir le devis ${quote.reference} (${quote.client?.name || "Client"}) en facture ?\nCette action est irréversible.`
+    );
+    if (!confirmed) return;
+    setConvertingId(quote.id);
+    try {
+      const resp = await fetch(`/api/invoices/${quote.id}/convert`, { method: "POST" });
+      const result = await resp.json();
+      if (resp.ok && result.success) {
+        toast.success(result.message || "Devis converti en facture avec succès");
+        queryClient.invalidateQueries({ queryKey: ["invoices"] });
+        queryClient.invalidateQueries({ queryKey: ["invoice-stats"] });
+        // Basculer vers l'onglet Factures
+        router.push(`${pathname}`);
+      } else {
+        toast.error(result.error || "Échec de la conversion");
+      }
+    } catch {
+      toast.error("Erreur de connexion lors de la conversion");
+    } finally {
+      setConvertingId(null);
+    }
+  };
+
+  const colSpan = type === "credit_note" ? 7 : type === "quote" ? 7 : 6;
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -421,6 +500,7 @@ const InvoicesList = ({ type, query }: { type: string; query: string }) => {
             <th className="px-4 py-3 text-right">Montant TTC</th>
             <th className="px-4 py-3">Statut</th>
             {type === "credit_note" && <th className="px-4 py-3">Certif. e-MECeF</th>}
+            {type === "quote" && <th className="px-4 py-3">Conversion</th>}
             <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
@@ -428,14 +508,14 @@ const InvoicesList = ({ type, query }: { type: string; query: string }) => {
           {isLoading ? (
             [...Array(5)].map((_, i) => (
               <tr key={i} className="border-b border-border">
-                <td colSpan={type === "credit_note" ? 7 : 6} className="px-4 py-3">
+                <td colSpan={colSpan} className="px-4 py-3">
                   <Skeleton className="h-4 w-full" />
                 </td>
               </tr>
             ))
           ) : items.length === 0 ? (
             <tr>
-              <td colSpan={type === "credit_note" ? 7 : 6} className="p-8 text-center text-muted-foreground text-xs">
+              <td colSpan={colSpan} className="p-8 text-center text-muted-foreground text-xs">
                 Aucun document trouvé.
               </td>
             </tr>
@@ -453,6 +533,30 @@ const InvoicesList = ({ type, query }: { type: string; query: string }) => {
                   <td className="px-4 py-3">
                     <MecefBadge invoice={q} onRetry={() => handleRetryMecef(q.id)} />
                   </td>
+                )}
+                {type === "quote" && q.status !== "cancelled" && (
+                  <td className="px-4 py-3">
+                    <PermissionGate module="invoices" level="write">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        disabled={convertingId === q.id}
+                        onClick={() => handleConvertToInvoice(q)}
+                        title="Convertir ce devis en facture de vente"
+                      >
+                        {convertingId === q.id ? (
+                          <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                        ) : (
+                          <FileCheck className="h-3.5 w-3.5 mr-1" />
+                        )}
+                        Convertir en facture
+                      </Button>
+                    </PermissionGate>
+                  </td>
+                )}
+                {type === "quote" && q.status === "cancelled" && (
+                  <td className="px-4 py-3" />
                 )}
                 <td className="px-4 py-3 text-right flex justify-end gap-1">
                   <DownloadPdfButton invoiceId={q.id} />

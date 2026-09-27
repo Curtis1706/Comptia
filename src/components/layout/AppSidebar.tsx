@@ -154,6 +154,13 @@ export const AppSidebar = ({ open, onClose }: Props) => {
 
   const { hasAccess } = usePermissions();
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
+  };
+
   const isSettingsAccessible =
     hasAccess("company_settings") ||
     hasAccess("chart_of_accounts") ||
@@ -173,6 +180,10 @@ export const AppSidebar = ({ open, onClose }: Props) => {
 
       if (item.key === "paie") {
         return hasAccess("payroll") || hasAccess("employees");
+      }
+
+      if (item.children && item.children.length > 0) {
+        return hasAccess(item.module) || item.children.some((c) => !c.module || hasAccess(c.module));
       }
 
       return hasAccess(item.module);
@@ -308,7 +319,7 @@ export const AppSidebar = ({ open, onClose }: Props) => {
               </div>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleSignOut}
               title="Se déconnecter"
               aria-label="Se déconnecter"
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/70 transition hover:bg-destructive hover:text-white active:scale-95"

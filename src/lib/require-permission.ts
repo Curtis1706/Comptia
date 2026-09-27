@@ -31,7 +31,7 @@ export async function requirePermission(
   if (!user) {
     return {
       ok: false,
-      response: errorResponse("Non authentifié", 401),
+      response: errorResponse("Session invalide ou compte suspendu", 401),
     };
   }
 

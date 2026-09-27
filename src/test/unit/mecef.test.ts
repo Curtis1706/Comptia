@@ -55,7 +55,8 @@ export async function testMecefEngine() {
     console.assert(Boolean(res.codeMECeFDGI), "Code MECeF/DGI manquant");
     console.assert(Boolean(res.nim), "NIM manquant");
     console.assert(Boolean(res.qrCode), "QR code manquant");
-    console.assert(res.codeMECeFDGI.startsWith("TEST-"), `Format code MECeF invalide : ${res.codeMECeFDGI}`);
+    const mecefRegex = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    console.assert(mecefRegex.test(res.codeMECeFDGI), `Format code MECeF invalide (attendu 6 groupes de 4 caractères) : ${res.codeMECeFDGI}`);
     console.log(`  ✅ Certification e-MECeF générée : Code DGI=${res.codeMECeFDGI}, NIM=${res.nim}`);
   } finally {
     process.env.MECEF_MODE = prevMode;

@@ -360,3 +360,8 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npx tsc --noEmit` : 0 erreur.
   - `npm run test:unit` : 9/9 modules validés (100%).
   - `pnpm build` : 55 pages et routes compilées avec succès.
+
+- **Résolution Découplage OCR & Configuration Vercel Serverless** :
+  - `next.config.ts` : ajout de `serverExternalPackages: ["pdfjs-dist", "tesseract.js", "pg"]`, empêchant Turbopack de corrompre les binaires et workers au packaging serverless.
+  - `src/app/api/documents/upload/route.ts` : ajout des configurations de segment `dynamic = "force-dynamic"`, `runtime = "nodejs"`, `maxDuration = 60`, et découplage du moteur OCR via import dynamique asynchrone pour ne pas alourdir l'initialisation de la lambda d'upload.
+  - `src/views/Documents.tsx` : ajout systématique de `credentials: "include"` sur la requête multipart de téléversement (règle 15 Ceilow).

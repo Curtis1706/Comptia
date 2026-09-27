@@ -160,6 +160,66 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 - **Prochaines étapes** :
   - Validation finale par l'utilisateur.
 
+### 2026-09-14 — Création de la Page /demo (Inspiration Uptimise) & Nettoyage des CTA sur la Landing
+
+- **Actions effectuées** :
+  - **Création de la page `/demo`** ([src/app/demo/page.tsx](file:///e:/Comptia/src/app/demo/page.tsx)) :
+    - Mise en page split-screen 2 colonnes (inspirée de la référence `uptimise.io/demo` fournie par l'utilisateur).
+    - **Panneau gauche** : Logo Ceilow sombre, grand titre de positionnement valorisant la conformité DGI et la simplicité, métriques réelles (+500 professionnels, +15 000 factures certifiées e-MECeF), grille de partenaires béninois de référence, et bouton de retour au site principal (`ArrowLeft`).
+    - **Panneau droit** : Formulaire complet de planification de démo avec saisie du numéro béninois (`BJ +229`), nom, prénoms, email professionnel, nom d'entreprise et priorité métier, validation inline, état de chargement et confirmation d'envoi.
+  - **Mise à jour des CTA sur la Landing Page** ([src/views/LandingView.tsx](file:///e:/Comptia/src/views/LandingView.tsx)) :
+    - Remplacement de tous les boutons « Démarrer gratuitement » et « Démarrer » par **« Demander une démo »** (avec lien direct vers `/demo`).
+    - Redirection du bouton « Demander une démo » de la Hero section directement vers `/demo`.
+    - Dans la bannière CTA avant le footer :
+      - Suppression intégrale et définitive du bouton « Parler à un expert » et de ses bordures indésirables.
+      - Bouton unique centré : **« Demander une démo »** (`bg-primary text-ink font-semibold rounded-xl min-h-[48px] px-8 py-3.5`).
+  - **Conformité stricte aux Règles Ceilow** :
+    - Zéro emoji (aucun drapeau ni picto emoji, balise texte `BJ` + icônes Lucide).
+    - Zéro glassmorphisme.
+    - Zéro code hexadécimal en dur dans les classes JSX.
+    - Cibles tactiles `>= 44px`.
+  - **Validation technique (Règle 18)** :
+    - `npx tsc --noEmit` : **0 erreur**.
+    - `pnpm build` : **0 erreur** (55 pages statiques/dynamiques compilées avec succès, route `/demo` validée).
+
+### 2026-09-14 — Correction de la Redirection Middleware sur /demo
+
+- **Cause du problème** :
+  - Dans [src/middleware.ts](file:///e:/Comptia/src/middleware.ts), la constante `PUBLIC_PATHS` contenait uniquement `["/", "/login", "/register", "/landing", ...]`.
+  - La route `/demo` n'y figurait pas, ce qui provoquait sa détection automatique comme une route d'application privée nécessitant une session active, déclenchant ainsi la redirection `NextResponse.redirect(new URL("/login?callbackUrl=%2Fdemo", req.url))`.
+- **Actions effectuées** :
+  - Ajout de `"/demo"` dans le tableau `PUBLIC_PATHS` de [src/middleware.ts](file:///e:/Comptia/src/middleware.ts), ainsi que des dossiers publics `/logo` et `/images`.
+  - La page `/demo` est désormais directement accessible sans être redirigée vers la mire de connexion.
+- **Validation technique (Règle 18)** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `pnpm build` : **0 erreur** (55 pages compilées).
+
+### 2026-09-14 — Ajustements Visuels & Simplification du Formulaire /demo
+
+- **Actions effectuées** :
+  - **Panneau gauche (/demo)** :
+    - Suppression de tous les traits de séparation rigides (`border-t border-border`) entre les métriques `+500`, `+15 000` et les partenaires.
+    - Élimination des cartes rectangulaires blanches à bordure pour les « Entreprises de référence au Bénin ». Remplacement par une grille de logos/marques aérée et élégante avec puces de charte (`bg-primary` / `bg-ink`) et typographies différenciées fidèles à l'identité visuelle Ceilow.
+  - **Formulaire de droite (/demo)** :
+    - Remplacement du label « Email professionnel » par **« Email »** tout court.
+    - Placeholder simplifié à **`exemple@gmail.com`**.
+    - Suppression complète du menu déroulant « Priorité pour votre activité » pour raccourcir le formulaire et maximiser le taux de conversion.
+- **Validation technique (Règle 18)** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `pnpm build` : **0 erreur** (55 pages compilées).
+
+### 2026-09-14 — Optimisation Mobile-First de la Page /demo (Formulaire Exclusif sur Mobile)
+
+- **Actions effectuées** :
+  - **Panneau gauche (Présentation)** :
+    - Configuré en `hidden lg:flex lg:w-1/2` : masqué sur mobile pour éliminer tout scroll superflu et afficher directement le formulaire de planification.
+  - **Panneau droit (Formulaire)** :
+    - Occupe 100% de la largeur sur mobile (`w-full lg:w-1/2`).
+    - Ajout d'un en-tête mobile exclusif (`lg:hidden`) comprenant le logo Ceilow vectoriel et un lien de retour rapide vers l'accueil (`ArrowLeft`).
+- **Validation technique (Règle 18)** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `pnpm build` : **0 erreur** (55 pages compilées).
+
 ### 2026-09-21 — Analyse Exhaustive du Rapport de Recette & Création des Consignes de Correction
 
 - **Actions effectuées** :
@@ -284,9 +344,4 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 - **Bilan global de la recette** :
   - **20 anomalies sur 20 résolues** et validées sur les 4 lots.
   - Zéro régression TypeScript, zéro violation de charte de tokens, zéro emoji restant.
-
-
-
-
-
 

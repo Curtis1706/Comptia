@@ -1,9 +1,12 @@
 import { requirePermission } from "@/lib/require-permission";
-import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
+import { successJson, errorResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
-import { processOCR } from "@/lib/ocr";
 import { storage } from "@/lib/storage";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 /**
  * POST /api/documents/upload
@@ -51,9 +54,9 @@ export async function POST(req: Request) {
 
     // 1. Sauvegarde sur le stockage physique résilient (/tmp ou public/uploads)
     const fileUrl = await storage.uploadFile(buffer, filename, user.company_id);
-    const base64Data = buffer.toString("base64");
+    const base64Data = file.size <= 1.5 * 1024 * 1024 ? buffer.toString("base64") : undefined;
 
-    // 2. Création du document avec sauvegarde base64 en base (durabilité serverless garantie)
+    // 2. Création du document
     const doc = await prisma.document.create({
       data: {
         company_id: user.company_id,
@@ -65,18 +68,20 @@ export async function POST(req: Request) {
         mime_type: safeMime,
         status: "uploaded",
         uploaded_by: user.id,
-        extracted_data: {
-          _raw_base64: base64Data,
-        },
+        extracted_data: base64Data ? { _raw_base64: base64Data } : undefined,
       },
     });
 
-    // 3. Déclenchement OCR asynchrone sécurisé
+    // 3. Déclenchement OCR asynchrone découplé en tâche de fond
     const shouldProcess = safeMime.startsWith("image/") || safeMime === "application/pdf";
     if (shouldProcess) {
-      processOCR(doc.id, fileUrl, user.company_id).catch((ocrErr) => {
-        console.error("[POST /api/documents/upload] Erreur OCR en arrière-plan :", ocrErr);
-      });
+      setTimeout(() => {
+        import("@/lib/ocr")
+          .then(({ processOCR }) => processOCR(doc.id, fileUrl, user.company_id))
+          .catch((ocrErr) => {
+            console.error("[POST /api/documents/upload] Erreur OCR en tâche de fond :", ocrErr);
+          });
+      }, 50);
     }
 
     // 4. Piste d'audit

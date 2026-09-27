@@ -56,6 +56,7 @@ export const Documents = () => {
       const res = await fetch("/api/documents/upload", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
       let result: any = null;
       try {

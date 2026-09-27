@@ -344,4 +344,6 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 - **Bilan global de la recette** :
   - **20 anomalies sur 20 résolues** et validées sur les 4 lots.
   - Zéro régression TypeScript, zéro violation de charte de tokens, zéro emoji restant.
+  - Suite de tests unitaires automatisée (npm run test:unit) : **9/9 modules validés avec succès (100%)**, incluant l'alignement de l'assertion MECeF sur le standard officiel DGI à 24 caractères (6 groupes de 4).
+  - Guide de recette pas à pas fourni à l'utilisateur pour les tests manuels et la vérification des critères d'acceptation.
 

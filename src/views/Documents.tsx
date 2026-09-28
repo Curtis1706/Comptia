@@ -21,6 +21,11 @@ import { fetcher } from "@/lib/fetcher";
 import { formatCFA, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  SYSCOHADA_EXPENSE_ACCOUNTS,
+  inferSyscohadaExpenseAccount,
+  SyscohadaExpenseAccount,
+} from "@/lib/syscohada-accounts";
 
 export const Documents = () => {
   const [drag, setDrag] = useState(false);
@@ -146,6 +151,14 @@ export const Documents = () => {
         invoice_number: doc.extracted_data.invoice_number || "",
         vat_amount: doc.extracted_data.vat_amount !== undefined ? String(doc.extracted_data.vat_amount) : "",
       });
+      // Respect du compte de charge SYSCOHADA :
+      if (doc.extracted_data.account_code) {
+        setAccountCode(doc.extracted_data.account_code);
+      } else {
+        const textSample = `${doc.extracted_data.vendor_name || ""} ${doc.extracted_data._raw_text || ""} ${doc.original_filename || ""}`;
+        const inferred = inferSyscohadaExpenseAccount(textSample, doc.extracted_data.vendor_name);
+        setAccountCode(inferred.code);
+      }
     } else {
       setOcrFields({
         amount: "",
@@ -155,17 +168,44 @@ export const Documents = () => {
         invoice_number: "",
         vat_amount: "",
       });
+      setAccountCode("628");
     }
   };
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [accountCode, setAccountCode] = useState("606");
+  const [accountCode, setAccountCode] = useState("628");
 
   const { data: accountsRes } = useQuery<any>({
-    queryKey: ["accounts"],
-    queryFn: () => fetcher("/api/accounts?limit=200"),
+    queryKey: ["accounts", "expense"],
+    queryFn: () => fetcher("/api/accounts?limit=200&type=expense"),
   });
-  const accounts = Array.isArray(accountsRes) ? accountsRes : [];
+  const customAccounts: any[] = Array.isArray(accountsRes)
+    ? accountsRes
+    : Array.isArray(accountsRes?.data)
+    ? accountsRes.data
+    : [];
+
+  // Union des comptes officiels SYSCOHADA et des comptes personnalisés en base
+  const availableAccounts = (() => {
+    const map = new Map<string, { code: string; name: string; category: string; description?: string }>();
+    for (const a of SYSCOHADA_EXPENSE_ACCOUNTS) {
+      map.set(a.code, a);
+    }
+    for (const a of customAccounts) {
+      if (a.code && a.code.startsWith("6")) {
+        const existing = map.get(a.code);
+        map.set(a.code, {
+          code: a.code,
+          name: a.name.startsWith(a.code) ? a.name : `${a.code} - ${a.name}`,
+          category: existing?.category || `Classe 6 - ${a.code.slice(0, 2)}`,
+          description: existing?.description,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
+  })();
+
+  const selectedAccountInfo = availableAccounts.find((a) => a.code === accountCode);
 
   const handleTransform = async () => {
     if (!selectedDoc) return;
@@ -479,30 +519,79 @@ export const Documents = () => {
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted">Compte de charge (SYSCOHADA)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted">Compte de charge (SYSCOHADA)</Label>
+                    {selectedAccountInfo && (
+                      <span className="text-[10px] font-medium text-primary px-1.5 py-0.5 rounded bg-primary/10">
+                        {selectedAccountInfo.category}
+                      </span>
+                    )}
+                  </div>
                   <select
-                    className="flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-xs text-ink shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary mt-1"
+                    className="flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-xs text-ink shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary mt-1 font-medium"
                     value={accountCode}
                     onChange={(e) => setAccountCode(e.target.value)}
                   >
-                    <option value="606">606 - Achats non stockés de matières et fournitures</option>
-                    <option value="601">601 - Achats de marchandises</option>
-                    <option value="622">622 - Rémunérations d'intermédiaires et honoraires</option>
-                    <option value="625">625 - Déplacements, missions et réceptions</option>
-                    <option value="626">626 - Frais postaux et télécommunications</option>
-                    <option value="628">628 - Frais divers de gestion (logiciels & abonnements)</option>
-                    {accounts
-                      .filter(
-                        (a: any) =>
-                          a.code.startsWith("6") &&
-                          !["606", "601", "622", "625", "626", "628"].includes(a.code)
-                      )
-                      .map((a: any) => (
-                        <option key={a.code} value={a.code}>
-                          {a.code} - {a.name}
-                        </option>
-                      ))}
+                    <optgroup label="60 - Achats de biens & matières">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("60"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="61 - Transports">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("61"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="62 - Services extérieurs A (Locations, Entretien, Logiciels/SaaS)">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("62"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="63 - Services extérieurs B (Honoraires, Télécoms, Missions)">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("63"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="64 - Impôts et taxes">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("64"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="65 & Autres charges">
+                      {availableAccounts
+                        .filter((a) => !["60", "61", "62", "63", "64"].includes(a.code.slice(0, 2)))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
                   </select>
+                  {selectedAccountInfo?.description && (
+                    <p className="text-[11px] text-muted italic mt-1 leading-tight">
+                      {selectedAccountInfo.description}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

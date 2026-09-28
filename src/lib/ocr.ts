@@ -1,6 +1,7 @@
 import Tesseract from "tesseract.js";
 import { prisma } from "./prisma";
 import { storage } from "./storage";
+import { inferSyscohadaExpenseAccount } from "./syscohada-accounts";
 
 /**
  * Configure de manière sécurisée pdfjs-dist en environnement Node.js / Serverless.
@@ -145,6 +146,8 @@ export function parseOCRText(text: string): {
   invoice_number?: string;
   date?: Date;
   vendor_name?: string;
+  account_code?: string;
+  account_name?: string;
 } {
   if (!text || typeof text !== "string") return {};
 
@@ -278,6 +281,9 @@ export function parseOCRText(text: string): {
     }
   }
 
+  // 7. Détection intelligente du Compte de Charge SYSCOHADA (Classe 6)
+  const expenseAccount = inferSyscohadaExpenseAccount(text, vendorName);
+
   return {
     amount,
     vat_amount: vatAmount,
@@ -285,6 +291,8 @@ export function parseOCRText(text: string): {
     invoice_number: invoiceNumber,
     date,
     vendor_name: vendorName,
+    account_code: expenseAccount.code,
+    account_name: expenseAccount.name,
   };
 }
 

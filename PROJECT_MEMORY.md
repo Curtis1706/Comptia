@@ -420,3 +420,34 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npm run test:unit` : **9/9 modules validés avec succès (100%)**.
   - `pnpm build` : **54 pages compilées avec succès**.
 
+### 2026-09-28 — Conformité Stricte du Compte de Charge SYSCOHADA (Classe 6) & Auto-Catégorisation
+
+- **Contexte & Demande utilisateur** :
+  - L'OCR fonctionne et extrait les données de factures téléversées sur Cloudflare R2.
+  - Demande : « Maintenant il faudrait que le Compte de charge (SYSCOHADA) Puisse aussi être respecté ».
+  - Constat : L'ancien code utilisait en dur le compte `606 - Achats non stockés de matières et fournitures` (qui relève du Plan Comptable Général français, mais n'existe pas dans le SYSCOHADA Révisé où l'on utilise `604`/`605` pour les fournitures et `628` pour les prestations logicielles/SaaS/licences). De plus, le compte n'était pas déduit automatiquement du contenu des factures (ex: "Prestation logicielle" de DIGIPLEX ou "Bordereau de redevances").
+- **Actions techniques effectuées** :
+  - **Création du référentiel SYSCOHADA Révisé (`src/lib/syscohada-accounts.ts`)** :
+    - Référencement exhaustif des comptes de charges usuels de la Classe 6 (60 - Achats, 61 - Transports, 62 - Services extérieurs A, 63 - Services extérieurs B, 64 - Impôts et taxes, 65 - Autres charges).
+    - Moteur d'inférence sémantique `inferSyscohadaExpenseAccount(text, vendor)` : analyse les libellés, lignes de facture et fournisseurs pour déterminer automatiquement le bon compte SYSCOHADA (ex. : `logiciel`, `licence`, `abonnement`, `hébergement`, `SaaS`, `redevance` -> **628** ; `électricité`, `eau` -> **605** ; `carburant` -> **604** ; `téléphone`, `internet` -> **628** ; `maintenance`, `réparation` -> **624** ; `honoraire`, `consultant` -> **632** ; etc.).
+  - **Intégration dans le moteur OCR (`src/lib/ocr.ts`)** :
+    - La fonction `parseOCRText` exécute désormais systématiquement l'inférence de compte et renvoie `account_code` et `account_name` dans `extracted_data`.
+  - **Mise à niveau de la transformation comptable (`src/app/api/documents/[id]/transform/route.ts`)** :
+    - Suppression définitive du compte hardcodé `606`.
+    - Prise en compte prioritaire du compte sélectionné par l'utilisateur ou inféré par l'OCR.
+    - Création automatique si nécessaire dans le plan comptable de l'entreprise (`prisma.account`) avec le bon intitulé officiel SYSCOHADA.
+    - Provisionnement sécurisé des comptes de contrepartie `401 - Fournisseurs` et `4452 - État, TVA récupérable sur achats`.
+    - Génération de l'écriture en partie double strictement équilibrée (Débit 6xx, Débit 4452 éventuel, Crédit 401).
+  - **Refonte UI de sélection du compte (`src/views/Documents.tsx`)** :
+    - Correction du déballage de la réponse API `/api/accounts` (`accountsRes?.data`).
+    - Regroupement des comptes dans le menu déroulant avec `<optgroup>` par grande catégorie SYSCOHADA.
+    - Sélection automatique immédiate du compte inféré lors du clic sur un document.
+    - Affichage d'un badge de catégorie et d'une description d'aide à la décision sous le sélecteur.
+    - Respect absolu des tokens Ceilow (`bg-background`, `border-border`, `text-ink`, `text-muted`, `bg-primary`).
+  - **Mise à niveau des 8 documents existants en base** : Mise à jour de `extracted_data.account_code = '628'` pour refléter les prestations logicielles et redevances de DIGIPLEX et Lahathèque.
+- **Validation technique** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `npm run test:unit` : **9/9 suites de tests validées (100%)**.
+  - `pnpm build` : **54 pages compilées avec succès**.
+
+

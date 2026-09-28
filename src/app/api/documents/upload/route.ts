@@ -53,9 +53,9 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 1. Sauvegarde sur le stockage physique résilient (/tmp ou public/uploads)
-    const fileUrl = await storage.uploadFile(buffer, filename, user.company_id);
-    const base64Data = file.size <= 1.5 * 1024 * 1024 ? buffer.toString("base64") : undefined;
+    // 1. Sauvegarde sur le stockage physique Cloudflare R2 (avec fallback local)
+    const fileUrl = await storage.uploadFile(buffer, filename, user.company_id, safeMime);
+    const base64Data = file.size <= 2 * 1024 * 1024 ? buffer.toString("base64") : undefined;
 
     // 2. Création du document
     const doc = await prisma.document.create({

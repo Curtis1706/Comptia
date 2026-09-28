@@ -391,3 +391,32 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npx tsc --noEmit` : 0 erreur.
   - Build en cours de verification.
 - **Lecon retenue** : Toute nouvelle utilisation de `fetch()` en dehors de `fetcher`/`mutate` DOIT inclure `credentials: "include"`. Idealement, centraliser tous les appels via `fetcher`/`mutate` pour eviter ce type de regression.
+
+### 2026-09-28 — Intégration Stockage Cloudflare R2 & Résolution Complète de l'OCR
+
+- **Contexte & Demande utilisateur** :
+  - Configuration de Cloudflare R2 pour le stockage persistant des factures et justificatifs (`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET_NAME`, `CLOUDFLARE_R2_ENDPOINT`, `CLOUDFLARE_R2_PUBLIC_URL`).
+  - Signalement : « Jusqu'à présent l'OCR sur les documents échoue » avec état rouge `error` visible sur la page `/documents`.
+- **Diagnostic approfondi de l'échec OCR** :
+  - **Cause 1 (Crash Node.js / Vercel Serverless)** : Dans `src/lib/ocr.ts`, `pdfjs.GlobalWorkerOptions.workerSrc` était forcé vers une URL CDN `https://cdnjs.cloudflare.com/...`. En environnement Node.js, l'ESM loader bloque immédiatement les URLs en protocole `https:` avec l'erreur bloquante `Only URLs with a scheme in: file, data are supported by the default ESM loader`. Le faux worker échouait et rejetait la promesse `pdfjs.getDocument()`, marquant systématiquement tous les documents en `status: "error"`.
+  - **Cause 2 (Parser inadapté à l'espace OHADA / Bénin)** : La fonction `parseOCRText` n'acceptait que les devises `€` et `EUR`. Toutes les factures béninoises (e-MECeF, FCFA, XOF) avec montants à points de milliers (`2.020.000`), IFU 13 chiffres avec caractères espacés (`I F U : 3 2 0 2 6 8 7 2 9 0 1 5 4`) et références béninoises étaient totalement ignorées.
+  - **Cause 3 (Stockage éphémère)** : Le stockage local sur conteneur serverless Vercel n'était pas partagé entre instances, provoquant des `null` buffer lors des lectures différées.
+- **Actions techniques effectuées** :
+  - **Installation du SDK Cloudflare R2 / S3** : Installation de `@aws-sdk/client-s3` (`pnpm add @aws-sdk/client-s3`).
+  - **Mise à niveau de `src/lib/storage.ts`** : Implémentation du service unifié `CloudflareR2StorageService` avec téléversement `PutObjectCommand`, extraction sécurisée de clé et téléchargement via `GetObjectCommand`, URL publique CDN Cloudflare (`pub-04ee70fd927649918bb42c881e0db428.r2.dev`) et rétrocompatibilité / fallback local `os.tmpdir()`.
+  - **Refonte de `src/lib/ocr.ts`** :
+    - Résolution propre de `pdf.worker.mjs` en environnement Node.js sans URL distante non supportée.
+    - Moteur d'extraction sémantique `parseOCRText` étendu : gestion des montants FCFA, CFA, XOF, F CFA, EUR, devises implicites, espacements inter-caractères PDF (`2 . 0 2 0 . 0 0 0` -> `2020000`), IFU béninois 13 chiffres, numéros de factures e-MECeF, dates ISO et francophones, et extraction propre du nom fournisseur (`DIGIPLEX`, `LAHATHÈQUE ÉDITIONS`).
+    - Fallback Tesseract pour les scans / images pures.
+  - **Création de la route `POST /api/documents/[id]/retry`** : Permet de relancer l'OCR à tout moment sur un document en anomalie.
+  - **Refonte UI `src/views/Documents.tsx`** :
+    - Alignement rigoureux sur les tokens Ceilow (`bg-primary text-ink`, `border-border`, `bg-background-secondary`, zéro emoji).
+    - Prévisualisation directe iframe/image depuis l'URL Cloudflare R2 ou `/api/documents/[id]/file`.
+    - Bouton interactif « Relancer l'OCR » avec spinner inline sur les documents en erreur.
+    - Saisie manuelle de secours débloquant la création d'opération même en cas de document complexe.
+  - **Migration & Réparation des documents existants** : Tous les documents en anomalie de la base de données ont été migrés sur Cloudflare R2 et retraités par le nouvel OCR (100% de succès, statut `processed`, montants et IFU extraits).
+- **Validation technique** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `npm run test:unit` : **9/9 modules validés avec succès (100%)**.
+  - `pnpm build` : **54 pages compilées avec succès**.
+

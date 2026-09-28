@@ -189,7 +189,7 @@ export type PaymentEntryLine = {
 
 /**
  * Maps a payment method to its appropriate SYSCOHADA treasury account.
- * - cash -> 541 (Caisse siège)
+ * - cash -> 571 (Caisse siège social — SYSCOHADA Révisé compte 57)
  * - bank_transfer, credit_card, western_union -> 521 (Banques locales)
  * - check -> 511 (Effets / Valeurs à encaisser)
  * - mobile_money_mtn, mobile_money_moov, mobile_money_celtiis -> 585 (Mobile Money / Transferts électroniques)
@@ -197,7 +197,7 @@ export type PaymentEntryLine = {
 export function getTreasuryAccountForPaymentMethod(paymentMethod?: string | null): string {
   switch (paymentMethod) {
     case "cash":
-      return "541";
+      return "571";
     case "check":
       return "511";
     case "mobile_money_mtn":
@@ -213,8 +213,17 @@ export function getTreasuryAccountForPaymentMethod(paymentMethod?: string | null
 }
 
 /**
+ * Détermine le journal comptable adéquat pour un mode de règlement :
+ * - cash -> "cash" (Journal de Caisse)
+ * - autres -> "bank" (Journal de Banque)
+ */
+export function getJournalForPaymentMethod(paymentMethod?: string | null): "bank" | "cash" {
+  return paymentMethod === "cash" ? "cash" : "bank";
+}
+
+/**
  * Generates the journal lines for a payment of a client invoice.
- * Debit Treasury (521/541/585/511) / Credit 411 (Clients)
+ * Debit Treasury (521/571/585/511) / Credit 411 (Clients)
  */
 export function generatePaymentEntryLines(params: {
   amount: number;
@@ -242,21 +251,24 @@ export function generatePaymentEntryLines(params: {
 
 /**
  * Generates JournalLines for a sales entry from an invoice (SYSCOHADA).
- * Debit 411 (Clients) / Credit 70x (Ventes) & Credit 4431 (TVA facturée)
+ * Debit 411 (Clients) / Credit 70x (Ventes), Credit 4431 (TVA facturée) et Credit 4471 (AIB collecté)
  */
 export function generateSalesEntryLines(invoice: {
   client_id: string;
   subtotal_ht: number;
   vat_amount: number;
   total_ttc: number;
+  aib_amount?: number;
   lines: Array<{ accounting_account?: string }>;
 }): any[] {
   const revenueAccount = invoice.lines[0]?.accounting_account ?? "706";
+  const aib = Number(invoice.aib_amount || 0);
+  const totalDebit = invoice.total_ttc + (aib > 0 && Math.abs(invoice.total_ttc - (invoice.subtotal_ht + invoice.vat_amount)) < 0.01 ? aib : 0);
 
   return [
     {
       account_code: "411",
-      debit: invoice.total_ttc,
+      debit: totalDebit,
       credit: 0,
       third_party: invoice.client_id,
       description: "Créance client",
@@ -277,6 +289,16 @@ export function generateSalesEntryLines(invoice: {
           },
         ]
       : []),
+    ...(aib > 0
+      ? [
+          {
+            account_code: "4471",
+            debit: 0,
+            credit: aib,
+            description: "AIB collecté à reverser (DGI Bénin)",
+          },
+        ]
+      : []),
   ];
 }
 
@@ -288,15 +310,18 @@ export function generateCreditNoteEntryLines(invoice: {
   subtotal_ht: number;
   vat_amount: number;
   total_ttc: number;
+  aib_amount?: number;
   lines: Array<{ accounting_account?: string }>;
 }): any[] {
   const revenueAccount = invoice.lines[0]?.accounting_account ?? "706";
+  const aib = Number(invoice.aib_amount || 0);
+  const totalCredit = invoice.total_ttc + (aib > 0 && Math.abs(invoice.total_ttc - (invoice.subtotal_ht + invoice.vat_amount)) < 0.01 ? aib : 0);
 
   return [
     {
       account_code: "411",
       debit: 0,
-      credit: invoice.total_ttc,
+      credit: totalCredit,
       third_party: invoice.client_id,
       description: "Avoir client - Diminution créance",
     },
@@ -313,6 +338,16 @@ export function generateCreditNoteEntryLines(invoice: {
             debit: invoice.vat_amount,
             credit: 0,
             description: "Avoir client - Régularisation TVA",
+          },
+        ]
+      : []),
+    ...(aib > 0
+      ? [
+          {
+            account_code: "4471",
+            debit: aib,
+            credit: 0,
+            description: "Avoir client - Régularisation AIB",
           },
         ]
       : []),

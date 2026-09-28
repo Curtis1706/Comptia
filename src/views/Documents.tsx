@@ -577,15 +577,60 @@ export const Documents = () => {
                           </option>
                         ))}
                     </optgroup>
-                    <optgroup label="65 & Autres charges">
+                    <optgroup label="65 - Autres charges d'exploitation">
                       {availableAccounts
-                        .filter((a) => !["60", "61", "62", "63", "64"].includes(a.code.slice(0, 2)))
+                        .filter((a) => a.code.startsWith("65"))
                         .map((a) => (
                           <option key={a.code} value={a.code}>
                             {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
                           </option>
                         ))}
                     </optgroup>
+                    <optgroup label="66 - Charges de personnel (Salaires, Primes, CNSS, VPS, Intérim)">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("66"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="67 - Charges financières (Intérêts, Agio, Changes)">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("67"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="68 & 69 - Dotations aux amortissements & Charges H.A.O.">
+                      {availableAccounts
+                        .filter((a) => a.code.startsWith("68") || a.code.startsWith("69"))
+                        .map((a) => (
+                          <option key={a.code} value={a.code}>
+                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                          </option>
+                        ))}
+                    </optgroup>
+                    {availableAccounts.some(
+                      (a) => !["60", "61", "62", "63", "64", "65", "66", "67", "68", "69"].includes(a.code.slice(0, 2))
+                    ) && (
+                      <optgroup label="Comptes spécifiques entreprise">
+                        {availableAccounts
+                          .filter(
+                            (a) =>
+                              !["60", "61", "62", "63", "64", "65", "66", "67", "68", "69"].includes(
+                                a.code.slice(0, 2)
+                              )
+                          )
+                          .map((a) => (
+                            <option key={a.code} value={a.code}>
+                              {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
+                            </option>
+                          ))}
+                      </optgroup>
+                    )}
                   </select>
                   {selectedAccountInfo?.description && (
                     <p className="text-[11px] text-muted italic mt-1 leading-tight">

@@ -178,6 +178,110 @@ export const SYSCOHADA_EXPENSE_ACCOUNTS: SyscohadaExpenseAccount[] = [
     category: "65 - Autres charges",
     description: "Indemnités diverses, pénalités contractuelles et charges d'exploitation résiduelles.",
   },
+
+  // 66 - Charges de personnel (SYSCOHADA Révisé)
+  {
+    code: "661",
+    name: "Rémunérations directes versées au personnel national",
+    category: "66 - Charges de personnel",
+    description: "Salaires de base, heures supplémentaires, primes, gratifications et congés payés du personnel national.",
+  },
+  {
+    code: "662",
+    name: "Rémunérations directes versées au personnel non national",
+    category: "66 - Charges de personnel",
+    description: "Salaires, primes et indemnités versés aux personnels expatriés ou non nationaux.",
+  },
+  {
+    code: "663",
+    name: "Indemnités forfaitaires versées au personnel",
+    category: "66 - Charges de personnel",
+    description: "Indemnités représentatives de frais : transport, logement, fonction, panier, per diem.",
+  },
+  {
+    code: "664",
+    name: "Charges sociales (CNSS Bénin & VPS)",
+    category: "66 - Charges de personnel",
+    description: "Cotisations patronales CNSS Bénin (Prestations familiales, Risques professionnels, Retraite) et VPS (4%).",
+  },
+  {
+    code: "666",
+    name: "Rémunérations et charges de l'exploitant individuel",
+    category: "66 - Charges de personnel",
+    description: "Prélèvements de l'exploitant individuel et cotisations sociales obligatoires associées.",
+  },
+  {
+    code: "667",
+    name: "Rémunération de personnel extérieur et intérimaire",
+    category: "66 - Charges de personnel",
+    description: "Factures des agences d'intérim et de travail temporaire pour mise à disposition de personnel.",
+  },
+  {
+    code: "668",
+    name: "Autres charges de personnel",
+    category: "66 - Charges de personnel",
+    description: "Médecine du travail, visites médicales, mutuelle d'entreprise, tenues professionnelles, cantine.",
+  },
+
+  // 67 - Frais financiers et charges assimilées
+  {
+    code: "671",
+    name: "Intérêts des emprunts et dettes",
+    category: "67 - Charges financières",
+    description: "Intérêts bancaires d'emprunts, concours financiers et découverts.",
+  },
+  {
+    code: "673",
+    name: "Escomptes accordés",
+    category: "67 - Charges financières",
+    description: "Escomptes de règlement accordés aux clients pour paiement anticipé.",
+  },
+  {
+    code: "676",
+    name: "Pertes de change",
+    category: "67 - Charges financières",
+    description: "Pertes de change constatées sur règlements ou conversions de devises.",
+  },
+  {
+    code: "678",
+    name: "Autres charges financières",
+    category: "67 - Charges financières",
+    description: "Commissions sur cautions, avals et garanties bancaires.",
+  },
+
+  // 68 - Dotations aux amortissements et provisions
+  {
+    code: "681",
+    name: "Dotations aux amortissements d'exploitation",
+    category: "68 - Dotations aux amortissements",
+    description: "Amortissement annuel des immobilisations corporelles et incorporelles.",
+  },
+  {
+    code: "685",
+    name: "Dotations aux provisions d'exploitation",
+    category: "68 - Dotations aux amortissements",
+    description: "Provisions pour litiges, dépréciations et risques d'exploitation.",
+  },
+
+  // 69 - Charges Hors Activités Ordinaires (H.A.O.)
+  {
+    code: "691",
+    name: "Valeurs comptables des cessions d'immobilisations",
+    category: "69 - Charges H.A.O.",
+    description: "Valeur nette comptable (VNC) des actifs cédés, démolis ou mis au rebut.",
+  },
+  {
+    code: "695",
+    name: "Dons et libéralités",
+    category: "69 - Charges H.A.O.",
+    description: "Dons caritatifs, mécénat et abandons de créances consentis.",
+  },
+  {
+    code: "698",
+    name: "Autres charges hors activités ordinaires",
+    category: "69 - Charges H.A.O.",
+    description: "Pénalités fiscales, rappels de droits, sinistres et charges exceptionnelles.",
+  },
 ];
 
 /**
@@ -189,6 +293,107 @@ export function inferSyscohadaExpenseAccount(
   vendorName?: string
 ): { code: string; name: string } {
   const content = `${vendorName || ""} ${text || ""}`.toLowerCase();
+
+  // 0. Charges sociales patronales (CNSS Bénin & VPS) -> 664
+  if (
+    content.includes("cnss") ||
+    content.includes("sécurité sociale") ||
+    content.includes("securite sociale") ||
+    content.includes("caisse nationale de sécurité sociale") ||
+    content.includes("cotisation patronale") ||
+    content.includes("cotisations patronales") ||
+    content.includes("cotisations sociales") ||
+    content.includes("charges sociales") ||
+    content.includes("vps") ||
+    content.includes("versement patronal") ||
+    content.includes("quittance cnss") ||
+    content.includes("appel de cotisation")
+  ) {
+    return {
+      code: "664",
+      name: "664 - Charges sociales (CNSS Bénin & VPS)",
+    };
+  }
+
+  // 0. Salaires & Rémunérations directes du personnel -> 661
+  if (
+    content.includes("bulletin de paie") ||
+    content.includes("bulletin de salaire") ||
+    content.includes("fiche de paie") ||
+    content.includes("état des salaires") ||
+    content.includes("etat des salaires") ||
+    content.includes("salaire brut") ||
+    content.includes("salaire net") ||
+    content.includes("virement de salaire") ||
+    content.includes("rémunération du personnel") ||
+    content.includes("remuneration du personnel") ||
+    content.includes("13ème mois") ||
+    content.includes("13eme mois") ||
+    content.includes("gratification") ||
+    content.includes("prime de fin d'année") ||
+    content.includes("solde de tout compte") ||
+    content.includes("avance sur salaire") ||
+    content.includes("acompte sur salaire") ||
+    content.includes("indemnité de congés")
+  ) {
+    return {
+      code: "661",
+      name: "661 - Rémunérations directes versées au personnel national",
+    };
+  }
+
+  // 0. Personnel intérimaire et travail temporaire -> 667
+  if (
+    content.includes("intérim") ||
+    content.includes("interim") ||
+    content.includes("travail temporaire") ||
+    content.includes("personnel temporaire") ||
+    content.includes("mise à disposition de personnel") ||
+    content.includes("agence d'intérim") ||
+    content.includes("agence d'interim") ||
+    content.includes("manpower") ||
+    content.includes("adecco")
+  ) {
+    return {
+      code: "667",
+      name: "667 - Rémunération de personnel extérieur et intérimaire",
+    };
+  }
+
+  // 0. Indemnités forfaitaires au personnel -> 663
+  if (
+    content.includes("indemnité de transport") ||
+    content.includes("indemnite de transport") ||
+    content.includes("indemnité kilométrique") ||
+    content.includes("indemnité de logement") ||
+    content.includes("indemnité de panier") ||
+    content.includes("indemnité de fonction") ||
+    content.includes("per diem personnel")
+  ) {
+    return {
+      code: "663",
+      name: "663 - Indemnités forfaitaires versées au personnel",
+    };
+  }
+
+  // 0. Autres charges de personnel (Médecine du travail, mutuelle, tenues) -> 668
+  if (
+    content.includes("médecine du travail") ||
+    content.includes("medecine du travail") ||
+    content.includes("visite médicale d'embauche") ||
+    content.includes("visite medicale") ||
+    content.includes("mutuelle santé entreprise") ||
+    content.includes("tenue de travail") ||
+    content.includes("vêtement de travail") ||
+    content.includes("chaussures de sécurité") ||
+    content.includes("cantine du personnel") ||
+    content.includes("repas du personnel")
+  ) {
+    return {
+      code: "668",
+      name: "668 - Autres charges de personnel",
+    };
+  }
 
   // 1. Logiciels, Informatique, SaaS, Licences, Redevances -> 628
   if (
@@ -377,7 +582,7 @@ export function inferSyscohadaExpenseAccount(
     };
   }
 
-  // 10. Frais bancaires -> 631
+  // 10. Frais bancaires & Agio -> 631
   if (
     content.includes("frais bancaire") ||
     content.includes("agios") ||

@@ -26,11 +26,40 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
     if (!document) return errorResponse("Document non trouvé", 404);
 
-    const ref = invoice_number || (await nextEntryReference(prisma, user.company_id, "AC"));
     const effectiveAccountCode = account_code || (document.extracted_data as any)?.account_code || "628";
     const totalAmount = Number(amount) || 0;
-    const vat = Number(vat_amount) || 0;
+
+    // Détermination de la typologie comptable selon la classe SYSCOHADA
+    const isSalariesAccount = ["661", "662", "663"].includes(effectiveAccountCode);
+    const isCnssAccount = effectiveAccountCode === "664";
+    const isPayrollAccount = isSalariesAccount || isCnssAccount;
+
+    // TVA : les salaires et cotisations sociales sont hors champ TVA (0 TVA)
+    const vat = isPayrollAccount ? 0 : Number(vat_amount) || 0;
     const netChargeAmount = Math.max(0, totalAmount - vat);
+
+    // Définition de la contrepartie au passif (401 Fournisseurs, 421 Personnel, ou 431 Sécurité Sociale)
+    let counterpartCode = "401";
+    let counterpartName = "Fournisseurs, dettes en compte";
+    let counterpartDesc = `Dette ${vendor_name || ""}`.trim();
+    let journalType: "purchases" | "payroll" = "purchases";
+    let journalPrefix = "AC";
+
+    if (isSalariesAccount) {
+      counterpartCode = "421";
+      counterpartName = "Personnel, rémunérations dues";
+      counterpartDesc = `Rémunérations dues ${vendor_name || "au personnel"}`.trim();
+      journalType = "payroll";
+      journalPrefix = "PAIE";
+    } else if (isCnssAccount) {
+      counterpartCode = "431";
+      counterpartName = "Sécurité sociale (CNSS)";
+      counterpartDesc = `Cotisations sociales dues CNSS / VPS`.trim();
+      journalType = "payroll";
+      journalPrefix = "PAIE";
+    }
+
+    const ref = invoice_number || (await nextEntryReference(prisma, user.company_id, journalPrefix));
 
     // 1. Assurer l'existence du compte de charge SYSCOHADA dans le plan de l'entreprise
     const chargeAccountExists = await prisma.account.findFirst({
@@ -53,17 +82,17 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
         .catch(() => {});
     }
 
-    // 2. Assurer l'existence du compte Fournisseur (401)
-    const supplierAccountExists = await prisma.account.findFirst({
-      where: { code: "401", company_id: user.company_id },
+    // 2. Assurer l'existence du compte de contrepartie (401, 421 ou 431)
+    const counterpartAccountExists = await prisma.account.findFirst({
+      where: { code: counterpartCode, company_id: user.company_id },
     });
-    if (!supplierAccountExists) {
+    if (!counterpartAccountExists) {
       await prisma.account
         .create({
           data: {
             company_id: user.company_id,
-            code: "401",
-            name: "Fournisseurs, dettes en compte",
+            code: counterpartCode,
+            name: counterpartName,
             type: "liability",
             is_active: true,
             is_postable: true,
@@ -99,9 +128,12 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     const entry = await prisma.journalEntry.create({
       data: {
         company_id: user.company_id,
+        created_by: user.id,
         date: entryDate,
-        description: `Saisie OCR: ${vendor_name || "Fournisseur"} (Facture ${ref})`,
-        journal: "purchases",
+        description: isPayrollAccount
+          ? `Pièce RH / Paie: ${vendor_name || "Personnel"} (${ref})`
+          : `Saisie OCR: ${vendor_name || "Fournisseur"} (Facture ${ref})`,
+        journal: journalType,
         status: "draft",
         reference: ref,
         lines: {
@@ -112,7 +144,10 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
               account_code: effectiveAccountCode,
               debit: netChargeAmount,
               credit: 0,
-              description: `Achat ${vendor_name || ""}`.trim(),
+              description: (isPayrollAccount
+                ? `Charge personnel ${vendor_name || ""}`
+                : `Achat ${vendor_name || ""}`
+              ).trim(),
             },
             // Débit : TVA déductible (si applicable)
             ...(vat > 0
@@ -126,13 +161,13 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
                   },
                 ]
               : []),
-            // Crédit : Dette Fournisseur 401 (TTC)
+            // Crédit : Contrepartie (401 Fournisseurs, 421 Salariés, 431 Sécurité Sociale)
             {
               company_id: user.company_id,
-              account_code: "401",
+              account_code: counterpartCode,
               debit: 0,
               credit: totalAmount,
-              description: `Dette ${vendor_name || ""}`.trim(),
+              description: counterpartDesc,
             },
           ],
         },

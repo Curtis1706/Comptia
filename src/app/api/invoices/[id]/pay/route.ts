@@ -65,20 +65,35 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
         data: { status: isPaid ? "paid" : "sent" },
       });
 
-      // 3. Generate automatic JournalEntry
+      // 3. Generate automatic JournalEntry (SYSCOHADA Révisé)
       const entryLines = generatePaymentEntryLines({
         amount,
         client_id: invoice.client_id,
         payment_method,
       });
       const entryReference = `PAY-${invoice.reference}-${invoice.payments.length + 1}`;
+      const journalType = payment_method === "cash" ? "cash" : "bank";
+
+      const treasuryCode = entryLines[0]?.account_code || "521";
+      const treasuryName =
+        treasuryCode === "571"
+          ? "Caisse siège social"
+          : treasuryCode === "585"
+          ? "Mobile Money"
+          : "Banques locales";
+
+      await tx.account.upsert({
+        where: { code_company_id: { code: treasuryCode, company_id: user.company_id } },
+        create: { code: treasuryCode, name: treasuryName, type: "asset", company_id: user.company_id },
+        update: {},
+      }).catch(() => {});
 
       await tx.journalEntry.create({
         data: {
           date: payment_date,
           reference: entryReference,
           description: `Paiement facture ${invoice.reference}`,
-          journal: "bank",
+          journal: journalType,
           status: "validated",
           company_id: user.company_id,
           created_by: user.id,

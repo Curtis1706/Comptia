@@ -450,4 +450,73 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npm run test:unit` : **9/9 suites de tests validées (100%)**.
   - `pnpm build` : **54 pages compilées avec succès**.
 
+### 2026-09-28 — Intégration Complète de la Classe 66 (Charges de personnel) & Classes 67 à 69 SYSCOHADA
+
+- **Contexte & Demande utilisateur** :
+  - Remarque essentielle de l'utilisateur : « Je crois que les salariés constituent une charge pour l'entreprise ».
+  - Constat : Les charges de personnel (salaires, cotisations patronales CNSS, VPS, intérim, indemnités, médecine du travail) constituent l'une des charges principales d'exploitation d'une entreprise. Elles étaient absentes du sélecteur et du référentiel des charges usuelles [syscohada-accounts.ts](file:///c:/Projects/brightbook-studio/src/lib/syscohada-accounts.ts) et de l'interface [Documents.tsx](file:///c:/Projects/brightbook-studio/src/views/Documents.tsx).
+- **Actions techniques effectuées** :
+  - **Extension du référentiel SYSCOHADA Révisé (`src/lib/syscohada-accounts.ts`)** :
+    - **Classe 66 — Charges de personnel** :
+      - `661` : Rémunérations directes versées au personnel national (salaires, primes, 13e mois, heures sup, congés payés).
+      - `662` : Rémunérations directes versées au personnel non national (expatriés / étrangers).
+      - `663` : Indemnités forfaitaires versées au personnel (transport, logement, fonction, panier, per diem).
+      - `664` : Charges sociales patronales (Cotisations CNSS Bénin : Prestations familiales, Risques pro, Retraite + VPS 4%).
+      - `666` : Rémunérations et charges sociales de l'exploitant individuel.
+      - `667` : Rémunération de personnel extérieur et intérimaire (agences de travail temporaire).
+      - `668` : Autres charges de personnel (médecine du travail, visites médicales, mutuelle, cantine, tenues).
+    - **Classes 67, 68 et 69** :
+      - `671` (Intérêts d'emprunts), `673` (Escomptes), `676` (Pertes de change), `678` (Autres charges financières).
+      - `681` (Dotations amortissements d'exploitation), `685` (Dotations provisions).
+      - `691` (VNC cessions actifs), `695` (Dons), `698` (Charges exceptionnelles HAO).
+  - **Inférence sémantique automatique OCR (`inferSyscohadaExpenseAccount`)** :
+    - Priorité absolue aux détections RH & sociales :
+      - Pièces CNSS, cotisations patronales, VPS -> `664`.
+      - Bulletins de salaire, fiches de paie, primes, 13ème mois -> `661`.
+      - Factures agences d'intérim, travail temporaire -> `667`.
+      - Indemnités transport / déplacement du personnel -> `663`.
+      - Médecine du travail, visites médicales, tenues de travail -> `668`.
+  - **Mise à niveau UI (`src/views/Documents.tsx`)** :
+    - Ajout du groupe `<optgroup label="66 - Charges de personnel (Salaires, Primes, CNSS, VPS, Intérim)">`.
+    - Ajout des groupes pour la classe 67 (Charges financières) et 68-69 (Dotations et HAO).
+    - Sélection et affichage contextuel de l'intitulé et des règles de déductibilité.
+  - **Génération comptable adaptée (`src/app/api/documents/[id]/transform/route.ts`)** :
+    - Correction du champ requis `created_by: user.id` dans `prisma.journalEntry.create`.
+    - Règles comptables SYSCOHADA strictes pour le personnel :
+      - Salaires (`661`, `662`, `663`) : Journal `payroll` (PAIE), 0 TVA (hors champ), contrepartie **`421 — Personnel, rémunérations dues`**.
+      - Charges sociales (`664`) : Journal `payroll` (PAIE), 0 TVA, contrepartie **`431 — Sécurité sociale (CNSS)`**.
+      - Intérim (`667`) : Journal `purchases` (AC), TVA déductible si applicable, contrepartie **`401 — Fournisseurs`**.
+      - Auto-création sécurisée des comptes au passif `421` et `431` dans `prisma.account`.
+- **Validation technique** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `npm run test:unit` : **9/9 suites de tests validées (100%)**.
+  - `pnpm build` : **54 pages compilées avec succès**.
+
+### 2026-09-28 — Audit Exhaustif de Conformité SYSCOHADA Révisé & Corrections Systématiques
+
+- **Contexte & Question de l'utilisateur** :
+  - « N'y a t'il pas d'autres oubli dans le projet conformément au SYSCOHADA Révisé ? »
+  - Exécution d'un audit de fond croisant l'Acte Uniforme relatif au Droit Comptable et à l'Information Financière (AUDCIF / SYSCOHADA Révisé) et les spécificités fiscales et sociales béninoises (DGI / CNSS).
+- **Anomalies & Oublis identifiés lors de l'audit** :
+  1. **Anomalie majeure : Compte de Caisse (`541` vs `571`)** :
+     - Le projet utilisait `541` pour la caisse dans `accounting.ts`, `invoices/route.ts`, `seed.ts`, `Rapprochement.tsx`, et les tests.
+     - *Correction SYSCOHADA* : En SYSCOHADA Révisé, **`57` est le compte officiel de Caisse** (`571` Caisse siège social, `572` Caisse succursale). Le compte **`54` est réservé aux Instruments de trésorerie**. Remplacement intégral de `541` par `571`.
+  2. **Anomalie de Journal : Encaissements espèces imputés en banque** :
+     - Les paiements `cash` étaient enregistrés avec `journal: "bank"` dans `invoices/[id]/pay/route.ts`.
+     - *Correction SYSCOHADA* : Les règlements espèces sont désormais rigoureusement routés vers le journal de **Caisse (`cash`)**, tandis que les chèques/virements vont vers `bank`.
+  3. **Erreur d'inversion : Compte 707 (Ventes vs Produits accessoires)** :
+     - Dans `invoices/route.ts`, `707` était intitulé "Ventes de produits finis" (confusion avec le plan français).
+     - *Correction SYSCOHADA* : En SYSCOHADA Révisé, **`702`** est Ventes de produits finis et **`707`** est Produits accessoires.
+  4. **Comptabilisation de l'AIB (DGI Bénin) dans les factures de vente** :
+     - `generateSalesEntryLines` et `generateCreditNoteEntryLines` n'isolaient pas l'AIB (1% ou 5%).
+     - *Correction SYSCOHADA* : L'AIB collecté est désormais crédité au compte dédié **`4471 — État, AIB retenu/collecté à reverser`**, équilibrant parfaitement la créance client `411` (TTC + AIB).
+  5. **Purge des résidus PCG français dans les jeux d'exemples** :
+     - Remplacement dans `mock.ts` des anciens comptes `512` (Banque française BNP) par `521001` (Ecobank / BOA Bénin), `606` par `605`, `641` (salaires en France) par `661` (Salaires SYSCOHADA), `44566` par `4452`, et déclarations "CA3" par "e-TVA DGI Bénin".
+- **Validation technique** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `npm run test:unit` : **9/9 suites de tests validées (100%)**.
+  - `pnpm build` : **54 pages compilées avec succès**.
+
+
+
 

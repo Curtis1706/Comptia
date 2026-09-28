@@ -34,7 +34,7 @@ export function testVatAndAccountingEngine() {
   console.assert(totalDebitCredit === 59_000 && totalCreditCredit === 59_000, "Facture d'avoir non équilibrée");
   console.log("  ✅ Facture d'avoir (4431 débit / 411 crédit) validée");
 
-  // 3. Encaissement Mobile Money (Compte 585) vs Banque (521) vs Caisse (541)
+  // 3. Encaissement Mobile Money (Compte 585) vs Banque (521) vs Caisse (571)
   const momoPayment = generatePaymentEntryLines({
     payment_method: "mobile_money_mtn",
     amount: 118_000,
@@ -54,8 +54,8 @@ export function testVatAndAccountingEngine() {
     amount: 50_000,
     invoice_reference: "FAC-2026-0002",
   });
-  console.assert(cashPayment.some(l => l.account_code === "541"), "Compte Caisse 541 manquant dans le règlement espèces");
-  console.log("  ✅ Encaissements Trésorerie (Mobile Money 585 / Banque 521 / Caisse 541) validés");
+  console.assert(cashPayment.some(l => l.account_code === "571"), "Compte Caisse 571 manquant dans le règlement espèces (SYSCOHADA Révisé)");
+  console.log("  ✅ Encaissements Trésorerie (Mobile Money 585 / Banque 521 / Caisse 571) validés");
 
   return true;
 }

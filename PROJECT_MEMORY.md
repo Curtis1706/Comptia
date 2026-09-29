@@ -584,16 +584,14 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Zéro bordure d'accent unilatérale : l'élément actif utilise uniquement `!bg-primary/15 !text-ink font-semibold`.
     - Zéro mock : branché sur `useQuery(["me"])` et les permissions réelles (`hasAccess`, `isModuleEnabledForSector`).
     - Zéro emoji, zéro glassmorphisme, 100% en français.
-  - **Mode Pliable / Dépliable (Collapsible - Icônes Seules)** :
-    - Gestion d'état fluide et persistance de la préférence utilisateur dans `localStorage` (`ceilow_sidebar_collapsed`).
-    - En mode plié (`collapsed`) :
-      - Largeur réduite à `w-16` (64px) et ajustement automatique du contenu principal à `lg:pl-16` (vs `lg:pl-64`).
-      - Affichage du picto officiel Ceilow sombre [public/logo/picto_ceilow_web_sombre.svg](file:///e:/Comptia/public/logo/picto_ceilow_web_sombre.svg).
-      - Affichage exclusif des icônes de navigation centrées sans texte, accompagnées d'infobulles contextuelles accessibles (`title`).
-      - Bouton toggle dédié (`PanelLeftClose` / `PanelLeftOpen`) pour basculer aisément entre mode complet et mode icônes seules.
+  - **Mode Rail avec Dépliage Automatique au Survol (Hover to Expand)** :
+    - Sur Desktop : la barre latérale reste par défaut en mode rail compact (`w-16`) avec les icônes seules et le picto Ceilow sombre.
+    - Dès que la souris survole la zone (`onMouseEnter`), elle s'ouvre fluidement en `w-64` avec une ombre douce (`shadow-2xl`) sans provoquer de décalage de mise en page (`lg:pl-16` constant sur le contenu principal).
+    - Dès que la souris quitte la zone (`onMouseLeave`), elle se replie instantanément en mode rail.
+    - Zéro bouton de clic manuel superflu requis (standard UX moderne du marché).
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 13.7s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 23.7s).
 
 
 

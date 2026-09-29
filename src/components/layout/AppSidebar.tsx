@@ -14,8 +14,6 @@ import {
   LogOut,
   ChevronDown,
   Search,
-  PanelLeftClose,
-  PanelLeftOpen,
   X,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -80,35 +78,30 @@ const navGroups: NavGroupConfig[] = [
 interface Props {
   open: boolean;
   onClose: () => void;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
 function WorkspaceSwitcher({
   companyName,
   role,
-  collapsed,
+  isExpanded,
 }: {
   companyName: string;
   role: string;
-  collapsed?: boolean;
+  isExpanded: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const initial = companyName.charAt(0).toUpperCase() || "C";
   const roleLabel = ROLE_LABELS[role] || "Propriétaire";
 
-  if (collapsed) {
+  if (!isExpanded) {
     return (
       <div className="flex justify-center mb-3">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-9 h-9 rounded-lg bg-primary text-ink flex items-center justify-center font-bold text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        <div
+          className="w-9 h-9 rounded-lg bg-primary text-ink flex items-center justify-center font-bold text-xs shadow-sm cursor-default"
           title={`${companyName} (${roleLabel})`}
-          aria-label={companyName}
         >
           {initial}
-        </button>
+        </div>
       </div>
     );
   }
@@ -146,7 +139,7 @@ function WorkspaceSwitcher({
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-[52px] left-0 w-full bg-background border border-border rounded-lg shadow-lg z-50 py-1 flex flex-col gap-0.5">
+          <div className="absolute top-[52px] left-0 w-full bg-background border border-border rounded-lg shadow-lg z-50 py-1 flex flex-col gap-0.5 animate-in fade-in duration-100">
             <div className="px-3 py-2 text-xs font-semibold text-ink bg-primary/10 rounded mx-1">
               {companyName}
             </div>
@@ -166,12 +159,9 @@ function WorkspaceSwitcher({
   );
 }
 
-export const AppSidebar = ({
-  open,
-  onClose,
-  collapsed = false,
-  onToggleCollapse,
-}: Props) => {
+export const AppSidebar = ({ open, onClose }: Props) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   const { data: userRes } = useQuery<any>({
     queryKey: ["me"],
     queryFn: () => fetcher("/api/auth/me"),
@@ -191,6 +181,9 @@ export const AppSidebar = ({
     hasAccess("mecef_settings") ||
     hasAccess("audit_log") ||
     hasAccess("subscription_billing");
+
+  // Déplié si ouvert sur mobile (open) ou si survolé par la souris sur desktop (isHovered)
+  const isExpanded = open || isHovered;
 
   const filterItem = (item: NavItemConfig): boolean => {
     const sectorOk = isModuleEnabledForSector(sector, item.key);
@@ -226,18 +219,20 @@ export const AppSidebar = ({
       />
 
       <aside
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className={cn(
-          "fixed left-0 top-0 h-full bg-background-secondary border-r border-border z-50 flex flex-col justify-between select-none transition-all duration-300 lg:translate-x-0 font-sans",
-          collapsed ? "w-16" : "w-64",
-          open ? "translate-x-0" : "-translate-x-full"
+          "fixed left-0 top-0 h-full bg-background-secondary border-r border-border z-50 flex flex-col justify-between select-none transition-all duration-200 ease-out font-sans",
+          isExpanded ? "w-64 shadow-2xl" : "w-16 shadow-none",
+          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex flex-col flex-1 min-h-0 p-3">
-          {/* En-tête avec Logo / Picto Ceilow et bouton plier/déplier */}
+          {/* En-tête : Picto quand compact, Logo complet quand survolé */}
           <div
             className={cn(
-              "h-12 flex items-center shrink-0 mb-2",
-              collapsed ? "justify-center" : "justify-between px-2"
+              "h-12 flex items-center shrink-0 mb-2 transition-all",
+              isExpanded ? "justify-between px-2" : "justify-center"
             )}
           >
             <Link
@@ -245,41 +240,22 @@ export const AppSidebar = ({
               className="flex items-center"
               title="Ceilow SYSCOHADA"
             >
-              {collapsed ? (
+              {isExpanded ? (
                 <img
-                  src="/logo/picto_ceilow_web_sombre.svg"
+                  src="/logo/ceilow_web_sombre.svg"
                   alt="Ceilow"
                   className="h-7 w-auto"
                 />
               ) : (
                 <img
-                  src="/logo/ceilow_web_sombre.svg"
+                  src="/logo/picto_ceilow_web_sombre.svg"
                   alt="Ceilow"
                   className="h-7 w-auto"
                 />
               )}
             </Link>
 
-            <div className="flex items-center gap-1">
-              {onToggleCollapse && (
-                <button
-                  type="button"
-                  onClick={onToggleCollapse}
-                  className={cn(
-                    "hidden lg:flex items-center justify-center p-1.5 rounded-md text-text-muted hover:text-ink hover:bg-surface-container transition-colors",
-                    collapsed && "mt-1"
-                  )}
-                  title={collapsed ? "Déplier la barre latérale" : "Plier la barre latérale"}
-                  aria-label={collapsed ? "Déplier la barre latérale" : "Plier la barre latérale"}
-                >
-                  {collapsed ? (
-                    <PanelLeftOpen className="w-4 h-4" />
-                  ) : (
-                    <PanelLeftClose className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-
+            {isExpanded && (
               <button
                 type="button"
                 onClick={onClose}
@@ -288,28 +264,18 @@ export const AppSidebar = ({
               >
                 <X className="h-5 w-5" />
               </button>
-            </div>
+            )}
           </div>
 
           {/* Switcher d'entreprise */}
           <WorkspaceSwitcher
             companyName={companyName}
             role={userRole}
-            collapsed={collapsed}
+            isExpanded={isExpanded}
           />
 
           {/* Raccourci Recherche ⌘K */}
-          {collapsed ? (
-            <button
-              type="button"
-              onClick={handleOpenSearch}
-              className="flex items-center justify-center w-10 h-10 mx-auto mb-3 rounded-lg bg-background border border-border text-text-muted hover:text-ink hover:border-ink transition-colors"
-              title="Recherche rapide (⌘K)"
-              aria-label="Recherche rapide"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          ) : (
+          {isExpanded ? (
             <button
               type="button"
               onClick={handleOpenSearch}
@@ -323,6 +289,16 @@ export const AppSidebar = ({
                 ⌘K
               </kbd>
             </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleOpenSearch}
+              className="flex items-center justify-center w-10 h-10 mx-auto mb-3 rounded-lg bg-background border border-border text-text-muted hover:text-ink hover:border-ink transition-colors"
+              title="Recherche rapide (⌘K)"
+              aria-label="Recherche rapide"
+            >
+              <Search className="w-4 h-4" />
+            </button>
           )}
 
           {/* Navigation groupée */}
@@ -333,12 +309,12 @@ export const AppSidebar = ({
 
               return (
                 <div key={groupIdx} className="flex flex-col gap-0.5">
-                  {!collapsed && group.heading && (
+                  {isExpanded && group.heading && (
                     <span className="px-2.5 mb-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
                       {group.heading}
                     </span>
                   )}
-                  {collapsed && groupIdx > 0 && (
+                  {!isExpanded && groupIdx > 0 && (
                     <div className="h-px bg-border/40 mx-2 my-1.5" />
                   )}
                   {visibleGroupItems.map((item) => {
@@ -350,16 +326,16 @@ export const AppSidebar = ({
                         end={item.to === "/dashboard"}
                         className={cn(
                           "flex items-center rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs",
-                          collapsed
-                            ? "justify-center w-10 h-10 mx-auto"
-                            : "gap-2.5 px-2.5 py-2"
+                          isExpanded
+                            ? "gap-2.5 px-2.5 py-2"
+                            : "justify-center w-10 h-10 mx-auto"
                         )}
                         activeClassName="!bg-primary/15 !text-ink font-semibold"
                         onClick={onClose}
-                        title={collapsed ? item.label : undefined}
+                        title={!isExpanded ? item.label : undefined}
                       >
                         <Icon className="w-4 h-4 shrink-0" />
-                        {!collapsed && <span className="truncate">{item.label}</span>}
+                        {isExpanded && <span className="truncate">{item.label}</span>}
                       </NavLink>
                     );
                   })}
@@ -376,16 +352,16 @@ export const AppSidebar = ({
               to="/parametres"
               className={cn(
                 "flex items-center rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs",
-                collapsed
-                  ? "justify-center w-10 h-10 mx-auto"
-                  : "gap-2.5 px-2.5 py-2"
+                isExpanded
+                  ? "gap-2.5 px-2.5 py-2"
+                  : "justify-center w-10 h-10 mx-auto"
               )}
               activeClassName="!bg-primary/15 !text-ink font-semibold"
               onClick={onClose}
-              title={collapsed ? "Paramètres" : undefined}
+              title={!isExpanded ? "Paramètres" : undefined}
             >
               <Settings className="w-4 h-4 shrink-0" />
-              {!collapsed && <span>Paramètres</span>}
+              {isExpanded && <span>Paramètres</span>}
             </NavLink>
           )}
 
@@ -394,24 +370,24 @@ export const AppSidebar = ({
             onClick={handleSignOut}
             className={cn(
               "flex items-center rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs w-full",
-              collapsed
-                ? "justify-center w-10 h-10 mx-auto"
-                : "gap-2.5 px-2.5 py-2 text-left"
+              isExpanded
+                ? "gap-2.5 px-2.5 py-2 text-left"
+                : "justify-center w-10 h-10 mx-auto"
             )}
-            title={collapsed ? "Déconnexion" : undefined}
+            title={!isExpanded ? "Déconnexion" : undefined}
           >
             <LogOut className="w-4 h-4 shrink-0" />
-            {!collapsed && <span>Déconnexion</span>}
+            {isExpanded && <span>Déconnexion</span>}
           </button>
 
           <div
             className={cn(
               "mt-1 pt-2 border-t border-border/50 text-text-muted text-[11px] flex items-center",
-              collapsed ? "justify-center" : "justify-between px-2.5"
+              isExpanded ? "justify-between px-2.5" : "justify-center"
             )}
-            title={collapsed ? "Réseau e-MECeF Bénin : Opérationnel" : undefined}
+            title={!isExpanded ? "Réseau e-MECeF Bénin : Opérationnel" : undefined}
           >
-            {!collapsed && <span>Réseau e-MECeF Bénin</span>}
+            {isExpanded && <span>Réseau e-MECeF Bénin</span>}
             <span
               className="inline-block w-2 h-2 rounded-full bg-success"
               title="Opérationnel"

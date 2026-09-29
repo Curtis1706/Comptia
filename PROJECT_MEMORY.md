@@ -589,9 +589,11 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Dès que la souris survole la zone (`onMouseEnter`), elle s'ouvre fluidement en `w-64` avec une ombre douce (`shadow-2xl`) sans provoquer de décalage de mise en page (`lg:pl-16` constant sur le contenu principal).
     - Dès que la souris quitte la zone (`onMouseLeave`), elle se replie instantanément en mode rail.
     - Zéro bouton de clic manuel superflu requis (standard UX moderne du marché).
+- **Correction Typage NavLink** :
+  - Dans [src/components/NavLink.tsx](file:///e:/Comptia/src/components/NavLink.tsx) : extension de `NavLinkCompatProps` avec `React.AnchorHTMLAttributes<HTMLAnchorElement>` pour autoriser `title`, `aria-label` et l'ensemble des attributs HTML natifs sans erreur TypeScript.
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 23.7s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 34.1s).
 
 
 

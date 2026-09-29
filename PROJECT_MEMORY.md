@@ -220,6 +220,35 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npx tsc --noEmit` : **0 erreur**.
   - `pnpm build` : **0 erreur** (55 pages compilées).
 
+### 2026-09-29 - Refonte Complète du Dashboard et du Header (Charte Officielle Ceilow)
+
+- **Actions effectuées** :
+  - **Refonte de l'en-tête ([AppHeader.tsx](file:///e:/Comptia/src/components/layout/AppHeader.tsx))** :
+    - Épuration absolue selon les exigences strictes de l'utilisateur : suppression intégrale des blocs mockés `e-MECeF/DGI : Opérationnel`, `Exercice fiscal 2025 (SYSCOHADA)`, et de la mention textuelle `Direction générale / Société Bénin Digital SARL`.
+    - Conservation exclusive des notifications en temps réel (Popover avec pastille des non lus, marquage comme lu et liste horodatée) et de l'avatar profil sobre (picto Ceilow ou avatar utilisateur avec menu déroulant pour accès profil, abonnement, paramètres et déconnexion).
+    - Maintien du bouton de bascule du menu burger sur petits écrans pour garantir l'ergonomie mobile-first.
+  - **Refonte de la barre latérale ([AppSidebar.tsx](file:///e:/Comptia/src/components/layout/AppSidebar.tsx))** :
+    - Remplacement du fond sombre par les tokens sémantiques Ceilow (`bg-background-secondary`, `border-border`, `text-ink`, `text-text-muted`).
+    - Intégration du logo officiel vectoriel [ceilow_web_sombre.svg](file:///e:/Comptia/public/logo/ceilow_web_sombre.svg) et du statut Réseau e-MECeF Bénin.
+    - Éléments de navigation stylisés avec état actif sobre (`bg-primary/15 text-ink font-semibold border-l-2 border-ink`).
+  - **Refonte de la vue Dashboard ([src/views/Dashboard.tsx](file:///e:/Comptia/src/views/Dashboard.tsx))** :
+    - Câblage direct aux données réelles de l'API (`/api/dashboard/stats` et `/api/auth/me`) : zéro mock, zéro bouchon statique.
+    - Bannière d'alerte réglementaire DGI Bénin / SYSCOHADA calculée dynamiquement sur l'échéance du mois suivant, avec le montant de TVA estimé et le nombre/montant des factures impayées réelles.
+    - Grille des 6 KPIs financiers majeurs (Trésorerie Classe 5, Créances clients 411, Résultat net d'exploitation, Chiffre d'affaires Classe 7, Charges globales Classe 6, TVA nette à décaisser) dotés d'infobulles contextuelles pédagogiques.
+    - Histogramme 12 mois Ventes & Charges interactif (Recharts) aux couleurs de la charte (`#FFD946` pour le CA, `#FFA53D` pour les charges).
+    - Donut chart et ventilation détaillée des postes de charges réels de Classe 6 avec pourcentages calculés.
+    - Suivi des salaires et rémunérations validées (bulletins réels) et table des factures récentes avec statuts traduits en français et badges adaptés.
+    - Sélecteur de période interactif (Popover Calendar) réactualisant dynamiquement les métriques de la période choisie.
+    - Modales interactives opérationnelles (« Nouvelle facture » et « Saisir opération »).
+  - **Intégration de la recherche globale ([AppHeader.tsx](file:///e:/Comptia/src/components/layout/AppHeader.tsx))** :
+    - Ajout de la barre de recherche sobre (`Rechercher... ⌘K`) conforme aux tokens Ceilow (`bg-background-secondary`, `border-border`, `text-text-muted`) connectée au composant [GlobalSearch.tsx](file:///e:/Comptia/src/components/layout/GlobalSearch.tsx) pour les raccourcis et commandes rapides.
+    - Version mobile optimisée avec bouton icône tactile dédié.
+  - **Respect strict des contraintes typographiques** :
+    - Interdiction et élimination formelle du caractère em-dash (`—`), remplacé par des séparateurs neutres (`-` ou `•`).
+- **Validation technique (Règle 18)** :
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `pnpm build` : **0 erreur** (55 pages statiques et dynamiques compilées avec succès).
+
 
 
 

@@ -176,43 +176,46 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
   const canAccessBilling = hasAccess("subscription_billing") || userRole === "owner";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-xl lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-surface-container-lowest px-4 lg:px-space-lg">
       <GlobalSearch open={searchOpen} setOpen={setSearchOpen} />
-      
-      <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar} aria-label="Ouvrir la navigation">
-        <Menu className="h-5 w-5" />
-      </Button>
 
-      <div className="hidden flex-col md:flex">
-        <p className="text-xs text-muted-foreground">
-          Comptia / {companyLoading ? "..." : company?.name || "Espace Client"}
-        </p>
-        <h1 className="font-display text-lg font-semibold leading-tight text-foreground">{title}</h1>
-      </div>
-
-      <div className="ml-auto flex items-center gap-2 lg:gap-3">
-        <button 
-          onClick={() => setSearchOpen(true)}
-          className="relative hidden h-9 w-64 items-center gap-2 rounded-lg border border-border bg-secondary px-3 text-sm text-muted-foreground transition hover:bg-muted md:flex lg:w-72"
+      <div className="flex items-center gap-space-sm">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden h-9 w-9 text-ink hover:bg-surface-container"
+          onClick={onOpenSidebar}
+          aria-label="Ouvrir la navigation"
         >
-          <Search className="h-4 w-4" />
-          <span>Rechercher...</span>
-          <kbd className="pointer-events-none absolute right-2 top-1.5 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-            <span className="text-xs">⌘</span>K
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Barre de recherche sobre Ceilow */}
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          className="relative hidden sm:flex h-9 w-60 lg:w-72 items-center gap-2 rounded bg-background-secondary border border-border px-3 text-xs text-text-muted hover:bg-surface-container hover:text-ink transition-colors"
+        >
+          <Search className="h-3.5 w-3.5 text-text-muted shrink-0" />
+          <span className="flex-1 text-left">Rechercher...</span>
+          <kbd className="pointer-events-none hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-surface px-1.5 font-mono text-[10px] text-text-muted">
+            <span className="text-[11px]">⌘</span>K
           </kbd>
         </button>
 
-        {canCreateInvoice && (
-          <Button 
-            size="sm" 
-            className="hidden bg-gradient-primary shadow-sm hover:opacity-90 sm:inline-flex"
-            onClick={() => router.push("/facturation?action=new")}
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            Nouvelle facture
-          </Button>
-        )}
+        {/* Bouton recherche mobile */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="sm:hidden h-9 w-9 text-ink hover:bg-surface-container"
+          onClick={() => setSearchOpen(true)}
+          aria-label="Rechercher"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+      </div>
 
+      <div className="ml-auto flex items-center gap-space-sm">
         <Popover>
           <PopoverTrigger asChild>
             <Button 
@@ -299,30 +302,25 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
         {/* User Profile Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative flex h-10 items-center gap-2.5 rounded-full border border-border bg-secondary p-1 pr-3 transition hover:bg-muted">
+            <Button
+              variant="ghost"
+              aria-label="Profil utilisateur"
+              className="bg-background-secondary border border-border p-1.5 w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 hover:bg-surface-container transition-colors"
+            >
               {userLoading ? (
-                <Skeleton className="h-8 w-8 rounded-full" />
-              ) : (
-                <Avatar className="h-8 w-8 border border-border shadow-sm">
-                  <AvatarImage src={user?.avatar_url} alt={user?.name} />
-                  <AvatarFallback className="bg-gradient-primary text-[10px] font-bold text-white">
+                <Skeleton className="h-6 w-6 rounded-full" />
+              ) : user?.avatar_url ? (
+                <Avatar className="h-full w-full">
+                  <AvatarImage src={user.avatar_url} alt={user?.name || "Profil"} />
+                  <AvatarFallback className="text-[10px] font-bold text-ink bg-primary/20">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
+              ) : (
+                <svg className="w-5 h-5 text-ink" viewBox="0 0 49 48" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M49,20.88a2.93,2.93,0,0,0-2.1-2.28,2.79,2.79,0,0,0-1.62-.06A155,155,0,0,1,27.33,22s0,0,0,0c3.25-5.9,6.56-11.23,9.77-16a2.81,2.81,0,0,0-1-4.08A2.94,2.94,0,0,0,33,2.34a2.78,2.78,0,0,0-1,1.3,155.92,155.92,0,0,1-7.17,16.47s0,0-.05,0c-.61-2.18-1.19-4.43-1.73-6.73-.88-3.79-1.58-7.46-2.14-11a2.81,2.81,0,0,0-5.26-.9,2.73,2.73,0,0,0-.33,1.32,2.91,2.91,0,0,0,.22,1.09c2.36,5.58,4.7,11.81,6.84,18.65,0,0,0,0,0,0-2.69.27-5.45.48-8.3.61-3.89.18-7.62.21-11.18.11A2.83,2.83,0,0,0,.28,24.9,2.85,2.85,0,0,0,0,26.44a2.82,2.82,0,0,0,1.05,1.9,2.86,2.86,0,0,0,1.17.55,2.93,2.93,0,0,0,1.18,0c5.6-1.24,11.77-2.35,18.44-3.2,0,0,0,0,0,0Q20.17,28.81,18.21,32c-2.06,3.31-4.16,6.39-6.25,9.27a2.83,2.83,0,0,0-.2,3.07,2.89,2.89,0,0,0,1.13,1.09,2.82,2.82,0,0,0,3.32-.49,2.89,2.89,0,0,0,.61-.93c2-5,4.4-10.26,7.21-15.81,0,0,0,0,0,0,1.7,6,3,11.69,4,17a2.74,2.74,0,0,0,.41,1,2.84,2.84,0,0,0,3.17,1.12,2.93,2.93,0,0,0,1.86-2.47,2.83,2.83,0,0,0-.23-1.62,155.78,155.78,0,0,1-7-18,.05.05,0,0,1,0,0C33.5,24.4,40.15,24.07,46.22,24a2.87,2.87,0,0,0,1.08-.23A2.81,2.81,0,0,0,49,20.88Z" fill="#332E29" />
+                </svg>
               )}
-              <div className="hidden text-left lg:block">
-                {userLoading ? (
-                  <Skeleton className="h-3 w-20" />
-                ) : (
-                  <>
-                    <p className="text-xs font-semibold leading-tight text-foreground">{user?.name}</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <RoleIcon className="h-3 w-3 text-muted-foreground" />
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{roleInfo.label}</p>
-                    </div>
-                  </>
-                )}
-              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-60" align="end" forceMount>
@@ -367,18 +365,6 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Direct Logout Icon Button in Header for fast 1-click access */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          title="Déconnexion directe"
-          aria-label="Se déconnecter"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
       </div>
     </header>
   );

@@ -566,9 +566,14 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 - **Résolution des Avertissements CSS Tailwind** :
   - Dans [src/views/Dashboard.tsx](file:///e:/Comptia/src/views/Dashboard.tsx) : élimination du conflit `border-warning` vs `border-border` sur la bannière d'alerte, unifiée sous `border border-border`.
   - Dans [src/views/LandingView.tsx](file:///e:/Comptia/src/views/LandingView.tsx) : suppression du doublon `font-semibold font-bold` sur le badge tarifaire « Pro », unifié sous `font-bold`.
+- **Alignement Sidebar & Épuration Header Dashboard** :
+  - Dans [src/components/layout/AppSidebar.tsx](file:///e:/Comptia/src/components/layout/AppSidebar.tsx) : suppression stricte des bordures unilatérales d'accent (`border-l-2 !border-ink`), l'élément actif se distinguant désormais exclusivement par son fond sobre (`bg-primary/15`) et son texte accentué (`text-ink font-semibold`), conformément à la Règle 5.
+  - Déplacement du badge de rôle (« Propriétaire » / « Administrateur » / etc.) dans la sidebar au niveau de la section Grand Livre & Gestion.
+  - Remplacement de la couleur hexadécimale en dur sur le statut e-MECeF par le token sémantique `bg-success`.
+  - Dans [src/views/Dashboard.tsx](file:///e:/Comptia/src/views/Dashboard.tsx) : suppression du sous-titre `Pilotage d'activité` et du badge de rôle, pour un en-tête épuré et minimaliste.
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 21.5s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 21.0s).
 
 
 

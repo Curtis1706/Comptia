@@ -146,7 +146,6 @@ export const Dashboard = () => {
   const invoices = raw.invoices ?? [];
 
   const userRole = (me?.role as UserRole) || "owner";
-  const userRoleLabel = ROLE_LABELS[userRole] || "Direction générale";
 
   const selectedDate = date || new Date();
   const currentMonthYear = format(selectedDate, "MMMM yyyy", { locale: fr });
@@ -173,15 +172,7 @@ export const Dashboard = () => {
       {/* 1. EN-TÊTE DE PAGE */}
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm">
         <div className="flex flex-col gap-space-xs">
-          <div className="flex items-center gap-space-sm flex-wrap">
-            <h1 className="text-2xl lg:text-3xl font-bold text-ink tracking-tight">Tableau de bord</h1>
-            <span className="inline-flex items-center px-2 py-0.5 rounded bg-background-secondary border border-border text-ink text-xs font-semibold">
-              {userRoleLabel}
-            </span>
-          </div>
-          <p className="text-sm text-text-muted capitalize">
-            Pilotage d'activité - {currentMonthYear}
-          </p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-ink tracking-tight">Tableau de bord</h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-space-sm">

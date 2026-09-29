@@ -40,6 +40,15 @@ const items: Item[] = [
   { key: "reporting", module: "reporting", label: "Reporting & DSF", to: "/reporting", icon: TrendingUp },
 ];
 
+const ROLE_LABELS: Record<string, string> = {
+  owner: "Propriétaire",
+  admin: "Administrateur",
+  accountant: "Comptable",
+  cashier: "Caissier",
+  hr: "RH",
+  viewer: "Observateur",
+};
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -107,12 +116,14 @@ export const AppSidebar = ({ open, onClose }: Props) => {
             </button>
           </div>
 
-          <div className="px-space-md py-space-sm shrink-0">
-            <div className="px-space-sm py-space-xs">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-                Grand Livre & Gestion
-              </span>
-            </div>
+
+          <div className="px-space-md py-space-sm shrink-0 flex items-center justify-between border-b border-border/40">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+              Grand Livre & Gestion
+            </span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-background border border-border text-ink text-[10px] font-semibold">
+              {ROLE_LABELS[user?.role || "owner"] || "Propriétaire"}
+            </span>
           </div>
 
           {/* Navigation */}
@@ -125,7 +136,7 @@ export const AppSidebar = ({ open, onClose }: Props) => {
                   to={item.to}
                   end={item.to === "/dashboard"}
                   className="flex items-center gap-space-md px-space-md py-2 rounded text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
-                  activeClassName="!bg-primary/15 !text-ink font-semibold border-l-2 !border-ink"
+                  activeClassName="!bg-primary/15 !text-ink font-semibold"
                   onClick={onClose}
                 >
                   <Icon className="w-5 h-5 shrink-0" />
@@ -142,7 +153,7 @@ export const AppSidebar = ({ open, onClose }: Props) => {
             <NavLink
               to="/parametres"
               className="flex items-center gap-space-md px-space-md py-2 rounded text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
-              activeClassName="!bg-primary/15 !text-ink font-semibold border-l-2 !border-ink"
+              activeClassName="!bg-primary/15 !text-ink font-semibold"
               onClick={onClose}
             >
               <Settings className="w-5 h-5 shrink-0" />
@@ -151,7 +162,7 @@ export const AppSidebar = ({ open, onClose }: Props) => {
           )}
           <div className="mt-space-xs px-space-md py-space-xs flex items-center justify-between text-text-muted text-[11px] border-t border-border/50 pt-space-xs">
             <span>Réseau e-MECeF Bénin</span>
-            <span className="inline-block w-2 h-2 rounded-full bg-[#00855A]" title="Opérationnel"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-success" title="Opérationnel"></span>
           </div>
         </div>
       </aside>

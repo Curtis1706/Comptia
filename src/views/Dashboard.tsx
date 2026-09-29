@@ -239,7 +239,7 @@ export const Dashboard = () => {
 
       {/* 2. BANNIÈRE D'ALERTE RÉGLEMENTAIRE DGI BÉNIN / SYSCOHADA (Alerte Warning Ceilow #FFA53D) */}
       <aside
-        className="rounded-lg p-space-md bg-background-secondary border-l-4 border-warning border-t border-r border-b border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md"
+        className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md"
         role="alert"
       >
         <div className="flex items-start gap-space-md">

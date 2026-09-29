@@ -738,7 +738,7 @@ export default function LandingView() {
                   Recommandé
                 </div>
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-ink font-bold">Pro</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink">Pro</span>
                   <div className="mt-4 flex items-baseline">
                     <span className="text-4xl font-bold font-mono text-ink tabular-nums">15 000</span>
                     <span className="text-sm font-semibold text-muted-foreground ml-2">FCFA / mois</span>

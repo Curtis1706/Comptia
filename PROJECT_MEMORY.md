@@ -6,6 +6,25 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-09-29 — Refonte de la Modale de Facturation (Stepper 3 Étapes & Création Client Inline)
+
+- **Actions effectuées** :
+  - **Suppression définitive de `window.prompt`** : Remplacement de l'appel système navigateur par un formulaire inline soigné directement intégré au sein de la modale (`isCreatingClient`), avec saisie de la raison sociale, de l'IFU (13 chiffres avec validation), de l'email et du téléphone. Auto-sélection immédiate du client créé dans le formulaire et notification Toast Sonner.
+  - **Transformation en Wizard Multi-Étapes (règles §8 & §9 et standards 21st.dev)** :
+    - Élimination de l'entassement vertical surchargé. Découpage en 3 étapes guidées claires avec barre de progression (stepper) interactive et coches de complétion :
+      1. **Étape 1 : Client & Dates** : Type de document (FV, Devis, FA), sélection/création du client, dates d'émission & échéance, mode de paiement, AIB (avec détection automatique selon présence d'IFU) et référence originale pour les avoirs.
+      2. **Étape 2 : Prestations & Prix** : Tableau dynamique d'articles/services, calculs en temps réel des prix TTC et taxes DGI Bénin (Groupes A à F), ajout/suppression de lignes et sous-total partiel.
+      3. **Étape 3 : Récapitulatif & Finalisation** : Description complémentaire, message de pied de facture, récapitulatif financier certifié (Total HT, TVA, taxes spécifiques, AIB, Net à payer) et validation pour normalisation e-MECeF.
+  - **Conformité stricte de la charte Ceilow** :
+    - Élimination du dégradé interdit (`bg-gradient-primary` remplacé par `bg-primary text-ink font-bold hover:brightness-95`).
+    - Élimination de la classe interdite `text-amber-600` (remplacé par les tokens `text-ink` et `bg-warning/20`).
+    - Remplacement des tirets em-dashes `—` par des deux-points `:`.
+    - Zéro emoji, focus trap, fermeture au `Escape`, typographie Inter avec chiffres tabulaires `tnum`.
+  - **Validation & Contrôle qualité** :
+    - `npx tsc --noEmit` : 0 erreur de typage.
+    - `pnpm build` : Build de production Next.js Turbopack validé avec succès.
+
+
 ### 2026-09-29 — Refonte Graphique & Copywriting des 6 Cartes KPI du Dashboard
 
 - **Actions effectuées** :

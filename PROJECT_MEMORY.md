@@ -547,9 +547,26 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Correction de la redéclaration de variable `userRole` dans `src/views/Dashboard.tsx`.
     - Installation des dépendances via `pnpm install` pour intégrer `@aws-sdk/client-s3`.
     - Validation du commit de merge (`5bee9f4`).
+- **Refonte Complète de la Page de Connexion ([src/app/login/page.tsx](file:///e:/Comptia/src/app/login/page.tsx))** :
+  - **Inspiration 21st.dev & Adaptation Ceilow** :
+    - Layout split-screen responsive avec panneau gauche immersif (Desktop) et panneau droit centré pour le formulaire.
+    - Utilisation de l'image locale [public/login.jpg](file:///e:/Comptia/public/login.jpg) avec Next/Image optimisé, bouton de retour rapide vers l'accueil (`/`) avec icône Lucide `ArrowLeft`.
+    - Intégration du logo vectoriel blanc [public/logo/ceilow_web_blanc.svg](file:///e:/Comptia/public/logo/ceilow_web_blanc.svg) en bas de panneau avec accroche financière locale (SYSCOHADA Révisé, e-MECeF, DGI).
+  - **Formulaire & Expérience Utilisateur** :
+    - Intégration du logo officiel [public/logo/ceilow_web_sombre.svg](file:///e:/Comptia/public/logo/ceilow_web_sombre.svg) en tête de formulaire.
+    - 100% en français, zéro anglais (« Ravi de vous revoir », « Adresse email », « Mot de passe », « Se souvenir de moi », « Mot de passe oublié ? », « Se connecter »).
+    - Bascule visibilité du mot de passe avec icônes Lucide `Eye` / `EyeOff` et accessibilité (`aria-label`).
+    - Aucune dépendance tierce superflue (suppression des boutons OAuth Google et GitHub non désirés).
+    - Préservation intégrale du moteur d'authentification NextAuth v5 (`signIn("credentials")`, gestion des erreurs, redirection via `callbackUrl`, alerte compte suspendu).
+  - **Conception Mobile-First** :
+    - Masquage élégant du panneau gauche sous `lg`, formulaire pleine largeur optimisé pour mobile avec zones tactiles `>= 44px`.
+    - Bouton de retour vers l'accueil sur mobile en haut de formulaire.
+  - **Conformité Charte Ceilow** :
+    - Tokens sémantiques stricts (`bg-background`, `bg-ink`, `border-border`, `text-ink`, `text-text-muted`, `focus:ring-primary/40`).
+    - Zéro hexadécimal en dur dans les classes JSX, zéro emoji, zéro tiret cadratin (`—`).
 - **Validation technique (Règle 18)** :
-  - `npx tsc --noEmit` : **0 erreur** de typage.
-  - `pnpm build` : **0 erreur**, 54 pages statiques et dynamiques compilées avec succès en 12.9s.
+  - `npx tsc --noEmit` : **0 erreur**.
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 18.4s).
 
 
 

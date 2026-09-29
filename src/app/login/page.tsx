@@ -234,36 +234,16 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Image d'ambiance avec voile sobre */}
+        {/* Image du panneau gauche */}
         <div className="absolute inset-0">
           <Image
             src="/login.jpg"
-            alt="Espace Ceilow"
+            alt="Ceilow"
             fill
             priority
             className="object-cover"
             sizes="(max-width: 1024px) 0vw, 50vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" />
-        </div>
-
-        {/* Message et logo de bas de panneau */}
-        <div className="absolute bottom-10 left-10 right-10 z-10 text-white max-w-lg">
-          <div className="mb-4">
-            <Image
-              src="/logo/ceilow_web_blanc.svg"
-              alt="Ceilow"
-              width={140}
-              height={36}
-              className="h-8 w-auto"
-            />
-          </div>
-          <h2 className="text-xl xl:text-2xl font-bold tracking-tight text-white leading-snug">
-            La plateforme financière et comptable certifiée pour les entreprises du Bénin.
-          </h2>
-          <p className="mt-2 text-xs xl:text-sm text-white/80">
-            Comptabilité SYSCOHADA Révisé, facturation e-MECeF et déclarations fiscales automatisées.
-          </p>
         </div>
       </div>
 

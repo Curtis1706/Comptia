@@ -541,10 +541,15 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Ajout de la barre de recherche sobre (`Rechercher... ⌘K`) conforme aux tokens Ceilow (`bg-background-secondary`, `border-border`, `text-text-muted`) connectée au composant [GlobalSearch.tsx](file:///e:/Comptia/src/components/layout/GlobalSearch.tsx) pour les raccourcis et commandes rapides.
     - Version mobile optimisée avec bouton icône tactile dédié.
   - **Respect strict des contraintes typographiques** :
-    - Interdiction et élimination formelle du caractère em-dash (`—`), remplacé par des séparateurs neutres (`-` ou `•`).
+  - **Résolution des conflits de merge & Intégration Git** :
+    - Résolution des conflits de merge entre `HEAD` et `origin/main` sur 4 fichiers : `src/components/layout/AppHeader.tsx`, `src/components/layout/AppSidebar.tsx`, `src/views/Dashboard.tsx`, et `PROJECT_MEMORY.md`.
+    - Préservation intégrale du nouveau design et des tokens sémantiques Ceilow.
+    - Correction de la redéclaration de variable `userRole` dans `src/views/Dashboard.tsx`.
+    - Installation des dépendances via `pnpm install` pour intégrer `@aws-sdk/client-s3`.
+    - Validation du commit de merge (`5bee9f4`).
 - **Validation technique (Règle 18)** :
-  - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (55 pages statiques et dynamiques compilées avec succès).
+  - `npx tsc --noEmit` : **0 erreur** de typage.
+  - `pnpm build` : **0 erreur**, 54 pages statiques et dynamiques compilées avec succès en 12.9s.
 
 
 

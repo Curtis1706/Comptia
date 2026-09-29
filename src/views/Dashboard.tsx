@@ -163,7 +163,6 @@ export const Dashboard = () => {
   const caMargin = kpis.ca > 0 ? ((kpis.netResult / kpis.ca) * 100).toFixed(1) : "0.0";
   const chargesRatio = kpis.ca > 0 ? ((kpis.charges / kpis.ca) * 100).toFixed(1) : "0.0";
 
-  const userRole = me?.role || "viewer";
   const isCashier = userRole === "cashier";
   const isHr = userRole === "hr";
   const canCreateInvoice = ["owner", "admin", "accountant", "cashier"].includes(userRole);

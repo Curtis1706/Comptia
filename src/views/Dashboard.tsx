@@ -29,6 +29,8 @@ import {
   AlertCircle,
   ChevronRight,
   FileText,
+  CreditCard,
+  Scale,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

@@ -550,8 +550,7 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 - **Refonte Complète de la Page de Connexion ([src/app/login/page.tsx](file:///e:/Comptia/src/app/login/page.tsx))** :
   - **Inspiration 21st.dev & Adaptation Ceilow** :
     - Layout split-screen responsive avec panneau gauche immersif (Desktop) et panneau droit centré pour le formulaire.
-    - Utilisation de l'image locale [public/login.jpg](file:///e:/Comptia/public/login.jpg) avec Next/Image optimisé, bouton de retour rapide vers l'accueil (`/`) avec icône Lucide `ArrowLeft`.
-    - Intégration du logo vectoriel blanc [public/logo/ceilow_web_blanc.svg](file:///e:/Comptia/public/logo/ceilow_web_blanc.svg) en bas de panneau avec accroche financière locale (SYSCOHADA Révisé, e-MECeF, DGI).
+    - Utilisation de l'image locale [public/login.jpg](file:///e:/Comptia/public/login.jpg) avec Next/Image optimisé, sans aucun texte, logo ou voile superposé (image pure), avec bouton de retour rapide vers l'accueil (`/`) via l'icône Lucide `ArrowLeft`.
   - **Formulaire & Expérience Utilisateur** :
     - Intégration du logo officiel [public/logo/ceilow_web_sombre.svg](file:///e:/Comptia/public/logo/ceilow_web_sombre.svg) en tête de formulaire.
     - 100% en français, zéro anglais (« Ravi de vous revoir », « Adresse email », « Mot de passe », « Se souvenir de moi », « Mot de passe oublié ? », « Se connecter »).
@@ -566,7 +565,7 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Zéro hexadécimal en dur dans les classes JSX, zéro emoji, zéro tiret cadratin (`—`).
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 18.4s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 18.5s).
 
 
 

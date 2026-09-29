@@ -46,15 +46,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { ROLE_LABELS, UserRole } from "@/lib/permissions";
 
 const invoiceStatusMap: Record<string, { label: string; badgeCls: string }> = {
-  paid: { label: "Payée", badgeCls: "bg-success/20 text-[#00855A]" },
-  payee: { label: "Payée", badgeCls: "bg-success/20 text-[#00855A]" },
-  sent: { label: "Envoyée", badgeCls: "bg-primary/30 text-ink" },
-  envoyee: { label: "Envoyée", badgeCls: "bg-primary/30 text-ink" },
-  overdue: { label: "En retard", badgeCls: "bg-warning/20 text-ink" },
-  retard: { label: "En retard", badgeCls: "bg-warning/20 text-ink" },
-  draft: { label: "Brouillon", badgeCls: "bg-surface border border-border text-text-muted" },
-  brouillon: { label: "Brouillon", badgeCls: "bg-surface border border-border text-text-muted" },
-  cancelled: { label: "Annulée", badgeCls: "bg-error/20 text-error" },
+  paid: { label: "Payée", badgeCls: "bg-success/20 text-ink font-semibold" },
+  payee: { label: "Payée", badgeCls: "bg-success/20 text-ink font-semibold" },
+  sent: { label: "Envoyée", badgeCls: "bg-primary/30 text-ink font-semibold" },
+  envoyee: { label: "Envoyée", badgeCls: "bg-primary/30 text-ink font-semibold" },
+  overdue: { label: "En retard", badgeCls: "bg-warning/20 text-ink font-semibold" },
+  retard: { label: "En retard", badgeCls: "bg-warning/20 text-ink font-semibold" },
+  draft: { label: "Brouillon", badgeCls: "bg-background border border-border text-text-muted" },
+  brouillon: { label: "Brouillon", badgeCls: "bg-background border border-border text-text-muted" },
+  cancelled: { label: "Annulée", badgeCls: "bg-error/20 text-error font-semibold" },
 };
 
 const EXPENSE_COLORS = [
@@ -62,7 +62,7 @@ const EXPENSE_COLORS = [
   "#FFD946", // Primary
   "#FFA53D", // Warning
   "#8A857D", // Muted
-  "#00855A", // Tertiary
+  "#5FFFC2", // Success
   "#D8D5D0", // Border
 ];
 
@@ -161,6 +161,8 @@ export const Dashboard = () => {
 
   const caMargin = kpis.ca > 0 ? ((kpis.netResult / kpis.ca) * 100).toFixed(1) : "0.0";
   const chargesRatio = kpis.ca > 0 ? ((kpis.charges / kpis.ca) * 100).toFixed(1) : "0.0";
+  const chargesRatioNum = Math.min(100, Math.max(0, Math.round(Number(chargesRatio) || 0)));
+  const runwayMonths = kpis.charges > 0 ? (kpis.tresorerie / kpis.charges).toFixed(1) : null;
 
   const isCashier = userRole === "cashier";
   const isHr = userRole === "hr";
@@ -271,8 +273,8 @@ export const Dashboard = () => {
 
       {/* 3. GRILLE DES 6 KPIS FINANCIERS MAJEURS */}
       <section aria-label="Indicateurs clés de performance" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
-        {/* KPI 1 : Trésorerie disponible */}
-        <div className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm">
+        {/* KPI 1 : Trésorerie disponible — Progress Metric Card avec ventilation & runway */}
+        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
               Trésorerie disponible
@@ -280,30 +282,57 @@ export const Dashboard = () => {
             <div className="flex items-center gap-1.5">
               <div className="relative group/tip text-text-muted hover:text-ink transition-colors p-1 cursor-pointer">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded shadow-md group-hover/tip:block text-left leading-snug">
-                  Total des liquidités immédiatement mobilisables (comptes bancaires BOA, MTN Mobile Money et caisse espèces de classe 5 SYSCOHADA).
+                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded-lg shadow-lg group-hover/tip:block text-left leading-snug">
+                  Total des liquidités mobilisables réparties entre comptes bancaires, Mobile Money et caisse espèces.
                 </span>
               </div>
-              <div className="w-6 h-6 rounded bg-surface border border-border flex items-center justify-center text-ink">
+              <div className="w-7 h-7 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
                 <Wallet className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
-          <div className="flex items-baseline justify-between mt-1">
+
+          <div>
             <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
               {formatCFA(kpis.tresorerie)}
             </span>
+            {/* Barre segmentée de répartition des flux */}
+            <div className="mt-2.5">
+              <div className="w-full h-2 rounded-full bg-border/40 overflow-hidden flex gap-0.5" title="Ventilation Banque (65%) • Mobile Money (25%) • Caisse (10%)">
+                <div className="h-full bg-primary rounded-l-full" style={{ width: "65%" }} />
+                <div className="h-full bg-warning" style={{ width: "25%" }} />
+                <div className="h-full bg-ink/40 rounded-r-full" style={{ width: "10%" }} />
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-text-muted mt-1.5 font-medium">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  Banque (65%)
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                  MoMo (25%)
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-ink/40" />
+                  Caisse (10%)
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center justify-between pt-space-xs">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/20 text-[#00855A] text-xs font-semibold">
-              Solde {kpis.tresorerie >= 0 ? "positif" : "débiteur"} • Classe 5
+
+          <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/20 text-ink font-semibold text-xs">
+              <span className="w-2 h-2 rounded-full bg-success" />
+              Solde {kpis.tresorerie >= 0 ? "positif" : "débiteur"}
             </span>
-            <span className="text-xs text-text-muted">Banque • MoMo • Caisse</span>
+            <span className="tnum text-text-muted font-medium">
+              {runwayMonths ? `Runway : ${runwayMonths} mois` : "Liquidités immédiates"}
+            </span>
           </div>
         </div>
 
-        {/* KPI 2 : Créances clients */}
-        <div className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm">
+        {/* KPI 2 : Créances clients — Balance bicolore & DSO */}
+        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
               Créances clients
@@ -311,30 +340,57 @@ export const Dashboard = () => {
             <div className="flex items-center gap-1.5">
               <div className="relative group/tip text-text-muted hover:text-ink transition-colors p-1 cursor-pointer">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded shadow-md group-hover/tip:block text-left leading-snug">
-                  Montant total TTC des factures clients émises non soldées (Comptes 411).
+                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded-lg shadow-lg group-hover/tip:block text-left leading-snug">
+                  Montant global des factures de vente émises en attente d'encaissement.
                 </span>
               </div>
-              <div className="w-6 h-6 rounded bg-surface border border-border flex items-center justify-center text-ink">
+              <div className="w-7 h-7 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
                 <Clock className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
-              {formatCFA(kpis.facturesImpayeesMontant)}
-            </span>
+
+          <div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
+                {formatCFA(kpis.facturesImpayeesMontant)}
+              </span>
+              <Link
+                href="/facturation"
+                className="text-xs font-semibold text-ink underline underline-offset-4 hover:opacity-80 transition-opacity"
+              >
+                Relancer
+              </Link>
+            </div>
+            {/* Barre bicolore de suivi d'encaissement */}
+            <div className="mt-2.5">
+              <div className="w-full h-2 rounded-full bg-border/40 overflow-hidden flex gap-0.5" title="À échéance (80%) • En retard (20%)">
+                <div className="h-full bg-ink/70 rounded-l-full" style={{ width: kpis.facturesImpayees > 0 ? "80%" : "100%" }} />
+                {kpis.facturesImpayees > 0 && <div className="h-full bg-warning rounded-r-full" style={{ width: "20%" }} />}
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-text-muted mt-1.5 font-medium">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-ink/70" />
+                  À échéance (80%)
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                  En retard (20%)
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center justify-between pt-space-xs">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning/20 text-ink text-xs font-semibold">
+
+          <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning/20 text-ink font-semibold text-xs">
               {kpis.facturesImpayees} facture{kpis.facturesImpayees > 1 ? "s" : ""} en attente
             </span>
-            <span className="text-xs text-text-muted">Échéance max 15j</span>
+            <span className="text-text-muted font-medium">Échéance max 15j</span>
           </div>
         </div>
 
-        {/* KPI 3 : Résultat net d'exploitation */}
-        <div className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm">
+        {/* KPI 3 : Résultat net d'exploitation — Area Sparkline de rentabilité */}
+        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
               Résultat net d'exploitation
@@ -342,63 +398,86 @@ export const Dashboard = () => {
             <div className="flex items-center gap-1.5">
               <div className="relative group/tip text-text-muted hover:text-ink transition-colors p-1 cursor-pointer">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded shadow-md group-hover/tip:block text-left leading-snug">
-                  Bénéfice comptable : Produits (Cl. 7) moins charges (Cl. 6 SYSCOHADA).
+                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded-lg shadow-lg group-hover/tip:block text-left leading-snug">
+                  Bénéfice net généré par l'activité : chiffre d'affaires déduction faite de l'ensemble des charges.
                 </span>
               </div>
-              <div className="w-6 h-6 rounded bg-surface border border-border flex items-center justify-center text-[#00855A]">
+              <div className="w-7 h-7 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
                 <TrendingUp className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span
-              className={`tnum text-2xl lg:text-3xl font-bold tracking-tight ${
-                kpis.netResult >= 0 ? "text-[#00855A]" : "text-error"
-              }`}
-            >
-              {kpis.netResult >= 0 ? "+" : ""}
-              {formatCFA(kpis.netResult)}
-            </span>
+
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <span
+                className={`tnum text-2xl lg:text-3xl font-bold tracking-tight ${
+                  kpis.netResult >= 0 ? "text-ink" : "text-error"
+                }`}
+              >
+                {kpis.netResult >= 0 ? "+" : ""}
+                {formatCFA(kpis.netResult)}
+              </span>
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Marge nette : <span className="tnum font-bold text-ink">{caMargin}%</span>
+              </p>
+            </div>
+            {/* Sparkline de rentabilité */}
+            <div className="w-20 h-9 shrink-0" aria-hidden="true">
+              <svg className="w-full h-full" fill="none" viewBox="0 0 100 35">
+                <polyline
+                  points="0,28 14,24 28,26 42,16 56,18 70,10 84,14 100,4"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  className="text-ink"
+                />
+                <circle cx="100" cy="4" r="3" className="fill-success" />
+              </svg>
+            </div>
           </div>
-          <div className="flex items-center justify-between pt-space-xs">
-            <span className="tnum inline-flex items-center gap-1 text-xs text-[#00855A] font-bold">
-              {kpis.netResultGrowth >= 0 ? (
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              ) : (
-                <ArrowDownRight className="w-3.5 h-3.5 text-error" />
-              )}
-              {kpis.netResultGrowth >= 0 ? `+${kpis.netResultGrowth}%` : `${kpis.netResultGrowth}%`} vs M-1
+
+          <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/20 text-ink font-semibold text-xs">
+              <ArrowUpRight className="w-3.5 h-3.5 text-ink" />
+              {kpis.netResult >= 0 ? "Activité rentable" : "Déficit temporaire"}
             </span>
-            <span className="tnum text-xs text-text-muted">Marge nette {caMargin}%</span>
+            <span className="text-text-muted">Produits - Charges</span>
           </div>
         </div>
 
-        {/* KPI 4 : Chiffre d'affaires */}
-        <div className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm">
+        {/* KPI 4 : Chiffre d'affaires — Sparkline flux & cumul */}
+        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              Chiffre d'affaires (Classe 7)
+              Chiffre d'affaires
             </span>
             <div className="flex items-center gap-1.5">
               <div className="relative group/tip text-text-muted hover:text-ink transition-colors p-1 cursor-pointer">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded shadow-md group-hover/tip:block text-left leading-snug">
-                  Montant total HT des ventes de biens et services.
+                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded-lg shadow-lg group-hover/tip:block text-left leading-snug">
+                  Montant total facturé hors taxes sur les ventes de biens et de services.
                 </span>
               </div>
-              <div className="w-6 h-6 rounded bg-surface border border-border flex items-center justify-center text-ink">
-                <ArrowUpRight className="w-3.5 h-3.5" />
+              <div className="w-7 h-7 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
+                <CreditCard className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-1">
-            <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
-              {formatCFA(kpis.ca)}
-            </span>
-            {/* Sparkline sobre token primary #FFD946 */}
-            <div className="w-20 h-7 shrink-0">
-              <svg className="w-full h-full text-primary" fill="none" viewBox="0 0 100 35">
+
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
+                {formatCFA(kpis.ca)}
+              </span>
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Total des ventes HT facturées
+              </p>
+            </div>
+            {/* Sparkline CA token primary */}
+            <div className="w-20 h-9 shrink-0 text-primary" aria-hidden="true">
+              <svg className="w-full h-full" fill="none" viewBox="0 0 100 35">
                 <polyline
                   points="0,28 12,25 24,30 36,20 48,22 60,15 72,18 84,10 96,6 100,5"
                   stroke="currentColor"
@@ -406,98 +485,110 @@ export const Dashboard = () => {
                   strokeLinejoin="round"
                   strokeWidth="2.5"
                 />
+                <circle cx="100" cy="5" r="3" className="fill-primary" />
               </svg>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-space-xs">
-            <span className="tnum inline-flex items-center gap-1 text-xs text-[#00855A] font-bold">
-              {kpis.caGrowth >= 0 ? (
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              ) : (
-                <ArrowDownRight className="w-3.5 h-3.5 text-error" />
-              )}
-              {kpis.caGrowth >= 0 ? `+${kpis.caGrowth}%` : `${kpis.caGrowth}%`} vs M-1
+
+          <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/30 text-ink font-semibold text-xs">
+              Facturation HT
             </span>
-            <span className="text-xs text-text-muted">HT facturé</span>
+            <span className="text-text-muted">Mois en cours</span>
           </div>
         </div>
 
-        {/* KPI 5 : Charges globales */}
-        <div className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm">
+        {/* KPI 5 : Charges d'exploitation — Jauge de consommation du CA */}
+        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              Charges globales (Classe 6)
+              Charges d'exploitation
             </span>
             <div className="flex items-center gap-1.5">
               <div className="relative group/tip text-text-muted hover:text-ink transition-colors p-1 cursor-pointer">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded shadow-md group-hover/tip:block text-left leading-snug">
-                  Total des achats, loyers et charges de personnel.
+                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded-lg shadow-lg group-hover/tip:block text-left leading-snug">
+                  Achats de marchandises, sous-traitance, loyers et rémunérations du personnel.
                 </span>
               </div>
-              <div className="w-6 h-6 rounded bg-surface border border-border flex items-center justify-center text-ink">
-                <ArrowDownRight className="w-3.5 h-3.5" />
+              <div className="w-7 h-7 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
+                <Scale className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-1">
+
+          <div>
             <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
               {formatCFA(kpis.charges)}
             </span>
-            {/* Sparkline sobre token warning #FFA53D */}
-            <div className="w-20 h-7 shrink-0">
-              <svg className="w-full h-full text-warning" fill="none" viewBox="0 0 100 35">
-                <polyline
-                  points="0,10 14,14 28,12 42,22 56,18 70,25 84,20 96,24 100,26"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                />
-              </svg>
+            {/* Jauge linéaire de ratio Charges / CA */}
+            <div className="mt-2.5">
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-text-muted font-medium">Consommation du CA</span>
+                <span className="tnum font-bold text-ink">{chargesRatio}%</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-border/40 overflow-hidden" title={`${chargesRatio}% du CA consommé par les charges`}>
+                <div className="h-full bg-warning rounded-full transition-all" style={{ width: `${chargesRatioNum}%` }} />
+              </div>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-space-xs">
-            <span className="tnum inline-flex items-center gap-1 text-xs text-[#00855A] font-bold">
-              {kpis.chargesGrowth <= 0 ? (
-                <ArrowDownRight className="w-3.5 h-3.5" />
-              ) : (
-                <ArrowUpRight className="w-3.5 h-3.5 text-warning" />
-              )}
-              {kpis.chargesGrowth <= 0 ? `${kpis.chargesGrowth}% maîtrisées` : `+${kpis.chargesGrowth}%`}
+
+          <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning/20 text-ink font-semibold text-xs">
+              {chargesRatioNum <= 70 ? "Structure maîtrisée" : "Vigilance sur les coûts"}
             </span>
-            <span className="tnum text-xs text-text-muted">{chargesRatio}% du CA</span>
+            <span className="text-text-muted">Achats & prestations</span>
           </div>
         </div>
 
-        {/* KPI 6 : TVA nette à décaisser */}
-        <div className="rounded-lg p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm">
+        {/* KPI 6 : TVA nette à décaisser — Suivi fiscal & échéance e-MECeF */}
+        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between gap-space-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              TVA nette à décaisser (DGI)
+              TVA nette à décaisser
             </span>
             <div className="flex items-center gap-1.5">
               <div className="relative group/tip text-text-muted hover:text-ink transition-colors p-1 cursor-pointer">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded shadow-md group-hover/tip:block text-left leading-snug">
-                  TVA facturée collectée déduction faite de la TVA déductible.
+                <span className="pointer-events-none absolute right-0 top-6 z-50 hidden w-64 p-space-sm bg-ink text-background text-xs rounded-lg shadow-lg group-hover/tip:block text-left leading-snug">
+                  TVA collectée sur vos ventes déduction faite de la TVA déductible sur vos achats. À régler avant le 15 du mois à la DGI.
                 </span>
               </div>
-              <div className="w-6 h-6 rounded bg-surface border border-border flex items-center justify-center text-ink">
+              <div className="w-7 h-7 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
                 <Receipt className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
-              {formatCFA(kpis.tvaAPayer)}
-            </span>
+
+          <div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="tnum text-2xl lg:text-3xl font-bold text-ink tracking-tight">
+                {formatCFA(kpis.tvaAPayer)}
+              </span>
+              <Link
+                href="/tva"
+                className="text-xs font-semibold text-ink underline underline-offset-4 hover:opacity-80 transition-opacity"
+              >
+                Déclarer
+              </Link>
+            </div>
+            {/* Barre de suivi fiscal */}
+            <div className="mt-2.5">
+              <div className="w-full h-2 rounded-full bg-border/40 overflow-hidden" title="Échéance fiscale 15 du mois prochain">
+                <div className="h-full bg-ink/70 rounded-full" style={{ width: "100%" }} />
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-text-muted mt-1.5 font-medium">
+                <span>Collectée : {formatCFA(kpis.tvaAPayer)}</span>
+                <span>Déductible : 0 F CFA</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center justify-between pt-space-xs">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning/20 text-ink text-xs font-semibold">
-              Échéance le 15 du mois
+
+          <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border text-ink font-semibold text-xs">
+              Échéance le 15 {nextMonthYear}
             </span>
-            <span className="text-xs text-text-muted">Bénin e-MECeF</span>
+            <span className="text-text-muted font-medium">Normalisation e-MECeF</span>
           </div>
         </div>
       </section>

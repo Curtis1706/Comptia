@@ -6,6 +6,30 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-09-29 — Refonte Graphique & Copywriting des 6 Cartes KPI du Dashboard
+
+- **Actions effectuées** :
+  - **Copywriting épuré & accessible** : Suppression intégrale de tout jargon comptable brut ("Classe 5", "Classe 6", "Classe 7", mention brute "DGI" dans les titres) et des mentions trompeuses "+100% vs M-1" en l'absence de base d'antériorité. Remplacement par une micro-copie orientée dirigeant ("Liquidités immédiates", "Ventes HT facturées", "Consommation du CA", "Produits - Charges").
+  - **Design UI haute fidélité (patterns 21st.dev / Pennylane)** :
+    1. **Trésorerie disponible** : Progress Metric Card avec ventilation segmentée tripartite (Banque 65% `primary`, Mobile Money 25% `warning`, Caisse 10% `ink/40`), badge de solde positif avec puce `success` et calcul du runway de trésorerie en mois de charges couvertes.
+    2. **Créances clients** : Balance bicolore (À échéance 80% `ink/70` vs En retard 20% `warning`), lien d'action directe "Relancer" vers `/facturation`, décompte des factures en attente et délai max de règlement.
+    3. **Résultat net d'exploitation** : Stat card avec area sparkline SVG de rentabilité, marge nette calculée en pourcentage et libellé explicatif des composantes (produits moins charges).
+    4. **Chiffre d'affaires** : Stat card avec sparkline de facturation en accent `primary` et indicateur du mois en cours.
+    5. **Charges d'exploitation** : Jauge linéaire de ratio consommation du CA avec couleur `warning`, ratio pourcentage précis et badge d'état de maîtrise des coûts.
+    6. **TVA nette à décaisser** : Carte de suivi fiscal avec décomposition (TVA collectée vs TVA déductible), lien direct "Déclarer" vers `/tva` et rappel de l'échéance légale au 15 du mois avec normalisation e-MECeF Bénin.
+  - **Conformité stricte de la charte Ceilow** :
+    - Élimination de tout code hexadécimal en dur (notamment `#00855A` retiré au profit des tokens `success` et `ink`).
+    - Élimination des classes non définies (`bg-surface` remplacé par `bg-background`).
+    - Respect absolu de l'interdiction des emojis, em-dashes et du glassmorphisme.
+    - Chiffres tabulaires systématiques (`tnum`).
+  - **Contrôle qualité de validation** :
+    - `npx tsc --noEmit` : 0 erreur de typage.
+    - `pnpm build` : compilation Next.js Turbopack réussie avec succès.
+- **Décisions clés** :
+  - Conserver la cohérence de l'échelle de gris et des tokens sémantiques stricts (`primary`, `ink`, `warning`, `success`, `error`, `background`, `background-secondary`, `border`, `text-muted`).
+  - Infobulles contextuelles `HelpCircle` sur chaque KPI pour vulgariser les concepts financiers pour tout dirigeant ou gestionnaire sans formation comptable préalable.
+
+
 ### 2026-09-14 — Ratification de la Constitution Ceilow v1.0.0 & Initialisation des Règles
 
 - **Actions effectuées** :

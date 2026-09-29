@@ -571,9 +571,22 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - Déplacement du badge de rôle (« Propriétaire » / « Administrateur » / etc.) dans la sidebar au niveau de la section Grand Livre & Gestion.
   - Remplacement de la couleur hexadécimale en dur sur le statut e-MECeF par le token sémantique `bg-success`.
   - Dans [src/views/Dashboard.tsx](file:///e:/Comptia/src/views/Dashboard.tsx) : suppression du sous-titre `Pilotage d'activité` et du badge de rôle, pour un en-tête épuré et minimaliste.
+- **Intégration de la Nouvelle Sidebar (Inspiration 21st.dev)** :
+  - Dans [src/components/layout/AppSidebar.tsx](file:///e:/Comptia/src/components/layout/AppSidebar.tsx) : refonte architecturale inspirée du composant 21st.dev adapté strictement à Ceilow.
+  - **CompanySwitcher réel** : Affiche l'initiale de l'entreprise (`bg-primary text-ink font-bold`), le nom réel de l'entreprise connectée (`user?.company?.name`), et le badge de rôle dynamique (« Propriétaire », « Administrateur », etc.) avec menu d'accès direct aux paramètres d'entreprise.
+  - **Recherche rapide intégrée** : Bouton sobre avec raccourci `⌘K` ouvrant la recherche globale `GlobalSearch`.
+  - **Groupes de navigation hiérarchiques** :
+    - *Activité & Ventes* : Tableau de bord, Facturation & Clients, Dépenses & Achats.
+    - *Comptabilité SYSCOHADA* : Grand Livre & Écritures, Déclarations & TVA DGI, Trésorerie & Banque/MoMo.
+    - *RH & Clôture* : Paie & Salariés, Reporting & DSF.
+  - **Pied de sidebar complet** : Lien direct Paramètres avec permissions, bouton Déconnexion (`signOut()`), et statut Réseau e-MECeF Bénin avec pastille `bg-success`.
+  - **Conformité stricte aux Règles Ceilow** :
+    - Zéro bordure d'accent unilatérale : l'élément actif utilise uniquement `!bg-primary/15 !text-ink font-semibold`.
+    - Zéro mock : branché sur `useQuery(["me"])` et les permissions réelles (`hasAccess`, `isModuleEnabledForSector`).
+    - Zéro emoji, zéro glassmorphisme, 100% en français.
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 21.0s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 26.2s).
 
 
 

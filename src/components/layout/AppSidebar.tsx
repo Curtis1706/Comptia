@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import {
   LayoutDashboard,
   Wallet,
@@ -10,6 +11,9 @@ import {
   Users,
   TrendingUp,
   Settings,
+  LogOut,
+  ChevronDown,
+  Search,
   X,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -20,25 +24,8 @@ import { isModuleEnabledForSector } from "@/constants/sector-modules";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Module } from "@/lib/permissions";
 import Link from "next/link";
-
-type Item = {
-  key: string;
-  module: Module;
-  label: string;
-  to: string;
-  icon: React.ComponentType<{ className?: string }>;
-};
-
-const items: Item[] = [
-  { key: "dashboard", module: "dashboard", label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
-  { key: "facturation", module: "invoices", label: "Facturation & Clients", to: "/facturation", icon: Receipt },
-  { key: "documents", module: "documents", label: "Dépenses & Achats", to: "/documents", icon: ShoppingCart },
-  { key: "comptabilite", module: "accounting_entries", label: "Comptabilité SYSCOHADA", to: "/comptabilite", icon: BookOpen },
-  { key: "tva", module: "vat_declarations", label: "Déclarations & TVA DGI", to: "/tva", icon: CheckCircle2 },
-  { key: "rapprochement", module: "bank_reconciliation", label: "Trésorerie & Banque/MoMo", to: "/comptabilite/rapprochement", icon: Wallet },
-  { key: "paie", module: "payroll", label: "Paie & Salariés", to: "/paie", icon: Users },
-  { key: "reporting", module: "reporting", label: "Reporting & DSF", to: "/reporting", icon: TrendingUp },
-];
+import { signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "Propriétaire",
@@ -49,9 +36,106 @@ const ROLE_LABELS: Record<string, string> = {
   viewer: "Observateur",
 };
 
+export type NavItemConfig = {
+  key: string;
+  module: Module;
+  label: string;
+  to: string;
+  icon: React.ElementType;
+};
+
+export type NavGroupConfig = {
+  heading?: string;
+  items: NavItemConfig[];
+};
+
+const navGroups: NavGroupConfig[] = [
+  {
+    heading: "Activité & Ventes",
+    items: [
+      { key: "dashboard", module: "dashboard", label: "Tableau de bord", to: "/dashboard", icon: LayoutDashboard },
+      { key: "facturation", module: "invoices", label: "Facturation & Clients", to: "/facturation", icon: Receipt },
+      { key: "documents", module: "documents", label: "Dépenses & Achats", to: "/documents", icon: ShoppingCart },
+    ],
+  },
+  {
+    heading: "Comptabilité SYSCOHADA",
+    items: [
+      { key: "comptabilite", module: "accounting_entries", label: "Grand Livre & Écritures", to: "/comptabilite", icon: BookOpen },
+      { key: "tva", module: "vat_declarations", label: "Déclarations & TVA DGI", to: "/tva", icon: CheckCircle2 },
+      { key: "rapprochement", module: "bank_reconciliation", label: "Trésorerie & Banque/MoMo", to: "/comptabilite/rapprochement", icon: Wallet },
+    ],
+  },
+  {
+    heading: "RH & Clôture",
+    items: [
+      { key: "paie", module: "payroll", label: "Paie & Salariés", to: "/paie", icon: Users },
+      { key: "reporting", module: "reporting", label: "Reporting & DSF", to: "/reporting", icon: TrendingUp },
+    ],
+  },
+];
+
 interface Props {
   open: boolean;
   onClose: () => void;
+}
+
+function WorkspaceSwitcher({ companyName, role }: { companyName: string; role: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const initial = companyName.charAt(0).toUpperCase() || "C";
+  const roleLabel = ROLE_LABELS[role] || "Propriétaire";
+
+  return (
+    <div className="relative mb-2">
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container cursor-pointer transition-colors select-none group border border-transparent hover:border-border"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-primary text-ink flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+            {initial}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-semibold text-ink truncate leading-tight">
+              {companyName}
+            </span>
+            <span className="text-[11px] text-text-muted leading-tight mt-0.5">
+              {roleLabel}
+            </span>
+          </div>
+        </div>
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 text-text-muted transition-transform duration-200 shrink-0",
+            isOpen && "rotate-180"
+          )}
+        />
+      </div>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-[52px] left-0 w-full bg-background border border-border rounded-lg shadow-lg z-50 py-1 flex flex-col gap-0.5">
+            <div className="px-3 py-2 text-xs font-semibold text-ink bg-primary/10 rounded mx-1">
+              {companyName}
+            </div>
+            <div className="h-px bg-border my-1 mx-2" />
+            <Link
+              href="/parametres"
+              onClick={() => setIsOpen(false)}
+              className="px-3 py-2 text-xs text-text-muted hover:text-ink hover:bg-surface-container rounded mx-1 transition-colors flex items-center gap-2"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>Gérer l'entreprise</span>
+            </Link>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export const AppSidebar = ({ open, onClose }: Props) => {
@@ -61,6 +145,8 @@ export const AppSidebar = ({ open, onClose }: Props) => {
   });
 
   const user = userRes?.data || userRes;
+  const companyName = user?.company?.name || "Ceilow Entreprise";
+  const userRole = user?.role || "owner";
   const sector = user?.company?.sector;
 
   const { hasAccess } = usePermissions();
@@ -73,7 +159,7 @@ export const AppSidebar = ({ open, onClose }: Props) => {
     hasAccess("audit_log") ||
     hasAccess("subscription_billing");
 
-  const visibleItems = items.filter((item) => {
+  const filterItem = (item: NavItemConfig): boolean => {
     const sectorOk = isModuleEnabledForSector(sector, item.key);
     if (!sectorOk) return false;
 
@@ -82,14 +168,25 @@ export const AppSidebar = ({ open, onClose }: Props) => {
     }
 
     return hasAccess(item.module);
-  });
+  };
+
+  const handleOpenSearch = () => {
+    const event = new KeyboardEvent("keydown", { key: "k", metaKey: true });
+    document.dispatchEvent(event);
+    onClose();
+  };
+
+  const handleSignOut = async () => {
+    toast.info("Déconnexion en cours...");
+    await signOut({ callbackUrl: "/login" });
+  };
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Overlay Mobile */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-ink/50 backdrop-blur-none transition-opacity lg:hidden",
+          "fixed inset-0 z-40 bg-ink/50 transition-opacity lg:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         onClick={onClose}
@@ -97,72 +194,104 @@ export const AppSidebar = ({ open, onClose }: Props) => {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-background-secondary border-r border-border z-50 flex flex-col justify-between select-none transition-transform duration-300 lg:translate-x-0",
+          "fixed left-0 top-0 h-full w-64 bg-background-secondary border-r border-border z-50 flex flex-col justify-between select-none transition-transform duration-300 lg:translate-x-0 font-sans",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col flex-1 min-h-0">
-          {/* En-tête Sidebar avec Logo officiel Ceilow */}
-          <div className="h-16 px-space-lg flex items-center justify-between border-b border-border bg-background-secondary shrink-0">
-            <Link href="/dashboard" className="flex items-center" title="Ceilow SYSCOHADA Pro">
+        <div className="flex flex-col flex-1 min-h-0 p-3">
+          {/* En-tête avec Logo Ceilow et bouton fermeture mobile */}
+          <div className="h-12 px-2 flex items-center justify-between shrink-0 mb-2">
+            <Link href="/dashboard" className="flex items-center" title="Ceilow SYSCOHADA">
               <img src="/logo/ceilow_web_sombre.svg" alt="Ceilow" className="h-7 w-auto" />
             </Link>
             <button
               onClick={onClose}
-              className="lg:hidden p-1 text-text-muted hover:text-ink transition-colors"
+              className="lg:hidden p-1.5 text-text-muted hover:text-ink transition-colors rounded-md"
               aria-label="Fermer le menu"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
+          {/* Switcher d'entreprise */}
+          <WorkspaceSwitcher companyName={companyName} role={userRole} />
 
-          <div className="px-space-md py-space-sm shrink-0 flex items-center justify-between border-b border-border/40">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-              Grand Livre & Gestion
-            </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded bg-background border border-border text-ink text-[10px] font-semibold">
-              {ROLE_LABELS[user?.role || "owner"] || "Propriétaire"}
-            </span>
-          </div>
+          {/* Raccourci Recherche ⌘K */}
+          <button
+            type="button"
+            onClick={handleOpenSearch}
+            className="flex items-center justify-between w-full px-2.5 py-2 mb-3 rounded-lg bg-background border border-border text-text-muted hover:text-ink hover:border-ink transition-colors text-xs font-medium"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5" />
+              <span>Recherche rapide</span>
+            </div>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-text-muted bg-background-secondary border border-border rounded">
+              ⌘K
+            </kbd>
+          </button>
 
-          {/* Navigation */}
-          <nav className="flex flex-col space-y-1 px-space-sm flex-1 overflow-y-auto">
-            {visibleItems.map((item) => {
-              const Icon = item.icon;
+          {/* Navigation groupée */}
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-3">
+            {navGroups.map((group, groupIdx) => {
+              const visibleGroupItems = group.items.filter(filterItem);
+              if (visibleGroupItems.length === 0) return null;
+
               return (
-                <NavLink
-                  key={item.key}
-                  to={item.to}
-                  end={item.to === "/dashboard"}
-                  className="flex items-center gap-space-md px-space-md py-2 rounded text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
-                  activeClassName="!bg-primary/15 !text-ink font-semibold"
-                  onClick={onClose}
-                >
-                  <Icon className="w-5 h-5 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </NavLink>
+                <div key={groupIdx} className="flex flex-col gap-0.5">
+                  {group.heading && (
+                    <span className="px-2.5 mb-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                      {group.heading}
+                    </span>
+                  )}
+                  {visibleGroupItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.key}
+                        to={item.to}
+                        end={item.to === "/dashboard"}
+                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
+                        activeClassName="!bg-primary/15 !text-ink font-semibold"
+                        onClick={onClose}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
               );
             })}
-          </nav>
+          </div>
         </div>
 
-        {/* Footer Sidebar */}
-        <div className="p-space-sm border-t border-border bg-background-secondary shrink-0">
+        {/* Pied de la Sidebar */}
+        <div className="p-3 border-t border-border bg-background-secondary shrink-0 flex flex-col gap-1">
           {isSettingsAccessible && (
             <NavLink
               to="/parametres"
-              className="flex items-center gap-space-md px-space-md py-2 rounded text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
               activeClassName="!bg-primary/15 !text-ink font-semibold"
               onClick={onClose}
             >
-              <Settings className="w-5 h-5 shrink-0" />
+              <Settings className="w-4 h-4 shrink-0" />
               <span>Paramètres</span>
             </NavLink>
           )}
-          <div className="mt-space-xs px-space-md py-space-xs flex items-center justify-between text-text-muted text-[11px] border-t border-border/50 pt-space-xs">
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs w-full text-left"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span>Déconnexion</span>
+          </button>
+
+          <div className="mt-1 pt-2 border-t border-border/50 px-2.5 flex items-center justify-between text-text-muted text-[11px]">
             <span>Réseau e-MECeF Bénin</span>
-            <span className="inline-block w-2 h-2 rounded-full bg-success" title="Opérationnel"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-success" title="Opérationnel" />
           </div>
         </div>
       </aside>

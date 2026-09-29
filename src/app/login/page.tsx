@@ -1,162 +1,284 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Mail, Loader2, ArrowRight, AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-
-import { Suspense } from "react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const errorParam = searchParams.get("error");
-  
+
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.email.trim() || !formData.password) {
+      toast.error("Veuillez renseigner votre email et mot de passe.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const result = await signIn("credentials", {
-        email: email.trim().toLowerCase(),
-        password,
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
         redirect: false,
       });
 
       if (result?.error || !result?.ok) {
-        toast.error("Identifiants invalides ou compte inactif. Veuillez réessayer.");
+        toast.error("Identifiants incorrects ou compte inactif. Veuillez réessayer.");
       } else {
         toast.success("Connexion réussie ! Redirection...");
         window.location.href = callbackUrl;
       }
-    } catch (error) {
-      toast.error("Une erreur est survenue lors de la connexion.");
+    } catch {
+      toast.error("Une erreur réseau est survenue lors de la connexion.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleForgotPassword = () => {
+    toast.info("Pour réinitialiser votre mot de passe, veuillez vous rapprocher de l'administrateur de votre entreprise.");
+  };
+
   return (
-    <Card className="border border-border shadow-md bg-background">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
-        <CardDescription>
-          Entrez vos identifiants pour accéder à votre espace
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {errorParam === "account_suspended" && (
-          <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-error" />
-            <div className="space-y-0.5">
-              <p className="font-semibold">Compte suspendu</p>
-              <p className="text-xs text-error/90">
-                Ce compte a été suspendu par votre administrateur. Veuillez contacter votre responsable d'entreprise pour réactiver votre accès.
-              </p>
-            </div>
-          </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input 
-                id="email" 
-                placeholder="nom@entreprise.com" 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10" 
-                required 
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Link href="#" className="text-sm text-primary hover:underline">
-                Oublié ?
-              </Link>
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input 
-                id="password" 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10" 
-                required 
-              />
-            </div>
-          </div>
-          <Button type="submit" className="w-full shadow-glow group" disabled={loading}>
-            {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                Se connecter
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-      <CardFooter className="flex flex-col space-y-4">
-        <div className="relative w-full">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Ou</span>
-          </div>
-        </div>
-        <p className="text-center text-sm text-muted-foreground">
-          Pas encore de compte ?{" "}
-          <Link href="/register" className="text-primary font-medium hover:underline">
+    <div className="w-full max-w-md mx-auto">
+      {/* En-tête mobile avec bouton retour */}
+      <div className="lg:hidden mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-text-muted hover:text-ink transition-colors min-h-[44px]"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Retour à l'accueil
+        </Link>
+      </div>
+
+      {/* Logo Ceilow */}
+      <div className="mb-8">
+        <Link href="/" className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
+          <Image
+            src="/logo/ceilow_web_sombre.svg"
+            alt="Ceilow"
+            width={130}
+            height={32}
+            className="h-8 w-auto"
+            priority
+          />
+        </Link>
+      </div>
+
+      {/* Titre et sous-titre */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+          Ravi de vous revoir
+        </h1>
+        <p className="text-sm text-text-muted mt-2">
+          Vous n'avez pas de compte ?{" "}
+          <Link
+            href="/register"
+            className="text-ink font-semibold underline decoration-primary underline-offset-4 hover:text-primary transition-colors min-h-[44px] inline-flex items-center"
+          >
             Créer un compte
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+
+      {/* Alerte compte suspendu */}
+      {errorParam === "account_suspended" && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-error/30 bg-error/10 p-4 text-sm text-error">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-error" />
+          <div className="space-y-1">
+            <p className="font-semibold">Compte suspendu</p>
+            <p className="text-xs text-error/90 leading-relaxed">
+              Ce compte a été suspendu par un administrateur. Veuillez contacter votre responsable d'entreprise pour réactiver votre accès.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Formulaire de connexion */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Adresse email */}
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="block text-sm font-medium text-ink">
+            Adresse email
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="exemple@entreprise.bj"
+            className="w-full px-4 py-3 min-h-[44px] text-sm text-ink bg-background border border-border rounded-xl outline-none transition-all placeholder:text-text-muted focus:border-ink focus:ring-2 focus:ring-primary/40"
+            required
+            autoComplete="email"
+          />
+        </div>
+
+        {/* Mot de passe */}
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="block text-sm font-medium text-ink">
+            Mot de passe
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Saisissez votre mot de passe"
+              className="w-full px-4 py-3 pr-12 min-h-[44px] text-sm text-ink bg-background border border-border rounded-xl outline-none transition-all placeholder:text-text-muted focus:border-ink focus:ring-2 focus:ring-primary/40"
+              required
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-text-muted hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Options : Se souvenir de moi & Mot de passe oublié */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <label className="flex items-center gap-2.5 text-sm text-text-muted cursor-pointer min-h-[44px]">
+            <input
+              type="checkbox"
+              name="rememberMe"
+              checked={formData.rememberMe}
+              onChange={handleInputChange}
+              className="w-4 h-4 text-ink border-border rounded accent-ink focus:ring-2 focus:ring-primary/40 cursor-pointer"
+            />
+            <span>Se souvenir de moi</span>
+          </label>
+
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="text-sm text-text-muted hover:text-ink font-medium underline underline-offset-2 transition-colors min-h-[44px] inline-flex items-center"
+          >
+            Mot de passe oublié ?
+          </button>
+        </div>
+
+        {/* Bouton de soumission */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full min-h-[48px] bg-ink text-white font-medium text-sm rounded-xl hover:bg-ink/90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60 cursor-pointer"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span>Connexion en cours...</span>
+            </>
+          ) : (
+            <span>Se connecter</span>
+          )}
+        </button>
+      </form>
+
+      {/* Note de réassurance */}
+      <p className="mt-8 text-center text-xs text-text-muted">
+        Système sécurisé conforme SYSCOHADA Révisé et DGI Bénin
+      </p>
+    </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-      
-      <div className="w-full max-w-md p-4 relative z-10">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground mb-4 shadow-glow">
-            <Lock className="w-6 h-6" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Comptia</h1>
-          <p className="text-muted-foreground mt-2">Gestion comptable moderne & intelligente</p>
+    <div className="min-h-screen w-full flex bg-background">
+      {/* Panneau gauche : Section Image (visible sur desktop/tablette large) */}
+      <div className="hidden lg:block lg:flex-1 relative overflow-hidden bg-ink">
+        {/* Bouton retour vers l'accueil */}
+        <div className="absolute top-6 left-6 z-20">
+          <Link
+            href="/"
+            title="Retour à l'accueil"
+            className="w-11 h-11 bg-ink/75 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-ink hover:border-primary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </Link>
         </div>
 
-        <Suspense fallback={<Card className="p-8 flex justify-center"><Loader2 className="animate-spin" /></Card>}>
+        {/* Image d'ambiance avec voile sobre */}
+        <div className="absolute inset-0">
+          <Image
+            src="/login.jpg"
+            alt="Espace Ceilow"
+            fill
+            priority
+            className="object-cover"
+            sizes="(max-width: 1024px) 0vw, 50vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/20" />
+        </div>
+
+        {/* Message et logo de bas de panneau */}
+        <div className="absolute bottom-10 left-10 right-10 z-10 text-white max-w-lg">
+          <div className="mb-4">
+            <Image
+              src="/logo/ceilow_web_blanc.svg"
+              alt="Ceilow"
+              width={140}
+              height={36}
+              className="h-8 w-auto"
+            />
+          </div>
+          <h2 className="text-xl xl:text-2xl font-bold tracking-tight text-white leading-snug">
+            La plateforme financière et comptable certifiée pour les entreprises du Bénin.
+          </h2>
+          <p className="mt-2 text-xs xl:text-sm text-white/80">
+            Comptabilité SYSCOHADA Révisé, facturation e-MECeF et déclarations fiscales automatisées.
+          </p>
+        </div>
+      </div>
+
+      {/* Panneau droit : Section Formulaire */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 lg:p-12 xl:p-16 bg-background">
+        <Suspense
+          fallback={
+            <div className="flex flex-col items-center justify-center gap-3 p-8">
+              <Loader2 className="w-8 h-8 animate-spin text-ink" />
+              <p className="text-sm text-text-muted">Chargement de la page...</p>
+            </div>
+          }
+        >
           <LoginForm />
         </Suspense>
-
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Comptia Studio. Tous droits réservés.
-        </p>
       </div>
     </div>
   );

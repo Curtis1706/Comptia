@@ -563,9 +563,12 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - **Conformité Charte Ceilow** :
     - Tokens sémantiques stricts (`bg-background`, `bg-ink`, `border-border`, `text-ink`, `text-text-muted`, `focus:ring-primary/40`).
     - Zéro hexadécimal en dur dans les classes JSX, zéro emoji, zéro tiret cadratin (`—`).
+- **Résolution des Avertissements CSS Tailwind** :
+  - Dans [src/views/Dashboard.tsx](file:///e:/Comptia/src/views/Dashboard.tsx) : élimination du conflit `border-warning` vs `border-border` sur la bannière d'alerte, unifiée sous `border border-border`.
+  - Dans [src/views/LandingView.tsx](file:///e:/Comptia/src/views/LandingView.tsx) : suppression du doublon `font-semibold font-bold` sur le badge tarifaire « Pro », unifié sous `font-bold`.
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 18.5s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 21.5s).
 
 
 

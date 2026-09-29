@@ -197,6 +197,7 @@ export async function POST(req: Request) {
               subtotal_ht: Number(invoice.subtotal_ht),
               vat_amount: Number(invoice.vat_amount),
               total_ttc: Number(invoice.total_ttc),
+              aib_amount: Number(invoice.aib_amount || 0),
               lines: invoice.lines,
             })
           : generateCreditNoteEntryLines({
@@ -204,19 +205,22 @@ export async function POST(req: Request) {
               subtotal_ht: Number(invoice.subtotal_ht),
               vat_amount: Number(invoice.vat_amount),
               total_ttc: Number(invoice.total_ttc),
+              aib_amount: Number(invoice.aib_amount || 0),
               lines: invoice.lines,
             });
 
-        // Auto-create missing accounts (upsert) to avoid FK constraint violations
+        // Auto-create missing accounts (upsert) to avoid FK constraint violations (SYSCOHADA Révisé)
         const ACCOUNT_DEFAULTS: Record<string, { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }> = {
           "411": { name: "Clients", type: "asset" },
-          "706": { name: "Prestations de services", type: "revenue" },
           "701": { name: "Ventes de marchandises", type: "revenue" },
-          "707": { name: "Ventes de produits finis", type: "revenue" },
+          "702": { name: "Ventes de produits finis", type: "revenue" },
+          "706": { name: "Prestations de services", type: "revenue" },
+          "707": { name: "Produits accessoires", type: "revenue" },
           "4431": { name: "TVA facturée sur ventes", type: "liability" },
           "4452": { name: "TVA récupérable sur achats", type: "asset" },
+          "4471": { name: "État, AIB retenu à reverser", type: "liability" },
           "521": { name: "Banques locales", type: "asset" },
-          "541": { name: "Caisse siège", type: "asset" },
+          "571": { name: "Caisse siège social", type: "asset" },
           "585": { name: "Mobile Money", type: "asset" },
         };
 

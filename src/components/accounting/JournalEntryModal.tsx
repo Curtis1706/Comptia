@@ -111,6 +111,7 @@ export const JournalEntryModal = ({ isOpen, onClose, onSuccess }: JournalEntryMo
       const res = await fetch("/api/accounting/entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(values),
       });
 

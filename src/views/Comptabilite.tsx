@@ -16,6 +16,7 @@ import { JournalEntryModal } from "@/components/accounting/JournalEntryModal";
 import { PermissionGate } from "@/components/PermissionGate";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { detectAndParseCSV } from "@/lib/csv-parser";
 
 export const Comptabilite = () => {
   const [page, setPage] = useState(1);
@@ -54,6 +55,7 @@ export const Comptabilite = () => {
       const res = await fetch("/api/accounting/entries/bulk-validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ ids: selectedEntries }),
       });
       const result = await res.json();
@@ -72,7 +74,7 @@ export const Comptabilite = () => {
   const handleDeleteEntry = async (id: string) => {
     if (!confirm("Supprimer cette écriture ?")) return;
     try {
-      const res = await fetch(`/api/accounting/entries/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/accounting/entries/${id}`, { method: "DELETE", credentials: "include" });
       const result = await res.json();
       if (result.success) {
         toast.success(result.message);
@@ -112,42 +114,36 @@ export const Comptabilite = () => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const text = e.target?.result as string;
-      const lines = text.split("\n").map(l => l.split(",").map(c => c.trim()));
-      
-      const entriesMap: Record<string, any> = {};
+      if (!text || !text.trim()) {
+        toast.error("Le fichier CSV est vide");
+        return;
+      }
 
-      lines.slice(1).forEach((cols, idx) => {
-        if (cols.length < 6) return;
-        const [date, journal, desc, account, debit, credit] = cols;
-        const key = `${date}-${desc}`;
-        if (!entriesMap[key]) {
-          entriesMap[key] = { date, journal: journal.toLowerCase(), description: desc, lines: [] };
-        }
-        entriesMap[key].lines.push({
-          account_code: account,
-          debit: parseFloat(debit) || 0,
-          credit: parseFloat(credit) || 0,
-          description: desc
-        });
-      });
+      const parseResult = detectAndParseCSV(text);
+      if (parseResult.entries.length === 0) {
+        toast.error("Aucune écriture valide n'a pu être extraite du fichier CSV");
+        return;
+      }
 
-      const entriesToImport = Object.values(entriesMap);
-      
       try {
         const res = await fetch("/api/accounting/entries/import", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ entries: entriesToImport }),
+          credentials: "include",
+          body: JSON.stringify({ entries: parseResult.entries }),
         });
         const result = await res.json();
         if (result.success) {
-          toast.success(result.message);
+          const count = result.data?.count ?? parseResult.entries.length;
+          toast.success(`${count} écriture${count > 1 ? "s" : ""} importée${count > 1 ? "s" : ""} avec succès`);
           queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
         } else {
-          toast.error(result.error);
+          toast.error(result.error || "Erreur lors de l'importation");
         }
       } catch (err) {
-        toast.error("Erreur lors de l'importation");
+        toast.error("Erreur de connexion lors de l'importation");
+      } finally {
+        event.target.value = "";
       }
     };
     reader.readAsText(file);

@@ -53,6 +53,7 @@ export const Rapprochement = () => {
       const res = await fetch("/api/accounting/reconcile/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           bank_ids: selectedBank,
           ledger_ids: selectedLedger,
@@ -123,7 +124,7 @@ export const Rapprochement = () => {
           size="sm"
           onClick={() => { setTreasurySource("cash"); setSelectedBank([]); setSelectedLedger([]); }}
         >
-          Caisse siège (541)
+          Caisse siège (571)
         </Button>
       </div>
 

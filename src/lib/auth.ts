@@ -25,12 +25,16 @@ export const authConfig: NextAuthConfig = {
         token.role = (user as { role?: string }).role;
         token.company_id = (user as { company_id?: string }).company_id;
         token.avatar_url = (user as { avatar_url?: string }).avatar_url;
+        token.is_active = (user as { is_active?: boolean }).is_active ?? true;
       }
       return token;
     },
     // Expose token data in the session object
     async session({ session, token }) {
       if (token && session.user) {
+        if (token.is_active === false) {
+          return { ...session, user: undefined as any };
+        }
         session.user.id = token.id as string;
         (session.user as { role?: string }).role = token.role as string;
         (session.user as { company_id?: string }).company_id = token.company_id as string;
@@ -91,6 +95,7 @@ export const authConfig: NextAuthConfig = {
             role: user.role,
             company_id: user.company_id,
             avatar_url: user.avatar_url,
+            is_active: user.is_active,
           };
         } catch (err) {
           console.error("[NextAuth] authorize error:", err);

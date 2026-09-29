@@ -327,13 +327,20 @@ export async function normalizeInvoice(invoice: {
 
   // Mode Simulation locale (hors réseau)
   if (config.mode === "simulation") {
-    const nim = config.nim || "SIM-TS01019550";
+    const nim = config.nim || "TS01000001";
     const ifu = config.ifu || "3202687290154";
-    const rawCode = `TEST-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+    // Génération d'un code MECeF/DGI conforme : 24 caractères, 6 groupes de 4 alphanum
+    const generateGroup = () => Math.random().toString(36).substring(2, 6).toUpperCase().padEnd(4, "0").substring(0, 4);
+    const rawCode = `SIM1-${generateGroup()}-${generateGroup()}-${generateGroup()}-${generateGroup()}-${generateGroup()}`;
+
     const now = new Date();
     const formattedDate = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-    const qrPayload = `F;${nim};${rawCode.replace(/-/g, "")};${ifu};${now.toISOString().replace(/[-:T.]/g, "").slice(0, 14)}`;
-    const qrCodeDataUrl = await QRCode.toDataURL(qrPayload, { margin: 1, width: 200 });
+
+    // QR Code pointant vers l'URL réglementaire DGI Bénin (conforme au rapport de recette T2.4–T2.9)
+    const verifyBaseUrl = config.verificationUrl || "https://mecef.impots.bj/verify";
+    const qrPayload = `${verifyBaseUrl}?code=${encodeURIComponent(rawCode)}&nim=${encodeURIComponent(nim)}&ifu=${encodeURIComponent(ifu)}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(qrPayload, { margin: 1, width: 220, errorCorrectionLevel: "M" });
 
     const simSecurity: MecefSecurityElements = {
       codeMECeFDGI: rawCode,
@@ -495,7 +502,11 @@ export async function normalizeInvoice(invoice: {
   let qrCodeDataUrl = confirmData.qrCode;
   if (confirmData.qrCode && !confirmData.qrCode.startsWith("data:image")) {
     try {
-      qrCodeDataUrl = await QRCode.toDataURL(confirmData.qrCode, { margin: 1, width: 220 });
+      // Si l'API renvoie un code brut (non-URL), on le transforme en URL DGI réglementaire
+      const qrInput = confirmData.qrCode.startsWith("http")
+        ? confirmData.qrCode
+        : `${config.verificationUrl}?code=${encodeURIComponent(confirmData.qrCode)}`;
+      qrCodeDataUrl = await QRCode.toDataURL(qrInput, { margin: 1, width: 220, errorCorrectionLevel: "M" });
     } catch {
       qrCodeDataUrl = confirmData.qrCode;
     }

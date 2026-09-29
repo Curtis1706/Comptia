@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import { Lock, Mail, Loader2, ArrowRight, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Suspense } from "react";
@@ -17,6 +17,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const errorParam = searchParams.get("error");
   
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -47,7 +48,7 @@ function LoginForm() {
   };
 
   return (
-    <Card className="border-border/50 shadow-elevated bg-card/50 backdrop-blur-sm">
+    <Card className="border border-border shadow-md bg-background">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
         <CardDescription>
@@ -55,6 +56,17 @@ function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {errorParam === "account_suspended" && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-error" />
+            <div className="space-y-0.5">
+              <p className="font-semibold">Compte suspendu</p>
+              <p className="text-xs text-error/90">
+                Ce compte a été suspendu par votre administrateur. Veuillez contacter votre responsable d'entreprise pour réactiver votre accès.
+              </p>
+            </div>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

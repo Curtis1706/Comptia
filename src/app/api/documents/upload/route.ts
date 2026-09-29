@@ -1,9 +1,13 @@
 import { requirePermission } from "@/lib/require-permission";
-import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
+import { successJson, errorResponse } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
-import { processOCR } from "@/lib/ocr";
 import { storage } from "@/lib/storage";
+import { after } from "next/server";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 /**
  * POST /api/documents/upload
@@ -16,46 +20,81 @@ export async function POST(req: Request) {
 
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
     const type = (formData.get("type") as string) || "other";
 
-    if (!file) return errorResponse("Aucun fichier fourni", 400);
-
-    const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      return errorResponse("Format non supporté. Acceptés : PDF, JPEG, PNG, WEBP", 415);
+    if (!file || typeof file === "string" || !file.name) {
+      return errorResponse("Aucun fichier valide fourni", 400);
     }
+
     const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
     if (file.size > MAX_SIZE) {
       return errorResponse("Fichier trop volumineux (max 10 MB)", 413);
     }
 
-    const ext = file.name.split(".").pop();
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const allowedMimes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    const allowedExts = ["pdf", "jpg", "jpeg", "png", "webp"];
+    const isMimeAllowed = allowedMimes.includes(file.type);
+    const isExtAllowed = allowedExts.includes(ext);
+
+    if (!isMimeAllowed && !isExtAllowed) {
+      return errorResponse("Format non supporté. Acceptés : PDF, JPEG, PNG, WEBP", 415);
+    }
+
+    const safeMime = isMimeAllowed
+      ? file.type
+      : ext === "pdf"
+      ? "application/pdf"
+      : `image/${ext === "jpg" ? "jpeg" : ext}`;
+
+    const cleanExt = ext || (safeMime === "application/pdf" ? "pdf" : "png");
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${cleanExt}`;
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const fileUrl = await storage.uploadFile(buffer, filename, user.company_id);
+    // 1. Sauvegarde sur le stockage physique Cloudflare R2 (avec fallback local)
+    const fileUrl = await storage.uploadFile(buffer, filename, user.company_id, safeMime);
+    const base64Data = file.size <= 2 * 1024 * 1024 ? buffer.toString("base64") : undefined;
 
+    // 2. Création du document
     const doc = await prisma.document.create({
       data: {
         company_id: user.company_id,
         filename: filename,
         original_filename: file.name,
-        type: type as any,
+        type: (["invoice", "receipt", "bank_statement", "other"].includes(type) ? type : "other") as any,
         file_url: fileUrl,
         file_size: file.size,
-        mime_type: file.type,
+        mime_type: safeMime,
         status: "uploaded",
         uploaded_by: user.id,
+        extracted_data: base64Data ? { _raw_base64: base64Data } : undefined,
       },
     });
 
-    const shouldProcess = file.type.startsWith("image/") || file.type === "application/pdf";
+    // 3. Déclenchement OCR via after() — exécuté APRÈS l'envoi de la réponse
+    //    Sur Vercel, after() maintient la lambda active pour terminer le travail.
+    const shouldProcess = safeMime.startsWith("image/") || safeMime === "application/pdf";
     if (shouldProcess) {
-      processOCR(doc.id, fileUrl, user.company_id).catch(console.error);
+      after(async () => {
+        try {
+          const { processOCR } = await import("@/lib/ocr");
+          await processOCR(doc.id, fileUrl, user.company_id);
+        } catch (ocrErr) {
+          console.error("[POST /api/documents/upload] Erreur OCR après réponse :", ocrErr);
+          // Marquer le document en erreur pour que le frontend ne reste pas bloqué
+          try {
+            await prisma.document.update({
+              where: { id: doc.id },
+              data: { status: "error" },
+            });
+          } catch {}
+        }
+      });
     }
 
+    // 4. Piste d'audit
     await logAction({
       company_id: user.company_id,
       user_id: user.id,
@@ -66,8 +105,8 @@ export async function POST(req: Request) {
     });
 
     return successJson(doc, "Fichier uploadé avec succès", 201);
-  } catch (err) {
-    console.error("[POST /api/documents/upload]", err);
-    return handlePrismaError(err);
+  } catch (err: any) {
+    console.error("[POST /api/documents/upload] Erreur:", err);
+    return errorResponse(err?.message || "Erreur lors du téléversement du fichier", 500);
   }
 }

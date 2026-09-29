@@ -84,6 +84,13 @@ export const Parametres = () => {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
+  };
+
   const userInitials =
     currentUser?.name
       ?.split(" ")
@@ -187,6 +194,7 @@ const EntrepriseForm = () => {
       const res = await fetch("/api/company", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
       const result = await res.json();
@@ -256,7 +264,24 @@ const EntrepriseForm = () => {
           </div>
           <div className="space-y-2">
             <Label>Secteur d'activité</Label>
-            <Input name="sector" defaultValue={company.sector} />
+            <select
+              name="sector"
+              defaultValue={company.sector || "services"}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="commerce_general">Commerce général</option>
+              <option value="services">Services</option>
+              <option value="btp">BTP & Construction</option>
+              <option value="restauration">Hôtellerie & Restauration</option>
+              <option value="transport">Transport & Logistique</option>
+              <option value="sante">Santé & Pharmacie</option>
+              <option value="education">Éducation & Formation</option>
+              <option value="agriculture">Agriculture & Élevage</option>
+              <option value="industrie">Industrie & Transformation</option>
+              <option value="profession_liberale">Professions libérales</option>
+              <option value="tech">Technologies & Numérique</option>
+              <option value="autre">Autre</option>
+            </select>
           </div>
         </div>
 
@@ -507,21 +532,23 @@ const Audit = () => {
 
 const Billing = () => (
   <div className="animate-in fade-in duration-500">
-    <h2 className="font-display text-lg font-semibold">Abonnement & Facturation</h2>
-    <div className="mt-6 rounded-2xl bg-gradient-primary p-8 text-primary-foreground shadow-glow relative overflow-hidden">
+    <h2 className="text-lg font-semibold text-ink">Abonnement & Facturation</h2>
+    <div className="mt-6 rounded-2xl border border-border bg-background-secondary p-8 text-ink relative overflow-hidden">
       <div className="relative z-10">
-        <p className="text-xs uppercase tracking-widest opacity-70 font-bold">Plan actuel</p>
-        <p className="mt-2 font-display text-4xl font-extrabold tracking-tight">Studio Enterprise</p>
-        <p className="mt-4 text-sm font-medium opacity-90 leading-relaxed max-w-sm">
+        <span className="text-xs uppercase tracking-widest text-muted font-bold block">Plan actuel</span>
+        <p className="mt-2 text-3xl font-extrabold text-ink tracking-tight">Studio Enterprise</p>
+        <p className="mt-3 text-sm text-muted leading-relaxed max-w-sm">
           Abonnement annuel premium · Inclus support prioritaire 24/7 et exportations illimitées.
         </p>
-        <div className="mt-8 flex gap-3">
-          <Button variant="secondary" size="sm" className="font-bold shadow-card">Gérer mon abonnement</Button>
-          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 font-bold">Historique factures</Button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button variant="default" size="sm" className="bg-primary text-ink hover:opacity-90 font-medium">
+            Gérer mon abonnement
+          </Button>
+          <Button variant="outline" size="sm" className="border-border text-ink hover:bg-background">
+            Historique factures
+          </Button>
         </div>
       </div>
-      <div className="absolute -right-8 -bottom-8 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -left-12 -top-12 h-40 w-40 rounded-full bg-black/10 blur-3xl" />
     </div>
   </div>
 );

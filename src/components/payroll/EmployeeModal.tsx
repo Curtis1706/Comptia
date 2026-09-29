@@ -89,6 +89,7 @@ export function EmployeeModal({ isOpen, onClose, onSuccess, employee }: Employee
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
 

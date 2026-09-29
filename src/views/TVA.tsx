@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Clock, AlertTriangle, Download, Plus, Loader2, Calendar, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle, Download, Plus, Loader2, Calendar, ShieldCheck, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { PermissionGate } from "@/components/PermissionGate";
@@ -99,7 +99,7 @@ export const TVA = () => {
           <PermissionGate module="vat_declarations" level="validate">
             <Button 
               size="sm" 
-              className="bg-gradient-primary hover:opacity-90 shadow-glow"
+              className="bg-primary text-ink hover:opacity-90 font-medium"
               onClick={handleSubmitDeclaration}
               disabled={isSubmitting || previewLoading}
             >
@@ -112,15 +112,15 @@ export const TVA = () => {
 
       {/* Bannière d'information DGI */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs">
-        <div className="flex items-center gap-2 text-foreground font-medium">
-          <ShieldCheck className="h-4 w-4 text-primary" />
+        <div className="flex items-center gap-2 text-ink font-medium">
+          <ShieldCheck className="h-4 w-4 text-ink" />
           <span>Norme DGI Bénin : Déclaration mensuelle au plus tard le 15 du mois suivant (Taux standard 18%).</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-          <span>Échéance période sélectionnée : <strong>{legalDeadline.toLocaleDateString("fr-FR")}</strong></span>
+        <div className="flex items-center gap-2 text-muted">
+          <Calendar className="h-3.5 w-3.5 text-muted" />
+          <span>Échéance période sélectionnée : <strong className="text-ink">{legalDeadline.toLocaleDateString("fr-FR")}</strong></span>
           {isPastDeadline && (
-            <span className="rounded-full bg-destructive/10 text-destructive px-2 py-0.5 font-semibold text-[10px]">
+            <span className="rounded-full bg-error/10 text-error px-2 py-0.5 font-semibold text-[10px]">
               Pénalité de retard applicable (10% + 1%/mois)
             </span>
           )}
@@ -128,41 +128,44 @@ export const TVA = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-gradient-primary p-6 text-primary-foreground shadow-card">
-          <p className="text-xs uppercase tracking-wider opacity-80">TVA Nette Due (Période)</p>
-          <p className="mt-2 font-display text-3xl font-semibold tabular">
+        <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
+          <p className="text-xs uppercase tracking-wider text-muted font-medium">TVA Nette Due (Période)</p>
+          <p className="mt-2 text-3xl font-semibold font-mono tabular-nums text-ink">
             {previewLoading ? "..." : formatCFA(preview?.vat_due || 0)}
           </p>
-          <div className="mt-4 flex flex-col gap-2">
-            <label className="text-[10px] uppercase opacity-70">Période fiscale (Mois)</label>
-            <select 
-              className="bg-white/10 border border-white/20 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none"
-              value={currentMonthIndex}
-              onChange={(e) => handleMonthChange(parseInt(e.target.value))}
-            >
-              {months.map((m) => (
-                <option key={m.value} value={m.value} className="text-black">
-                  {m.label} {currentYear}
-                </option>
-              ))}
-            </select>
+          <div className="mt-4 flex flex-col gap-1.5">
+            <label className="text-xs text-muted font-medium">Période fiscale</label>
+            <div className="relative">
+              <select 
+                className="w-full appearance-none rounded-lg border border-border bg-background-secondary px-3 py-2 pr-9 text-sm font-medium text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer transition-colors"
+                value={currentMonthIndex}
+                onChange={(e) => handleMonthChange(parseInt(e.target.value))}
+              >
+                {months.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label} {currentYear}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6 shadow-card">
-          <p className="text-xs text-muted-foreground">TVA facturée / collectée (Compte 4431)</p>
-          <p className="mt-2 font-display text-2xl font-semibold tabular text-success">
+        <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
+          <p className="text-xs text-muted">TVA facturée / collectée (Compte 4431)</p>
+          <p className="mt-2 text-2xl font-semibold font-mono tabular-nums text-success">
             {previewLoading ? "..." : formatCFA(preview?.vat_collected || 0)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Sur ventes & prestations de services</p>
+          <p className="mt-1 text-xs text-muted">Sur ventes & prestations de services</p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6 shadow-card">
-          <p className="text-xs text-muted-foreground">TVA déductible / récupérable (Compte 445)</p>
-          <p className="mt-2 font-display text-2xl font-semibold tabular text-info">
+        <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
+          <p className="text-xs text-muted">TVA déductible / récupérable (Compte 445)</p>
+          <p className="mt-2 text-2xl font-semibold font-mono tabular-nums text-ink">
             {previewLoading ? "..." : formatCFA(preview?.vat_deductible || 0)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Sur achats & frais généraux</p>
+          <p className="mt-1 text-xs text-muted">Sur achats & frais généraux</p>
         </div>
       </div>
 

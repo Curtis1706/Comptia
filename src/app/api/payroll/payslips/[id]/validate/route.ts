@@ -53,10 +53,12 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
           string,
           { name: string; type: "asset" | "liability" | "equity" | "revenue" | "expense" }
         > = {
-          "641": { name: "Rémunérations du personnel", type: "expense" },
-          "645": { name: "Charges sociales patronales", type: "expense" },
-          "421": { name: "Personnel - Salaires à payer", type: "liability" },
-          "431": { name: "Sécurité Sociale", type: "liability" },
+          "661": { name: "Rémunérations directes versées au personnel national", type: "expense" },
+          "664": { name: "Charges sociales patronales (CNSS & VPS)", type: "expense" },
+          "421": { name: "Personnel, rémunérations dues", type: "liability" },
+          "431": { name: "Sécurité sociale (CNSS)", type: "liability" },
+          "4473": { name: "État, IPTS retenu sur salaires", type: "liability" },
+          "448": { name: "État, charges à payer (VPS)", type: "liability" },
         };
 
         const uniqueCodes = [...new Set(entryLines.map((l) => l.account_code))];

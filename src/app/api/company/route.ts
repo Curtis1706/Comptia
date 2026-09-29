@@ -3,13 +3,14 @@ import { requirePermission } from "@/lib/require-permission";
 import { successResponse, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
+import { BusinessSector } from "@prisma/client";
 import * as z from "zod";
 
 const UpdateCompanySchema = z.object({
   name: z.string().min(1).optional(),
   type: z.enum(["SARL", "EIRL", "SAS", "MICRO", "AUTO"]).optional(),
   tax_regime: z.enum(["auto_entrepreneur", "micro", "simplifie", "reel"]).optional(),
-  sector: z.string().optional(),
+  sector: z.nativeEnum(BusinessSector).optional(),
   address: z.string().optional(),
   postal_code: z.string().optional(),
   city: z.string().optional(),

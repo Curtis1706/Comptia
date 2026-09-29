@@ -1,7 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Users, TrendingUp, TrendingDown, MoreHorizontal, Building2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  MoreHorizontal,
+  Building2,
+  Eye,
+  Edit2,
+  UserX,
+  UserCheck,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/dashboard/PageHeader";
@@ -18,7 +31,15 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { ThirdPartyDetailDrawer } from "@/components/third-parties/ThirdPartyDetailDrawer";
 
 type ThirdPartyType = "all" | "client" | "supplier";
 
@@ -27,6 +48,10 @@ export const ThirdParties = () => {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 400);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingThirdParty, setEditingThirdParty] = useState<any | null>(null);
+  const [selectedDrawerId, setSelectedDrawerId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery<any>({
@@ -45,6 +70,59 @@ export const ThirdParties = () => {
     { id: "supplier", label: "Fournisseurs/Prestataires" },
   ];
 
+  const handleOpenDrawer = (id: string) => {
+    setSelectedDrawerId(id);
+    setIsDrawerOpen(true);
+  };
+
+  const handleToggleActive = async (tp: any) => {
+    try {
+      const res = await fetch(`/api/third-parties/${tp.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ is_active: !tp.is_active }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(
+          tp.is_active ? "Tiers désactivé avec succès" : "Tiers réactivé avec succès"
+        );
+        queryClient.invalidateQueries({ queryKey: ["third-parties"] });
+      } else {
+        toast.error(result.error || "Erreur lors de la modification");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    }
+  };
+
+  const handleDelete = async (tp: any) => {
+    if (
+      !window.confirm(
+        `Êtes-vous sûr de vouloir supprimer le tiers « ${tp.name} » ?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/third-parties/${tp.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success("Tiers supprimé avec succès");
+        queryClient.invalidateQueries({ queryKey: ["third-parties"] });
+      } else {
+        toast.error(result.error || "Impossible de supprimer ce tiers");
+      }
+    } catch {
+      toast.error("Erreur réseau lors de la suppression");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -53,8 +131,11 @@ export const ThirdParties = () => {
         actions={
           <Button
             size="sm"
-            className="bg-gradient-primary hover:opacity-90"
-            onClick={() => setIsModalOpen(true)}
+            className="bg-primary text-ink hover:opacity-90 font-medium"
+            onClick={() => {
+              setEditingThirdParty(null);
+              setIsModalOpen(true);
+            }}
           >
             <Plus className="mr-1 h-4 w-4" /> Nouveau tiers
           </Button>
@@ -62,8 +143,8 @@ export const ThirdParties = () => {
       />
 
       {/* Filter tabs */}
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
-        <div className="flex items-center gap-1 border-b border-border px-2 pt-2">
+      <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
+        <div className="flex items-center gap-1 border-b border-border px-2 pt-2 bg-background-secondary/40">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -71,8 +152,8 @@ export const ThirdParties = () => {
               className={cn(
                 "relative rounded-t-md px-4 py-2.5 text-sm font-medium transition",
                 filter === t.id
-                  ? "bg-card text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-background text-ink font-semibold"
+                  : "text-muted hover:text-ink"
               )}
             >
               {t.label}
@@ -86,12 +167,12 @@ export const ThirdParties = () => {
         {/* Search */}
         <div className="border-b border-border p-4">
           <div className="relative max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher par nom, email, IFU…"
-              className="pl-9"
+              className="pl-9 bg-background border-border text-ink"
             />
           </div>
         </div>
@@ -100,7 +181,7 @@ export const ThirdParties = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <tr className="border-b border-border bg-background-secondary/60 text-left text-xs font-medium uppercase tracking-wide text-muted">
                 <th className="px-4 py-3">Tiers</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">IFU</th>
@@ -121,13 +202,16 @@ export const ThirdParties = () => {
               ) : items.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-16 text-center">
-                    <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                    <div className="flex flex-col items-center gap-3 text-muted">
                       <Users className="h-10 w-10 opacity-30" />
                       <p className="text-sm">Aucun tiers enregistré</p>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                          setEditingThirdParty(null);
+                          setIsModalOpen(true);
+                        }}
                       >
                         <Plus className="mr-1 h-4 w-4" /> Créer le premier tiers
                       </Button>
@@ -138,16 +222,24 @@ export const ThirdParties = () => {
                 items.map((tp: any) => (
                   <tr
                     key={tp.id}
-                    className="border-b border-border last:border-0 transition hover:bg-muted/30"
+                    className="border-b border-border last:border-0 transition hover:bg-background-secondary/40 cursor-pointer"
+                    onClick={() => handleOpenDrawer(tp.id)}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground shrink-0">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-xs font-semibold text-ink shrink-0">
                           {tp.name?.[0]?.toUpperCase() ?? "?"}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate font-medium">{tp.name}</p>
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="truncate font-medium text-ink flex items-center gap-2">
+                            {tp.name}
+                            {!tp.is_active && (
+                              <span className="text-[10px] rounded px-1.5 py-0.5 bg-background-secondary text-muted">
+                                Désactivé
+                              </span>
+                            )}
+                          </p>
+                          <p className="truncate text-xs text-muted">
                             {tp.email}
                           </p>
                         </div>
@@ -158,8 +250,8 @@ export const ThirdParties = () => {
                         className={cn(
                           "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
                           tp.type === "client"
-                            ? "bg-primary/10 text-primary"
-                            : "bg-warning-soft text-warning"
+                            ? "bg-primary/10 text-ink"
+                            : "bg-warning/10 text-warning"
                         )}
                       >
                         {tp.type === "client" ? (
@@ -170,10 +262,10 @@ export const ThirdParties = () => {
                         {tp.type === "client" ? "Client" : "Fournisseur"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                    <td className="px-4 py-3 font-mono text-xs text-muted">
                       {tp.ifu || "—"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted">
                       <div className="flex items-center gap-1">
                         <Building2 className="h-3 w-3 shrink-0" />
                         {tp.city || "—"}
@@ -182,12 +274,12 @@ export const ThirdParties = () => {
                     <td className="px-4 py-3 text-right">
                       <span
                         className={cn(
-                          "tabular font-semibold",
+                          "tabular-nums font-mono font-semibold",
                           (tp.balance ?? 0) > 0
-                            ? "text-success"
+                            ? "text-ink"
                             : (tp.balance ?? 0) < 0
-                              ? "text-destructive"
-                              : "text-muted-foreground"
+                              ? "text-error"
+                              : "text-muted"
                         )}
                       >
                         {tp.balance !== undefined
@@ -195,10 +287,65 @@ export const ThirdParties = () => {
                           : "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
+                    <td
+                      className="px-4 py-3 text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted hover:text-ink"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuItem
+                            onClick={() => handleOpenDrawer(tp.id)}
+                            className="cursor-pointer gap-2"
+                          >
+                            <Eye className="h-4 w-4 text-muted" />
+                            <span>Voir le grand livre / Détails</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setEditingThirdParty(tp);
+                              setIsModalOpen(true);
+                            }}
+                            className="cursor-pointer gap-2"
+                          >
+                            <Edit2 className="h-4 w-4 text-muted" />
+                            <span>Modifier</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleActive(tp)}
+                            className="cursor-pointer gap-2"
+                          >
+                            {tp.is_active ? (
+                              <>
+                                <UserX className="h-4 w-4 text-warning" />
+                                <span>Désactiver</span>
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="h-4 w-4 text-success" />
+                                <span>Réactiver</span>
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(tp)}
+                            className="cursor-pointer gap-2 text-error focus:text-error"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span>Supprimer</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))
@@ -207,69 +354,108 @@ export const ThirdParties = () => {
           </table>
         </div>
 
-        <div className="border-t border-border p-3 text-xs text-muted-foreground">
-          {items.length} tiers affichés
+        <div className="border-t border-border p-3 text-xs text-muted">
+          {items.length} tiers affiché{items.length > 1 ? "s" : ""}
         </div>
       </div>
 
+      {/* Modal Création / Édition Tiers */}
       <ThirdPartyModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        initialData={editingThirdParty}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingThirdParty(null);
+        }}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ["third-parties"] });
           setIsModalOpen(false);
+          setEditingThirdParty(null);
+        }}
+      />
+
+      {/* Tiroir Détails & Grand Livre Auxiliaire */}
+      <ThirdPartyDetailDrawer
+        thirdPartyId={selectedDrawerId}
+        isOpen={isDrawerOpen}
+        onClose={() => {
+          setIsDrawerOpen(false);
+          setSelectedDrawerId(null);
         }}
       />
     </div>
   );
 };
 
-// ─── Modal création tiers ──────────────────────────────────────────────────────
+// ─── Modal création / édition tiers ──────────────────────────────────────────
 
 const ThirdPartyModal = ({
   isOpen,
+  initialData,
   onClose,
   onSuccess,
 }: {
   isOpen: boolean;
+  initialData?: any | null;
   onClose: () => void;
   onSuccess: () => void;
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "",
-    type: "client" as "client" | "supplier",
-    email: "",
-    phone: "",
-    ifu: "",
-    city: "",
-    country: "Bénin",
-    address: "",
-    payment_terms: 30,
+    name: initialData?.name || "",
+    type: (initialData?.type || "client") as "client" | "supplier",
+    email: initialData?.email || "",
+    phone: initialData?.phone || "",
+    ifu: initialData?.ifu || "",
+    city: initialData?.city || "",
+    country: initialData?.country || "Bénin",
+    address: initialData?.address || "",
+    payment_terms: initialData?.payment_terms || 30,
+  });
+
+  // Re-synchroniser quand initialData change
+  useState(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name || "",
+        type: initialData.type || "client",
+        email: initialData.email || "",
+        phone: initialData.phone || "",
+        ifu: initialData.ifu || "",
+        city: initialData.city || "",
+        country: initialData.country || "Bénin",
+        address: initialData.address || "",
+        payment_terms: initialData.payment_terms || 30,
+      });
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/third-parties", {
-        method: "POST",
+      const url = initialData
+        ? `/api/third-parties/${initialData.id}`
+        : "/api/third-parties";
+      const method = initialData ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(form),
       });
       const result = await res.json();
       if (result.success) {
-        toast.success("Tiers créé avec succès");
+        toast.success(
+          initialData ? "Tiers mis à jour avec succès" : "Tiers créé avec succès"
+        );
         onSuccess();
-        setForm({
-          name: "", type: "client", email: "", phone: "",
-          ifu: "", city: "", country: "Bénin", address: "", payment_terms: 30,
-        });
       } else {
-        toast.error(result.error || "Erreur lors de la création");
+        toast.error(result.error || "Erreur lors de l'enregistrement");
       }
     } catch {
-      toast.error("Une erreur est survenue");
+      toast.error("Une erreur réseau est survenue");
     } finally {
       setIsSubmitting(false);
     }
@@ -281,10 +467,11 @@ const ThirdPartyModal = ({
     props?: React.InputHTMLAttributes<HTMLInputElement>
   ) => (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium">{label}</label>
+      <label className="text-sm font-medium text-ink">{label}</label>
       <Input
         value={form[key] as string}
         onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+        className="bg-background border-border text-ink"
         {...props}
       />
     </div>
@@ -292,14 +479,16 @@ const ThirdPartyModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg" aria-describedby={undefined}>
+      <DialogContent className="max-w-lg bg-background border-border text-ink" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Nouveau tiers</DialogTitle>
+          <DialogTitle className="text-ink">
+            {initialData ? "Modifier le tiers" : "Nouveau tiers"}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Type */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Type</label>
+            <label className="text-sm font-medium text-ink">Type</label>
             <div className="flex gap-2">
               {(["client", "supplier"] as const).map((t) => (
                 <button
@@ -309,8 +498,8 @@ const ThirdPartyModal = ({
                   className={cn(
                     "flex-1 rounded-md border px-3 py-2 text-sm font-medium transition",
                     form.type === t
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-primary/50"
+                      ? "border-primary bg-primary/10 text-ink font-semibold"
+                      : "border-border text-muted hover:border-primary/50"
                   )}
                 >
                   {t === "client" ? "Client" : "Fournisseur"}
@@ -331,11 +520,20 @@ const ThirdPartyModal = ({
           {field("Adresse", "address")}
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Annuler
             </Button>
-            <Button type="submit" className="bg-gradient-primary" disabled={isSubmitting}>
-              Créer le tiers
+            <Button
+              type="submit"
+              className="bg-primary text-ink hover:opacity-90 font-medium"
+              disabled={isSubmitting}
+            >
+              {initialData ? "Enregistrer" : "Créer le tiers"}
             </Button>
           </DialogFooter>
         </form>

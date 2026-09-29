@@ -26,7 +26,7 @@ export function usePermissions() {
   const { data, isLoading } = useQuery<PermissionsResponse>({
     queryKey: ["permissions", session?.user?.email],
     queryFn: async () => {
-      const res = await fetch("/api/permissions");
+      const res = await fetch("/api/permissions", { credentials: "include" });
       if (!res.ok) {
         throw new Error("Impossible de charger les permissions");
       }

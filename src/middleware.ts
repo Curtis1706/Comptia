@@ -59,6 +59,19 @@ export async function middleware(req: NextRequest) {
     });
   }
 
+  // Fiche S1 : Rejet immédiat si le compte utilisateur est suspendu
+  if (token && token.is_active === false) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, data: null, error: "Compte suspendu" },
+        { status: 401 }
+      );
+    }
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("error", "account_suspended");
+    return NextResponse.redirect(loginUrl);
+  }
+
   // Redirect authenticated users away from auth pages
   if (token && (pathname === "/login" || pathname === "/register")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));

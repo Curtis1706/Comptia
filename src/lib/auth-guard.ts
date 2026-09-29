@@ -34,14 +34,33 @@ export async function getCurrentUser(
     if (!session?.user) return null;
 
     const user = session.user as any;
-    
+    if (!user?.id) return null;
+
+    // Fiche S1 : Contrôle en temps réel du statut actif en base de données
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        company_id: true,
+        avatar_url: true,
+        is_active: true,
+      },
+    });
+
+    if (!dbUser || !dbUser.is_active) {
+      return null;
+    }
+
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role as UserRole,
-      company_id: user.company_id,
-      avatar_url: user.avatar_url,
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role as UserRole,
+      company_id: dbUser.company_id,
+      avatar_url: dbUser.avatar_url,
     };
   } catch (err) {
     console.error("[getCurrentUser] Error:", err);
@@ -53,14 +72,14 @@ export async function getCurrentUser(
 
 /**
  * Wraps a route handler to inject the authenticated user.
- * Returns 401 if not authenticated.
+ * Returns 401 if not authenticated or if account is suspended.
  */
 export function withAuth(handler: AuthenticatedHandler) {
   return async (req: Request, context?: { params?: Promise<Record<string, string>> }) => {
     const user = await getCurrentUser(req);
 
     if (!user) {
-      return errorResponse("Non authentifié", 401);
+      return errorResponse("Session invalide ou compte suspendu", 401);
     }
 
     const params = context?.params ? await context.params : undefined;

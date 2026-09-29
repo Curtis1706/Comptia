@@ -149,6 +149,7 @@ export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ name, email, password, role }),
       });
       const data = await res.json();
@@ -329,6 +330,7 @@ export function ManageUserModal({ user, currentUserRole, isOpen, onClose }: Mana
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ role, is_active: isActive }),
       });
       const data = await res.json();
@@ -357,6 +359,7 @@ export function ManageUserModal({ user, currentUserRole, isOpen, onClose }: Mana
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body,
       });
       const data = await res.json();
@@ -381,6 +384,7 @@ export function ManageUserModal({ user, currentUserRole, isOpen, onClose }: Mana
       const res = await fetch("/api/company/transfer-ownership", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ target_user_id: user.id }),
       });
       const data = await res.json();

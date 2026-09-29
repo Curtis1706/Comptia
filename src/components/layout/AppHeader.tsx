@@ -149,7 +149,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
 
   const markAsRead = async (id: string) => {
     try {
-      await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
+      await fetch(`/api/notifications/${id}/read`, { method: "PATCH", credentials: "include" });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (e) {
       console.error(e);
@@ -158,7 +158,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
 
   const markAllAsRead = async () => {
     try {
-      await fetch("/api/notifications", { method: "PATCH" });
+      await fetch("/api/notifications", { method: "PATCH", credentials: "include" });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (e) {
       console.error(e);
@@ -174,6 +174,13 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
     hasAccess("user_management") ||
     hasAccess("mecef_settings");
   const canAccessBilling = hasAccess("subscription_billing") || userRole === "owner";
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-surface-container-lowest px-4 lg:px-space-lg">
@@ -358,7 +365,7 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer font-medium"
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Se déconnecter</span>

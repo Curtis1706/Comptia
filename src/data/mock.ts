@@ -78,24 +78,24 @@ export const credits = [
 export type OperationStatus = "validee" | "attente" | "erreur";
 
 export const operations = [
-  { id: 1, date: "2026-04-15", piece: "ACH-001", compte: "401001", libelle: "Fournisseur ABC - Facture #2391", debit: 1200, credit: 0, status: "validee" as OperationStatus },
-  { id: 2, date: "2026-04-15", piece: "VTE-128", compte: "411001", libelle: "Vente prestation - Studio Lumen", debit: 0, credit: 1800, status: "validee" as OperationStatus },
-  { id: 3, date: "2026-04-14", piece: "BNQ-045", compte: "512001", libelle: "Virement bancaire - BNP", debit: 0, credit: 5400, status: "validee" as OperationStatus },
-  { id: 4, date: "2026-04-13", piece: "ACH-002", compte: "606300", libelle: "Achat fournitures bureau", debit: 320, credit: 0, status: "attente" as OperationStatus },
-  { id: 5, date: "2026-04-12", piece: "SAL-04", compte: "641000", libelle: "Salaires avril 2026", debit: 22000, credit: 0, status: "validee" as OperationStatus },
-  { id: 6, date: "2026-04-11", piece: "TVA-Q1", compte: "445660", libelle: "TVA déductible Q1", debit: 1860, credit: 0, status: "validee" as OperationStatus },
-  { id: 7, date: "2026-04-10", piece: "ACH-003", compte: "613200", libelle: "Loyer bureau avril", debit: 2200, credit: 0, status: "erreur" as OperationStatus },
-  { id: 8, date: "2026-04-08", piece: "VTE-127", compte: "411002", libelle: "Vente prestation - Cabinet Durand", debit: 0, credit: 3200, status: "validee" as OperationStatus },
-  { id: 9, date: "2026-04-05", piece: "ACH-004", compte: "623400", libelle: "Campagne Google Ads", debit: 1400, credit: 0, status: "validee" as OperationStatus },
-  { id: 10, date: "2026-04-03", piece: "BNQ-044", compte: "512001", libelle: "Encaissement chèque #4521", debit: 0, credit: 2500, status: "attente" as OperationStatus },
+  { id: 1, date: "2026-04-15", piece: "ACH-001", compte: "401001", libelle: "Fournisseur ABC - Facture #2391", debit: 1200000, credit: 0, status: "validee" as OperationStatus },
+  { id: 2, date: "2026-04-15", piece: "VTE-128", compte: "411001", libelle: "Vente prestation - Studio Lumen", debit: 0, credit: 1800000, status: "validee" as OperationStatus },
+  { id: 3, date: "2026-04-14", piece: "BNQ-045", compte: "521001", libelle: "Virement bancaire - Ecobank Bénin", debit: 0, credit: 5400000, status: "validee" as OperationStatus },
+  { id: 4, date: "2026-04-13", piece: "ACH-002", compte: "605001", libelle: "Achat fournitures de bureau", debit: 320000, credit: 0, status: "attente" as OperationStatus },
+  { id: 5, date: "2026-04-12", piece: "SAL-04", compte: "661001", libelle: "Salaires du personnel national", debit: 2200000, credit: 0, status: "validee" as OperationStatus },
+  { id: 6, date: "2026-04-11", piece: "TVA-Q1", compte: "445200", libelle: "TVA récupérable sur achats", debit: 186000, credit: 0, status: "validee" as OperationStatus },
+  { id: 7, date: "2026-04-10", piece: "ACH-003", compte: "622001", libelle: "Loyer bureau avril (Locations)", debit: 2200000, credit: 0, status: "erreur" as OperationStatus },
+  { id: 8, date: "2026-04-08", piece: "VTE-127", compte: "411002", libelle: "Vente prestation - Cabinet Durand", debit: 0, credit: 3200000, status: "validee" as OperationStatus },
+  { id: 9, date: "2026-04-05", piece: "ACH-004", compte: "634001", libelle: "Campagne publicitaire et digitale", debit: 1400000, credit: 0, status: "validee" as OperationStatus },
+  { id: 10, date: "2026-04-03", piece: "BNQ-044", compte: "521001", libelle: "Encaissement virement BOA Bénin #4521", debit: 0, credit: 2500000, status: "attente" as OperationStatus },
 ];
 
 export const tvaDeclarations = [
-  { period: "Avril 2026", type: "CA3", deadline: "2026-05-19", status: "todo", tva: 8500 },
-  { period: "Mars 2026", type: "CA3", deadline: "2026-04-19", status: "submitted", tva: 7200 },
-  { period: "Février 2026", type: "CA3", deadline: "2026-03-19", status: "submitted", tva: 6800 },
-  { period: "Janvier 2026", type: "CA3", deadline: "2026-02-19", status: "submitted", tva: 5400 },
-  { period: "Décembre 2025", type: "CA3", deadline: "2026-01-19", status: "submitted", tva: 9100 },
+  { period: "Avril 2026", type: "e-TVA DGI", deadline: "2026-05-15", status: "todo", tva: 850000 },
+  { period: "Mars 2026", type: "e-TVA DGI", deadline: "2026-04-15", status: "submitted", tva: 720000 },
+  { period: "Février 2026", type: "e-TVA DGI", deadline: "2026-03-15", status: "submitted", tva: 680000 },
+  { period: "Janvier 2026", type: "e-TVA DGI", deadline: "2026-02-15", status: "submitted", tva: 540000 },
+  { period: "Décembre 2025", type: "e-TVA DGI", deadline: "2026-01-15", status: "submitted", tva: 910000 },
 ];
 
 export const employees = [

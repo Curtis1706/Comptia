@@ -584,9 +584,16 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Zéro bordure d'accent unilatérale : l'élément actif utilise uniquement `!bg-primary/15 !text-ink font-semibold`.
     - Zéro mock : branché sur `useQuery(["me"])` et les permissions réelles (`hasAccess`, `isModuleEnabledForSector`).
     - Zéro emoji, zéro glassmorphisme, 100% en français.
+  - **Mode Pliable / Dépliable (Collapsible - Icônes Seules)** :
+    - Gestion d'état fluide et persistance de la préférence utilisateur dans `localStorage` (`ceilow_sidebar_collapsed`).
+    - En mode plié (`collapsed`) :
+      - Largeur réduite à `w-16` (64px) et ajustement automatique du contenu principal à `lg:pl-16` (vs `lg:pl-64`).
+      - Affichage du picto officiel Ceilow sombre [public/logo/picto_ceilow_web_sombre.svg](file:///e:/Comptia/public/logo/picto_ceilow_web_sombre.svg).
+      - Affichage exclusif des icônes de navigation centrées sans texte, accompagnées d'infobulles contextuelles accessibles (`title`).
+      - Bouton toggle dédié (`PanelLeftClose` / `PanelLeftOpen`) pour basculer aisément entre mode complet et mode icônes seules.
 - **Validation technique (Règle 18)** :
   - `npx tsc --noEmit` : **0 erreur**.
-  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 26.2s).
+  - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 13.7s).
 
 
 

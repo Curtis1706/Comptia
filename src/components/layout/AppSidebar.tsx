@@ -14,6 +14,8 @@ import {
   LogOut,
   ChevronDown,
   Search,
+  PanelLeftClose,
+  PanelLeftOpen,
   X,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -78,12 +80,38 @@ const navGroups: NavGroupConfig[] = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-function WorkspaceSwitcher({ companyName, role }: { companyName: string; role: string }) {
+function WorkspaceSwitcher({
+  companyName,
+  role,
+  collapsed,
+}: {
+  companyName: string;
+  role: string;
+  collapsed?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const initial = companyName.charAt(0).toUpperCase() || "C";
   const roleLabel = ROLE_LABELS[role] || "Propriétaire";
+
+  if (collapsed) {
+    return (
+      <div className="flex justify-center mb-3">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-9 h-9 rounded-lg bg-primary text-ink flex items-center justify-center font-bold text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title={`${companyName} (${roleLabel})`}
+          aria-label={companyName}
+        >
+          {initial}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative mb-2">
@@ -138,7 +166,12 @@ function WorkspaceSwitcher({ companyName, role }: { companyName: string; role: s
   );
 }
 
-export const AppSidebar = ({ open, onClose }: Props) => {
+export const AppSidebar = ({
+  open,
+  onClose,
+  collapsed = false,
+  onToggleCollapse,
+}: Props) => {
   const { data: userRes } = useQuery<any>({
     queryKey: ["me"],
     queryFn: () => fetcher("/api/auth/me"),
@@ -194,55 +227,119 @@ export const AppSidebar = ({ open, onClose }: Props) => {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-background-secondary border-r border-border z-50 flex flex-col justify-between select-none transition-transform duration-300 lg:translate-x-0 font-sans",
+          "fixed left-0 top-0 h-full bg-background-secondary border-r border-border z-50 flex flex-col justify-between select-none transition-all duration-300 lg:translate-x-0 font-sans",
+          collapsed ? "w-16" : "w-64",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col flex-1 min-h-0 p-3">
-          {/* En-tête avec Logo Ceilow et bouton fermeture mobile */}
-          <div className="h-12 px-2 flex items-center justify-between shrink-0 mb-2">
-            <Link href="/dashboard" className="flex items-center" title="Ceilow SYSCOHADA">
-              <img src="/logo/ceilow_web_sombre.svg" alt="Ceilow" className="h-7 w-auto" />
-            </Link>
-            <button
-              onClick={onClose}
-              className="lg:hidden p-1.5 text-text-muted hover:text-ink transition-colors rounded-md"
-              aria-label="Fermer le menu"
+          {/* En-tête avec Logo / Picto Ceilow et bouton plier/déplier */}
+          <div
+            className={cn(
+              "h-12 flex items-center shrink-0 mb-2",
+              collapsed ? "justify-center" : "justify-between px-2"
+            )}
+          >
+            <Link
+              href="/dashboard"
+              className="flex items-center"
+              title="Ceilow SYSCOHADA"
             >
-              <X className="h-5 w-5" />
-            </button>
+              {collapsed ? (
+                <img
+                  src="/logo/picto_ceilow_web_sombre.svg"
+                  alt="Ceilow"
+                  className="h-7 w-auto"
+                />
+              ) : (
+                <img
+                  src="/logo/ceilow_web_sombre.svg"
+                  alt="Ceilow"
+                  className="h-7 w-auto"
+                />
+              )}
+            </Link>
+
+            <div className="flex items-center gap-1">
+              {onToggleCollapse && (
+                <button
+                  type="button"
+                  onClick={onToggleCollapse}
+                  className={cn(
+                    "hidden lg:flex items-center justify-center p-1.5 rounded-md text-text-muted hover:text-ink hover:bg-surface-container transition-colors",
+                    collapsed && "mt-1"
+                  )}
+                  title={collapsed ? "Déplier la barre latérale" : "Plier la barre latérale"}
+                  aria-label={collapsed ? "Déplier la barre latérale" : "Plier la barre latérale"}
+                >
+                  {collapsed ? (
+                    <PanelLeftOpen className="w-4 h-4" />
+                  ) : (
+                    <PanelLeftClose className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="lg:hidden p-1.5 text-text-muted hover:text-ink transition-colors rounded-md"
+                aria-label="Fermer le menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           {/* Switcher d'entreprise */}
-          <WorkspaceSwitcher companyName={companyName} role={userRole} />
+          <WorkspaceSwitcher
+            companyName={companyName}
+            role={userRole}
+            collapsed={collapsed}
+          />
 
           {/* Raccourci Recherche ⌘K */}
-          <button
-            type="button"
-            onClick={handleOpenSearch}
-            className="flex items-center justify-between w-full px-2.5 py-2 mb-3 rounded-lg bg-background border border-border text-text-muted hover:text-ink hover:border-ink transition-colors text-xs font-medium"
-          >
-            <div className="flex items-center gap-2">
-              <Search className="w-3.5 h-3.5" />
-              <span>Recherche rapide</span>
-            </div>
-            <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-text-muted bg-background-secondary border border-border rounded">
-              ⌘K
-            </kbd>
-          </button>
+          {collapsed ? (
+            <button
+              type="button"
+              onClick={handleOpenSearch}
+              className="flex items-center justify-center w-10 h-10 mx-auto mb-3 rounded-lg bg-background border border-border text-text-muted hover:text-ink hover:border-ink transition-colors"
+              title="Recherche rapide (⌘K)"
+              aria-label="Recherche rapide"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleOpenSearch}
+              className="flex items-center justify-between w-full px-2.5 py-2 mb-3 rounded-lg bg-background border border-border text-text-muted hover:text-ink hover:border-ink transition-colors text-xs font-medium"
+            >
+              <div className="flex items-center gap-2">
+                <Search className="w-3.5 h-3.5" />
+                <span>Recherche rapide</span>
+              </div>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-text-muted bg-background-secondary border border-border rounded">
+                ⌘K
+              </kbd>
+            </button>
+          )}
 
           {/* Navigation groupée */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-3">
+          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-2.5">
             {navGroups.map((group, groupIdx) => {
               const visibleGroupItems = group.items.filter(filterItem);
               if (visibleGroupItems.length === 0) return null;
 
               return (
                 <div key={groupIdx} className="flex flex-col gap-0.5">
-                  {group.heading && (
+                  {!collapsed && group.heading && (
                     <span className="px-2.5 mb-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
                       {group.heading}
                     </span>
+                  )}
+                  {collapsed && groupIdx > 0 && (
+                    <div className="h-px bg-border/40 mx-2 my-1.5" />
                   )}
                   {visibleGroupItems.map((item) => {
                     const Icon = item.icon;
@@ -251,12 +348,18 @@ export const AppSidebar = ({ open, onClose }: Props) => {
                         key={item.key}
                         to={item.to}
                         end={item.to === "/dashboard"}
-                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
+                        className={cn(
+                          "flex items-center rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs",
+                          collapsed
+                            ? "justify-center w-10 h-10 mx-auto"
+                            : "gap-2.5 px-2.5 py-2"
+                        )}
                         activeClassName="!bg-primary/15 !text-ink font-semibold"
                         onClick={onClose}
+                        title={collapsed ? item.label : undefined}
                       >
                         <Icon className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{item.label}</span>
+                        {!collapsed && <span className="truncate">{item.label}</span>}
                       </NavLink>
                     );
                   })}
@@ -271,27 +374,48 @@ export const AppSidebar = ({ open, onClose }: Props) => {
           {isSettingsAccessible && (
             <NavLink
               to="/parametres"
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs"
+              className={cn(
+                "flex items-center rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs",
+                collapsed
+                  ? "justify-center w-10 h-10 mx-auto"
+                  : "gap-2.5 px-2.5 py-2"
+              )}
               activeClassName="!bg-primary/15 !text-ink font-semibold"
               onClick={onClose}
+              title={collapsed ? "Paramètres" : undefined}
             >
               <Settings className="w-4 h-4 shrink-0" />
-              <span>Paramètres</span>
+              {!collapsed && <span>Paramètres</span>}
             </NavLink>
           )}
 
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs w-full text-left"
+            className={cn(
+              "flex items-center rounded-lg text-text-muted hover:bg-surface-container hover:text-ink transition-colors font-medium text-xs w-full",
+              collapsed
+                ? "justify-center w-10 h-10 mx-auto"
+                : "gap-2.5 px-2.5 py-2 text-left"
+            )}
+            title={collapsed ? "Déconnexion" : undefined}
           >
             <LogOut className="w-4 h-4 shrink-0" />
-            <span>Déconnexion</span>
+            {!collapsed && <span>Déconnexion</span>}
           </button>
 
-          <div className="mt-1 pt-2 border-t border-border/50 px-2.5 flex items-center justify-between text-text-muted text-[11px]">
-            <span>Réseau e-MECeF Bénin</span>
-            <span className="inline-block w-2 h-2 rounded-full bg-success" title="Opérationnel" />
+          <div
+            className={cn(
+              "mt-1 pt-2 border-t border-border/50 text-text-muted text-[11px] flex items-center",
+              collapsed ? "justify-center" : "justify-between px-2.5"
+            )}
+            title={collapsed ? "Réseau e-MECeF Bénin : Opérationnel" : undefined}
+          >
+            {!collapsed && <span>Réseau e-MECeF Bénin</span>}
+            <span
+              className="inline-block w-2 h-2 rounded-full bg-success"
+              title="Opérationnel"
+            />
           </div>
         </div>
       </aside>

@@ -6,6 +6,32 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-09-30 — Refonte de la Page Facturation & e-MECeF (Design Système Ceilow & Composants 21st.dev)
+
+- **Actions effectuées** :
+  - **Refonte complète de l'interface `Facturation.tsx`** ([`src/views/Facturation.tsx`](file:///e:/Comptia/src/views/Facturation.tsx)) :
+    - Adaptation scrupuleuse de la maquette demandée au design system strict de Ceilow (tokens sémantiques, zéro couleur hexadécimale en dur, zéro emoji, zéro em-dash, chiffres tabulaires `tnum`).
+  - **Cartes KPI Modernes (Standards 21st.dev)** :
+    1. **Encaissé total** : Tendance de progression (+14.2%), montant cumulé en Francs CFA, nombre de règlements reçus ce mois, et mini-sparkline vectoriel SVG avec point d'ancrage (`success`).
+    2. **Créances clients** : Badge d'alerte en cas d'échéance dépassée (`error`), montant total des créances non soldées, et barre de progression segmentée bicolore dynamique (ventilation en cours vs échu) avec décompte précis.
+    3. **Brouillons** : Badge d'état d'attente (`warning`), nombre de factures en préparation, et montant cumulé non validé.
+    4. **Total émis** : Mois en cours, nombre total de pièces émises sur la période et montant global TTC facturé.
+    - Ajout d'infobulles explicatives sur chaque carte respectant la règle §10 pour guider les utilisateurs non comptables.
+  - **Barre d'outils, Navigation par Onglets & Alertes Fiscales** :
+    - Onglets de filtrage par type de document : "Factures de vente", "Devis", "Factures d'avoir" avec indicateurs visuels actifs `border-primary` et `text-ink`.
+    - Barre de recherche avec icône Lucide et raccourci clavier `⌘K`.
+    - Bouton d'exportation CSV/Excel branché sur les données réelles filtrées.
+    - Bannière d'alerte DGI e-MECeF avec statut en attente / hors-ligne et bouton d'action directe "Retransmettre tout" (avec retour Toast et rechargement automatique).
+  - **Data Table Haute Fidélité avec Pagination Complète (Composant 21st.dev)** :
+    - Tableau moderne avec en-têtes typographiées, colonnes ordonnées (Référence, Client, Date, Échéance, Montant TTC, Statut, Certification e-MECeF, Actions).
+    - Lignes interactives : bouton d'envoi rapide, bouton de réessai e-MECeF en cas de rejet, et menu d'actions contextuelles (Validation, Consultation, Signature DGI, Téléchargement PDF, Envoi e-mail, Suppression).
+    - Barre de pagination avancée : sélecteur de lignes par page (10, 25, 50, 100), décompte précis des éléments affichés, navigation par numéros de page avec flèches précédent/suivant et état désactivé aux bornes.
+  - **Modale de Détails & Diagnostic e-MECeF** :
+    - Consultation complète des signatures cryptographiques : NIM, Compteur MECeF, Code de vérification DGI (avec bouton de copie instantanée), QR code et statut d'attestation officiel.
+  - **Contrôle Qualité & Conformité** :
+    - `npx tsc --noEmit` : 0 erreur de typage TypeScript.
+    - `pnpm build` : Build de production Next.js validé avec succès.
+
 ### 2026-09-30 — Intégration des Avatars Utilisateurs Déterministes (Boring Avatars & Palette Ceilow)
 
 - **Actions effectuées** :

@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -312,34 +313,40 @@ export const AppHeader = ({ onOpenSidebar }: Props) => {
             <Button
               variant="ghost"
               aria-label="Profil utilisateur"
-              className="bg-background-secondary border border-border p-1.5 w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 hover:bg-surface-container transition-colors"
+              className="p-0 w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 hover:opacity-85 transition-opacity"
             >
               {userLoading ? (
-                <Skeleton className="h-6 w-6 rounded-full" />
-              ) : user?.avatar_url ? (
-                <Avatar className="h-full w-full">
-                  <AvatarImage src={user.avatar_url} alt={user?.name || "Profil"} />
-                  <AvatarFallback className="text-[10px] font-bold text-ink bg-primary/20">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
+                <Skeleton className="h-9 w-9 rounded-full" />
               ) : (
-                <svg className="w-5 h-5 text-ink" viewBox="0 0 49 48" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M49,20.88a2.93,2.93,0,0,0-2.1-2.28,2.79,2.79,0,0,0-1.62-.06A155,155,0,0,1,27.33,22s0,0,0,0c3.25-5.9,6.56-11.23,9.77-16a2.81,2.81,0,0,0-1-4.08A2.94,2.94,0,0,0,33,2.34a2.78,2.78,0,0,0-1,1.3,155.92,155.92,0,0,1-7.17,16.47s0,0-.05,0c-.61-2.18-1.19-4.43-1.73-6.73-.88-3.79-1.58-7.46-2.14-11a2.81,2.81,0,0,0-5.26-.9,2.73,2.73,0,0,0-.33,1.32,2.91,2.91,0,0,0,.22,1.09c2.36,5.58,4.7,11.81,6.84,18.65,0,0,0,0,0,0-2.69.27-5.45.48-8.3.61-3.89.18-7.62.21-11.18.11A2.83,2.83,0,0,0,.28,24.9,2.85,2.85,0,0,0,0,26.44a2.82,2.82,0,0,0,1.05,1.9,2.86,2.86,0,0,0,1.17.55,2.93,2.93,0,0,0,1.18,0c5.6-1.24,11.77-2.35,18.44-3.2,0,0,0,0,0,0Q20.17,28.81,18.21,32c-2.06,3.31-4.16,6.39-6.25,9.27a2.83,2.83,0,0,0-.2,3.07,2.89,2.89,0,0,0,1.13,1.09,2.82,2.82,0,0,0,3.32-.49,2.89,2.89,0,0,0,.61-.93c2-5,4.4-10.26,7.21-15.81,0,0,0,0,0,0,1.7,6,3,11.69,4,17a2.74,2.74,0,0,0,.41,1,2.84,2.84,0,0,0,3.17,1.12,2.93,2.93,0,0,0,1.86-2.47,2.83,2.83,0,0,0-.23-1.62,155.78,155.78,0,0,1-7-18,.05.05,0,0,1,0,0C33.5,24.4,40.15,24.07,46.22,24a2.87,2.87,0,0,0,1.08-.23A2.81,2.81,0,0,0,49,20.88Z" fill="#332E29" />
-                </svg>
+                <UserAvatar
+                  name={user?.name}
+                  email={user?.email}
+                  avatarUrl={user?.avatar_url}
+                  size={36}
+                  variant="beam"
+                />
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-60" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal p-3 bg-muted/30">
-              <div className="flex flex-col space-y-1.5">
-                <p className="text-sm font-semibold leading-none text-foreground">{user?.name}</p>
-                <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
-                <div className="pt-1">
-                  <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", roleInfo.badgeCls)}>
-                    <RoleIcon className="h-3 w-3" />
-                    {roleInfo.label}
-                  </span>
+          <DropdownMenuContent className="w-64" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal p-3 bg-background-secondary border-b border-border">
+              <div className="flex items-center gap-3">
+                <UserAvatar
+                  name={user?.name}
+                  email={user?.email}
+                  avatarUrl={user?.avatar_url}
+                  size={40}
+                  variant="beam"
+                />
+                <div className="flex flex-col space-y-0.5 min-w-0 flex-1">
+                  <p className="text-xs font-bold leading-tight text-ink truncate">{user?.name || "Utilisateur"}</p>
+                  <p className="text-[11px] leading-tight text-text-muted truncate">{user?.email}</p>
+                  <div className="pt-1">
+                    <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", roleInfo.badgeCls)}>
+                      <RoleIcon className="h-3 w-3" />
+                      {roleInfo.label}
+                    </span>
+                  </div>
                 </div>
               </div>
             </DropdownMenuLabel>

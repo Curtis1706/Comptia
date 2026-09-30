@@ -6,6 +6,24 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-09-30 — Intégration des Avatars Utilisateurs Déterministes (Boring Avatars & Palette Ceilow)
+
+- **Actions effectuées** :
+  - **Correction de l'anomalie de marque** : Suppression du picto Ceilow utilisé à tort comme avatar de profil par défaut dans `AppHeader.tsx`. La règle §6 réserve exclusivement le picto à l'organisation/entreprise.
+  - **Installation & Création du composant `UserAvatar`** ([`src/components/ui/user-avatar.tsx`](file:///e:/Comptia/src/components/ui/user-avatar.tsx)) :
+    - Utilisation de la bibliothèque `boring-avatars` (variante abstraite et professionnelle `beam`) alimentée avec un seed déterministe (`name` ou `email`).
+    - Injection stricte de la palette fermée officielle Ceilow : `["#332E29", "#FFD946", "#5FFFC2", "#FFA53D", "#F5F4F2"]`.
+    - Gestion automatique du fallback si l'utilisateur a uploadé une photo personnalisée (`avatar_url`), avec basculement gracieux sur l'avatar vectoriel en cas d'erreur de chargement d'image.
+  - **Déploiement sur l'ensemble de l'application** :
+    - [`src/components/layout/AppHeader.tsx`](file:///e:/Comptia/src/components/layout/AppHeader.tsx) : Bouton de profil du header et en-tête du menu déroulant.
+    - [`src/views/Parametres.tsx`](file:///e:/Comptia/src/views/Parametres.tsx) : Carte de session active et liste des collaborateurs de l'entreprise.
+    - [`src/components/settings/UserModals.tsx`](file:///e:/Comptia/src/components/settings/UserModals.tsx) : Modale de gestion des collaborateurs `ManageUserModal`.
+  - **Élimination des infractions CSS résiduelles** : Remplacement des fonds `bg-gradient-primary` obsolètes dans les cartes utilisateurs par le composant `UserAvatar`.
+  - **Contrôle qualité & Validation** :
+    - `npx tsc --noEmit` : 0 erreur de typage.
+    - `pnpm build` : Build de production Next.js validé avec succès.
+
+
 ### 2026-09-29 — Refonte de la Modale de Facturation (Stepper 3 Étapes & Création Client Inline)
 
 - **Actions effectuées** :

@@ -31,6 +31,7 @@ import {
   Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 export const ROLE_DEFINITIONS = [
   {
@@ -418,9 +419,13 @@ export function ManageUserModal({ user, currentUserRole, isOpen, onClose }: Mana
         <div className="space-y-4 py-2">
           {/* User info header */}
           <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-primary text-base font-semibold text-primary-foreground">
-              {user.name.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
-            </div>
+            <UserAvatar
+              name={user.name}
+              email={user.email}
+              avatarUrl={user.avatar_url}
+              size={48}
+              variant="beam"
+            />
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm truncate">{user.name}</p>
               <p className="text-xs text-muted-foreground truncate">{user.email}</p>

@@ -35,6 +35,7 @@ import { PermissionsMatrix } from "@/components/settings/PermissionsMatrix";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Module, Permission } from "@/lib/permissions";
 import { InviteUserModal, ManageUserModal, UserRoleBadge } from "@/components/settings/UserModals";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { signOut } from "next-auth/react";
 
 interface SettingSection {
@@ -127,16 +128,16 @@ export const Parametres = () => {
           <div className="rounded-xl border border-border bg-card p-4 shadow-card space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Session active</p>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-primary text-xs font-bold text-white shadow-sm overflow-hidden">
-                {currentUser?.avatar_url ? (
-                  <img src={currentUser.avatar_url} alt={currentUser?.name} className="h-full w-full object-cover" />
-                ) : (
-                  userInitials
-                )}
-              </div>
+              <UserAvatar
+                name={currentUser?.name}
+                email={currentUser?.email}
+                avatarUrl={currentUser?.avatar_url}
+                size={38}
+                variant="beam"
+              />
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-foreground truncate leading-tight">{currentUser?.name || "Utilisateur"}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{currentUser?.email}</p>
+                <p className="text-xs font-bold text-ink truncate leading-tight">{currentUser?.name || "Utilisateur"}</p>
+                <p className="text-[11px] text-text-muted truncate">{currentUser?.email}</p>
               </div>
             </div>
             <div className="pt-0.5">
@@ -406,9 +407,13 @@ const UsersTable = () => {
         ) : (
           users.map((u: any) => (
             <li key={u.id} className="flex items-center gap-4 p-4 hover:bg-muted/20 transition">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-sm font-semibold text-primary-foreground shadow-card">
-                {u.name.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
-              </div>
+              <UserAvatar
+                name={u.name}
+                email={u.email}
+                avatarUrl={u.avatar_url}
+                size={40}
+                variant="beam"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-semibold truncate text-sm">{u.name}</p>

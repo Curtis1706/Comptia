@@ -25,6 +25,9 @@ export default {
         display: ["Clash Display", "var(--font-clash)", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
+      textColor: {
+        muted: "hsl(var(--muted-foreground))",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

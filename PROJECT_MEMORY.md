@@ -28,6 +28,17 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - Barre de pagination avancée : sélecteur de lignes par page (10, 25, 50, 100), décompte précis des éléments affichés, navigation par numéros de page avec flèches précédent/suivant et état désactivé aux bornes.
   - **Modale de Détails & Diagnostic e-MECeF** :
     - Consultation complète des signatures cryptographiques : NIM, Compteur MECeF, Code de vérification DGI (avec bouton de copie instantanée), QR code et statut d'attestation officiel.
+  - **Composants Récupérés via MCP 21st.dev & Adaptés** :
+    - Récupération effective des codes sources via les serveurs MCP `21st` et `21st-2` :
+      1. `Stats Card` (id: 7841 par kavikatiyar) -> Création de [`src/components/ui/stats-card.tsx`](file:///e:/Comptia/src/components/ui/stats-card.tsx) avec animation spring `framer-motion`, chiffres tabulaires et tokens Ceilow.
+      2. `Data Table` (id: 28327 par ephraimduncan) et `Table Pagination` (id: 25118 par shadcnui-blocks) -> Création de [`src/components/ui/data-table-pagination.tsx`](file:///e:/Comptia/src/components/ui/data-table-pagination.tsx) avec sélecteur de lignes par page, pagination numérotée, plage dynamique et adaptation mobile-first.
+    - Remplacement des blocs manuels par ces composants officiels réutilisables dans [`src/views/Facturation.tsx`](file:///e:/Comptia/src/views/Facturation.tsx).
+  - **Résolution de l'Anomalie de Contraste sur les Textes Secondaires (`text-muted`)** :
+    - Diagnostic : La classe Tailwind `text-muted` résolvait vers `colors.muted.DEFAULT` (`--muted` = `#F5F4F2`, couleur de fond clair) au lieu de `colors.muted.foreground` (`--muted-foreground` = `#8A857D`), rendant les textes secondaires, en-têtes et libellés quasiment invisibles sur fond blanc.
+    - Correction :
+      1. Configuration de `textColor: { muted: "hsl(var(--muted-foreground))" }` dans [`tailwind.config.ts`](file:///e:/Comptia/tailwind.config.ts).
+      2. Ajout de la règle utilitaire `.text-muted { color: hsl(var(--muted-foreground)) !important; }` dans [`src/app/globals.css`](file:///e:/Comptia/src/app/globals.css).
+      3. Renforcement typographique (font-semibold sur les titres de cartes et en-têtes de tableau, font-medium sur les métriques secondaires) dans [`src/components/ui/stats-card.tsx`](file:///e:/Comptia/src/components/ui/stats-card.tsx) et [`src/views/Facturation.tsx`](file:///e:/Comptia/src/views/Facturation.tsx).
   - **Contrôle Qualité & Conformité** :
     - `npx tsc --noEmit` : 0 erreur de typage TypeScript.
     - `pnpm build` : Build de production Next.js validé avec succès.

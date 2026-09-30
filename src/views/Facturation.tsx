@@ -51,6 +51,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { InvoiceModal } from "@/components/invoices/InvoiceModal";
 import { DownloadPdfButton } from "@/components/invoices/DownloadPdfButton";
 import { PermissionGate } from "@/components/PermissionGate";
+import { StatsCard } from "@/components/ui/stats-card";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { toast } from "sonner";
 import { getQueuedInvoices, dequeueInvoice, incrementAttempts } from "@/lib/offline-queue";
 
@@ -273,7 +275,7 @@ export const Facturation = () => {
       <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Facturation & e-MECeF</h1>
-          <p className="text-xs text-text-muted mt-1 font-normal">
+          <p className="text-xs text-muted mt-1 font-medium">
             Émission de factures, devis, avoirs et normalisation certifiée DGI Bénin
           </p>
         </div>
@@ -300,145 +302,123 @@ export const Facturation = () => {
         </div>
       </section>
 
-      {/* 2. GRILLE DES 4 CARTES KPI STATISTIQUES (Patterns 21st.dev adaptés à la charte Ceilow) */}
+      {/* 2. GRILLE DES 4 CARTES KPI STATISTIQUES (Composant StatsCard issu de 21st.dev id: 7841) */}
       <section
         aria-label="Statistiques de facturation"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md"
       >
         {/* Metric 1 : Encaissé total */}
-        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between shadow-xs">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
-                ENCAISSÉ TOTAL
-              </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-ink bg-success/20 px-1.5 py-0.5 rounded tnum">
-                +14.2%
-              </span>
-            </div>
-            <div className="mt-2 text-2xl font-bold tracking-tight text-ink tnum">
-              {statsLoading ? (
-                <Skeleton className="h-7 w-32" />
-              ) : (
-                formatCFA(stats?.total_revenue || 0)
-              )}
-            </div>
-          </div>
-          <div className="mt-3 pt-2 border-t border-border flex items-center justify-between text-xs text-text-muted">
-            <span className="text-[11px]">
-              {stats?.status_counts?.paid || 0} règlement(s) reçu(s) ce mois
+        <StatsCard
+          title="Encaissé total"
+          currentValue={stats?.total_revenue || 0}
+          valuePostfix=" F CFA"
+          description={`${stats?.status_counts?.paid || 0} règlement(s) reçu(s) ce mois`}
+          tooltipText="Total des règlements clients effectivement perçus au cours du mois actif."
+          trendBadge={
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink bg-success/20 px-1.5 py-0.5 rounded tnum border border-success/30">
+              +14.2%
             </span>
-            <svg
-              className="w-16 h-5 text-success overflow-visible"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 64 20"
-              aria-hidden="true"
-            >
-              <path
-                d="M0 16 L12 14 L24 17 L36 9 L48 11 L64 3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        </div>
+          }
+          footer={
+            <div className="flex items-center justify-between text-xs text-muted">
+              <span className="text-[11px] font-medium">
+                {stats?.status_counts?.paid || 0} reçus ce mois
+              </span>
+              <svg
+                className="w-16 h-5 text-success overflow-visible"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 64 20"
+                aria-hidden="true"
+              >
+                <path
+                  d="M0 16 L12 14 L24 17 L36 9 L48 11 L64 3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          }
+        />
 
         {/* Metric 2 : Créances clients */}
-        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between shadow-xs">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
-                CRÉANCES CLIENTS
-              </span>
-              <span className="inline-flex items-center text-[10px] font-semibold text-ink bg-warning/20 px-1.5 py-0.5 rounded border border-warning/30">
-                {stats?.status_counts?.overdue
-                  ? `${stats.status_counts.overdue} en retard`
-                  : "À échéance"}
-              </span>
+        <StatsCard
+          title="Créances clients"
+          currentValue={stats?.unpaid_amount || 0}
+          valuePostfix=" F CFA"
+          description="Factures validées restant dues par vos clients"
+          tooltipText="Montant total des factures de vente validées non soldées."
+          trendBadge={
+            <span className="inline-flex items-center text-[10px] font-semibold text-ink bg-warning/20 px-1.5 py-0.5 rounded border border-warning/30">
+              {stats?.status_counts?.overdue
+                ? `${stats.status_counts.overdue} en retard`
+                : "À échéance"}
+            </span>
+          }
+          footer={
+            <div className="space-y-1.5">
+              <div className="w-full h-1.5 bg-border/40 rounded-full overflow-hidden flex">
+                <div
+                  className="h-full bg-ink/70"
+                  style={{ width: "65%" }}
+                  title="À échéance régulière"
+                />
+                <div
+                  className="h-full bg-warning"
+                  style={{ width: "35%" }}
+                  title="Échu à relancer"
+                />
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-muted tnum font-medium">
+                <span>{formatCFA((stats?.unpaid_amount || 0) * 0.65)} en cours</span>
+                <span className="text-ink font-semibold">
+                  {formatCFA((stats?.unpaid_amount || 0) * 0.35)} échu
+                </span>
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-bold tracking-tight text-ink tnum">
-              {statsLoading ? (
-                <Skeleton className="h-7 w-32" />
-              ) : (
-                formatCFA(stats?.unpaid_amount || 0)
-              )}
-            </div>
-          </div>
-          <div className="mt-3 pt-2 border-t border-border space-y-1.5">
-            <div className="w-full h-1.5 bg-border/40 rounded-full overflow-hidden flex">
-              <div
-                className="h-full bg-ink/70"
-                style={{ width: "65%" }}
-                title="À échéance régulière"
-              />
-              <div
-                className="h-full bg-warning"
-                style={{ width: "35%" }}
-                title="Échu à relancer"
-              />
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-text-muted tnum font-medium">
-              <span>{formatCFA((stats?.unpaid_amount || 0) * 0.65)} en cours</span>
-              <span className="text-ink font-semibold">
-                {formatCFA((stats?.unpaid_amount || 0) * 0.35)} échu
-              </span>
-            </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Metric 3 : Brouillons */}
-        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between shadow-xs">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
-                BROUILLONS
-              </span>
-              <span className="text-[11px] font-semibold text-ink bg-background border border-border px-1.5 py-0.5 rounded">
-                En attente
-              </span>
-            </div>
-            <div className="mt-2 text-2xl font-bold tracking-tight text-ink tnum">
-              {statsLoading ? (
-                <Skeleton className="h-7 w-16" />
-              ) : (
-                stats?.status_counts?.draft || 0
-              )}
-            </div>
-          </div>
-          <div className="mt-3 pt-2 border-t border-border flex items-center justify-between text-xs text-text-muted">
-            <span className="text-[11px]">
-              {stats?.status_counts?.draft || 0} facture(s) non validée(s)
+        <StatsCard
+          title="Brouillons"
+          currentValue={stats?.status_counts?.draft || 0}
+          description={`${stats?.status_counts?.draft || 0} facture(s) non validée(s)`}
+          tooltipText="Factures en cours d'édition n'ayant pas encore reçu d'attestation e-MECeF."
+          trendBadge={
+            <span className="text-[11px] font-semibold text-ink bg-background border border-border px-1.5 py-0.5 rounded">
+              En attente
             </span>
-            <span className="text-[11px] font-medium text-ink">À certifier</span>
-          </div>
-        </div>
+          }
+          footer={
+            <div className="flex items-center justify-between text-xs text-muted font-medium">
+              <span className="text-[11px]">En attente de validation</span>
+              <span className="text-[11px] font-medium text-ink">À certifier</span>
+            </div>
+          }
+        />
 
         {/* Metric 4 : Total émis */}
-        <div className="rounded-xl p-space-md bg-background-secondary border border-border flex flex-col justify-between shadow-xs">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
-                TOTAL ÉMIS
+        <StatsCard
+          title="Total émis"
+          currentValue={stats?.total_count || 0}
+          description="Volume de factures émises sur la période"
+          tooltipText="Nombre total de documents émis (factures, devis, avoirs) et CA correspondant."
+          trendBadge={
+            <span className="text-[11px] font-medium text-muted">Mois actif</span>
+          }
+          footer={
+            <div className="flex items-center justify-between text-xs text-muted font-medium">
+              <span className="text-[11px]">
+                {stats?.total_count || 0} document(s) émis
               </span>
-              <span className="text-[11px] font-medium text-text-muted">Mois actif</span>
+              <span className="text-[11px] font-semibold text-ink tnum">
+                {formatCFA(stats?.total_revenue || 0)}
+              </span>
             </div>
-            <div className="mt-2 text-2xl font-bold tracking-tight text-ink tnum">
-              {statsLoading ? (
-                <Skeleton className="h-7 w-16" />
-              ) : (
-                stats?.total_count || 0
-              )}
-            </div>
-          </div>
-          <div className="mt-3 pt-2 border-t border-border flex items-center justify-between text-xs text-text-muted">
-            <span className="text-[11px]">{stats?.total_count || 0} document(s) émis</span>
-            <span className="text-[11px] font-semibold text-ink tnum">
-              {formatCFA(stats?.total_revenue || 0)}
-            </span>
-          </div>
-        </div>
+          }
+        />
       </section>
 
       {/* 3. CONTENEUR PRINCIPAL DU TABLEAU DE DONNÉES */}
@@ -459,7 +439,7 @@ export const Facturation = () => {
                   "pb-3 text-xs tracking-wide transition-colors relative",
                   isActive
                     ? "text-ink font-bold border-b-2 border-primary"
-                    : "text-text-muted hover:text-ink border-b-2 border-transparent"
+                    : "text-muted hover:text-ink border-b-2 border-transparent font-medium"
                 )}
               >
                 {t.label}
@@ -471,7 +451,7 @@ export const Facturation = () => {
         {/* Barre d'outils & filtres */}
         <section className="p-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm border-b border-border bg-background-secondary/30">
           <div className="relative w-full sm:w-96">
-            <Search className="w-4 h-4 pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+            <Search className="w-4 h-4 pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <Input
               value={query}
               onChange={(e) => {
@@ -479,10 +459,10 @@ export const Facturation = () => {
                 setCurrentPage(1);
               }}
               placeholder="Rechercher client, référence, code MECeF..."
-              className="pl-9 pr-12 h-9 text-xs bg-background border-border text-ink focus:border-ink"
+              className="pl-9 pr-12 h-9 text-xs bg-background border-border text-ink focus:border-ink placeholder:text-muted"
             />
             <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
-              <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-text-muted border border-border rounded bg-background">
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-muted border border-border rounded bg-background font-medium">
                 ⌘ K
               </kbd>
             </div>
@@ -543,7 +523,7 @@ export const Facturation = () => {
         {/* 4. TABLEAU DE DONNÉES DATA TABLE AVEC ACTIONS */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead className="border-b border-border bg-background-secondary text-text-muted font-semibold tracking-wider text-[11px] uppercase">
+            <thead className="border-b border-border bg-background-secondary text-muted font-semibold tracking-wider text-[11px] uppercase">
               <tr>
                 <th className="py-3 px-4">Référence</th>
                 <th className="py-3 px-4">Client</th>
@@ -566,7 +546,7 @@ export const Facturation = () => {
                 ))
               ) : invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-text-muted text-xs italic">
+                  <td colSpan={8} className="py-12 text-center text-muted text-xs italic">
                     Aucun document trouvé pour ce critère.
                   </td>
                 </tr>
@@ -591,12 +571,12 @@ export const Facturation = () => {
                       </td>
 
                       {/* Date d'émission */}
-                      <td className="py-3.5 px-4 text-text-muted tnum">
+                      <td className="py-3.5 px-4 text-muted tnum font-medium">
                         {formatDate(inv.issue_date)}
                       </td>
 
                       {/* Date d'échéance */}
-                      <td className="py-3.5 px-4 text-text-muted tnum">
+                      <td className="py-3.5 px-4 text-muted tnum font-medium">
                         {formatDate(inv.due_date)}
                       </td>
 
@@ -675,7 +655,7 @@ export const Facturation = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-text-muted hover:text-ink hover:bg-background-secondary rounded"
+                                className="h-7 w-7 text-muted hover:text-ink hover:bg-background-secondary rounded"
                                 title="Plus d'actions"
                               >
                                 <MoreHorizontal className="w-4 h-4" />
@@ -686,7 +666,7 @@ export const Facturation = () => {
                                 onClick={() => setSelectedInvoiceDetail(inv)}
                                 className="text-xs cursor-pointer"
                               >
-                                <Eye className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                                <Eye className="w-3.5 h-3.5 mr-2 text-muted" />
                                 <span>Détails & e-MECeF</span>
                               </DropdownMenuItem>
 
@@ -694,7 +674,7 @@ export const Facturation = () => {
                                 onClick={() => toast.info(`Email préparé pour ${inv.client?.name || "le client"}`)}
                                 className="text-xs cursor-pointer"
                               >
-                                <Mail className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                                <Mail className="w-3.5 h-3.5 mr-2 text-muted" />
                                 <span>Envoyer par e-mail</span>
                               </DropdownMenuItem>
 
@@ -734,104 +714,21 @@ export const Facturation = () => {
           </table>
         </div>
 
-        {/* 5. CONTRÔLE DE PAGINATION COMPLET (Composant 21st.dev Table Pagination) */}
-        <div className="p-space-md border-t border-border flex flex-col sm:flex-row items-center justify-between gap-space-sm text-xs bg-background-secondary/20">
-          <div className="flex items-center gap-2 text-text-muted">
-            <span>
-              Affichage de{" "}
-              <strong className="text-ink tnum">
-                {totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1}
-              </strong>{" "}
-              à{" "}
-              <strong className="text-ink tnum">
-                {Math.min(currentPage * pageSize, totalCount)}
-              </strong>{" "}
-              sur <strong className="text-ink tnum">{totalCount}</strong> document(s)
-            </span>
-
-            <span className="w-1 h-1 rounded-full bg-border mx-1" />
-
-            <div className="flex items-center gap-1">
-              <span>Lignes par page :</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="h-7 rounded border border-border bg-background px-1.5 text-xs text-ink"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={currentPage <= 1 || invoicesLoading}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="h-8 px-2.5 text-xs font-medium border-border hover:bg-background-secondary text-ink"
-            >
-              <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-              <span>Précédent</span>
-            </Button>
-
-            <div className="flex items-center gap-1 px-1">
-              {[...Array(totalPages)].map((_, i) => {
-                const pageNum = i + 1;
-                // N'afficher que les pages proches si beaucoup de pages
-                if (
-                  totalPages > 7 &&
-                  Math.abs(pageNum - currentPage) > 2 &&
-                  pageNum !== 1 &&
-                  pageNum !== totalPages
-                ) {
-                  if (pageNum === 2 || pageNum === totalPages - 1) {
-                    return (
-                      <span key={pageNum} className="px-1 text-text-muted">
-                        ...
-                      </span>
-                    );
-                  }
-                  return null;
-                }
-                const isSelected = pageNum === currentPage;
-                return (
-                  <button
-                    key={pageNum}
-                    type="button"
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={cn(
-                      "w-7 h-7 rounded text-xs font-semibold transition-colors flex items-center justify-center",
-                      isSelected
-                        ? "bg-primary text-ink font-bold shadow-xs"
-                        : "text-text-muted hover:text-ink hover:bg-background-secondary"
-                    )}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= totalPages || invoicesLoading}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="h-8 px-2.5 text-xs font-medium border-border hover:bg-background-secondary text-ink"
-            >
-              <span>Suivant</span>
-              <ChevronRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          </div>
-        </div>
+        {/* 5. CONTRÔLE DE PAGINATION COMPLET (Composant officiel 21st.dev id: 25118 & 28327) */}
+        <DataTablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[10, 20, 50]}
+          labelSingular="document"
+          labelPlural="documents"
+        />
       </div>
 
       {/* 6. MODALE DÉTAIL FACTURE & CERTIFICATION e-MECeF */}

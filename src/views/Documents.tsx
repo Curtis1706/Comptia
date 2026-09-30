@@ -1,122 +1,203 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   UploadCloud,
   FileText,
   CheckCircle2,
-  Clock,
-  ScanLine,
+  AlertTriangle,
   Loader2,
-  AlertCircle,
+  Search,
+  Download,
+  Trash2,
+  Eye,
   RotateCw,
-  ExternalLink,
+  MoreHorizontal,
+  Plus,
+  Check,
+  Filter,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PageHeader } from "@/components/dashboard/PageHeader";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import { formatCFA, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import {
-  SYSCOHADA_EXPENSE_ACCOUNTS,
-  inferSyscohadaExpenseAccount,
-  SyscohadaExpenseAccount,
-} from "@/lib/syscohada-accounts";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { DocumentUploadDrawer } from "@/components/documents/DocumentUploadDrawer";
+import { DocumentVerificationView } from "@/components/documents/DocumentVerificationView";
 
-export const Documents = () => {
-  const [drag, setDrag] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [retryingId, setRetryingId] = useState<string | null>(null);
-  const [selectedDoc, setSelectedDoc] = useState<any>(null);
-  const [ocrFields, setOcrFields] = useState<any>({
-    amount: "",
-    date: "",
-    vendor_name: "",
-    vendor_siret: "",
-    invoice_number: "",
-    vat_amount: "",
-  });
+type FilterStatus = "all" | "to_verify" | "extracted" | "processed" | "error";
 
+export function Documents() {
   const queryClient = useQueryClient();
 
+  // Navigation entre la vue liste et la vue vérification
+  const [currentView, setCurrentView] = useState<"list" | "verify">("list");
+  const [activeVerificationIndex, setActiveVerificationIndex] = useState(0);
+
+  // État du panneau latéral de téléversement (Écran 2)
+  const [isUploadDrawerOpen, setIsUploadDrawerOpen] = useState(false);
+
+  // Filtres
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
+  const [periodFilter, setPeriodFilter] = useState("all");
+  const [accountFilter, setAccountFilter] = useState("all");
+
+  // Sélection multiple
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Chargement des documents
   const { data: docsRes, isLoading } = useQuery<any>({
     queryKey: ["documents"],
     queryFn: () => fetcher("/api/documents/list"),
     refetchInterval: (query: any) => {
-      // Auto-refetch while any document is still processing
       const docs = query?.state?.data || [];
       const list = Array.isArray(docs) ? docs : docs?.data || [];
-      return list.some((d: any) => d.status === "processing" || d.status === "uploaded") ? 3000 : false;
+      return list.some(
+        (d: any) => d.status === "processing" || d.status === "uploaded"
+      )
+        ? 3000
+        : false;
     },
   });
 
-  const documents: any[] = Array.isArray(docsRes) ? docsRes : docsRes?.data || [];
+  const documents: any[] = useMemo(() => {
+    return Array.isArray(docsRes) ? docsRes : docsRes?.data || [];
+  }, [docsRes]);
 
-  const setDocuments = (updater: (prev: any[]) => any[]) => {
-    queryClient.setQueryData(["documents"], (old: any) => {
-      const prev = Array.isArray(old) ? old : old?.data || [];
-      return updater(prev);
-    });
-  };
+  // Calcul des métriques pour les 4 cartes de synthèse
+  const metrics = useMemo(() => {
+    let toVerify = 0;
+    let extracted = 0;
+    let processed = 0;
+    let error = 0;
 
-  const handleFileUpload = async (file: File) => {
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", "invoice");
-
-    try {
-      const res = await fetch("/api/documents/upload", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-      let result: any = null;
-      try {
-        result = await res.json();
-      } catch {
-        result = { success: false, error: `Erreur serveur (${res.status})` };
-      }
-      if (result.success && result.data) {
-        setDocuments((prev) => [result.data, ...prev]);
-        toast.success("Document envoyé vers le stockage Cloudflare, analyse OCR en cours...");
-        pollDocumentStatus(result.data.id);
+    for (const doc of documents) {
+      if (doc.status === "processed") {
+        processed++;
+      } else if (doc.status === "error") {
+        error++;
+      } else if (doc.status === "processing" || doc.status === "uploaded") {
+        extracted++;
       } else {
-        toast.error(result.error || "Erreur lors de l'upload");
+        toVerify++;
       }
-    } catch (e: any) {
-      toast.error(e?.message || "Erreur réseau lors de l'upload");
-    } finally {
-      setIsUploading(false);
+    }
+
+    return { toVerify, extracted, processed, error };
+  }, [documents]);
+
+  // Filtrage des documents
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) => {
+      // 1. Filtre par recherche texte
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const filename = (doc.original_filename || "").toLowerCase();
+        const vendor = (doc.extracted_data?.vendor_name || "").toLowerCase();
+        const invNumber = (doc.extracted_data?.invoice_number || "").toLowerCase();
+        const account = (doc.extracted_data?.account_code || "").toLowerCase();
+        if (
+          !filename.includes(q) &&
+          !vendor.includes(q) &&
+          !invNumber.includes(q) &&
+          !account.includes(q)
+        ) {
+          return false;
+        }
+      }
+
+      // 2. Filtre par statut
+      if (statusFilter === "processed" && doc.status !== "processed") return false;
+      if (statusFilter === "error" && doc.status !== "error") return false;
+      if (
+        statusFilter === "extracted" &&
+        doc.status !== "processing" &&
+        doc.status !== "uploaded"
+      )
+        return false;
+      if (
+        statusFilter === "to_verify" &&
+        (doc.status === "processed" || doc.status === "error")
+      )
+        return false;
+
+      // 3. Filtre par compte
+      if (accountFilter !== "all") {
+        const acc = doc.extracted_data?.account_code;
+        if (acc !== accountFilter) return false;
+      }
+
+      // 4. Filtre par période
+      if (periodFilter !== "all" && doc.created_at) {
+        const docDate = new Date(doc.created_at);
+        const now = new Date();
+        if (periodFilter === "month") {
+          if (
+            docDate.getMonth() !== now.getMonth() ||
+            docDate.getFullYear() !== now.getFullYear()
+          )
+            return false;
+        } else if (periodFilter === "year") {
+          if (docDate.getFullYear() !== now.getFullYear()) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [documents, searchQuery, statusFilter, accountFilter, periodFilter]);
+
+  // Pagination sur la liste filtrée
+  const totalCount = filteredDocuments.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const paginatedDocuments = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredDocuments.slice(start, start + pageSize);
+  }, [filteredDocuments, currentPage, pageSize]);
+
+  // Gestion de la sélection
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(paginatedDocuments.map((d) => d.id));
+    } else {
+      setSelectedIds([]);
     }
   };
 
-  const pollDocumentStatus = (docId: string) => {
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/documents/${docId}`, { credentials: "include" }).then((r) => r.json());
-        if (res.data?.status === "processed" || res.data?.status === "error") {
-          clearInterval(interval);
-          setDocuments((prev) => prev.map((d) => (d.id === docId ? res.data : d)));
-          if (res.data.status === "processed") {
-            toast.success("OCR terminé — données comptables extraites");
-            if (selectedDoc?.id === docId) handleSelectDoc(res.data);
-          } else {
-            toast.error("L'analyse OCR a rencontré une difficulté sur ce fichier");
-          }
-        }
-      } catch {}
-    }, 2000);
-    setTimeout(() => clearInterval(interval), 60000);
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds((prev) => [...prev, id]);
+    } else {
+      setSelectedIds((prev) => prev.filter((i) => i !== id));
+    }
+  };
+
+  // Actions individuelles
+  const handleOpenVerification = (doc: any) => {
+    const index = documents.findIndex((d) => d.id === doc.id);
+    setActiveVerificationIndex(index >= 0 ? index : 0);
+    setCurrentView("verify");
   };
 
   const handleRetryOCR = async (docId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setRetryingId(docId);
     try {
       const res = await fetch(`/api/documents/${docId}/retry`, {
         method: "POST",
@@ -125,542 +206,716 @@ export const Documents = () => {
       const data = await res.json();
       if (data.success) {
         toast.success("Traitement OCR relancé");
-        setDocuments((prev) => prev.map((d) => (d.id === docId ? { ...d, status: "processing" } : d)));
-        if (selectedDoc?.id === docId) {
-          setSelectedDoc((prev: any) => ({ ...prev, status: "processing" }));
-        }
-        pollDocumentStatus(docId);
+        queryClient.invalidateQueries({ queryKey: ["documents"] });
       } else {
         toast.error(data.error || "Impossible de relancer l'OCR");
       }
     } catch {
-      toast.error("Erreur réseau lors de la relance OCR");
-    } finally {
-      setRetryingId(null);
+      toast.error("Erreur réseau");
     }
   };
 
-  const handleSelectDoc = (doc: any) => {
-    setSelectedDoc(doc);
-    if (doc.extracted_data) {
-      setOcrFields({
-        amount: doc.extracted_data.amount !== undefined ? String(doc.extracted_data.amount) : "",
-        date: doc.extracted_data.date ? new Date(doc.extracted_data.date).toISOString().split("T")[0] : "",
-        vendor_name: doc.extracted_data.vendor_name || "",
-        vendor_siret: doc.extracted_data.vendor_siret || "",
-        invoice_number: doc.extracted_data.invoice_number || "",
-        vat_amount: doc.extracted_data.vat_amount !== undefined ? String(doc.extracted_data.vat_amount) : "",
-      });
-      // Respect du compte de charge SYSCOHADA :
-      if (doc.extracted_data.account_code) {
-        setAccountCode(doc.extracted_data.account_code);
-      } else {
-        const textSample = `${doc.extracted_data.vendor_name || ""} ${doc.extracted_data._raw_text || ""} ${doc.original_filename || ""}`;
-        const inferred = inferSyscohadaExpenseAccount(textSample, doc.extracted_data.vendor_name);
-        setAccountCode(inferred.code);
-      }
-    } else {
-      setOcrFields({
-        amount: "",
-        date: "",
-        vendor_name: "",
-        vendor_siret: "",
-        invoice_number: "",
-        vat_amount: "",
-      });
-      setAccountCode("628");
-    }
-  };
-
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [accountCode, setAccountCode] = useState("628");
-
-  const { data: accountsRes } = useQuery<any>({
-    queryKey: ["accounts", "expense"],
-    queryFn: () => fetcher("/api/accounts?limit=200&type=expense"),
-  });
-  const customAccounts: any[] = Array.isArray(accountsRes)
-    ? accountsRes
-    : Array.isArray(accountsRes?.data)
-    ? accountsRes.data
-    : [];
-
-  // Union des comptes officiels SYSCOHADA et des comptes personnalisés en base
-  const availableAccounts = (() => {
-    const map = new Map<string, { code: string; name: string; category: string; description?: string }>();
-    for (const a of SYSCOHADA_EXPENSE_ACCOUNTS) {
-      map.set(a.code, a);
-    }
-    for (const a of customAccounts) {
-      if (a.code && a.code.startsWith("6")) {
-        const existing = map.get(a.code);
-        map.set(a.code, {
-          code: a.code,
-          name: a.name.startsWith(a.code) ? a.name : `${a.code} - ${a.name}`,
-          category: existing?.category || `Classe 6 - ${a.code.slice(0, 2)}`,
-          description: existing?.description,
+  const handleDeleteOne = async (doc: any, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (confirm(`Supprimer le document "${doc.original_filename}" ?`)) {
+      try {
+        const res = await fetch(`/api/documents/${doc.id}`, {
+          method: "DELETE",
+          credentials: "include",
         });
+        if (res.ok) {
+          toast.success("Document supprimé");
+          setSelectedIds((prev) => prev.filter((id) => id !== doc.id));
+          queryClient.invalidateQueries({ queryKey: ["documents"] });
+        }
+      } catch {
+        toast.error("Erreur lors de la suppression");
       }
-    }
-    return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
-  })();
-
-  const selectedAccountInfo = availableAccounts.find((a) => a.code === accountCode);
-
-  const handleTransform = async () => {
-    if (!selectedDoc) return;
-    setIsProcessing(true);
-    try {
-      const res = await fetch(`/api/documents/${selectedDoc.id}/transform`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          ...ocrFields,
-          account_code: accountCode,
-        }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success("Écriture comptable créée avec succès");
-        queryClient.invalidateQueries({ queryKey: ["documents"] });
-        setSelectedDoc(null);
-      } else {
-        toast.error(result.error || "Erreur lors de la validation");
-      }
-    } catch (e) {
-      toast.error("Erreur réseau lors de la création de l'opération");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  const previewUrl = selectedDoc
-    ? selectedDoc.file_url?.startsWith("http")
-      ? selectedDoc.file_url
-      : `/api/documents/${selectedDoc.id}/file`
-    : null;
+  // Actions groupées
+  const handleBulkDelete = async () => {
+    if (
+      !confirm(
+        `Êtes-vous sûr de vouloir supprimer les ${selectedIds.length} justificatifs sélectionnés ?`
+      )
+    )
+      return;
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Documents & Justificatifs"
-        subtitle="Téléversement Cloudflare R2 et extraction OCR automatique conforme SYSCOHADA"
+    setIsBulkProcessing(true);
+    let successCount = 0;
+    for (const id of selectedIds) {
+      try {
+        const res = await fetch(`/api/documents/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (res.ok) successCount++;
+      } catch {}
+    }
+    toast.success(`${successCount} document(s) supprimé(s)`);
+    setSelectedIds([]);
+    setIsBulkProcessing(false);
+    queryClient.invalidateQueries({ queryKey: ["documents"] });
+  };
+
+  const handleBulkValidate = async () => {
+    setIsBulkProcessing(true);
+    let successCount = 0;
+    for (const id of selectedIds) {
+      const doc = documents.find((d) => d.id === id);
+      if (!doc || doc.status === "processed") continue;
+
+      const ext = doc.extracted_data || {};
+      const amount = Number(ext.amount) || 0;
+      if (amount <= 0 || !ext.vendor_name) continue;
+
+      try {
+        const res = await fetch(`/api/documents/${id}/transform`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            vendor_name: ext.vendor_name,
+            amount: amount,
+            date: ext.date || new Date().toISOString().split("T")[0],
+            vat_amount: Number(ext.vat_amount) || 0,
+            invoice_number: ext.invoice_number || "",
+            account_code: ext.account_code || "628",
+          }),
+        });
+        if (res.ok) successCount++;
+      } catch {}
+    }
+    toast.success(`${successCount} document(s) validé(s) et comptabilisé(s)`);
+    setSelectedIds([]);
+    setIsBulkProcessing(false);
+    queryClient.invalidateQueries({ queryKey: ["documents"] });
+  };
+
+  // Export CSV
+  const handleExportCsv = () => {
+    if (filteredDocuments.length === 0) {
+      toast.info("Aucun document à exporter.");
+      return;
+    }
+
+    const headers = [
+      "Fichier",
+      "Fournisseur",
+      "Date_Facture",
+      "Montant_TTC",
+      "TVA_Deductible",
+      "Compte_SYSCOHADA",
+      "Statut",
+      "Date_Ajout",
+    ];
+
+    const rows = filteredDocuments.map((doc) => {
+      const ext = doc.extracted_data || {};
+      return [
+        `"${doc.original_filename || ""}"`,
+        `"${ext.vendor_name || ""}"`,
+        `"${ext.date ? formatDate(ext.date) : ""}"`,
+        ext.amount || 0,
+        ext.vat_amount || 0,
+        `"${ext.account_code || "628"}"`,
+        `"${doc.status}"`,
+        `"${doc.created_at ? formatDate(doc.created_at) : ""}"`,
+      ].join(",");
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `justificatifs_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Exportation CSV terminée");
+  };
+
+  // BASCULE VERS LA VUE DE VÉRIFICATION PLEINE PAGE (ÉCRAN 3)
+  if (currentView === "verify") {
+    return (
+      <DocumentVerificationView
+        documents={documents}
+        initialIndex={activeVerificationIndex}
+        onBackToList={() => {
+          setCurrentView("list");
+          queryClient.invalidateQueries({ queryKey: ["documents"] });
+        }}
+        onDocumentValidated={() => {
+          queryClient.invalidateQueries({ queryKey: ["documents"] });
+        }}
+        onDocumentDeleted={() => {
+          queryClient.invalidateQueries({ queryKey: ["documents"] });
+        }}
       />
+    );
+  }
 
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDrag(true);
-        }}
-        onDragLeave={() => setDrag(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDrag(false);
-          const file = e.dataTransfer.files[0];
-          if (file) handleFileUpload(file);
-        }}
-        className={cn(
-          "rounded-xl border-2 border-dashed bg-background-secondary/50 p-8 sm:p-10 text-center transition relative",
-          drag ? "border-primary bg-primary/10" : "border-border"
-        )}
-      >
-        {isUploading && (
-          <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-xl z-10">
-            <div className="flex flex-col items-center gap-2">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-xs font-medium text-ink">Téléversement vers Cloudflare R2...</p>
-            </div>
-          </div>
-        )}
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-ink">
-          <UploadCloud className="h-6 w-6 text-ink" />
+  // ÉCRAN 1 : PAGE LISTE « DOCUMENTS & JUSTIFICATIFS »
+  return (
+    <div className="space-y-space-md">
+      {/* 1. EN-TÊTE DE LA PAGE */}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
+            Documents & Justificatifs
+          </h1>
+          <p className="text-xs text-muted mt-1 font-medium">
+            Centralisez vos justificatifs et validez les données extraites automatiquement (OCR).
+          </p>
         </div>
-        <p className="mt-3 text-base sm:text-lg font-semibold text-ink">Déposez vos justificatifs ici</p>
-        <p className="text-xs sm:text-sm text-muted">PDF, JPG, PNG, WEBP — Taille maximale 10 Mo</p>
-        <div className="mt-4">
-          <Input
-            type="file"
-            className="hidden"
-            id="file-upload"
-            accept=".pdf,.jpg,.jpeg,.png,.webp"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFileUpload(file);
-            }}
-          />
-          <Label
-            htmlFor="file-upload"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-primary/90 cursor-pointer min-h-[44px]"
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            className="h-9 px-3.5 text-xs font-semibold border-border hover:bg-background-secondary text-ink flex items-center gap-1.5"
           >
-            Parcourir les fichiers
-          </Label>
-        </div>
-      </div>
+            <Download className="w-3.5 h-3.5 text-ink" />
+            <span>Exporter</span>
+          </Button>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Colonne 1 : Documents récents */}
-        <div className="rounded-xl border border-border bg-background p-4 lg:col-span-1">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-ink">Documents récents</h3>
-            <span className="text-xs text-muted tabular-nums">{documents.length} document(s)</span>
+          <Button
+            type="button"
+            onClick={() => setIsUploadDrawerOpen(true)}
+            className="bg-primary text-ink text-xs font-bold hover:brightness-95 active:scale-[0.99] transition-all shadow-xs flex items-center gap-1.5 h-9 px-4 rounded"
+          >
+            <Plus className="w-4 h-4 text-ink" />
+            <span>Téléverser un justificatif</span>
+          </Button>
+        </div>
+      </section>
+
+      {/* 2. RANGÉE DE 4 CARTES DE SYNTHÈSE COMPACTES ET CLIQUABLES */}
+      <section
+        aria-label="Synthèse des justificatifs"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto pb-1"
+      >
+        {/* Carte 1 : À vérifier */}
+        <button
+          type="button"
+          onClick={() =>
+            setStatusFilter(statusFilter === "to_verify" ? "all" : "to_verify")
+          }
+          className={cn(
+            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            statusFilter === "to_verify"
+              ? "border-warning ring-2 ring-warning/30 bg-warning/5"
+              : "border-border hover:border-border/80 hover:shadow-2xs"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+              À VÉRIFIER
+            </span>
+            <span className="w-2 h-2 rounded-full bg-warning" />
+          </div>
+          <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
+            {metrics.toVerify}
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Données à valider</p>
+        </button>
+
+        {/* Carte 2 : Extraits */}
+        <button
+          type="button"
+          onClick={() =>
+            setStatusFilter(statusFilter === "extracted" ? "all" : "extracted")
+          }
+          className={cn(
+            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            statusFilter === "extracted"
+              ? "border-primary ring-2 ring-primary/30 bg-primary/5"
+              : "border-border hover:border-border/80 hover:shadow-2xs"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+              EXTRAITS
+            </span>
+            <span className="w-2 h-2 rounded-full bg-primary" />
+          </div>
+          <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
+            {metrics.extracted}
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Analyse en cours</p>
+        </button>
+
+        {/* Carte 3 : Validés */}
+        <button
+          type="button"
+          onClick={() =>
+            setStatusFilter(statusFilter === "processed" ? "all" : "processed")
+          }
+          className={cn(
+            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            statusFilter === "processed"
+              ? "border-success ring-2 ring-success/30 bg-success/5"
+              : "border-border hover:border-border/80 hover:shadow-2xs"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+              VALIDÉS
+            </span>
+            <span className="w-2 h-2 rounded-full bg-success" />
+          </div>
+          <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
+            {metrics.processed}
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Écritures comptabilisées</p>
+        </button>
+
+        {/* Carte 4 : En erreur */}
+        <button
+          type="button"
+          onClick={() =>
+            setStatusFilter(statusFilter === "error" ? "all" : "error")
+          }
+          className={cn(
+            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            statusFilter === "error"
+              ? "border-error ring-2 ring-error/30 bg-error/5"
+              : "border-border hover:border-border/80 hover:shadow-2xs"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+              EN ERREUR
+            </span>
+            <span className="w-2 h-2 rounded-full bg-error" />
+          </div>
+          <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
+            {metrics.error}
+          </div>
+          <p className="mt-1 text-[11px] text-muted">À relancer</p>
+        </button>
+      </section>
+
+      {/* 3. BARRE DE FILTRES MULTI-CRITÈRES */}
+      <section className="p-3 sm:p-4 rounded-xl border border-border bg-background flex flex-col lg:flex-row items-center justify-between gap-3 shadow-2xs">
+        <div className="relative w-full lg:w-96">
+          <Search className="w-4 h-4 pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Rechercher fournisseur, fichier, référence..."
+            className="pl-9 pr-3 h-9 text-xs bg-background border-border text-ink focus:border-ink placeholder:text-muted"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          {/* Filtre Statut */}
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as FilterStatus);
+              setCurrentPage(1);
+            }}
+            aria-label="Filtrer par statut"
+            className="h-9 rounded-md border border-border bg-background px-3 text-xs text-ink focus:border-ink focus:ring-0"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="to_verify">À vérifier</option>
+            <option value="extracted">En extraction</option>
+            <option value="processed">Validé</option>
+            <option value="error">Erreur</option>
+          </select>
+
+          {/* Filtre Période */}
+          <select
+            value={periodFilter}
+            onChange={(e) => {
+              setPeriodFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            aria-label="Filtrer par période"
+            className="h-9 rounded-md border border-border bg-background px-3 text-xs text-ink focus:border-ink focus:ring-0"
+          >
+            <option value="all">Toutes périodes</option>
+            <option value="month">Ce mois-ci</option>
+            <option value="year">Cette année</option>
+          </select>
+
+          {/* Filtre Compte de charge */}
+          <select
+            value={accountFilter}
+            onChange={(e) => {
+              setAccountFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            aria-label="Filtrer par compte de charge"
+            className="h-9 rounded-md border border-border bg-background px-3 text-xs text-ink focus:border-ink focus:ring-0 max-w-[160px]"
+          >
+            <option value="all">Tous les comptes</option>
+            <option value="605">605 - Achats</option>
+            <option value="626">626 - Frais télécoms</option>
+            <option value="628">628 - Services ext.</option>
+            <option value="661">661 - Salaires</option>
+          </select>
+        </div>
+      </section>
+
+      {/* BARRE D'ACTIONS GROUPÉES AU COCHAGE DE LIGNES */}
+      {selectedIds.length > 0 && (
+        <aside
+          role="region"
+          aria-label="Actions groupées"
+          className="p-3 rounded-lg border border-primary/40 bg-primary/10 flex items-center justify-between text-xs text-ink select-none animate-in fade-in-50"
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-bold font-mono tabular-nums">
+              {selectedIds.length} sélectionné(s)
+            </span>
           </div>
 
-          <ul className="space-y-1.5 max-h-[520px] overflow-y-auto">
-            {isLoading ? (
-              <div className="p-6 text-center text-muted text-xs">Chargement des documents...</div>
-            ) : documents.length === 0 ? (
-              <p className="text-xs text-muted p-6 text-center">Aucun justificatif importé pour le moment</p>
-            ) : (
-              documents.map((d) => (
-                <li key={d.id}>
-                  <div
-                    onClick={() => handleSelectDoc(d)}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-lg p-3 text-left transition cursor-pointer border",
-                      selectedDoc?.id === d.id
-                        ? "border-primary bg-primary/10"
-                        : "border-transparent bg-background-secondary/40 hover:bg-background-secondary"
-                    )}
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-background border border-border text-muted">
-                      <FileText className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleBulkValidate}
+              disabled={isBulkProcessing}
+              className="h-7 px-3 text-xs font-bold bg-primary text-ink hover:brightness-95"
+            >
+              {isBulkProcessing ? (
+                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              ) : (
+                <Check className="w-3 h-3 mr-1" />
+              )}
+              <span>Valider la sélection</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleBulkDelete}
+              disabled={isBulkProcessing}
+              className="h-7 px-3 text-xs font-medium text-error border-error/30 hover:bg-error/10"
+            >
+              <Trash2 className="w-3 h-3 mr-1 text-error" />
+              <span>Supprimer</span>
+            </Button>
+          </div>
+        </aside>
+      )}
+
+      {/* 4. TABLEAU DE DONNÉES AVEC CASES À COCHER & PAGINATION */}
+      <div className="rounded-xl border border-border bg-background shadow-xs overflow-hidden">
+        {/* Vue Desktop / Tablette */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs whitespace-nowrap">
+            <thead className="border-b border-border bg-background-secondary text-muted font-semibold tracking-wider text-[11px] uppercase">
+              <tr>
+                <th className="py-3 px-4 w-10">
+                  <Checkbox
+                    checked={
+                      paginatedDocuments.length > 0 &&
+                      selectedIds.length === paginatedDocuments.length
+                    }
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Tout sélectionner"
+                  />
+                </th>
+                <th className="py-3 px-4">Fichier</th>
+                <th className="py-3 px-4">Fournisseur</th>
+                <th className="py-3 px-4">Date facture</th>
+                <th className="py-3 px-4 text-right">Montant TTC</th>
+                <th className="py-3 px-4 text-right">TVA déductible</th>
+                <th className="py-3 px-4">Compte</th>
+                <th className="py-3 px-4">Statut</th>
+                <th className="py-3 px-4">Ajouté le</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-border text-ink">
+              {isLoading ? (
+                [...Array(pageSize)].map((_, i) => (
+                  <tr key={i} className="border-b border-border">
+                    <td colSpan={10} className="py-3 px-4">
+                      <div className="h-5 w-full bg-background-secondary/60 animate-pulse rounded" />
+                    </td>
+                  </tr>
+                ))
+              ) : filteredDocuments.length === 0 ? (
+                /* ÉCRAN 1 BIS : ÉTAT VIDE */
+                <tr>
+                  <td colSpan={10} className="py-16 text-center">
+                    <div className="max-w-sm mx-auto flex flex-col items-center justify-center text-center">
+                      <div className="w-12 h-12 rounded-full bg-background-secondary border border-border flex items-center justify-center text-muted mb-3">
+                        <FileText className="w-6 h-6 text-muted" />
+                      </div>
+                      <h3 className="text-sm font-bold text-ink">
+                        Aucun justificatif pour le moment
+                      </h3>
+                      <p className="text-xs text-muted mt-1 font-normal">
+                        Déposez une facture ou un reçu, nous extrayons les données pour vous.
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={() => setIsUploadDrawerOpen(true)}
+                        className="mt-4 bg-primary text-ink text-xs font-bold hover:brightness-95 h-9 px-4 rounded shadow-xs"
+                      >
+                        <Plus className="w-4 h-4 mr-1 text-ink" />
+                        <span>Téléverser un justificatif</span>
+                      </Button>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-semibold text-ink">{d.original_filename}</p>
-                      <p className="text-[11px] text-muted tabular-nums">
-                        {formatDate(d.created_at)}
-                        {d.status === "processed" && d.extracted_data?.amount !== undefined && (
-                          <span className="font-medium text-ink ml-1.5">
-                            · {formatCFA(d.extracted_data.amount)}
+                  </td>
+                </tr>
+              ) : (
+                paginatedDocuments.map((doc) => {
+                  const isChecked = selectedIds.includes(doc.id);
+                  const ext = doc.extracted_data || {};
+                  const isProcessed = doc.status === "processed";
+                  const isError = doc.status === "error";
+                  const isProcessing =
+                    doc.status === "processing" || doc.status === "uploaded";
+                  const isToVerify = !isProcessed && !isError && !isProcessing;
+
+                  const fileUrl = doc.file_url?.startsWith("http")
+                    ? doc.file_url
+                    : `/api/documents/${doc.id}/file`;
+
+                  return (
+                    <tr
+                      key={doc.id}
+                      className={cn(
+                        "hover:bg-background-secondary/40 transition-colors group cursor-pointer",
+                        isChecked && "bg-primary/5"
+                      )}
+                      onClick={() => handleOpenVerification(doc)}
+                    >
+                      {/* Checkbox */}
+                      <td
+                        className="py-3 px-4"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) =>
+                            handleSelectOne(doc.id, Boolean(checked))
+                          }
+                          aria-label={`Sélectionner ${doc.original_filename}`}
+                        />
+                      </td>
+
+                      {/* Fichier (icône + nom tronqué) */}
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2 max-w-[200px]">
+                          <FileText className="w-4 h-4 text-muted shrink-0" />
+                          <span
+                            className="font-medium text-ink truncate"
+                            title={doc.original_filename}
+                          >
+                            {doc.original_filename || "Document"}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Fournisseur */}
+                      <td className="py-3 px-4 font-medium text-ink">
+                        {ext.vendor_name || (
+                          <span className="text-muted italic">Non identifié</span>
+                        )}
+                      </td>
+
+                      {/* Date facture */}
+                      <td className="py-3 px-4 text-muted tnum font-medium">
+                        {ext.date
+                          ? formatDate(ext.date)
+                          : doc.issue_date
+                          ? formatDate(doc.issue_date)
+                          : "—"}
+                      </td>
+
+                      {/* Montant TTC */}
+                      <td className="py-3 px-4 font-bold text-right tnum text-ink">
+                        {ext.amount ? formatCFA(Number(ext.amount)) : "0 F CFA"}
+                      </td>
+
+                      {/* TVA déductible */}
+                      <td className="py-3 px-4 font-medium text-right tnum text-muted">
+                        {ext.vat_amount ? formatCFA(Number(ext.vat_amount)) : "0 F CFA"}
+                      </td>
+
+                      {/* Compte (ex. 628) */}
+                      <td className="py-3 px-4 font-mono text-xs font-semibold text-ink">
+                        <span className="px-1.5 py-0.5 rounded bg-background-secondary border border-border">
+                          {ext.account_code || "628"}
+                        </span>
+                      </td>
+
+                      {/* Statut avec pastille point + texte */}
+                      <td className="py-3 px-4">
+                        {isProcessed ? (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink bg-success/20 px-2 py-0.5 rounded border border-success/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
+                            <span>Validé</span>
+                          </span>
+                        ) : isError ? (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-error bg-error/15 px-2 py-0.5 rounded border border-error/25">
+                            <span className="w-1.5 h-1.5 rounded-full bg-error shrink-0" />
+                            <span>Erreur</span>
+                          </span>
+                        ) : isProcessing ? (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted bg-background-secondary px-2 py-0.5 rounded border border-border">
+                            <span className="w-1.5 h-1.5 rounded-full bg-muted shrink-0" />
+                            <span>En extraction</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink bg-warning/20 px-2 py-0.5 rounded border border-warning/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
+                            <span>À vérifier</span>
                           </span>
                         )}
-                      </p>
-                    </div>
+                      </td>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {d.status === "processed" && (
-                        <CheckCircle2 className="h-4 w-4 text-success" title="Traité avec succès" />
-                      )}
-                      {d.status === "processing" && (
-                        <Loader2 className="h-4 w-4 text-primary animate-spin" title="OCR en cours" />
-                      )}
-                      {d.status === "uploaded" && (
-                        <Clock className="h-4 w-4 text-warning" title="En attente" />
-                      )}
-                      {d.status === "error" && (
-                        <button
-                          type="button"
-                          onClick={(e) => handleRetryOCR(d.id, e)}
-                          disabled={retryingId === d.id}
-                          className="flex items-center gap-1 rounded px-1.5 py-1 text-[11px] text-error hover:bg-error/10 transition"
-                          title="Cliquer pour relancer l'OCR"
-                        >
-                          {retryingId === d.id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {/* Ajouté le */}
+                      <td className="py-3 px-4 text-muted tnum font-medium">
+                        {doc.created_at ? formatDate(doc.created_at) : "—"}
+                      </td>
+
+                      {/* Actions */}
+                      <td
+                        className="py-3 px-4 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Bouton contextuel selon statut */}
+                          {isError ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => handleRetryOCR(doc.id, e)}
+                              className="h-7 px-2 text-xs font-semibold text-error border-error/30 hover:bg-error/10"
+                            >
+                              <RotateCw className="w-3 h-3 mr-1" />
+                              <span>Réessayer</span>
+                            </Button>
+                          ) : isProcessed ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenVerification(doc)}
+                              className="h-7 px-2 text-xs font-semibold text-ink border-border hover:bg-background-secondary"
+                            >
+                              <Eye className="w-3 h-3 mr-1" />
+                              <span>Voir</span>
+                            </Button>
                           ) : (
-                            <RotateCw className="h-3.5 w-3.5" />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleOpenVerification(doc)}
+                              className="h-7 px-2.5 text-xs font-bold bg-primary text-ink hover:brightness-95 shadow-2xs"
+                            >
+                              <span>Vérifier</span>
+                            </Button>
                           )}
-                          <span>Relancer</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))
-            )}
-          </ul>
+
+                          {/* Menu contextuel "..." */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted hover:text-ink hover:bg-background-secondary rounded"
+                                title="Actions complémentaires"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-44 bg-background border border-border"
+                            >
+                              <DropdownMenuItem asChild className="text-xs cursor-pointer">
+                                <a
+                                  href={fileUrl}
+                                  download={doc.original_filename}
+                                  className="flex items-center w-full"
+                                >
+                                  <Download className="w-3.5 h-3.5 mr-2 text-muted" />
+                                  <span>Télécharger</span>
+                                </a>
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator />
+
+                              <DropdownMenuItem
+                                onClick={(e) => handleDeleteOne(doc, e as any)}
+                                className="text-xs text-error cursor-pointer flex items-center"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 mr-2 text-error" />
+                                <span>Supprimer</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* Colonnes 2 & 3 : Aperçu du document + Données extraites */}
-        <div className="grid grid-cols-1 gap-4 lg:col-span-2 lg:grid-cols-2">
-          {/* Panneau d'aperçu */}
-          <div className="flex flex-col h-[480px] rounded-xl border border-border bg-background p-3 overflow-hidden">
-            <div className="flex items-center justify-between pb-2 border-b border-border text-xs">
-              <span className="font-semibold text-ink truncate max-w-[200px]">
-                {selectedDoc ? selectedDoc.original_filename : "Aperçu du document"}
-              </span>
-              {previewUrl && (
-                <a
-                  href={previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[11px] text-muted hover:text-ink transition"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  <span>Ouvrir</span>
-                </a>
-              )}
-            </div>
-
-            <div className="flex-1 flex items-center justify-center overflow-hidden pt-2 bg-background-secondary/30 rounded-lg mt-2">
-              {selectedDoc && previewUrl ? (
-                selectedDoc.mime_type === "application/pdf" ? (
-                  <iframe
-                    src={previewUrl}
-                    className="h-full w-full border-0 rounded-lg"
-                    title="Aperçu PDF"
-                  />
-                ) : (
-                  <img
-                    src={previewUrl}
-                    alt="Aperçu du justificatif"
-                    className="max-h-full max-w-full object-contain rounded-lg"
-                  />
-                )
-              ) : (
-                <div className="text-center text-muted p-4">
-                  <FileText className="mx-auto h-10 w-10 opacity-30 mb-2" />
-                  <p className="text-xs">Sélectionnez un document pour afficher son aperçu</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Formulaire des données extraites */}
-          <div className="rounded-xl border border-border bg-background p-5 flex flex-col justify-between">
-            <div>
-              <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
-                <div className="flex items-center gap-2">
-                  <ScanLine className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-ink">Données extraites (OCR)</h3>
-                </div>
-                {selectedDoc && (
-                  <span
-                    className={cn(
-                      "text-[11px] font-medium px-2 py-0.5 rounded-full border",
-                      selectedDoc.status === "processed" && "bg-success/15 border-success/30 text-ink",
-                      selectedDoc.status === "processing" && "bg-primary/20 border-primary/40 text-ink",
-                      selectedDoc.status === "uploaded" && "bg-warning/15 border-warning/30 text-ink",
-                      selectedDoc.status === "error" && "bg-error/15 border-error/30 text-error"
-                    )}
-                  >
-                    {selectedDoc.status === "processed" && "Données validées"}
-                    {selectedDoc.status === "processing" && "Analyse en cours..."}
-                    {selectedDoc.status === "uploaded" && "En attente"}
-                    {selectedDoc.status === "error" && "Anomalie OCR"}
-                  </span>
-                )}
-              </div>
-
-              {selectedDoc?.status === "error" && (
-                <div className="mb-3 rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs text-ink flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="font-semibold">Extraction automatique incomplète</p>
-                    <p className="text-[11px] text-muted mt-0.5">
-                      Vérifiez les champs ci-dessous ou relancez l'analyse.
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRetryOCR(selectedDoc.id)}
-                      disabled={retryingId === selectedDoc.id}
-                      className="mt-2 h-7 text-xs border-border bg-background hover:bg-background-secondary min-h-[32px]"
-                    >
-                      {retryingId === selectedDoc.id && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
-                      Relancer l'OCR
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted">Fournisseur / Bénéficiaire</Label>
-                  <Input
-                    className="h-9 text-xs mt-1"
-                    placeholder="Ex: DIGIPLEX SARL"
-                    value={ocrFields.vendor_name}
-                    onChange={(e) => setOcrFields({ ...ocrFields, vendor_name: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-muted">Montant TTC (FCFA)</Label>
-                    <Input
-                      className="h-9 text-xs mt-1 tabular-nums font-medium"
-                      placeholder="Ex: 2020000"
-                      value={ocrFields.amount}
-                      onChange={(e) => setOcrFields({ ...ocrFields, amount: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted">Date facture</Label>
-                    <Input
-                      type="date"
-                      className="h-9 text-xs mt-1 tabular-nums"
-                      value={ocrFields.date}
-                      onChange={(e) => setOcrFields({ ...ocrFields, date: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-muted">TVA déductible</Label>
-                    <Input
-                      className="h-9 text-xs mt-1 tabular-nums"
-                      placeholder="Ex: 0"
-                      value={ocrFields.vat_amount}
-                      onChange={(e) => setOcrFields({ ...ocrFields, vat_amount: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted">N° de facture / Réf.</Label>
-                    <Input
-                      className="h-9 text-xs mt-1"
-                      placeholder="Ex: EM018683313"
-                      value={ocrFields.invoice_number}
-                      onChange={(e) => setOcrFields({ ...ocrFields, invoice_number: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-xs text-muted">Compte de charge (SYSCOHADA)</Label>
-                    {selectedAccountInfo && (
-                      <span className="text-[10px] font-medium text-primary px-1.5 py-0.5 rounded bg-primary/10">
-                        {selectedAccountInfo.category}
-                      </span>
-                    )}
-                  </div>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-xs text-ink shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary mt-1 font-medium"
-                    value={accountCode}
-                    onChange={(e) => setAccountCode(e.target.value)}
-                  >
-                    <optgroup label="60 - Achats de biens & matières">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("60"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="61 - Transports">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("61"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="62 - Services extérieurs A (Locations, Entretien, Logiciels/SaaS)">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("62"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="63 - Services extérieurs B (Honoraires, Télécoms, Missions)">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("63"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="64 - Impôts et taxes">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("64"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="65 - Autres charges d'exploitation">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("65"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="66 - Charges de personnel (Salaires, Primes, CNSS, VPS, Intérim)">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("66"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="67 - Charges financières (Intérêts, Agio, Changes)">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("67"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="68 & 69 - Dotations aux amortissements & Charges H.A.O.">
-                      {availableAccounts
-                        .filter((a) => a.code.startsWith("68") || a.code.startsWith("69"))
-                        .map((a) => (
-                          <option key={a.code} value={a.code}>
-                            {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                          </option>
-                        ))}
-                    </optgroup>
-                    {availableAccounts.some(
-                      (a) => !["60", "61", "62", "63", "64", "65", "66", "67", "68", "69"].includes(a.code.slice(0, 2))
-                    ) && (
-                      <optgroup label="Comptes spécifiques entreprise">
-                        {availableAccounts
-                          .filter(
-                            (a) =>
-                              !["60", "61", "62", "63", "64", "65", "66", "67", "68", "69"].includes(
-                                a.code.slice(0, 2)
-                              )
-                          )
-                          .map((a) => (
-                            <option key={a.code} value={a.code}>
-                              {a.code} - {a.name.replace(/^6\d{2}\s*-\s*/, "")}
-                            </option>
-                          ))}
-                      </optgroup>
-                    )}
-                  </select>
-                  {selectedAccountInfo?.description && (
-                    <p className="text-[11px] text-muted italic mt-1 leading-tight">
-                      {selectedAccountInfo.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-border mt-4">
-              <Button
-                className="w-full bg-primary hover:bg-primary/90 text-ink font-semibold min-h-[44px]"
-                disabled={!selectedDoc || isProcessing || (!ocrFields.amount && selectedDoc.status === "processing")}
-                onClick={handleTransform}
-              >
-                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin text-ink" />}
-                Valider et créer l'opération
-              </Button>
-              {selectedDoc && selectedDoc.status === "processing" && (
-                <p className="text-[11px] text-center text-muted italic mt-2">
-                  Extraction OCR en cours... Vous pouvez également saisir manuellement.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* 5. CONTRÔLE DE PAGINATION issu de 21st.dev */}
+        {filteredDocuments.length > 0 && (
+          <DataTablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalCount}
+            pageSize={pageSize}
+            onPageChange={(page) => setCurrentPage(page)}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[10, 20, 50]}
+            labelSingular="justificatif"
+            labelPlural="justificatifs"
+          />
+        )}
       </div>
+
+      {/* ÉCRAN 2 : PANNEAU LATÉRAL DE TÉLÉVERSEMENT MULTI-FICHIERS */}
+      <DocumentUploadDrawer
+        open={isUploadDrawerOpen}
+        onOpenChange={setIsUploadDrawerOpen}
+        onDocumentReady={(docId) => {
+          queryClient.invalidateQueries({ queryKey: ["documents"] });
+        }}
+        onAllCompleted={(docIds) => {
+          queryClient.invalidateQueries({ queryKey: ["documents"] });
+          if (docIds.length > 0) {
+            const index = documents.findIndex((d) => d.id === docIds[0]);
+            setActiveVerificationIndex(index >= 0 ? index : 0);
+            setCurrentView("verify");
+          }
+        }}
+      />
     </div>
   );
-};
+}
 
 export default Documents;

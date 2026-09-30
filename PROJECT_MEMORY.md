@@ -6,6 +6,43 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-09-30 — Refonte Intégrale de la Page Documents & Justificatifs (3 Écrans & Composants 21st.dev)
+
+- **Actions effectuées** :
+  - **Architecture en 3 Écrans Distincts (séparation des tâches selon les standards Dext / Pennylane)** :
+    1. **Écran 1 : Page Liste « Documents & Justificatifs »** ([`src/views/Documents.tsx`](file:///e:/Comptia/src/views/Documents.tsx)) :
+       - En-tête avec titre, sous-titre explicatif, bouton secondaire « Exporter » (génération de fichier CSV certifié) et bouton principal jaune Ceilow « Téléverser un justificatif ».
+       - 4 cartes de synthèse compactes cliquables agissant comme filtres instantanés : « À vérifier », « Extraits », « Validés », « En erreur » avec pastilles sémantiques et décomptes en temps réel.
+       - Barre de filtres multi-critères : recherche en temps réel (fournisseur, nom de fichier, référence, compte), sélecteur de statut, période et compte de charge SYSCOHADA.
+       - Data Table avec cases à cocher individuelles et globales, colonnes structurées (Fichier, Fournisseur, Date facture, Montant TTC aligné à droite, TVA déductible, Compte SYSCOHADA, Statut en pastilles avec point et libellé français, Ajouté le, Actions contextuelles).
+       - Actions contextuelles par ligne (« Vérifier » si à vérifier, « Voir » si validé, « Réessayer » si erreur OCR) et menu déroulant (Télécharger, Supprimer).
+       - Barre d'actions groupées au cochage de lignes : compteur dynamique de sélection, validation en lot (« Valider la sélection ») et suppression groupée.
+       - Pagination complète en bas de tableau via [`src/components/ui/data-table-pagination.tsx`](file:///e:/Comptia/src/components/ui/data-table-pagination.tsx) (issu de 21st.dev).
+       - **Écran 1 bis (État vide)** : Vue dédiée invitant au premier dépôt si aucun document n'est trouvé.
+    2. **Écran 2 : Téléversement en Panneau Latéral (Drawer / Sheet)** ([`src/components/documents/DocumentUploadDrawer.tsx`](file:///e:/Comptia/src/components/documents/DocumentUploadDrawer.tsx)) :
+       - Ouverture depuis le bouton principal avec fond assombri uni (`SheetOverlay`).
+       - Zone de dépôt à bordure pointillée intégrant le composant officiel 21st.dev `FileDropzone` (id: 19201 par joyco, créé dans [`src/components/ui/file-dropzone.tsx`](file:///e:/Comptia/src/components/ui/file-dropzone.tsx)).
+       - Suivi individuel des fichiers : taille formatée, barre de progression dynamique, libellé d'étape (« Téléversement... », « Extraction OCR... », « Prêt » ou « Échec » avec bouton de relance), et bouton de suppression.
+       - Pied fixé avec bouton d'annulation et bouton d'action principal « Vérifier les documents (N) » basculant directement sur la vue de vérification séquentielle.
+    3. **Écran 3 : Page de Vérification Plein Écran en 2 Colonnes** ([`src/components/documents/DocumentVerificationView.tsx`](file:///e:/Comptia/src/components/documents/DocumentVerificationView.tsx)) :
+       - Barre supérieure fixe avec navigation « Retour à la liste », nom du fichier, badge de statut, et boutons « Précédent » / « Suivant » avec compteur dynamique (« 2 sur 5 »).
+       - Colonne gauche (60%) : Grand visualiseur de document (PDF ou image) avec barre d'outils (zoom avant/arrière, réinitialisation 100%, plein écran dans un nouvel onglet, téléchargement).
+       - Colonne droite (40%) : Formulaire des données extraites OCR avec badge « Auto » sur champs extraits et avertissement ambre « À vérifier » sur champs à faible confiance.
+       - Sélection du compte de charge SYSCOHADA avec description détaillée et 3 suggestions rapides cliquables (« 628 Divers services extérieurs », « 626 Frais postaux & télécoms », « 605 Autres achats »).
+       - Pied fixé : bouton jaune « Valider et passer au suivant », « Enregistrer le brouillon », et suppression.
+       - Gestion des états intermédiaires : squelette d'extraction en cours, encadré d'erreur avec bouton de relance OCR, et confirmation visuelle « Opération créée ».
+    4. **Écran 4 : Conception Mobile-First** :
+       - Sous `lg`, transformation de la table en cartes empilées lisibles.
+       - Cartes de synthèse avec défilement horizontal fluide.
+       - Vue de vérification adaptative avec bascule « Aperçu / Formulaire » et validation fixée en bas.
+  - **Conformité Stricte aux Règles Ceilow** :
+    - Zéro couleur hexadécimale en dur, utilisation exclusive des tokens sémantiques.
+    - Zéro emoji, typographie Inter avec chiffres tabulaires (`tnum`, `font-mono`).
+    - Traitement intégral sur les vraies routes API backend (`/api/documents/list`, `/api/documents/upload`, `/api/documents/[id]/transform`, etc.).
+  - **Contrôle Qualité & Validation** :
+    - `npx tsc --noEmit` : 0 erreur de typage.
+    - `pnpm build` : Build de production Next.js validé avec succès.
+
 ### 2026-09-30 — Refonte de la Page Facturation & e-MECeF (Design Système Ceilow & Composants 21st.dev)
 
 - **Actions effectuées** :

@@ -27,6 +27,7 @@ import { EditPayslipModal } from "@/components/payroll/EditPayslipModal";
 import { PermissionGate } from "@/components/PermissionGate";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 const allTabs = [
   { id: "bulletins", label: "Bulletins", module: "payroll" },
@@ -64,6 +65,10 @@ export const Paie = () => {
   const [employeePage, setEmployeePage] = useState(1);
   const [employeePageSize, setEmployeePageSize] = useState(10);
 
+  // Pagination pour le tableau des Bulletins
+  const [bulletinPage, setBulletinPage] = useState(1);
+  const [bulletinPageSize, setBulletinPageSize] = useState(10);
+
   const setTab = (t: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (t === "bulletins") params.delete("tab");
@@ -99,6 +104,13 @@ export const Paie = () => {
     if (payslipsRes && Array.isArray(payslipsRes.data)) return payslipsRes.data;
     return [];
   }, [payslipsRes]);
+
+  const totalPayslips = payslips.length;
+  const totalPayslipPages = Math.ceil(totalPayslips / bulletinPageSize) || 1;
+  const paginatedPayslips = useMemo(() => {
+    const start = (bulletinPage - 1) * bulletinPageSize;
+    return payslips.slice(start, start + bulletinPageSize);
+  }, [payslips, bulletinPage, bulletinPageSize]);
 
   const activeEmployeesCount = useMemo(() => {
     return employees.filter((e) => e.status === "active").length;
@@ -251,6 +263,7 @@ export const Paie = () => {
                   onChange={(e) => {
                     const [m, y] = e.target.value.split("-").map(Number);
                     setSelectedPeriod({ month: m, year: y });
+                    setBulletinPage(1);
                   }}
                   className="h-9 pl-3.5 pr-9 bg-background border border-border rounded text-xs font-medium text-ink focus:outline-none focus:border-ink appearance-none cursor-pointer outline-none transition-colors"
                 >
@@ -394,7 +407,7 @@ export const Paie = () => {
                       </td>
                     </tr>
                   ) : (
-                    payslips.map((p) => {
+                    paginatedPayslips.map((p) => {
                       const emp = p.employee || {};
                       const isDraft = p.status === "draft";
                       const periodStr = `${String(p.month).padStart(2, "0")}/${p.year}`;
@@ -406,11 +419,24 @@ export const Paie = () => {
                         >
                           {/* Salarié */}
                           <td className="py-3.5 px-6 text-xs text-ink">
-                            <div className="font-bold text-ink">
-                              {emp.first_name} {emp.last_name}
-                            </div>
-                            <div className="font-mono text-[11px] text-muted">
-                              {emp.position || "Poste non défini"}
+                            <div className="flex items-center gap-3">
+                              <UserAvatar
+                                name={`${emp.first_name || ""} ${emp.last_name || ""}`}
+                                email={emp.email}
+                                avatarUrl={emp.avatar_url}
+                                size={32}
+                                variant="beam"
+                                square
+                                className="rounded shrink-0"
+                              />
+                              <div className="min-w-0">
+                                <div className="font-bold text-ink truncate">
+                                  {emp.first_name} {emp.last_name}
+                                </div>
+                                <div className="font-mono text-[11px] text-muted truncate">
+                                  {emp.position || "Poste non défini"}
+                                </div>
+                              </div>
                             </div>
                           </td>
 
@@ -489,6 +515,24 @@ export const Paie = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination du tableau des Bulletins */}
+            {totalPayslips > 0 && (
+              <DataTablePagination
+                currentPage={bulletinPage}
+                totalPages={totalPayslipPages}
+                totalItems={totalPayslips}
+                pageSize={bulletinPageSize}
+                onPageChange={(p) => setBulletinPage(p)}
+                onPageSizeChange={(sz) => {
+                  setBulletinPageSize(sz);
+                  setBulletinPage(1);
+                }}
+                pageSizeOptions={[10, 25, 50, 100]}
+                labelSingular="bulletin"
+                labelPlural="bulletins"
+              />
+            )}
 
             {/* Bandeau inférieur de conformité */}
             <div className="px-6 py-3.5 border-t border-border bg-background-secondary flex flex-col sm:flex-row items-center justify-between text-xs text-muted gap-2">
@@ -649,9 +693,15 @@ export const Paie = () => {
                           {/* Salarié */}
                           <td className="py-3.5 px-6">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded bg-background-secondary border border-border flex items-center justify-center text-xs font-bold text-ink select-none flex-shrink-0">
-                                {initials || "EM"}
-                              </div>
+                              <UserAvatar
+                                name={`${emp.first_name || ""} ${emp.last_name || ""}`}
+                                email={emp.email}
+                                avatarUrl={emp.avatar_url}
+                                size={32}
+                                variant="beam"
+                                square
+                                className="rounded shrink-0"
+                              />
                               <div className="min-w-0">
                                 <div className="font-bold text-xs text-ink truncate">
                                   {emp.first_name} {emp.last_name}

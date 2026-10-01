@@ -6,6 +6,22 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Chargement des Véritables Avatars Salariés & Ajout Pagination sur les Bulletins
+
+- **Actions effectuées** :
+  - **Véritables Avatars Salariés** ([`src/views/Paie.tsx`](file:///e:/Comptia/src/views/Paie.tsx) & [`src/components/ui/user-avatar.tsx`](file:///e:/Comptia/src/components/ui/user-avatar.tsx)) :
+    - Remplacement des placeholders texte d'initiales par le composant unifié [`UserAvatar`](file:///e:/Comptia/src/components/ui/user-avatar.tsx).
+    - L'avatar charge l'image réelle si elle existe (via `avatarUrl`) ou génère un avatar Ceilow déterministe harmonieux (`BoringAvatar` palette officielle Ceilow : `#332E29`, `#FFD946`, `#5FFFC2`, `#FFA53D`).
+    - Format carré strict Ceilow (`square={true}` avec `rounded`).
+    - Intégration sur l'onglet **Salariés** et sur l'onglet **Bulletins**.
+  - **Association automatique des avatars en base de données** :
+    - [`src/app/api/payroll/employees/route.ts`](file:///e:/Comptia/src/app/api/payroll/employees/route.ts) : enrichit la liste des salariés avec l'avatar réel de l'utilisateur associé par email dans la même entreprise.
+    - [`src/app/api/payroll/payslips/route.ts`](file:///e:/Comptia/src/app/api/payroll/payslips/route.ts) : enrichit les données des bulletins avec l'avatar réel du salarié.
+  - **Pagination sur l'onglet Bulletins** ([`src/views/Paie.tsx`](file:///e:/Comptia/src/views/Paie.tsx)) :
+    - Intégration du composant [`DataTablePagination`](file:///e:/Comptia/src/components/ui/data-table-pagination.tsx) sur la liste des fiches de paie.
+    - Pagination dynamique (sélecteur 10, 25, 50, 100 lignes, navigation début/précédent/suivant/fin).
+    - Découpage paginé `paginatedPayslips` avec remise à la première page lors d'un changement de période.
+
 ### 2026-10-01 — Refonte UX/UI Page Paie & Salariés (`/paie`) avec Composant DataTable & Zéro Mock
 
 - **Actions effectuées** :

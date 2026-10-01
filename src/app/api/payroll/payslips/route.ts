@@ -42,6 +42,7 @@ export async function GET(req: Request) {
               first_name: true,
               last_name: true,
               position: true,
+              email: true,
             },
           },
         },
@@ -49,7 +50,27 @@ export async function GET(req: Request) {
       prisma.payroll.count({ where }),
     ]);
 
-    return paginatedResponse(payrolls, total, pag.page, pag.limit);
+    const userEmails = payrolls.map((p) => p.employee?.email).filter(Boolean) as string[];
+    const users = await prisma.user.findMany({
+      where: {
+        company_id: user.company_id,
+        email: { in: userEmails },
+      },
+      select: { email: true, avatar_url: true },
+    });
+    const avatarMap = new Map(users.map((u) => [u.email, u.avatar_url]));
+
+    const payrollsWithAvatar = payrolls.map((p) => ({
+      ...p,
+      employee: p.employee
+        ? {
+            ...p.employee,
+            avatar_url: avatarMap.get(p.employee.email) || null,
+          }
+        : null,
+    }));
+
+    return paginatedResponse(payrollsWithAvatar, total, pag.page, pag.limit);
   } catch (err) {
     console.error("[GET /api/payroll/payslips]", err);
     return handlePrismaError(err);

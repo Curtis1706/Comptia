@@ -39,7 +39,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 
   const containerClasses = cn(
     "relative inline-flex shrink-0 items-center justify-center overflow-hidden border border-border/40 bg-background-secondary shadow-xs",
-    square ? "rounded-lg" : "rounded-full",
+    square ? "rounded" : "rounded-full",
     className
   );
 

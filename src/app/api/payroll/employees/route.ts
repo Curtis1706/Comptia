@@ -62,7 +62,22 @@ export async function GET(req: Request) {
       prisma.employee.count({ where }),
     ]);
 
-    return paginatedResponse(employees, total, pag.page, pag.limit);
+    const userEmails = employees.map((e) => e.email).filter(Boolean);
+    const users = await prisma.user.findMany({
+      where: {
+        company_id: user.company_id,
+        email: { in: userEmails },
+      },
+      select: { email: true, avatar_url: true },
+    });
+    const avatarMap = new Map(users.map((u) => [u.email, u.avatar_url]));
+
+    const employeesWithAvatar = employees.map((e) => ({
+      ...e,
+      avatar_url: avatarMap.get(e.email) || null,
+    }));
+
+    return paginatedResponse(employeesWithAvatar, total, pag.page, pag.limit);
   } catch (err) {
     console.error("[GET /api/payroll/employees]", err);
     return handlePrismaError(err);

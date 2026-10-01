@@ -40,11 +40,11 @@ export async function GET(req: Request) {
       limit: searchParams.get("limit") ?? undefined,
     });
 
-    const status = searchParams.get("status") || "active";
+    const status = searchParams.get("status");
     const department = searchParams.get("department");
 
     const where: any = { company_id: user.company_id };
-    if (status) where.status = status;
+    if (status && status !== "all") where.status = status;
     if (department) where.department = department;
 
     const [employees, total] = await Promise.all([
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       data: {
         ...data,
         company_id: user.company_id,
-      },
+      } as any,
     });
 
     await logAction({

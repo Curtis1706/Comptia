@@ -6,7 +6,45 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
-### 2026-10-01 — Correction du Fond Canvas (`bg-background-secondary`) & Contraste Typographique
+### 2026-10-01 — Refonte UX/UI Page Paie & Salariés (`/paie`) avec Composant DataTable & Zéro Mock
+
+- **Actions effectuées** :
+  - **Refonte intégrale de la page Paie & Salariés** ([`src/views/Paie.tsx`](file:///e:/Comptia/src/views/Paie.tsx)) selon le design HTML fourni et les règles strictes Ceilow :
+    - **En-tête & Contrôles d'actions** :
+      - Titre « Paie » et sous-titre clair « Gérez vos salariés et générez vos bulletins en un clic ».
+      - Sélecteur de période mensuelle (mois de l'exercice en cours) avec synchronisation temps réel des bulletins.
+      - Bouton CTA principal « Générer [mois] » (`bg-primary text-ink rounded font-semibold`) pour le calcul en lot des fiches de paie.
+      - Bouton secondaire « Nouveau salarié » ouvrant la modale de création d'employé.
+    - **Navigation par onglets (Bulletins / Salariés)** :
+      - Onglet « Bulletins » avec témoin actif jaune Ceilow (`bg-primary`) et barre de soulignement.
+      - Onglet « Salariés » avec badge dynamique comptant les salariés actifs réels.
+    - **Onglet Salariés — Intégration du composant DataTable** :
+      - Remplacement de l'ancien affichage en cartes par un tableau de données dense, professionnel et structuré.
+      - Barre d'outils avec recherche en direct (nom, matricule, poste) et filtres combinables par type de contrat (CDI, CDD, Stage, Alternance) et statut (Actif, Inactif).
+      - Colonnes tabulaires : Salarié (Avatar initiales carré `rounded`, nom complet, matricule), Poste & Département, Contrat (badge carré), Salaire de base (typographie monospacée tabulaire `tabular-nums font-mono text-ink`), Date d'embauche, Bulletins générés, Statut (« Actif » vert profond contrasté `text-success-deep bg-success/20 border-success-deep/30 rounded`), et Actions (« Modifier »).
+      - Pagination complète `DataTablePagination` avec sélecteur de taille de page (10, 25, 50, 100), affichage du nombre d'éléments, navigation précédente/suivante et boutons de pagination.
+    - **Onglet Bulletins — Tableau & État vide conforme au mockup** :
+      - Tableau avec colonnes Salarié, Période, Salaire Brut, Salaire Net (en gras tabulaire `font-semibold text-ink`), Statut (badge carré ambre profond pour les brouillons, vert profond pour les validés), et menu d'actions (Éditer, Valider, Télécharger PDF via `DownloadPayslipButton`, Copier la ligne).
+      - État vide conforme au design lorsque 0 bulletin n'a été calculé pour la période, avec icône, explication contextuelle et bouton d'action immédiate « Générer [mois] ».
+    - **Pied de page de conformité réglementaire béninoise** :
+      - Mention légale : « Conformité : Code du Travail Béninois · Régime : CNSS & IPTS ».
+      - Compteur dynamique tabulaire : « X bulletin(s) généré(s) sur Y salariés actifs ».
+    - **Modales connectées** :
+      - `EmployeeModal` pour l'ajout et la modification des données salariales (matricule, salaire de base, type de contrat, etc.).
+      - `EditPayslipModal` pour l'ajustement des primes et cotisations sur les bulletins en brouillon.
+  - **Zéro donnée mockée** :
+    - Connexion directe aux routes API réelles : `GET /api/payroll/employees`, `POST /api/payroll/employees`, `GET /api/payroll/payslips`, `POST /api/payroll/payslips/generate`, `POST /api/payroll/payslips/[id]/validate`.
+    - Correction du filtre de statut dans [`src/app/api/payroll/employees/route.ts`](file:///e:/Comptia/src/app/api/payroll/employees/route.ts) pour ne pas filtrer sur `where.status = "all"` et renvoyer la totalité des vrais salariés enregistrés en base.
+  - **Règles Ceilow scrupuleusement respectées** :
+    - Tokens sémantiques exclusifs (`bg-background`, `bg-background-secondary`, `border-border`, `text-ink`, `text-text-muted`, `bg-primary`).
+    - Format carré strict (`rounded` 2px / 0.125rem).
+    - Zéro emoji, zéro glassmorphisme.
+    - Typographie tabulaire `tabular-nums font-mono` sur l'ensemble des montants en FCFA.
+    - Couleurs sémantiques profondes lisibles (`text-success-deep`, `text-warning-deep`).
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage (résolution de la compatibilité de type Prisma sur `prisma.employee.create`).
+  - `pnpm build` : Build de production Next.js validé avec succès (code 0, 54 routes générées sans erreur).
+
 
 - **Actions effectuées** :
   - **Correction du fond global d'application** ([`src/components/layout/AppShell.tsx`](file:///e:/Comptia/src/components/layout/AppShell.tsx)) :

@@ -6,6 +6,77 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Ajustements de Précision & Adaptabilité Mobile Page Configuration (`/parametres`)
+
+- **Actions effectuées** :
+  - **Menu de gauche & Navigation** ([`src/views/Parametres.tsx`](file:///e:/Comptia/src/views/Parametres.tsx)) :
+    - Entrée active parfaitement lisible : fond jaune `#FFD946` (`bg-primary`), texte foncé en gras (`text-ink font-bold`).
+    - Anneau de focus visible de 2px sur toutes les entrées (`focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1`).
+    - Adaptabilité mobile : le menu de gauche devient une liste horizontale défilante au-dessus du contenu (`flex flex-row overflow-x-auto whitespace-nowrap scrollbar-none gap-1.5` sous `lg`, et `flex flex-col` sur desktop).
+  - **Onglet Entreprise** :
+    - Hauteur des champs fixée à 44px (`h-[44px]`), bordure 1px gris moyen (`border border-[#D8D5D0]`), et état de focus avec bordure foncée de 2px (`focus:outline-none focus:border-2 focus:border-ink focus:ring-0`).
+    - Aides textuelles affichées en gris foncé 13px, sans italique (`text-[13px] text-[#4D4634] not-italic`).
+    - Bouton « Enregistrer les modifications » désactivé en gris tant qu'aucun champ n'est modifié, passant automatiquement en jaune `#FFD946` dès la première modification (`isDirty`).
+  - **Onglet Plan comptable** :
+    - Intégration complète de l'ensemble des 8 classes du plan SYSCOHADA révisé (Classe 1 à 8) avec tous leurs comptes principaux et de détail.
+    - Ajout d'une barre de filtres au-dessus du tableau : champ de recherche « Rechercher un compte... » et sélecteur personnalisé « Classe ».
+    - **Filtre Classe avec taille limitée et défilement vertical** : le menu déroulant du filtre possède une hauteur maximale bornée (`max-h-56`) avec barre de défilement intégrée (`overflow-y-auto scrollbar-thin`), garantissant une ergonomie irréprochable même avec un grand nombre d'options ou de sous-classes.
+    - **Page & Tableau rétablis à leur disposition naturelle** : suppression de la hauteur contrainte et du compteur sur la page principale pour laisser le tableau s'étendre naturellement selon le flux standard de l'application.
+  - **Onglet Utilisateurs & Rôles & Session Active** :
+    - Remplacement des pastilles par des pastilles grises à texte foncé avec icône de rôle Lucide ([`src/components/settings/UserModals.tsx`](file:///e:/Comptia/src/components/settings/UserModals.tsx)).
+    - Respect absolu des avatars via `UserAvatar` (chargement de la photo réelle de profil si présente, sinon avatar déterministe Ceilow officiel avec la palette `#332E29`, `#FFD946`, `#5FFFC2`, `#FFA53D`).
+    - Intégré sur chaque ligne de la table des utilisateurs ainsi que sur la carte de session active.
+  - **Fenêtre « Inviter un collaborateur »** ([`src/components/settings/UserModals.tsx`](file:///e:/Comptia/src/components/settings/UserModals.tsx)) :
+    - Carte de rôle sélectionnée évidente : bordure foncée de 2px (`border-2 border-ink`), fond jaune très clair (`bg-[#FEFCE8]`) et coche verte visible (`CheckCircle2`).
+    - Bouton « Envoyer l'invitation » désactivé tant que les 3 champs obligatoires (nom, email, mot de passe) ne sont pas saisis.
+    - Plein écran adaptatif sur mobile (`w-full h-full max-h-screen rounded-none sm:rounded sm:max-w-2xl sm:h-auto sm:max-h-[92vh]`) avec rôles sur une seule colonne (`grid grid-cols-1 sm:grid-cols-2`).
+  - **Onglet Certification e-MECeF** ([`src/components/settings/MecefDiagnostic.tsx`](file:///e:/Comptia/src/components/settings/MecefDiagnostic.tsx)) :
+    - Remplacement de « Expire dans undefined jour(s) » par « Aucune date d'expiration » quand le jeton est absent.
+    - Ajout d'un bouton principal jaune Ceilow « Renouveler le jeton » dans la carte « Jeton Taxpayer ».
+  - **Onglet Sécurité & Audit** :
+    - Pastilles d'action avec fonds unis contrastés et lisibles (`CREATE`, `LOGIN`, `VALIDATE`, `UPDATE`, `DELETE`).
+    - Ajout au-dessus du tableau d'un champ de recherche « Rechercher un acteur ou une cible... » et d'une liste déroulante « Action ».
+  - **Onglet Intégrations** :
+    - Alignement en bas de carte avec pastille verte « CONNECTÉ » lisible et lien « Gérer » à droite pour les intégrations connectées.
+  - **Onglet Rôles et permissions** :
+    - Conservé scrupuleusement intact (`<PermissionsMatrix />`) sans aucune modification.
+- **Contrôles Qualité & Validation** :
+  - Import strict des types `Module` et `Permission` depuis [`@/lib/permissions`](file:///e:/Comptia/src/lib/permissions.ts) dans [`src/views/Parametres.tsx`](file:///e:/Comptia/src/views/Parametres.tsx).
+  - `npx tsc --noEmit` : 0 erreur de typage.
+
+### 2026-10-01 — Refonte UX/UI Page Paramètres & Configuration (`/parametres`)
+
+- **Actions effectuées** :
+  - **Alignement fidèle sur la maquette HTML & Charte Ceilow** ([`src/views/Parametres.tsx`](file:///e:/Comptia/src/views/Parametres.tsx)) :
+    - En-tête : Titre « Configuration », sous-titre « Personnalisez votre espace Comptia », et pastille « SYSCOHADA Révisé 2026 ».
+    - Grille responsive 2 colonnes (`grid grid-cols-1 lg:grid-cols-12`) :
+      - Colonne gauche (`lg:col-span-3`) : Menu des 8 onglets avec icônes Lucide précises, bouton actif en jaune Ceilow (`bg-primary text-ink font-semibold rounded`), inactifs en gris (`text-muted hover:bg-background-secondary`).
+      - Carte de session active : statut « PROPRIÉTAIRE » en badge avec couronne, composant `UserAvatar` respectant le véritable avatar utilisateur (`avatar_url`), nom et email, et bouton de déconnexion rouge sobre avec icône `LogOut`.
+    - **1. Onglet « Entreprise »** :
+      - Bloc logo 56x56 au format carré (`rounded`) avec upload direct de fichier PNG/JPG/SVG (&lt; 2MB) et suppression.
+      - Formulaire complet connecté à l'API (`/api/company`) : Raison sociale, IFU/SIRET (verrouillé en lecture seule avec icône cadenas et mention légale), Email, Téléphone, Adresse siège, Ville, Secteur d'activité.
+      - Encart dédié « Trésorerie & Soldes » sur fond ambre très clair (`#FFF7ED` avec bordure `#FED7AA`) avec solde initial modifiable.
+    - **2. Onglet « Plan comptable »** :
+      - En-tête avec bouton « Exporter CSV » et « Ajouter un compte ».
+      - Table structurée avec comptes parents en gras (10, 11, 12, 13) et sous-comptes indentés avec marge gauche (`pl-8`), pastilles « ACTIF » en vert (`bg-[#DCFCE7] text-[#166534]`).
+    - **3. Onglet « Utilisateurs & Rôles »** :
+      - Liste complète des collaborateurs avec leur véritable avatar (`UserAvatar`), statut actif ou suspendu, badge de rôle carré (`UserRoleBadge`), et bouton « Gérer ».
+      - Bouton « + Inviter un utilisateur » ouvrant la modale dédiée.
+    - **4. Onglet « Rôles et permissions »** :
+      - **Conservé scrupuleusement intact** (`<PermissionsMatrix />`) conformément à la consigne explicite de l'utilisateur (« ne touche pas à la page role et permission, laisse là tel qu'elle d'abord »).
+    - **5. Onglet « Certification e-MECeF »** ([`src/components/settings/MecefDiagnostic.tsx`](file:///e:/Comptia/src/components/settings/MecefDiagnostic.tsx)) :
+      - Alignement graphique des 3 cartes d'état (Environnement, Jeton Taxpayer, Vérification publique) et de la table des 50 derniers échanges avec la DGI.
+    - **6. Onglet « Intégrations »** :
+      - Grille 2x2 des 4 passerelles : Connexion bancaire (BOA, Ecobank - Connecté), Shopify/WooCommerce, Stripe/PayPal (Connecté), OCR Avancé (Connecté 99.4%).
+    - **7. Onglet « Sécurité & Audit »** :
+      - Piste d'audit immuable avec acteur, badge d'action sémantique (`CREATE`, `LOGIN`, `DELETE`), cible et horodatage long.
+    - **8. Onglet « Facturation Studio »** :
+      - Grande carte « Studio Enterprise » avec statut actif, 3 KPI (Collaborateurs illimités, Factures e-MECeF illimitées, Stockage GED 18.4 Go), bouton de gestion et d'historique.
+  - **Modale d'invitation collaborateur** ([`src/components/settings/UserModals.tsx`](file:///e:/Comptia/src/components/settings/UserModals.tsx)) :
+    - Alignement complet sur la maquette : nom, email, mot de passe avec générateur aléatoire et œil pour afficher/masquer, sélection des 6 rôles par cartes cliquables avec carte active en bordure foncée et fond jaune pâle (`border-2 border-ink bg-[#FEFCE8]`) et coche verte.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+
 ### 2026-10-01 — Refonte & Ajustements de Précision Page Reporting & États Financiers (`/reporting`)
 
 - **Actions effectuées** :

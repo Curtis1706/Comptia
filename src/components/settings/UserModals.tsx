@@ -29,6 +29,7 @@ import {
   ArrowRightLeft,
   Loader2,
   Check,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -81,30 +82,21 @@ export const ROLE_DEFINITIONS = [
 export function UserRoleBadge({ role }: { role: string }) {
   if (role === "owner") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 uppercase tracking-wide">
-        <Crown className="h-3 w-3" /> Propriétaire
+      <span className="inline-flex items-center gap-1.5 rounded bg-[#F0ECE3] text-[#2B2520] border border-[#DCD6CD] px-2.5 py-1 text-xs font-semibold uppercase tracking-wider">
+        <Crown className="h-3.5 w-3.5 text-[#2B2520]" />
+        PROPRIÉTAIRE
       </span>
     );
   }
 
   const def = ROLE_DEFINITIONS.find((r) => r.role === role);
-  if (!def) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-muted border border-border px-2.5 py-0.5 text-[11px] font-bold text-muted-foreground uppercase">
-        {role}
-      </span>
-    );
-  }
+  const label = def?.label || role;
+  const Icon = def?.icon;
 
-  const Icon = def.icon;
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
-        def.badgeCls
-      )}
-    >
-      <Icon className="h-3 w-3" /> {def.label}
+    <span className="inline-flex items-center gap-1.5 rounded bg-[#F0ECE3] text-[#2B2520] border border-[#DCD6CD] px-2.5 py-1 text-xs font-semibold uppercase tracking-wider">
+      {Icon && <Icon className="h-3.5 w-3.5 text-[#2B2520]" />}
+      {label}
     </span>
   );
 }
@@ -122,14 +114,14 @@ export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("Benin2026@Securite");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<string>("accountant");
   const [isLoading, setIsLoading] = useState(false);
 
   const generateSecurePassword = () => {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
     let pass = "";
-    // Ensure at least 1 uppercase and 1 number
     pass += "ABCDEFGHJKLMNPQRSTUVWXYZ"[Math.floor(Math.random() * 24)];
     pass += "23456789"[Math.floor(Math.random() * 8)];
     for (let i = 0; i < 8; i++) {
@@ -160,7 +152,7 @@ export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
         queryClient.invalidateQueries({ queryKey: ["users"] });
         setName("");
         setEmail("");
-        setPassword("");
+        setPassword("Benin2026@Securite");
         setRole("accountant");
         onClose();
       } else {
@@ -173,32 +165,39 @@ export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
     }
   };
 
+  const isFormValid = name.trim().length > 0 && email.trim().length > 0 && password.trim().length > 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-            <Users className="h-5 w-5 text-primary" /> Inviter un collaborateur
+      <DialogContent className="w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-2xl overflow-y-auto p-0 rounded-none sm:rounded border border-border bg-background shadow-2xl">
+        <DialogHeader className="px-6 py-4 border-b border-border bg-background-secondary">
+          <DialogTitle className="text-lg font-semibold text-ink">
+            Inviter un collaborateur
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs text-muted">
             Ajoutez un nouveau membre à votre entreprise et attribuez-lui un rôle spécifique selon ses responsabilités.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="inv-name">Nom complet *</Label>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="inv-name" className="text-xs font-semibold text-ink">
+                Nom complet *
+              </Label>
               <Input
                 id="inv-name"
                 placeholder="Ex: Amina KOUASSI"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="h-10 px-3 bg-background border border-border rounded text-xs text-ink focus:outline-none focus:border-ink"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="inv-email">Email professionnel *</Label>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="inv-email" className="text-xs font-semibold text-ink">
+                Email professionnel *
+              </Label>
               <Input
                 id="inv-email"
                 type="email"
@@ -206,89 +205,113 @@ export function InviteUserModal({ isOpen, onClose }: InviteUserModalProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-10 px-3 bg-background border border-border rounded text-xs text-ink focus:outline-none focus:border-ink"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="inv-password">Mot de passe temporaire *</Label>
-              <Button
+              <Label htmlFor="inv-password" className="text-xs font-semibold text-ink">
+                Mot de passe temporaire *
+              </Label>
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-primary"
+                className="text-xs text-ink font-semibold hover:underline cursor-pointer"
                 onClick={generateSecurePassword}
               >
-                <RefreshCw className="h-3 w-3 mr-1" /> Générer mot de passe
-              </Button>
+                Générer mot de passe
+              </button>
             </div>
             <div className="relative">
               <Input
                 id="inv-password"
-                type="text"
-                placeholder="8 caractères min, 1 majuscule, 1 chiffre"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="font-mono text-sm"
+                className="w-full h-10 pl-3 pr-10 bg-background border border-border rounded font-mono text-xs text-ink focus:outline-none focus:border-ink"
               />
-              <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <Eye className="h-4 w-4" />
+              </button>
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              Le collaborateur utilisera cet email et ce mot de passe pour se connecter sur Studio.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-muted gap-1">
+              <span>8 caractères min, 1 majuscule, 1 chiffre</span>
+              <span>Le collaborateur utilisera cet email et ce mot de passe pour se connecter sur Studio.</span>
+            </div>
           </div>
 
-          <div className="space-y-2.5">
-            <Label className="text-sm font-semibold">Sélectionnez le type d'accès (Rôle)</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="flex flex-col gap-2.5 pt-2">
+            <Label className="text-xs font-semibold text-ink uppercase tracking-wider">
+              Sélectionnez le type d'accès (Rôle)
+            </Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" id="role-selector-container">
               {ROLE_DEFINITIONS.map((r) => {
-                const Icon = r.icon;
                 const isSelected = role === r.role;
                 return (
-                  <div
+                  <label
                     key={r.role}
                     onClick={() => setRole(r.role)}
                     className={cn(
-                      "flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all text-left",
+                      "role-option flex items-start gap-3 p-3 rounded cursor-pointer transition-colors text-left",
                       isSelected
-                        ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary"
-                        : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
+                        ? "border-2 border-ink bg-[#FEFCE8] relative"
+                        : "border border-border bg-background hover:bg-background-secondary"
                     )}
                   >
-                    <div
-                      className={cn(
-                        "p-2 rounded-lg shrink-0 mt-0.5",
-                        isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="font-semibold text-xs text-foreground">{r.label}</p>
-                        {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                    <input
+                      type="radio"
+                      name="user_role"
+                      value={r.role}
+                      checked={isSelected}
+                      onChange={() => setRole(r.role)}
+                      className="mt-1 accent-primary"
+                    />
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-xs text-ink">{r.label}</span>
+                        {isSelected && (
+                          <CheckCircle2 className="text-[#166534] h-4 w-4 shrink-0 font-semibold" />
+                        )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-tight">
+                      <span className="text-[11px] text-muted leading-tight mt-0.5 line-clamp-2">
                         {r.desc}
-                      </p>
+                      </span>
                     </div>
-                  </div>
+                  </label>
                 );
               })}
             </div>
           </div>
 
-          <DialogFooter className="border-t border-border pt-4">
-            <Button variant="outline" type="button" onClick={onClose} disabled={isLoading}>
+          <div className="px-6 py-4 -mx-6 -mb-6 mt-4 border-t border-border bg-background-secondary flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isLoading}
+              className="h-10 px-4 bg-background border border-border rounded text-xs font-semibold text-ink hover:bg-background-secondary transition-colors cursor-pointer"
+            >
               Annuler
-            </Button>
-            <Button className="bg-gradient-primary hover:opacity-90 shadow-glow" type="submit" disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
+            </button>
+            <button
+              type="submit"
+              disabled={!isFormValid || isLoading}
+              className={cn(
+                "h-10 px-5 rounded text-xs font-semibold flex items-center gap-2 transition-colors",
+                isFormValid && !isLoading
+                  ? "bg-primary text-ink hover:bg-[#F0CB3A] cursor-pointer"
+                  : "bg-[#E5E2DC] text-[#8A857D] border border-[#D8D5D0] cursor-not-allowed"
+              )}
+            >
+              {isLoading && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
               Envoyer l'invitation
-            </Button>
-          </DialogFooter>
+            </button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

@@ -51,10 +51,12 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+          deep: "hsl(var(--destructive-deep))",
         },
         error: {
           DEFAULT: "hsl(var(--error))",
           foreground: "hsl(var(--error-foreground))",
+          deep: "hsl(var(--error-deep))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
@@ -64,6 +66,7 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
+          deep: "hsl(var(--warning-deep))",
         },
         info: {
           DEFAULT: "hsl(var(--info))",

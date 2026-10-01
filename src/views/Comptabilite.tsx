@@ -266,9 +266,9 @@ export const Comptabilite = () => {
                     key={`${op.entry_id}-${op.account_code}-${idx}`}
                     className={cn(
                       "border-b border-border last:border-0 transition hover:bg-muted/30",
-                      op.status === "validated" && "bg-success-soft/5",
+                      op.status === "validated" && "bg-success/5",
                       op.status === "draft" && "opacity-80 italic",
-                      selectedEntries.includes(op.entry_id) && "bg-primary-soft/50"
+                      selectedEntries.includes(op.entry_id) && "bg-primary/15"
                     )}
                   >
                     <td className="px-4 py-3">
@@ -283,8 +283,8 @@ export const Comptabilite = () => {
                     <td className="px-4 py-3 font-mono text-xs">{op.piece}</td>
                     <td className="px-4 py-3 font-mono text-xs font-semibold">{op.account_code}</td>
                     <td className="px-4 py-3 font-medium">{op.description}</td>
-                    <td className="px-4 py-3 text-right tabular text-success">{op.debit > 0 ? formatCFA(op.debit) : ""}</td>
-                    <td className="px-4 py-3 text-right tabular text-destructive">{op.credit > 0 ? formatCFA(op.credit) : ""}</td>
+                    <td className="px-4 py-3 text-right tabular font-medium text-success-deep dark:text-success">{op.debit > 0 ? formatCFA(op.debit) : ""}</td>
+                    <td className="px-4 py-3 text-right tabular font-medium text-destructive-deep dark:text-destructive">{op.credit > 0 ? formatCFA(op.credit) : ""}</td>
                     <td className="px-4 py-3"><OperationStatusBadge status={op.status} /></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end items-center gap-1">

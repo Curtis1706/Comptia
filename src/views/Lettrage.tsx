@@ -146,8 +146,8 @@ export const Lettrage = () => {
                   <td className="px-4 py-3 text-xs font-mono uppercase text-muted-foreground">{l.entry.journal}</td>
                   <td className="px-4 py-3 font-medium">{l.description || l.entry.description}</td>
                   <td className="px-4 py-3">{l.third_party || "-"}</td>
-                  <td className="px-4 py-3 text-right tabular text-success font-semibold">{Number(l.debit) > 0 ? formatCFA(l.debit) : ""}</td>
-                  <td className="px-4 py-3 text-right tabular text-destructive font-semibold">{Number(l.credit) > 0 ? formatCFA(l.credit) : ""}</td>
+                  <td className="px-4 py-3 text-right tabular text-success-deep dark:text-success font-semibold">{Number(l.debit) > 0 ? formatCFA(l.debit) : ""}</td>
+                  <td className="px-4 py-3 text-right tabular text-destructive-deep dark:text-destructive font-semibold">{Number(l.credit) > 0 ? formatCFA(l.credit) : ""}</td>
                 </tr>
               ))}
             </tbody>

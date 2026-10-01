@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -31,7 +33,9 @@ import {
   FileText,
   CreditCard,
   Scale,
+  BarChart3,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
@@ -78,6 +82,7 @@ export const Dashboard = () => {
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [periodOpen, setPeriodOpen] = useState(false);
+  const [chartView, setChartView] = useState<"area" | "bar">("area");
 
   const { data: me } = useQuery<any>({
     queryKey: ["me"],
@@ -608,47 +613,144 @@ export const Dashboard = () => {
             </div>
             <div className="flex items-center gap-space-md flex-wrap">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-primary inline-block" />
+                <span className="w-3 h-0.5 bg-primary rounded-full inline-block" />
                 <span className="text-xs font-medium text-ink">Chiffre d'affaires (Cl. 7)</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-warning inline-block" />
+                <span className="w-3 h-0.5 bg-warning rounded-full inline-block" />
                 <span className="text-xs font-medium text-ink">Charges d'exploitation (Cl. 6)</span>
+              </div>
+              {/* Toggle Courbes / Barres */}
+              <div className="flex items-center p-0.5 rounded-lg bg-surface border border-border">
+                <button
+                  type="button"
+                  onClick={() => setChartView("area")}
+                  className={cn(
+                    "px-2.5 py-1 text-xs rounded font-medium transition-colors flex items-center gap-1",
+                    chartView === "area"
+                      ? "bg-background text-ink shadow-sm font-semibold"
+                      : "text-text-muted hover:text-ink"
+                  )}
+                  title="Affichage en courbes d'aire"
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Courbes</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChartView("bar")}
+                  className={cn(
+                    "px-2.5 py-1 text-xs rounded font-medium transition-colors flex items-center gap-1",
+                    chartView === "bar"
+                      ? "bg-background text-ink shadow-sm font-semibold"
+                      : "text-text-muted hover:text-ink"
+                  )}
+                  title="Affichage en barres"
+                >
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Barres</span>
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Histogramme Recharts conforme tokens Ceilow */}
+          {/* Graphique Recharts conforme tokens Ceilow (Courbes par défaut) */}
           <div className="relative w-full pt-space-sm">
             <div className="w-full h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#D8D5D0" vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 11, fill: "#8A857D" }}
-                    axisLine={{ stroke: "#D8D5D0" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tickFormatter={(v) => (v >= 1000000 ? `${(v / 1000000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}k`)}
-                    tick={{ fontSize: 11, fill: "#8A857D" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 4,
-                      border: "1px solid #D8D5D0",
-                      background: "#FFFFFF",
-                      color: "#332E29",
-                      fontSize: 12,
-                    }}
-                    formatter={(val: number) => [formatCFA(val), ""]}
-                  />
-                  <Bar dataKey="ca" name="CA (Cl. 7)" fill="#FFD946" radius={[2, 2, 0, 0]} maxBarSize={18} />
-                  <Bar dataKey="charges" name="Charges (Cl. 6)" fill="#FFA53D" radius={[2, 2, 0, 0]} maxBarSize={18} />
-                </BarChart>
+                {chartView === "area" ? (
+                  <AreaChart data={monthlyRevenue} margin={{ top: 12, right: 15, left: -15, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="caAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#FFD946" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#FFD946" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="chargesAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#FFA53D" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#FFA53D" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#D8D5D0" strokeOpacity={0.6} vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 11, fill: "#8A857D" }}
+                      axisLine={{ stroke: "#D8D5D0" }}
+                      tickLine={false}
+                      dy={4}
+                    />
+                    <YAxis
+                      tickFormatter={(v) => (v >= 1000000 ? `${(v / 1000000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}k`)}
+                      tick={{ fontSize: 11, fill: "#8A857D" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 8,
+                        border: "1px solid #D8D5D0",
+                        background: "#FFFFFF",
+                        color: "#332E29",
+                        fontSize: 12,
+                        boxShadow: "0 4px 12px rgba(51, 46, 41, 0.08)",
+                      }}
+                      formatter={(val: number, name: string) => [
+                        formatCFA(val),
+                        name === "ca" ? "Chiffre d'affaires (Cl. 7)" : "Charges d'exploitation (Cl. 6)",
+                      ]}
+                      labelStyle={{ fontWeight: 600, color: "#332E29", marginBottom: 4 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="ca"
+                      name="ca"
+                      stroke="#FFD946"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#caAreaGradient)"
+                      activeDot={{ r: 6, fill: "#FFD946", stroke: "#332E29", strokeWidth: 2 }}
+                      dot={{ r: 3, fill: "#FFD946", strokeWidth: 0 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="charges"
+                      name="charges"
+                      stroke="#FFA53D"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#chargesAreaGradient)"
+                      activeDot={{ r: 5, fill: "#FFA53D", stroke: "#332E29", strokeWidth: 2 }}
+                      dot={{ r: 3, fill: "#FFA53D", strokeWidth: 0 }}
+                    />
+                  </AreaChart>
+                ) : (
+                  <BarChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#D8D5D0" vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 11, fill: "#8A857D" }}
+                      axisLine={{ stroke: "#D8D5D0" }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tickFormatter={(v) => (v >= 1000000 ? `${(v / 1000000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}k`)}
+                      tick={{ fontSize: 11, fill: "#8A857D" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 4,
+                        border: "1px solid #D8D5D0",
+                        background: "#FFFFFF",
+                        color: "#332E29",
+                        fontSize: 12,
+                      }}
+                      formatter={(val: number) => [formatCFA(val), ""]}
+                    />
+                    <Bar dataKey="ca" name="CA (Cl. 7)" fill="#FFD946" radius={[2, 2, 0, 0]} maxBarSize={18} />
+                    <Bar dataKey="charges" name="Charges (Cl. 6)" fill="#FFA53D" radius={[2, 2, 0, 0]} maxBarSize={18} />
+                  </BarChart>
+                )}
               </ResponsiveContainer>
             </div>
             <div className="mt-space-xs flex items-center justify-between text-xs text-text-muted">

@@ -773,9 +773,23 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - [src/components/layout/AppSidebar.tsx](file:///c:/Projects/brightbook-studio/src/components/layout/AppSidebar.tsx) : Mise à jour de `handleSignOut` pour exécuter `await signOut({ redirect: false })` puis rediriger immédiatement le navigateur vers `${window.location.origin}/login`.
     - [src/views/Parametres.tsx](file:///c:/Projects/brightbook-studio/src/views/Parametres.tsx) : Remplacement de l'appel direct `onClick={() => signOut({ callbackUrl: "/login" })}` par `onClick={handleSignOut}`.
     - [src/app/access-denied/page.tsx](file:///c:/Projects/brightbook-studio/src/app/access-denied/page.tsx) : Ajout du gestionnaire `handleSignOut` dynamique et branchement sur le bouton de déconnexion.
+- **Amélioration Graphique Dashboard — Courbes d'Aire avec Dégradé Élégant** :
+  - **Constat** : Le graphique annuel « Activité annuelle : Ventes & Charges » sous forme d'histogramme générait un rendu brut et discontinu lorsqu'un faible nombre de mois contenait des écritures comptables (un seul grand bâton isolé).
+  - **Résolution** :
+    - [src/views/Dashboard.tsx](file:///c:/Projects/brightbook-studio/src/views/Dashboard.tsx) : Remplacement de l'affichage par défaut par un `AreaChart` avec courbes spline `type="monotone"`, dégradés SVG subtils (`#FFD946` pour le CA Cl. 7 et `#FFA53D` pour les charges Cl. 6), points discrets de repère et survol interactif.
+    - Ajout d'un sélecteur sobre et discret « Courbes / Barres » pour permettre à l'utilisateur d'alterner à tout moment entre les deux représentations.
+    - Respect strict des tokens Ceilow (`primary`, `warning`, `border`, `text-muted`, `ink`), typographie Inter avec chiffres tabulaires (`tnum`).
+- **Amélioration du Contraste Visuel des Statuts et Montants (Accessibilité & Lisibilité)** :
+  - **Constat** : Sur la page [Comptabilité (Journal des opérations)](file:///c:/Projects/brightbook-studio/src/views/Comptabilite.tsx), les textes de statuts (« Comptabilisée » en jaune, « Validée » en vert menthe, « Brouillon » en ambre) et les montants Débit/Crédit manquaient de contraste par rapport au fond blanc, les rendant difficilement perceptibles à l'œil (échec WCAG de lisibilité du jaune/vert clair sur blanc).
+  - **Résolution** :
+    - [src/app/globals.css](file:///c:/Projects/brightbook-studio/src/app/globals.css) & [tailwind.config.ts](file:///c:/Projects/brightbook-studio/tailwind.config.ts) : Ajout et harmonisation des tokens sémantiques profonds `--success-deep` (`#0D6E4B`), `--warning-deep` (`#9E4A06`), `--destructive-deep` (`#AA1D1D`) pour assurer un contraste élevé (> 7:1) en mode clair tout en préservant la charte en mode sombre.
+    - [src/components/dashboard/StatusBadge.tsx](file:///c:/Projects/brightbook-studio/src/components/dashboard/StatusBadge.tsx) : Refonte des badges `OperationStatusBadge` et `InvoiceStatusBadge` avec fond teinté distinct (`bg-success/20`, `bg-primary/30`, `bg-warning/20`, `bg-destructive/15`), bordures délimitées et typographie contrastée (`text-success-deep`, `text-ink`, `text-warning-deep`, `text-destructive-deep`), rendant les statuts vert, jaune, ambre et rouge immédiatement identifiables.
+    - [src/views/Comptabilite.tsx](file:///c:/Projects/brightbook-studio/src/views/Comptabilite.tsx) & [src/views/Lettrage.tsx](file:///c:/Projects/brightbook-studio/src/views/Lettrage.tsx) : Remplacement des classes de montants délavées (`text-success`) par `text-success-deep` (vert émeraude net pour les débits) et `text-destructive-deep` (rouge rubis net pour les crédits).
   - **Validation technique (Règle 18)** :
     - `npx tsc --noEmit` : **0 erreur**.
     - `pnpm build` : **0 erreur** (54 pages compilées avec succès).
+
+
 
 
 

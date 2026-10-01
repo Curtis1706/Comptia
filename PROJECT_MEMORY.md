@@ -6,6 +6,42 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Refonte UX & Alignement Comptabilité SYSCOHADA (Prompts 2 à 6 & Extourne)
+
+- **Actions effectuées** :
+  - **Correction du typage `JournalEntryModal`** ([`src/views/Comptabilite.tsx`](file:///e:/Comptia/src/views/Comptabilite.tsx)) :
+    - Remplacement de `onCreated` par la prop réelle `onSuccess` pour fermer la modale et invalider les requêtes.
+    - Zéro donnée mockée : conservation intégrale du flux de données réelles (`/api/accounting/entries`).
+  - **Prompt 2 : Montants & Couleurs (Sobriété financière & Règle 3)** :
+    - Colonnes Débit et Crédit affichées en texte sombre presque noir (`text-ink`), sans vert ni rouge sur les lignes.
+    - Colonnes Débit et Crédit côte à côte avec fine séparation verticale (`border-r border-border`).
+    - Affichage d'un tiret gris discret `—` quand la case est vide.
+    - Le rouge est strictement réservé aux réels écarts/erreurs d'équilibre arithmétique.
+  - **Prompt 3 : Statuts Simplifiés & Lignes Brouillon** :
+    - 3 statuts stricts en pastille avec point et texte : « Brouillon » (point ambre, fond ambre clair), « Validée » (point vert, fond vert clair), « Verrouillée » (gris avec icône `Lock`). Suppression du statut « Comptabilisée ».
+    - Lignes en brouillon : fond ambre très clair (`bg-warning/5 hover:bg-warning/10`), texte normal (non-italique).
+    - Bouton d'action direct « Valider » affiché visiblement sur chaque pièce en brouillon.
+  - **Prompt 4 : Actions Contextuelles, Menu « ... » & Actions Groupées** :
+    - Bouton contextuel par pièce : « Valider » pour un brouillon, « Voir la pièce » pour une écriture validée/verrouillée (dépliage instantané).
+    - Menu « ... » enrichi : « Dupliquer », « Extourner » (branché sur la nouvelle route API `POST /api/accounting/entries/[id]/reverse`), « Télécharger le justificatif » (export CSV de la pièce), et « Supprimer » (désactivé si validée/verrouillée, actif uniquement pour un brouillon avec confirmation).
+    - Barre d'actions groupées : apparaît automatiquement quand des pièces sont cochées avec compteur (« N sélectionnée(s) »), bouton « Valider la sélection », « Exporter », « Supprimer » (sécurisé pour les brouillons) et « Désélectionner ».
+  - **Prompt 5 : Lisibilité & Pagination Avancée** :
+    - En-tête du tableau fixé au défilement (`sticky top-0 z-10 bg-background-secondary`).
+    - Survol de ligne en gris très clair (`hover:bg-background-secondary/60`).
+    - Intitulé du compte en gris moyen à côté de son numéro en gras (ex : « 661 Rémunération du personnel »).
+    - Contraste rehaussé sur les dates et numéros de pièce (`text-ink font-semibold font-mono`).
+    - Pagination ergonomique : libellé dynamique « X à Y sur Z pièces », sélecteur « Lignes par page » (10, 20, 50, 100), et boutons « Précédent » / « Suivant » actifs selon les bornes.
+  - **Prompt 6 : États, Erreurs & Mobile-First** :
+    - État vide conforme : « Aucune écriture sur cette période » avec bouton d'action jaune « Nouvelle opération ».
+    - Gestion détaillée des erreurs d'import CSV avec panneau d'alerte listant le motif et les lignes incriminées.
+    - Version mobile repliable : transformation en cartes claires sous `lg` avec date, libellé, total, pastille de statut et bouton contextuel (« Valider » ou « Voir »).
+  - **Contrôles Données Métier & Extourne** :
+    - Création de la route backend d'extourne [`src/app/api/accounting/entries/[id]/reverse/route.ts`](file:///e:/Comptia/src/app/api/accounting/entries/[id]/reverse/route.ts) qui inverse les imputations débit/crédit sous référence `EXT-...` et journalise l'audit trail.
+    - Blocage strict de la suppression des pièces validées en base et dans l'interface, proposition de l'extourne comme alternative légale SYSCOHADA.
+- **Contrôle Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes générées, route /reverse opérationnelle).
+
 ### 2026-10-01 — Harmonisation des Libellés de Navigation Sidebar & Corrections Documents
 
 - **Actions effectuées** :

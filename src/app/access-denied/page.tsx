@@ -11,6 +11,13 @@ export default function AccessDeniedPage() {
   const userRole = (session?.user as any)?.role as UserRole | undefined;
   const roleLabel = userRole ? ROLE_LABELS[userRole] || userRole : null;
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
       <div className="mx-auto max-w-md space-y-6">
@@ -35,7 +42,7 @@ export default function AccessDeniedPage() {
           <Button
             variant="destructive"
             className="w-full sm:w-auto inline-flex items-center gap-2 shadow-sm"
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={handleSignOut}
           >
             <LogOut className="h-4 w-4" />
             Se déconnecter

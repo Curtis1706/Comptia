@@ -766,6 +766,18 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npx tsc --noEmit` : **0 erreur**.
   - `pnpm build` : **0 erreur** (54 pages compilées avec succès en 34.1s).
 
+- **Correction Fiche S3 — Redirection Déconnexion sur l'Origine Active (Erreur 404)** :
+  - **Constat** : Le clic sur « Déconnexion » redirigeait vers `https://brightbook-studio.vercel.app/login` affichant une page d'erreur 404 (`DEPLOYMENT_NOT_FOUND`) au lieu de rester sur le domaine actif de l'application.
+  - **Cause racine** : L'appel `signOut({ callbackUrl: "/login" })` dans `AppSidebar.tsx`, `Parametres.tsx` et `access-denied/page.tsx` déclenchait une redirection gérée côté serveur par NextAuth, qui résolvait l'URL relative contre l'ancienne variable d'environnement `AUTH_URL` / `NEXTAUTH_URL` (`brightbook-studio.vercel.app`).
+  - **Résolution** :
+    - [src/components/layout/AppSidebar.tsx](file:///c:/Projects/brightbook-studio/src/components/layout/AppSidebar.tsx) : Mise à jour de `handleSignOut` pour exécuter `await signOut({ redirect: false })` puis rediriger immédiatement le navigateur vers `${window.location.origin}/login`.
+    - [src/views/Parametres.tsx](file:///c:/Projects/brightbook-studio/src/views/Parametres.tsx) : Remplacement de l'appel direct `onClick={() => signOut({ callbackUrl: "/login" })}` par `onClick={handleSignOut}`.
+    - [src/app/access-denied/page.tsx](file:///c:/Projects/brightbook-studio/src/app/access-denied/page.tsx) : Ajout du gestionnaire `handleSignOut` dynamique et branchement sur le bouton de déconnexion.
+  - **Validation technique (Règle 18)** :
+    - `npx tsc --noEmit` : **0 erreur**.
+    - `pnpm build` : **0 erreur** (54 pages compilées avec succès).
+
+
 
 
 

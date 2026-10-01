@@ -147,7 +147,7 @@ export const Parametres = () => {
               variant="outline"
               size="sm"
               className="w-full text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleSignOut}
             >
               <LogOut className="h-3.5 w-3.5 mr-1.5" />
               Se déconnecter

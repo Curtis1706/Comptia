@@ -204,7 +204,10 @@ export const AppSidebar = ({ open, onClose }: Props) => {
 
   const handleSignOut = async () => {
     toast.info("Déconnexion en cours...");
-    await signOut({ callbackUrl: "/login" });
+    await signOut({ redirect: false });
+    if (typeof window !== "undefined") {
+      window.location.href = `${window.location.origin}/login`;
+    }
   };
 
   return (

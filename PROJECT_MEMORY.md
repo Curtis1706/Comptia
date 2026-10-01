@@ -6,42 +6,30 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
-### 2026-10-01 — Refonte UX/UI Page Reporting & États Financiers (`/reporting`) — SYSCOHADA Révisé
+### 2026-10-01 — Refonte & Ajustements de Précision Page Reporting & États Financiers (`/reporting`)
 
 - **Actions effectuées** :
-  - **Refonte intégrale de la vue Reporting** ([`src/views/Reporting.tsx`](file:///e:/Comptia/src/views/Reporting.tsx)) conformément aux captures et aux règles de conception Ceilow :
-    - **En-tête commun** : Titre « Reporting & États Financiers », sous-titre explicatif « DSF obligatoire DGI / INSAE et états financiers SYSCOHADA révisé », et bouton secondaire « Exporter en PDF / Imprimer » (fond blanc uni `bg-background`, bordure 1px `border-border`, icône Lucide `Download`).
-    - **Carte principale à 5 onglets** :
-      - Bordure 1px `border-border`, fond uni blanc opaque `bg-background`, ombre subtile `shadow-sm`, coins au format carré `rounded`.
-      - Onglet actif : texte en gras foncé `text-ink font-bold` avec soulignement jaune Ceilow de 2px (`h-[2px] bg-primary`).
-      - Onglets inactifs : texte gris foncé `text-muted hover:text-ink`.
-    - **1. Onglet « Bilan »** :
-      - Mention « Bilan au 01/10/2026 ».
-      - Deux tableaux côte à côte ACTIF et PASSIF (en-têtes en petites majuscules grises `bg-background-secondary`).
-      - Actif : Clients 1 770 000 F CFA, Banques locales en monnaie nationale 5 000 000 F CFA, Total Actif 6 770 000 F CFA.
-      - Passif : Capital social (5 000 000), Capital par dotation (100 000), Fournisseurs dettes en compte (100 000), Personnel rémunérations dues (698 808), Sécurité sociale CNSS Bénin (152 000), TVA facturée (270 000), IPTS retenu sur salaires (72 392), État charges à payer (32 000), Total Passif 6 425 200 F CFA.
-      - Lignes de total en gras avec fond gris clair (`bg-background-secondary`).
-    - **2. Onglet « Compte de résultat »** :
-      - Mention « Exercice 2026 ».
-      - Deux tableaux côte à côte CHARGES (Rémunérations directes 800 000, Charges patronales 155 200, Total charges 955 200) et PRODUITS (Services vendus 1 500 000, Total produits 1 500 000).
-      - Ligne « Résultat net » avec icône `TrendingUp`, montant 544 800 F CFA en vert foncé et gras (`text-success-deep`) sur fond vert très clair uni (`bg-success/15 border border-success-deep/20`).
-    - **3. Onglet « DSF / États SYSCOHADA »** :
-      - Menu déroulant « Exercice : 2026 » en haut à droite.
-      - Bandeau d'information fin : à gauche « DSF SYSCOHADA révisé (DGI Bénin)... », à droite « Équilibre Bilan : Équilibré (Actif = Passif) » avec pastille verte sans emoji.
-      - 3 boutons de sous-navigation : « Bilan SYSCOHADA » (`Scale`), « Compte de Résultat (SIG) » (`BarChart3`), « TAFIRE (Flux Financiers) » (`FileSpreadsheet`), le bouton actif sur fond jaune `bg-primary text-ink`, inactifs sur fond blanc avec bordure 1px.
-      - *Sous-vue Bilan SYSCOHADA* : Deux cartes ACTIF (Emplois) et PASSIF (Ressources), totaux sur fond jaune #FFD946 avec texte noir profond.
-      - *Sous-vue Compte de Résultat (SIG)* : Tableau officiel 3 colonnes (Code en monospace gris, Libellé, Montant), lignes de détail débutant par + ou -, lignes de solde (CA, MB, VA, EBE, REX, RFI, RAO, RHAO, RNET) en gras sur fond gris très clair, trait jaune de 3px à gauche pour les soldes majeurs (CA, VA, EBE, REX, RAO, RNET) avec texte noir, charge de personnel -955 200 en rouge foncé (`text-error-deep`).
-      - *Sous-vue TAFIRE* : 3 cartes (CAF 544 800 F CFA, Variation BFR 444 800 F CFA, Flux Trésorerie Exploitation 100 000 F CFA) avec montants en noir profond.
-    - **4. Onglet « Trésorerie »** :
-      - Mention « Évolution de la trésorerie — 30 derniers jours ».
-      - Graphique en aires plat : courbe vert foncé de 2px (`#0D6E4B`), remplissage vert très clair uni opaque (`#E6FAF1`, zéro dégradé), grille horizontale en pointillés gris clair, axe Y de 0k à 6000k, axe X du 02/09 au 30/09, infobulle sobre au survol.
-    - **5. Onglet « Ratios »** :
-      - 4 cartes indicateurs de même hauteur : SOLVABILITÉ (1.05), RÉSULTAT NET (544 800 F), MARGE NETTE (36.3%), TRÉSORERIE (5 000 000 F).
-      - Valeurs en noir profond et grandes, badges de tendance en vert foncé sur fond vert très clair uni (`text-success-deep bg-success/20 border-success-deep/30`).
-  - **Règles Ceilow scrupuleusement respectées** :
-    - Zéro emoji, zéro glassmorphisme, zéro dégradé.
-    - Typographie tabulaire `tabular-nums font-mono` sur l'ensemble des montants.
-    - Accent jaune #FFD946 réservé aux boutons actifs, totaux de bilan et soulignement de l'onglet actif.
+  - **Sobriété typographique & Couleurs** ([`src/views/Reporting.tsx`](file:///e:/Comptia/src/views/Reporting.tsx)) :
+    - Remplacement de tous les textes et montants jaunes sur fond blanc par du noir profond (`text-ink`).
+    - Conservation stricte du jaune (`bg-primary`, `border-l-primary`, `h-0.5 bg-primary`) uniquement pour les fonds de totaux, soulignements d'onglets actifs et boutons de sous-navigation actifs.
+    - Onglets principaux : onglet actif signalé par un texte foncé en gras (`text-ink font-bold`) et un soulignement jaune de 2px (`h-0.5 bg-primary`).
+  - **Sous-vue Compte de Résultat (SIG)** :
+    - En-tête de tableau fixé au défilement (`sticky top-0 z-10 bg-background-secondary shadow-xs`) restant visible pendant la consultation des 27 lignes de comptes et de soldes.
+    - Alignement scrupuleux des montants à droite en chiffres tabulaires (`text-right font-mono tabular-nums`).
+    - Codes de compte en monospace gris foncé (`font-mono text-xs text-[#4B4640]`).
+    - Lignes de solde rehaussées sur fond gris très clair (`bg-[#F5F4F2]` avec bordure gauche 4px jaune Ceilow pour les soldes majeurs CA, VA, EBE, REX, RAO, RNET).
+  - **Onglet Trésorerie** :
+    - Graphique SVG en aires parfaitement plat : remplissage vert très clair uni opaque (`fill="#EBF9EE"`, zéro dégradé) et ligne continue verte nette de 2px (`#16A34A`).
+    - Libellés d'axe Y complets et lisibles en F CFA (`6 000 000`, `4 500 000`, `3 000 000`, `1 500 000`, `0`).
+  - **Onglet Ratios** :
+    - Montants des 4 ratios en noir profond (`text-ink font-bold font-mono tabular-nums`).
+    - Tendances affichées sous forme de pastilles vertes sobres avec texte vert foncé (`bg-[#EBF9EE] text-[#166534] border border-[#86EFAC]`).
+  - **Onglet Compte de résultat** :
+    - Ligne « Résultat net de l'exercice » sur un fond vert très clair uni (`bg-[#EBF9EE] border border-[#86EFAC]`) avec titre et montant en vert foncé en gras (`text-[#166534] font-bold`).
+  - **Adaptabilité mobile & Responsive** :
+    - Tableaux côte à côte empilés sur une colonne sous l'écran large (`grid grid-cols-1 lg:grid-cols-2`).
+    - Cartes d'indicateurs (TAFIRE et Ratios) passant sur une seule colonne sur mobile (`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`).
+    - Onglets défilant horizontalement de façon fluide sans saut de ligne (`overflow-x-auto scrollbar-none whitespace-nowrap`).
 - **Contrôles Qualité & Validation** :
   - `npx tsc --noEmit` : 0 erreur de typage.
 

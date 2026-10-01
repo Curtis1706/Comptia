@@ -36,7 +36,7 @@
     --secondary-foreground: 30 11% 18%;
 
     --muted: 40 11% 95.5%; /* #F5F4F2 */
-    --muted-foreground: 37 5% 52%; /* #8A857D */
+    --muted-foreground: 30 8% 42%; /* #6E665E - Contraste renforcé et lisible */
 
     --accent: 48 100% 64%;
     --accent-foreground: 30 11% 18%;

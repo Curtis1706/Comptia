@@ -6,6 +6,97 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Correction du Fond Canvas (`bg-background-secondary`) & Contraste Typographique
+
+- **Actions effectuées** :
+  - **Correction du fond global d'application** ([`src/components/layout/AppShell.tsx`](file:///e:/Comptia/src/components/layout/AppShell.tsx)) :
+    - Remplacement de `bg-surface-container-lowest` (blanc `#FFFFFF` produisant un effet blanc sur blanc aveuglant et sans relief) par **`bg-background-secondary`** (`#F5F4F2`).
+    - Les cartes, sections et conteneurs de tableau (`bg-background` `#FFFFFF`) se détachent désormais nettement sur le fond chaud canvas, recréant la hiérarchie visuelle du design.
+  - **Amélioration du contraste de la typographie secondaire** ([`src/app/globals.css`](file:///e:/Comptia/src/app/globals.css)) :
+    - Réajustement de `--muted-foreground` de `52%` à `42%` (`#6E665E`, conforme au token `brand.secondary`), éliminant l'effet de texte gris délavé sur fond clair.
+  - **Lisibilité du tableau et des statuts comptables** ([`src/views/Comptabilite.tsx`](file:///e:/Comptia/src/views/Comptabilite.tsx)) :
+    - En-tête des colonnes du tableau rehaussé en gras et encre Ceilow (`font-bold text-ink uppercase`).
+    - Statuts « Validée » et « Brouillon » passés aux teintes profondes (`text-success-deep` et `text-warning-deep`), supprimant l'aspect de vert clair illisible.
+    - Pastilles d'état des cartes « Écart arithmétique » et « Brouillons » harmonisées avec les couleurs profondes.
+- **Contrôles Qualité** :
+  - `npx tsc --noEmit` : 0 erreur.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes compilées).
+
+### 2026-10-01 — Refonte UX & Intégration Données Réelles Page Déclarations & TVA DGI (`/tva`)
+
+- **Actions effectuées** :
+  - **Refonte visuelle et structurelle intégrale de la page TVA** ([`src/views/TVA.tsx`](file:///e:/Comptia/src/views/TVA.tsx)) en conformité stricte avec le mockup HTML et les règles de conception Ceilow :
+    - **Header & Action principale** : Titre « Gestion TVA (DGI Bénin) », sous-titre explicatif, et CTA jaune Ceilow `Soumettre la déclaration DGI` (`bg-primary text-ink border border-ink/20 font-semibold rounded`).
+    - **Bandeau réglementaire DGI Bénin** : Rappel de la norme légale (déclaration mensuelle au plus tard le 15 du mois suivant, taux standard 18%), échéance dynamique calculée au 15 du mois suivant la période sélectionnée, et pastille d'avertissement en cas de dépassement de l'échéance légale avec mention des pénalités (10% + 1%/mois).
+    - **3 Cartes de synthèse fiscale (KPI)** :
+      1. *TVA NETTE DUE (PÉRIODE)* : Montant proéminent en typographie tabulaire (`text-4xl font-bold font-mono tabular-nums text-ink`), accompagné du sélecteur interactif de période fiscale (mois de l'exercice en cours).
+      2. *TVA facturée / collectée (Compte 4431)* : Montant en noir comptable sobre (`text-2xl font-semibold font-mono tabular-nums text-ink`), sous-titre « Sur ventes & prestations de services ».
+      3. *TVA déductible / récupérable (Compte 445)* : Montant en noir comptable sobre, sous-titre « Sur achats & frais généraux ».
+    - **Tableau de bord récapitulatif SYSCOHADA (3 colonnes)** :
+      - Col 1 : Chiffre d'affaires HT (Classe 7) et Achats & charges HT (Classe 6).
+      - Col 2 : Type de déclaration (« Mensuelle ») et Statut de calcul (« Aperçu temps réel » avec pastille ambre `rounded`).
+      - Col 3 : Crédit de TVA reportable (Compte 4449) et TVA à payer (Compte 4441).
+    - **Historique chronologique des déclarations DGI (Timeline)** :
+      - En-tête avec bouton fonctionnel « Exporter » téléchargeant l'historique complet en format CSV conforme (séparateur point-virgule, BOM UTF-8).
+      - Indicateurs d'état visuels fidèles : pastille circulaire (`rounded-full`) vert émeraude foncé (`border-success-deep text-success-deep`) avec coche `stroke-[3]` pour les déclarations soumises, pastille horloge pour les brouillons.
+      - Périodes, badges « MENSUELLE » au format carré (`rounded`), dates de création, dates d'échéance et pénalités éventuelles.
+      - Statuts traduits en français : « Soumise » avec vert foncé émeraude lisible et contrasté (`text-success-deep bg-success/20 border-success-deep/30 rounded`), « Brouillon » (`text-warning-deep bg-warning/20 border-warning-deep/30 rounded`).
+      - Zéro translucidité / zéro glassmorphisme : fonds solides purs (`bg-background` et `bg-background-secondary`), suppression de tout alpha (`/40`).
+      - Bouton interactif « Voir le détail » ouvrant une modale détaillée avec ventilation complète des comptes SYSCOHADA (4431, 4452, 4441, 4449).
+    - **Workflow de soumission sécurisé (Modale de confirmation DGI)** :
+      - Modale récapitulative des montants calculés avant télétransmission.
+      - Détection des déclarations déjà soumises pour bloquer les doublons non autorisés.
+      - Alerte visuelle en cas de déclaration tardive au regard du 15 du mois.
+      - Appel des API backend réelles `POST /api/vat/declarations` et `POST /api/vat/declarations/[id]/submit`.
+  - **Zéro Donnée Mockée & Rigueur des Règles** :
+    - Toutes les données proviennent des endpoints API réels (`/api/vat/preview`, `/api/vat/declarations`).
+    - Zéro couleur hexadécimale en dur, utilisation exclusive des variables sémantiques Ceilow (`bg-background`, `border-border`, `text-ink`, `text-text-muted`, `bg-primary`, `bg-success/15`, `bg-warning/15`, `bg-error/15`).
+    - Format carré strict (`rounded` 2px / 0.125rem), aucune bordure `rounded-lg`, `rounded-xl` ou `rounded-full` intempestive (hors pastilles témoins).
+    - Chiffres financiers en police tabulaire (`tabular-nums font-mono`).
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes générées sans erreur).
+
+### 2026-10-01 — Refonte UX & Alignement Comptabilité SYSCOHADA (Prompts 2 à 6 & Extourne)
+
+- **Actions effectuées** :
+  - **Correction du typage `JournalEntryModal`** ([`src/views/Comptabilite.tsx`](file:///e:/Comptia/src/views/Comptabilite.tsx)) :
+    - Remplacement de `onCreated` par la prop réelle `onSuccess` pour fermer la modale et invalider les requêtes.
+    - Zéro donnée mockée : conservation intégrale du flux de données réelles (`/api/accounting/entries`).
+  - **Alignement Géométrique au Format Carré (`rounded` 2px / 4px) & Couleurs du Design** :
+    - Remplacement de tous les arrondis excessifs (`rounded-lg`, `rounded-full`, `rounded-md`) par le format quasi-carré du design HTML (`rounded`, 2px/0.125rem).
+    - Application aux cards de synthèse, conteneur du tableau, boutons d'action, sélecteurs, champs de recherche et badges de statut/journal.
+    - Alignement scrupuleux des couleurs sur la charte : cartes blanches nettes, badges avec puces précises, bouton de page numéroté carré jaune Ceilow (`h-8 w-8 rounded bg-primary text-ink border border-ink/20`).
+  - **Prompt 2 : Montants & Couleurs (Sobriété financière & Règle 3)** :
+    - Colonnes Débit et Crédit affichées en texte sombre presque noir (`text-ink`), sans vert ni rouge sur les lignes.
+    - Colonnes Débit et Crédit côte à côte avec fine séparation verticale (`border-r border-border`).
+    - Affichage d'un tiret gris discret `—` quand la case est vide.
+    - Le rouge est strictement réservé aux réels écarts/erreurs d'équilibre arithmétique.
+  - **Prompt 3 : Statuts Simplifiés & Lignes Brouillon** :
+    - 3 statuts stricts en pastille avec point et texte : « Brouillon » (point ambre, fond ambre clair), « Validée » (point vert, fond vert clair), « Verrouillée » (gris avec icône `Lock`). Suppression du statut « Comptabilisée ».
+    - Lignes en brouillon : fond ambre très clair (`bg-warning/5 hover:bg-warning/10`), texte normal (non-italique).
+    - Bouton d'action direct « Valider » affiché visiblement sur chaque pièce en brouillon.
+  - **Prompt 4 : Actions Contextuelles, Menu « ... » & Actions Groupées** :
+    - Bouton contextuel par pièce : « Valider » pour un brouillon, « Voir la pièce » pour une écriture validée/verrouillée (dépliage instantané).
+    - Menu « ... » enrichi : « Dupliquer », « Extourner » (branché sur la nouvelle route API `POST /api/accounting/entries/[id]/reverse`), « Télécharger le justificatif » (export CSV de la pièce), et « Supprimer » (désactivé si validée/verrouillée, actif uniquement pour un brouillon avec confirmation).
+    - Barre d'actions groupées : apparaît automatiquement quand des pièces sont cochées avec compteur (« N sélectionnée(s) »), bouton « Valider la sélection », « Exporter », « Supprimer » (sécurisé pour les brouillons) et « Désélectionner ».
+  - **Prompt 5 : Lisibilité & Pagination Avancée** :
+    - En-tête du tableau fixé au défilement (`sticky top-0 z-10 bg-background-secondary`).
+    - Survol de ligne en gris très clair (`hover:bg-background-secondary/60`).
+    - Intitulé du compte en gris moyen à côté de son numéro en gras (ex : « 661 Rémunération du personnel »).
+    - Contraste rehaussé sur les dates et numéros de pièce (`text-ink font-semibold font-mono`).
+    - Pagination ergonomique : libellé dynamique « X à Y sur Z pièces », sélecteur « Lignes par page » (10, 20, 50, 100), et boutons « Précédent » / « Suivant » actifs selon les bornes.
+  - **Prompt 6 : États, Erreurs & Mobile-First** :
+    - État vide conforme : « Aucune écriture sur cette période » avec bouton d'action jaune « Nouvelle opération ».
+    - Gestion détaillée des erreurs d'import CSV avec panneau d'alerte listant le motif et les lignes incriminées.
+    - Version mobile repliable : transformation en cartes claires sous `lg` avec date, libellé, total, pastille de statut et bouton contextuel (« Valider » ou « Voir »).
+  - **Contrôles Données Métier & Extourne** :
+    - Création de la route backend d'extourne [`src/app/api/accounting/entries/[id]/reverse/route.ts`](file:///e:/Comptia/src/app/api/accounting/entries/[id]/reverse/route.ts) qui inverse les imputations débit/crédit sous référence `EXT-...` et journalise l'audit trail.
+    - Blocage strict de la suppression des pièces validées en base et dans l'interface, proposition de l'extourne comme alternative légale SYSCOHADA.
+- **Contrôle Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes générées, route /reverse opérationnelle).
+
 ### 2026-10-01 — Harmonisation des Libellés de Navigation Sidebar & Corrections Documents
 
 - **Actions effectuées** :

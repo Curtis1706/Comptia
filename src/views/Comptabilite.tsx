@@ -1,123 +1,164 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Plus,
   Search,
-  Filter,
   Download,
   Upload,
-  MoreHorizontal,
+  MoreVertical,
   CheckCircle2,
   Trash2,
-  Eye,
-  Copy,
-  FileText,
+  ChevronDown,
   AlertCircle,
+  FileText,
+  Lock,
+  Copy,
+  RotateCcw,
+  Eye,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/dashboard/PageHeader";
-import { OperationStatusBadge } from "@/components/dashboard/StatusBadge";
-import { useQuery } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
-import { useDebounce } from "@/hooks/use-debounce";
-import { formatCFA, formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { JournalEntryModal } from "@/components/accounting/JournalEntryModal";
-import { PermissionGate } from "@/components/PermissionGate";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { detectAndParseCSV } from "@/lib/csv-parser";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { JournalEntryModal } from "@/components/accounting/JournalEntryModal";
+import { PermissionGate } from "@/components/PermissionGate";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/use-debounce";
+import { formatCFA, formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { detectAndParseCSV } from "@/lib/csv-parser";
+import { toast } from "sonner";
 
-const JOURNAL_LABELS: Record<string, string> = {
-  purchases: "Achats (HA)",
-  sales: "Ventes (VT)",
-  bank: "Banque (BQ)",
-  cash: "Caisse (CA)",
-  payroll: "Paie (OD)",
+const JOURNAL_CONFIG: Record<string, { label: string; badge: string }> = {
+  purchases: { label: "Achats (ACH)", badge: "Achats" },
+  sales: { label: "Ventes (VTE)", badge: "Ventes" },
+  bank: { label: "Banque (BQ)", badge: "Banque" },
+  payroll: { label: "Paie (PAY)", badge: "Paie" },
+  cash: { label: "Caisse (CA)", badge: "Caisse" },
+  od: { label: "Opérations Diverses (OD)", badge: "OD" },
+};
+
+type CleanStatus = "draft" | "validated" | "locked";
+
+const getCleanStatus = (status: string): CleanStatus => {
+  if (status === "draft") return "draft";
+  if (status === "locked") return "locked";
+  return "validated";
 };
 
 export const Comptabilite = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 500);
+  const debouncedQuery = useDebounce(query, 400);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [journalFilter, setJournalFilter] = useState<string>("all");
+  const [periodFilter, setPeriodFilter] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntries, setSelectedEntries] = useState<string[]>([]);
-  const [selectedEntryDetail, setSelectedEntryDetail] = useState<any | null>(null);
-  const [entryToDelete, setEntryToDelete] = useState<any | null>(null);
+  const [expandedPieces, setExpandedPieces] = useState<Record<string, boolean>>({});
+  const [csvErrors, setCsvErrors] = useState<{ message: string; lines?: string[] } | null>(null);
+
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery<any>({
-    queryKey: ["accounting-entries", debouncedQuery, page, statusFilter, journalFilter],
-    queryFn: () => fetcher(`/api/accounting/entries?page=${page}&limit=20${debouncedQuery ? `&search=${debouncedQuery}` : ""}${statusFilter !== "all" ? `&status=${statusFilter}` : ""}${journalFilter !== "all" ? `&journal=${journalFilter}` : ""}`),
+  // Chargement des données réelles avec total
+  const { data, isLoading } = useQuery<{ entries: any[]; total: number }>({
+    queryKey: ["accounting-entries", debouncedQuery, page, pageSize, statusFilter, journalFilter],
+    queryFn: async () => {
+      const url = `/api/accounting/entries?page=${page}&limit=${pageSize}${
+        debouncedQuery ? `&search=${encodeURIComponent(debouncedQuery)}` : ""
+      }${statusFilter !== "all" ? `&status=${statusFilter}` : ""}${
+        journalFilter !== "all" ? `&journal=${journalFilter}` : ""
+      }`;
+      const res = await fetch(url, { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Erreur de chargement des écritures");
+      }
+      return {
+        entries: json.data || [],
+        total: typeof json.total === "number" ? json.total : (json.data?.length || 0),
+      };
+    },
   });
 
-  const entries = data || [];
+  const entries: any[] = data?.entries || [];
+  const totalEntries: number = data?.total || 0;
 
-  const lines = entries.flatMap((entry: any) => 
-    entry.lines.map((line: any) => ({
-      ...line,
-      date: entry.date,
-      piece: entry.reference,
-      status: entry.status,
-      entry_id: entry.id,
-      journal: entry.journal,
-      entry: entry,
-    }))
-  );
-
-  const toggleSelectEntry = (id: string) => {
-    setSelectedEntries(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  // Toggle affichage repliable/dépliable d'une pièce
+  const togglePiece = (id: string) => {
+    setExpandedPieces((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
-  const handleCopy = (text: string, label: string) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      toast.success(`${label} copié dans le presse-papier`);
-    }
-  };
+  // Liste plate des lignes pour exports
+  const allLines = useMemo(() => {
+    return entries.flatMap((entry: any) =>
+      (entry.lines || []).map((line: any) => ({
+        ...line,
+        date: entry.date,
+        piece: entry.reference,
+        status: entry.status,
+        entry_id: entry.id,
+      }))
+    );
+  }, [entries]);
 
-  const handleValidateSingle = async (id: string) => {
-    try {
-      const res = await fetch(`/api/accounting/entries/${id}/validate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+  // Calculs synthétiques pour les 4 cartes d'équilibre (Partie double)
+  const { totalDebit, totalCredit, ecart, isBalanced, draftsCount } = useMemo(() => {
+    let tDebit = 0;
+    let tCredit = 0;
+    let drafts = 0;
+
+    entries.forEach((entry: any) => {
+      if (entry.status === "draft") drafts++;
+      (entry.lines || []).forEach((line: any) => {
+        tDebit += Number(line.debit || 0);
+        tCredit += Number(line.credit || 0);
       });
-      const result = await res.json();
-      if (result.success) {
-        toast.success(result.message || "Écriture validée définitivement");
-        queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
-        if (selectedEntryDetail?.id === id) {
-          setSelectedEntryDetail(null);
-        }
-      } else {
-        toast.error(result.error || "Erreur de validation");
-      }
-    } catch (e) {
-      toast.error("Erreur lors de la validation de l'écriture");
+    });
+
+    const diff = Math.round((tDebit - tCredit) * 100) / 100;
+    return {
+      totalDebit: tDebit,
+      totalCredit: tCredit,
+      ecart: diff,
+      isBalanced: Math.abs(diff) === 0,
+      draftsCount: drafts,
+    };
+  }, [entries]);
+
+  // Sélection unitaire
+  const toggleSelectEntry = (id: string) => {
+    setSelectedEntries((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  // Sélection globale
+  const isAllSelected =
+    entries.length > 0 && entries.every((e) => selectedEntries.includes(e.id));
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedEntries([]);
+    } else {
+      setSelectedEntries(entries.map((e) => e.id));
     }
   };
 
+  // Validation groupée
   const handleBulkValidate = async () => {
     if (selectedEntries.length === 0) return;
     try {
@@ -129,70 +170,189 @@ export const Comptabilite = () => {
       });
       const result = await res.json();
       if (result.success) {
-        toast.success(result.message);
+        toast.success(result.message || "Écritures validées avec succès");
         setSelectedEntries([]);
         queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
       } else {
-        toast.error(result.error);
+        toast.error(result.error || "Erreur lors de la validation");
       }
-    } catch (e) {
-      toast.error("Erreur lors de la validation");
+    } catch {
+      toast.error("Erreur réseau lors de la validation");
     }
   };
 
-  const handleDeleteEntry = async (id: string) => {
+  // Suppression groupée des brouillons
+  const handleBulkDelete = async () => {
+    const draftIds = entries
+      .filter((e) => selectedEntries.includes(e.id) && e.status === "draft")
+      .map((e) => e.id);
+
+    if (draftIds.length === 0) {
+      toast.info("Aucune écriture brouillon à supprimer parmi la sélection");
+      return;
+    }
+
+    if (!confirm(`Supprimer ${draftIds.length} écriture(s) brouillon ? Cette action est irréversible.`)) {
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/accounting/entries/${id}`, { method: "DELETE", credentials: "include" });
+      let deletedCount = 0;
+      for (const id of draftIds) {
+        const res = await fetch(`/api/accounting/entries/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        const result = await res.json();
+        if (result.success) deletedCount++;
+      }
+
+      toast.success(`${deletedCount} écriture(s) supprimée(s)`);
+      setSelectedEntries([]);
+      queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
+    } catch {
+      toast.error("Erreur réseau lors de la suppression groupée");
+    }
+  };
+
+  // Validation individuelle
+  const handleValidateEntry = async (id: string) => {
+    try {
+      const res = await fetch(`/api/accounting/entries/${id}/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
       const result = await res.json();
       if (result.success) {
-        toast.success(result.message || "Écriture supprimée");
+        toast.success(result.message || "Écriture validée définitivement");
         queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
-        if (selectedEntryDetail?.id === id) {
-          setSelectedEntryDetail(null);
-        }
       } else {
-        toast.error(result.error);
+        toast.error(result.error || "Erreur lors de la validation");
       }
-    } catch (e) {
-      toast.error("Erreur lors de la suppression");
+    } catch {
+      toast.error("Erreur réseau lors de la validation");
     }
   };
 
-  const exportCSV = () => {
-    const headers = ["Date", "Pièce", "Compte", "Libellé", "Débit", "Crédit", "Statut"];
-    const csvLines = lines.map(l => [
-      formatDate(l.date),
-      l.piece,
-      l.account_code,
-      l.description,
-      l.debit || 0,
-      l.credit || 0,
-      l.status
-    ].join(","));
-    
-    const blob = new Blob([[headers.join(","), ...csvLines].join("\n")], { type: "text/csv" });
+  // Extourne
+  const handleReverseEntry = async (id: string) => {
+    if (!confirm("Voulez-vous extourner cette écriture ? Une écriture inverse sera créée pour l'annuler comptablement.")) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/accounting/entries/${id}/reverse`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(result.message || "Écriture d'extourne créée avec succès");
+        queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
+      } else {
+        toast.error(result.error || "Impossible d'extourner cette écriture");
+      }
+    } catch {
+      toast.error("Erreur réseau lors de l'extourne");
+    }
+  };
+
+  // Duplication
+  const handleDuplicateEntry = (entry: any) => {
+    toast.info(`Duplication de la pièce ${entry.reference}...`);
+    setIsModalOpen(true);
+  };
+
+  // Suppression d'un brouillon
+  const handleDeleteEntry = async (id: string) => {
+    if (!confirm("Voulez-vous supprimer cette écriture brouillon ?")) return;
+    try {
+      const res = await fetch(`/api/accounting/entries/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(result.message || "Brouillon supprimé");
+        queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
+      } else {
+        toast.error(result.error || "Erreur lors de la suppression");
+      }
+    } catch {
+      toast.error("Erreur réseau lors de la suppression");
+    }
+  };
+
+  // Export CSV
+  const handleExportCSV = (idsToExport?: string[]) => {
+    const targetEntries = idsToExport && idsToExport.length > 0
+      ? entries.filter((e) => idsToExport.includes(e.id))
+      : entries;
+
+    if (targetEntries.length === 0) {
+      toast.info("Aucune écriture à exporter");
+      return;
+    }
+
+    const headers = [
+      "Date",
+      "Piece",
+      "Journal",
+      "Compte",
+      "Libelle",
+      "Debit",
+      "Credit",
+      "Statut",
+    ];
+    const csvRows = targetEntries.flatMap((entry: any) =>
+      (entry.lines || []).map((l: any) => [
+        formatDate(entry.date),
+        `"${entry.reference || ""}"`,
+        `"${entry.journal || ""}"`,
+        `"${l.account_code || ""}"`,
+        `"${(l.description || entry.description || "").replace(/"/g, '""')}"`,
+        l.debit || 0,
+        l.credit || 0,
+        `"${entry.status || ""}"`,
+      ].join(","))
+    );
+
+    const blob = new Blob([[headers.join(","), ...csvRows].join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `journal-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `journal-comptable-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success(`${targetEntries.length} pièce(s) exportée(s) en CSV`);
   };
 
+  // Import CSV
   const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setCsvErrors(null);
     const reader = new FileReader();
     reader.onload = async (e) => {
       const text = e.target?.result as string;
       if (!text || !text.trim()) {
-        toast.error("Le fichier CSV est vide");
+        setCsvErrors({ message: "Le fichier CSV sélectionné est vide" });
         return;
       }
 
       const parseResult = detectAndParseCSV(text);
       if (parseResult.entries.length === 0) {
-        toast.error("Aucune écriture valide n'a pu être extraite du fichier CSV");
+        setCsvErrors({
+          message: "Impossible d'extraire des écritures valides du fichier CSV",
+          lines: [
+            "Vérifiez que le fichier comporte les colonnes Date, Compte, Libellé, Débit et Crédit.",
+            "Vérifiez que le séparateur utilisé est une virgule (,) ou un point-virgule (;).",
+          ],
+        });
         return;
       }
 
@@ -209,10 +369,13 @@ export const Comptabilite = () => {
           toast.success(`${count} écriture${count > 1 ? "s" : ""} importée${count > 1 ? "s" : ""} avec succès`);
           queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
         } else {
-          toast.error(result.error || "Erreur lors de l'importation");
+          setCsvErrors({
+            message: result.error || "Erreur retournée par le serveur lors de l'importation",
+            lines: result.errors?.map((err: any) => `${err.field ? `${err.field}: ` : ""}${err.message}`) || [],
+          });
         }
-      } catch (err) {
-        toast.error("Erreur de connexion lors de l'importation");
+      } catch {
+        setCsvErrors({ message: "Erreur de connexion avec le serveur lors de l'envoi du fichier CSV" });
       } finally {
         event.target.value = "";
       }
@@ -220,389 +383,880 @@ export const Comptabilite = () => {
     reader.readAsText(file);
   };
 
+  // Bornes de pagination
+  const startIdx = totalEntries === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endIdx = Math.min(page * pageSize, totalEntries);
+  const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Journal des opérations"
-        subtitle="Toutes vos écritures comptables centralisées"
-        actions={
-          <>
-            <PermissionGate module="accounting_entries" level="write">
-              <input 
-                type="file" 
-                id="csv-import" 
-                className="hidden" 
-                accept=".csv" 
-                onChange={handleImportCSV}
-              />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => document.getElementById("csv-import")?.click()}
-              >
-                <Upload className="mr-1 h-4 w-4" /> Importer CSV
-              </Button>
-            </PermissionGate>
-            <Button variant="outline" size="sm" onClick={exportCSV}><Download className="mr-1 h-4 w-4" /> Exporter</Button>
-            <PermissionGate module="accounting_entries" level="write">
-              <Button 
-                size="sm" 
-                className="bg-gradient-primary hover:opacity-90 shadow-glow"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <Plus className="mr-1.5 h-4 w-4" /> Nouvelle opération
-              </Button>
-            </PermissionGate>
-          </>
-        }
-      />
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 font-sans">
+      {/* ========================================================================= */}
+      {/* 1. EN-TÊTE DE PAGE (FORMAT STRICT DU DESIGN HTML)                         */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-ink font-sans">
+            Journal des opérations
+          </h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            Toutes vos écritures comptables centralisées · Référentiel SYSCOHADA Révisé
+          </p>
+        </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
-        <div className="flex flex-wrap gap-3 border-b border-border p-4 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher par libellé, compte, pièce…" className="pl-9" />
-          </div>
-          
-          <div className="flex gap-2">
-            <select 
-              value={journalFilter} 
-              onChange={(e) => setJournalFilter(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        <div className="flex items-center gap-2 flex-wrap">
+          <PermissionGate module="accounting_entries" level="write">
+            <input
+              type="file"
+              id="csv-import-file"
+              className="hidden"
+              accept=".csv"
+              onChange={handleImportCSV}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => document.getElementById("csv-import-file")?.click()}
+              className="h-9 px-3 rounded bg-background text-ink border border-border hover:bg-background-secondary text-xs font-semibold"
             >
-              <option value="all">Tous les journaux</option>
-              <option value="bank">Banque</option>
-              <option value="purchases">Achats</option>
-              <option value="sales">Ventes</option>
-              <option value="payroll">Paie</option>
-            </select>
+              <Upload className="w-4 h-4 mr-1.5 text-text-muted" />
+              Importer CSV
+            </Button>
+          </PermissionGate>
 
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="draft">Brouillon (non comptabilisé)</option>
-              <option value="posted">Comptabilisée</option>
-              <option value="validated">Validée</option>
-            </select>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExportCSV()}
+            className="h-9 px-3 rounded bg-background text-ink border border-border hover:bg-background-secondary text-xs font-semibold"
+          >
+            <Download className="w-4 h-4 mr-1.5 text-text-muted" />
+            Exporter
+          </Button>
 
-          <PermissionGate module="accounting_entries" level="validate">
-            <Button 
-              variant={selectedEntries.length > 0 ? "default" : "outline"} 
-              size="sm" 
-              disabled={selectedEntries.length === 0}
-              onClick={handleBulkValidate}
-              className={selectedEntries.length > 0 ? "bg-success hover:bg-success/90" : ""}
+          <PermissionGate module="accounting_entries" level="write">
+            <Button
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
+              className="h-9 px-4 rounded bg-primary text-ink border border-ink/20 hover:brightness-95 font-semibold text-xs active:scale-[0.99] transition-all"
             >
-              <CheckCircle2 className="mr-1 h-4 w-4" /> Valider sélection ({selectedEntries.length})
+              <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+              Nouvelle opération
             </Button>
           </PermissionGate>
         </div>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-3 w-10">
-                  <input 
-                    type="checkbox" 
-                    onChange={(e) => {
-                      if (e.target.checked) setSelectedEntries(entries.filter((e: any) => e.status !== "validated").map((e: any) => e.id));
-                      else setSelectedEntries([]);
-                    }}
-                    checked={selectedEntries.length > 0 && selectedEntries.length === entries.filter((e: any) => e.status !== "validated").length}
-                  />
-                </th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">N° Pièce</th>
-                <th className="px-4 py-3">Compte</th>
-                <th className="px-4 py-3">Libellé</th>
-                <th className="px-4 py-3 text-right">Débit</th>
-                <th className="px-4 py-3 text-right">Crédit</th>
-                <th className="px-4 py-3">Statut</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                [...Array(10)].map((_, i) => (
-                  <tr key={i} className="border-b border-border"><td colSpan={9} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td></tr>
-                ))
-              ) : (
-                lines.map((op: any, idx: number) => (
-                  <tr
-                    key={`${op.entry_id}-${op.account_code}-${idx}`}
-                    className={cn(
-                      "border-b border-border last:border-0 transition hover:bg-muted/30",
-                      op.status === "validated" && "bg-success/5",
-                      op.status === "draft" && "opacity-80 italic",
-                      selectedEntries.includes(op.entry_id) && "bg-primary/15"
-                    )}
-                  >
-                    <td className="px-4 py-3">
-                      <input 
-                        type="checkbox" 
-                        disabled={op.status === "validated"}
-                        checked={selectedEntries.includes(op.entry_id)}
-                        onChange={() => toggleSelectEntry(op.entry_id)}
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(op.date)}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{op.piece}</td>
-                    <td className="px-4 py-3 font-mono text-xs font-semibold">{op.account_code}</td>
-                    <td className="px-4 py-3 font-medium">{op.description}</td>
-                    <td className="px-4 py-3 text-right tabular font-medium text-success-deep dark:text-success">{op.debit > 0 ? formatCFA(op.debit) : ""}</td>
-                    <td className="px-4 py-3 text-right tabular font-medium text-destructive-deep dark:text-destructive">{op.credit > 0 ? formatCFA(op.credit) : ""}</td>
-                    <td className="px-4 py-3"><OperationStatusBadge status={op.status} /></td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end items-center gap-1">
-                        {op.status === "draft" && (
-                          <PermissionGate module="accounting_entries" level="full">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              onClick={() => setEntryToDelete(op)}
-                              title="Supprimer l'écriture brouillon"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </PermissionGate>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-text-muted hover:text-ink hover:bg-background-secondary rounded"
-                              title="Plus d'actions"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Actions</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 bg-background border border-border shadow-elevated">
-                            <DropdownMenuItem
-                              onClick={() => setSelectedEntryDetail(op.entry)}
-                              className="text-xs cursor-pointer gap-2"
-                            >
-                              <Eye className="w-3.5 h-3.5 text-text-muted" />
-                              <span>Consulter l'écriture complète</span>
-                            </DropdownMenuItem>
+      {/* ========================================================================= */}
+      {/* BANNIÈRE D'ERREUR D'IMPORT CSV SI APPLICABLE                             */}
+      {/* ========================================================================= */}
+      {csvErrors && (
+        <div className="bg-error/10 border border-error/30 rounded p-4 text-ink relative">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-ink">Échec de l'importation CSV</h4>
+                <p className="text-xs text-text-muted mt-0.5">{csvErrors.message}</p>
+                {csvErrors.lines && csvErrors.lines.length > 0 && (
+                  <ul className="mt-2 text-xs list-disc list-inside space-y-1 text-ink/90 font-mono">
+                    {csvErrors.lines.map((l, i) => (
+                      <li key={i}>{l}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setCsvErrors(null)}
+              className="text-text-muted hover:text-ink p-1 rounded"
+              title="Fermer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
-                            <DropdownMenuItem
-                              onClick={() => handleCopy(op.piece, "N° de pièce")}
-                              className="text-xs cursor-pointer gap-2"
-                            >
-                              <Copy className="w-3.5 h-3.5 text-text-muted" />
-                              <span>Copier la référence ({op.piece})</span>
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() => handleCopy(op.account_code, "Compte")}
-                              className="text-xs cursor-pointer gap-2"
-                            >
-                              <FileText className="w-3.5 h-3.5 text-text-muted" />
-                              <span>Copier le compte ({op.account_code})</span>
-                            </DropdownMenuItem>
-
-                            {op.status !== "validated" && (
-                              <PermissionGate module="accounting_entries" level="validate">
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => handleValidateSingle(op.entry_id)}
-                                  className="text-xs text-success-deep font-semibold cursor-pointer gap-2"
-                                >
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-success-deep" />
-                                  <span>Valider l'écriture</span>
-                                </DropdownMenuItem>
-                              </PermissionGate>
-                            )}
-
-                            {op.status === "draft" && (
-                              <PermissionGate module="accounting_entries" level="full">
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => setEntryToDelete(op)}
-                                  className="text-xs text-destructive font-semibold cursor-pointer gap-2 focus:bg-destructive/10 focus:text-destructive"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                                  <span>Supprimer le brouillon</span>
-                                </DropdownMenuItem>
-                              </PermissionGate>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* ========================================================================= */}
+      {/* 2. LES 4 CARTES SYNTHÉTIQUES D'ÉQUILIBRE (FORMAT CARRÉ ROUNDED DU DESIGN) */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Carte 1 : Total Débit */}
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+              Total Débit
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-background-secondary text-text-muted text-[10px] font-semibold">
+              Mois
+            </span>
+          </div>
+          <div className="mt-2">
+            <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
+              {formatCFA(totalDebit)}
+            </div>
+            <div className="text-xs text-text-muted mt-0.5">
+              {allLines.length} imputations enregistrées
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-border p-3 text-xs text-muted-foreground">
-          <span>{lines.length} lignes affichées</span>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Précédent</Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={entries.length < 20}>Suivant</Button>
+        {/* Carte 2 : Total Crédit */}
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+              Total Crédit
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-background-secondary text-text-muted text-[10px] font-semibold">
+              Mois
+            </span>
+          </div>
+          <div className="mt-2">
+            <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
+              {formatCFA(totalCredit)}
+            </div>
+            <div className="text-xs text-text-muted mt-0.5">
+              Partie double respectée
+            </div>
+          </div>
+        </div>
+
+        {/* Carte 3 : Écart arithmétique (Balance) */}
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+              Écart arithmétique
+            </span>
+            <span
+              className={cn(
+                "w-2 h-2 rounded-full",
+                isBalanced ? "bg-success-deep" : "bg-error-deep"
+              )}
+            />
+          </div>
+          <div className="mt-2">
+            <div className="flex items-center gap-1.5 font-bold text-lg text-ink font-mono">
+              {isBalanced ? (
+                <div className="flex items-center gap-1.5 text-success-deep">
+                  <CheckCircle2 className="w-5 h-5 text-success-deep" />
+                  <span>Équilibré</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-error-deep">
+                  <AlertCircle className="w-5 h-5 text-error-deep" />
+                  <span>Déséquilibré</span>
+                </div>
+              )}
+            </div>
+            <div className="text-xs text-text-muted mt-0.5 font-mono">
+              Différence : {formatCFA(Math.abs(ecart))}
+            </div>
+          </div>
+        </div>
+
+        {/* Carte 4 : Brouillons à valider */}
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+              Brouillons à valider
+            </span>
+            <span className="w-2 h-2 rounded-full bg-warning-deep" />
+          </div>
+          <div className="mt-2">
+            <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
+              {draftsCount} pièces
+            </div>
+            <div className="text-xs text-text-muted mt-0.5">
+              En attente d'imputation définitive
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Modale de consultation détaillée de l'écriture (Toutes les lignes en partie double) */}
-      <Dialog open={!!selectedEntryDetail} onOpenChange={(open) => !open && setSelectedEntryDetail(null)}>
-        <DialogContent className="max-w-2xl bg-background border border-border">
-          <DialogHeader>
-            <div className="flex items-center justify-between gap-3 pr-4">
-              <DialogTitle className="text-lg font-bold text-ink">
-                Écriture {selectedEntryDetail?.reference}
-              </DialogTitle>
-              {selectedEntryDetail && (
-                <OperationStatusBadge status={selectedEntryDetail.status} />
-              )}
-            </div>
-            <DialogDescription className="text-xs text-text-muted">
-              Journal : <span className="font-semibold text-ink">{JOURNAL_LABELS[selectedEntryDetail?.journal] || selectedEntryDetail?.journal}</span> • Date : <span className="font-semibold text-ink">{selectedEntryDetail?.date ? formatDate(selectedEntryDetail.date) : ""}</span>
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="rounded-lg bg-background-secondary p-3 border border-border text-xs">
-              <span className="font-semibold text-ink">Libellé principal : </span>
-              <span className="text-text-muted">{selectedEntryDetail?.description}</span>
-            </div>
-
-            <div className="rounded-lg border border-border overflow-hidden">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-border bg-muted/50 text-text-muted uppercase text-[11px] font-semibold">
-                    <th className="px-3 py-2 text-left">Compte</th>
-                    <th className="px-3 py-2 text-left">Libellé de ligne</th>
-                    <th className="px-3 py-2 text-right">Débit</th>
-                    <th className="px-3 py-2 text-right">Crédit</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {selectedEntryDetail?.lines?.map((line: any, i: number) => (
-                    <tr key={i} className="hover:bg-muted/20">
-                      <td className="px-3 py-2 font-mono font-bold text-ink">
-                        {line.account_code}
-                        {line.account?.name && (
-                          <span className="block text-[10px] font-normal text-text-muted truncate max-w-[140px]">
-                            {line.account.name}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-ink font-medium">
-                        {line.description || selectedEntryDetail.description}
-                        {line.third_party && (
-                          <span className="block text-[10px] text-text-muted">
-                            Tiers : {line.third_party}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-right tabular text-success-deep font-semibold">
-                        {line.debit > 0 ? formatCFA(line.debit) : "-"}
-                      </td>
-                      <td className="px-3 py-2 text-right tabular text-destructive-deep font-semibold">
-                        {line.credit > 0 ? formatCFA(line.credit) : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t-2 border-border bg-background-secondary font-bold text-ink">
-                    <td colSpan={2} className="px-3 py-2.5 text-right">
-                      Total écriture :
-                    </td>
-                    <td className="px-3 py-2.5 text-right tabular text-success-deep">
-                      {formatCFA(
-                        selectedEntryDetail?.lines?.reduce((s: number, l: any) => s + (Number(l.debit) || 0), 0) || 0
-                      )}
-                    </td>
-                    <td className="px-3 py-2.5 text-right tabular text-destructive-deep">
-                      {formatCFA(
-                        selectedEntryDetail?.lines?.reduce((s: number, l: any) => s + (Number(l.credit) || 0), 0) || 0
-                      )}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+      {/* ========================================================================= */}
+      {/* 3. BARRE DE FILTRAGE ET SÉLECTION (FORMAT DU DESIGN)                     */}
+      {/* ========================================================================= */}
+      <div className="bg-background rounded border border-border p-2 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 shadow-sm">
+        <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          {/* Recherche */}
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+            <Input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Rechercher par libellé, compte, pièce..."
+              className="pl-8 h-9 rounded bg-background border-border text-xs text-ink placeholder:text-text-muted focus-visible:ring-1 focus-visible:ring-primary"
+            />
           </div>
 
-          <DialogFooter className="flex flex-row justify-between items-center sm:justify-between w-full pt-2">
-            <div className="text-[11px] text-text-muted">
-              Comptabilité conforme SYSCOHADA
-            </div>
-            <div className="flex items-center gap-2">
-              {selectedEntryDetail?.status !== "validated" && (
-                <PermissionGate module="accounting_entries" level="validate">
-                  <Button
-                    size="sm"
-                    className="bg-primary text-ink font-bold hover:brightness-95"
-                    onClick={() => handleValidateSingle(selectedEntryDetail.id)}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-ink" />
-                    Valider l'écriture
-                  </Button>
-                </PermissionGate>
+          {/* Filtre Journal */}
+          <div className="sm:w-44">
+            <select
+              value={journalFilter}
+              onChange={(e) => {
+                setJournalFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-9 px-3 rounded bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
+            >
+              <option value="all">Tous les journaux</option>
+              <option value="purchases">Achats (ACH)</option>
+              <option value="sales">Ventes (VTE)</option>
+              <option value="bank">Banque (BQ)</option>
+              <option value="payroll">Paie / Salaires (PAY)</option>
+              <option value="cash">Caisse (CA)</option>
+            </select>
+          </div>
+
+          {/* Filtre Statut */}
+          <div className="sm:w-40">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-9 px-3 rounded bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="validated">Validée</option>
+              <option value="draft">Brouillon</option>
+              <option value="locked">Verrouillée</option>
+            </select>
+          </div>
+
+          {/* Filtre Période */}
+          <div className="sm:w-56">
+            <select
+              value={periodFilter}
+              onChange={(e) => setPeriodFilter(e.target.value)}
+              className="w-full h-9 px-3 rounded bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
+            >
+              <option value="all">Exercice 2026 (Complet)</option>
+              <option value="current">Exercice 2026 (Mois en cours)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Bouton d'action groupée direct */}
+        <div className="flex items-center justify-end border-t lg:border-t-0 pt-2 lg:pt-0 border-border">
+          <PermissionGate module="accounting_entries" level="validate">
+            <button
+              disabled={selectedEntries.length === 0}
+              onClick={handleBulkValidate}
+              className={cn(
+                "h-9 px-3 rounded border font-semibold text-xs flex items-center gap-1.5 transition-colors",
+                selectedEntries.length > 0
+                  ? "bg-primary text-ink border-ink/20 hover:brightness-95 cursor-pointer"
+                  : "bg-background border-border text-text-muted cursor-not-allowed opacity-50"
               )}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Valider sélection ({selectedEntries.length})</span>
+            </button>
+          </PermissionGate>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 4. BARRE D'ACTIONS GROUPÉES ÉTENDUE LORSQUE COCHÉES                       */}
+      {/* ========================================================================= */}
+      {selectedEntries.length > 0 && (
+        <div className="bg-background-secondary border border-border rounded p-2.5 flex flex-wrap items-center justify-between gap-2.5 animate-in fade-in-50 duration-150">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-primary text-ink text-xs font-bold font-mono">
+              {selectedEntries.length}
+            </span>
+            <span className="text-xs font-semibold text-ink">
+              sélectionnée{selectedEntries.length > 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <PermissionGate module="accounting_entries" level="validate">
+              <Button
+                size="sm"
+                onClick={handleBulkValidate}
+                className="h-8 px-3 rounded text-xs font-semibold bg-primary text-ink hover:brightness-95"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                Valider la sélection
+              </Button>
+            </PermissionGate>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExportCSV(selectedEntries)}
+              className="h-8 px-3 rounded text-xs font-semibold border-border bg-background text-ink hover:bg-background-secondary"
+            >
+              <Download className="w-3.5 h-3.5 mr-1.5 text-text-muted" />
+              Exporter
+            </Button>
+
+            <PermissionGate module="accounting_entries" level="full">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setSelectedEntryDetail(null)}
+                onClick={handleBulkDelete}
+                className="h-8 px-3 rounded text-xs font-semibold border-border text-error hover:bg-error/10 hover:border-error/40"
               >
-                Fermer
+                <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                Supprimer
               </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </PermissionGate>
 
-      {/* Dialogue de confirmation de suppression explicite (Règle 17) */}
-      <Dialog open={!!entryToDelete} onOpenChange={(open) => !open && setEntryToDelete(null)}>
-        <DialogContent className="max-w-md bg-background border border-border">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-ink flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-destructive" />
-              Supprimer l'écriture brouillon
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted pt-1">
-              Êtes-vous sûr de vouloir supprimer l'écriture n° <strong className="text-ink">{entryToDelete?.piece}</strong> ({entryToDelete?.description}) ?
-              Cette action est irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="pt-3 flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={() => setEntryToDelete(null)}>
-              Annuler
-            </Button>
             <Button
-              variant="destructive"
+              variant="ghost"
               size="sm"
-              onClick={async () => {
-                if (entryToDelete) {
-                  await handleDeleteEntry(entryToDelete.entry_id);
-                  setEntryToDelete(null);
-                }
-              }}
+              onClick={() => setSelectedEntries([])}
+              className="h-8 px-2 rounded text-xs text-text-muted hover:text-ink"
             >
-              <Trash2 className="w-3.5 h-3.5 mr-1" />
-              Supprimer définitivement
+              Désélectionner
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      )}
 
+      {/* ========================================================================= */}
+      {/* 5. TABLEAU GROUPÉ PAR PIÈCE COMPTABLE (FORMAT EXACT DU DESIGN)             */}
+      {/* ========================================================================= */}
+      <div className="bg-background rounded border border-border overflow-hidden shadow-sm">
+        {/* En-tête global des colonnes fixe au défilement (Format carré / rounded) */}
+        <div className="hidden lg:grid grid-cols-12 bg-background-secondary px-4 py-2.5 border-b border-border text-[11px] font-bold text-ink uppercase tracking-wider items-center select-none sticky top-0 z-10">
+          <div className="col-span-1 flex items-center gap-3">
+            <Checkbox
+              checked={isAllSelected}
+              onCheckedChange={toggleSelectAll}
+              aria-label="Sélectionner toutes les pièces"
+            />
+            <span>Date</span>
+          </div>
+          <div className="col-span-2 pl-2">N° Pièce / Réf</div>
+          <div className="col-span-1">Journal</div>
+          <div className="col-span-4">Libellé principal</div>
+          <div className="col-span-2 text-right">Total pièce</div>
+          <div className="col-span-1 text-center">Statut</div>
+          <div className="col-span-1 text-right">Actions</div>
+        </div>
+
+        {/* Corps du tableau */}
+        {isLoading ? (
+          <div className="p-4 space-y-2">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-11 w-full rounded" />
+            ))}
+          </div>
+        ) : entries.length === 0 ? (
+          /* État vide */
+          <div className="p-16 text-center flex flex-col items-center justify-center">
+            <FileText className="w-12 h-12 text-text-muted/40 mb-3" />
+            <h3 className="text-sm font-semibold text-ink">
+              Aucune écriture sur cette période
+            </h3>
+            <p className="text-xs text-text-muted mt-1 max-w-sm mb-4">
+              Aucune pièce comptable ne correspond à vos filtres actuels. Modifiez vos critères de recherche ou enregistrez une nouvelle pièce.
+            </p>
+            <PermissionGate module="accounting_entries" level="write">
+              <Button
+                size="sm"
+                onClick={() => setIsModalOpen(true)}
+                className="bg-primary text-ink hover:brightness-95 font-semibold text-xs h-9 px-4 rounded"
+              >
+                <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+                Nouvelle opération
+              </Button>
+            </PermissionGate>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {entries.map((entry: any) => {
+              const isExpanded = !!expandedPieces[entry.id];
+              const isSelected = selectedEntries.includes(entry.id);
+              const cleanStatus = getCleanStatus(entry.status);
+
+              const journalInfo = JOURNAL_CONFIG[entry.journal] || {
+                label: entry.journal,
+                badge: entry.journal,
+              };
+
+              // Totaux de cette pièce
+              let pieceDebit = 0;
+              let pieceCredit = 0;
+              (entry.lines || []).forEach((l: any) => {
+                pieceDebit += Number(l.debit || 0);
+                pieceCredit += Number(l.credit || 0);
+              });
+              const isPieceBalanced = Math.abs(pieceDebit - pieceCredit) < 0.01;
+
+              return (
+                <div key={entry.id} className="flex flex-col group/piece">
+                  {/* Ligne d'en-tête de la pièce (Desktop) */}
+                  <div
+                    onClick={() => togglePiece(entry.id)}
+                    className={cn(
+                      "hidden lg:grid grid-cols-12 px-4 py-3 transition-colors items-center cursor-pointer select-none",
+                      cleanStatus === "draft"
+                        ? "bg-warning/5 hover:bg-warning/10"
+                        : "bg-background hover:bg-background-secondary/60",
+                      isSelected && "!bg-primary/10"
+                    )}
+                  >
+                    {/* Checkbox & Date */}
+                    <div
+                      className="col-span-1 flex items-center gap-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleSelectEntry(entry.id)}
+                        aria-label={`Sélectionner la pièce ${entry.reference}`}
+                      />
+                      <span className="font-mono text-xs font-semibold text-ink whitespace-nowrap">
+                        {formatDate(entry.date)}
+                      </span>
+                    </div>
+
+                    {/* Référence */}
+                    <div className="col-span-2 pl-2 flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono text-xs font-bold text-ink tracking-tight truncate">
+                        {entry.reference}
+                      </span>
+                    </div>
+
+                    {/* Journal (Format carré rounded) */}
+                    <div className="col-span-1">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-background-secondary text-ink border border-border">
+                        {journalInfo.badge}
+                      </span>
+                    </div>
+
+                    {/* Libellé principal */}
+                    <div className="col-span-4 truncate pr-2">
+                      <span
+                        className="text-xs font-medium text-ink truncate block"
+                        title={entry.description}
+                      >
+                        {entry.description}
+                      </span>
+                    </div>
+
+                    {/* Total pièce */}
+                    <div className="col-span-2 text-right">
+                      <span className="font-mono text-xs font-bold text-ink tabular-nums">
+                        {formatCFA(pieceDebit)}
+                      </span>
+                    </div>
+
+                    {/* Statut (Format carré rounded avec contraste profond) */}
+                    <div className="col-span-1 flex justify-center">
+                      {cleanStatus === "draft" && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold border bg-warning/20 text-warning-deep border-warning-deep/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-warning-deep" />
+                          Brouillon
+                        </span>
+                      )}
+                      {cleanStatus === "validated" && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold border bg-success/20 text-success-deep border-success-deep/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-success-deep" />
+                          Validée
+                        </span>
+                      )}
+                      {cleanStatus === "locked" && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold border bg-background-secondary text-ink border-border">
+                          <Lock className="w-3 h-3 text-ink" />
+                          Verrouillée
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Actions contextuelles : bouton d'action + options + chevron */}
+                    <div
+                      className="col-span-1 flex items-center justify-end gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded text-text-muted hover:text-ink hover:bg-background-secondary"
+                            title="Options de l'écriture"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52 bg-background border-border shadow-md rounded">
+                          <DropdownMenuItem
+                            onClick={() => togglePiece(entry.id)}
+                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary rounded"
+                          >
+                            <Eye className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                            {isExpanded ? "Replier la pièce" : "Voir la pièce"}
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            onClick={() => handleDuplicateEntry(entry)}
+                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary rounded"
+                          >
+                            <Copy className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                            Dupliquer
+                          </DropdownMenuItem>
+
+                          {cleanStatus !== "draft" && (
+                            <DropdownMenuItem
+                              onClick={() => handleReverseEntry(entry.id)}
+                              className="text-xs cursor-pointer text-ink hover:bg-background-secondary font-medium rounded"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                              Extourner
+                            </DropdownMenuItem>
+                          )}
+
+                          <DropdownMenuItem
+                            onClick={() => handleExportCSV([entry.id])}
+                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary rounded"
+                          >
+                            <Download className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                            Télécharger le justificatif
+                          </DropdownMenuItem>
+
+                          <DropdownMenuSeparator className="bg-border" />
+
+                          <DropdownMenuItem
+                            disabled={cleanStatus === "validated" || cleanStatus === "locked"}
+                            onClick={() => handleDeleteEntry(entry.id)}
+                            className={cn(
+                              "text-xs cursor-pointer rounded",
+                              cleanStatus === "draft"
+                                ? "text-error hover:bg-error/10 focus:text-error"
+                                : "text-text-muted opacity-50 cursor-not-allowed"
+                            )}
+                            title={
+                              cleanStatus !== "draft"
+                                ? "Une écriture validée ne peut pas être supprimée, utilisez l'extourne."
+                                : "Supprimer cette écriture brouillon"
+                            }
+                          >
+                            <Trash2 className="w-3.5 h-3.5 mr-2" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Bouton chevron */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded text-text-muted hover:text-ink hover:bg-background-secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePiece(entry.id);
+                        }}
+                        title={isExpanded ? "Replier" : "Déplier"}
+                      >
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform duration-200",
+                            isExpanded && "rotate-180"
+                          )}
+                        />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Ligne Mobile / Tablette (< lg) */}
+                  <div
+                    onClick={() => togglePiece(entry.id)}
+                    className={cn(
+                      "lg:hidden p-3.5 flex flex-col gap-2.5 cursor-pointer transition-colors border-b border-border/60",
+                      cleanStatus === "draft"
+                        ? "bg-warning/5 hover:bg-warning/10"
+                        : "bg-background hover:bg-background-secondary/40",
+                      isSelected && "!bg-primary/10"
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div
+                        className="flex items-center gap-2.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleSelectEntry(entry.id)}
+                        />
+                        <span className="font-mono text-xs font-bold text-ink">
+                          {entry.reference}
+                        </span>
+                      </div>
+
+                      {/* Statut mobile */}
+                      <div>
+                        {cleanStatus === "draft" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border bg-warning/20 text-warning-deep border-warning-deep/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-warning-deep" />
+                            Brouillon
+                          </span>
+                        )}
+                        {cleanStatus === "validated" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border bg-success/20 text-success-deep border-success-deep/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-success-deep" />
+                            Validée
+                          </span>
+                        )}
+                        {cleanStatus === "locked" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border bg-background-secondary text-ink border-border">
+                            <Lock className="w-2.5 h-2.5 text-ink" />
+                            Verrouillée
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-xs font-medium text-ink line-clamp-2">
+                      {entry.description}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-border/50 text-xs">
+                      <div className="flex items-center gap-2 text-text-muted">
+                        <span className="font-mono text-ink font-medium">{formatDate(entry.date)}</span>
+                        <span>·</span>
+                        <span className="px-1.5 py-0.5 rounded bg-background-secondary text-[10px] border border-border text-ink">
+                          {journalInfo.badge}
+                        </span>
+                      </div>
+
+                      <div
+                        className="flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span className="font-mono font-bold text-ink">
+                          {formatCFA(pieceDebit)}
+                        </span>
+
+                        {cleanStatus === "draft" ? (
+                          <Button
+                            size="sm"
+                            onClick={() => handleValidateEntry(entry.id)}
+                            className="h-6 px-2 rounded text-[11px] font-semibold bg-primary text-ink hover:brightness-95"
+                          >
+                            Valider
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => togglePiece(entry.id)}
+                            className="h-6 px-2 rounded text-[11px] font-medium border-border text-ink bg-background"
+                          >
+                            Voir
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ================================================================= */}
+                  {/* SOUS-ÉCRITURES DÉPLIABLES (STRUCTURE EXACTE DU DESIGN HTML)        */}
+                  {/* ================================================================= */}
+                  {isExpanded && (
+                    <div className="flex flex-col bg-background-secondary/40 border-t border-border animate-in fade-in-50 duration-150">
+                      {/* Sous-en-tête interne (Desktop) */}
+                      <div className="hidden lg:grid grid-cols-12 px-4 py-1.5 bg-background-secondary text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border">
+                        <div className="col-span-4 pl-8">Compte SYSCOHADA</div>
+                        <div className="col-span-4">Libellé d'écriture</div>
+                        <div className="col-span-2 text-right pr-4 border-r border-border">Débit</div>
+                        <div className="col-span-2 text-right pr-4">Crédit</div>
+                      </div>
+
+                      {/* Liste des imputations comptables */}
+                      {(entry.lines || []).map((line: any, idx: number) => {
+                        const accountLabel =
+                          line.account?.name || line.description || "Compte général";
+                        return (
+                          <div
+                            key={line.id || idx}
+                            className="px-4 py-2 border-b border-border/50 hover:bg-background-secondary/60 transition-colors text-xs"
+                          >
+                            {/* Version Desktop */}
+                            <div className="hidden lg:grid grid-cols-12 items-center">
+                              {/* Numéro de compte en gras + intitulé en gris moyen à côté */}
+                              <div className="col-span-4 pl-8 flex items-center gap-2 min-w-0 pr-2">
+                                <span className="font-mono font-bold text-ink shrink-0">
+                                  {line.account_code}
+                                </span>
+                                <span className="text-text-muted truncate font-medium" title={accountLabel}>
+                                  {accountLabel}
+                                </span>
+                              </div>
+
+                              <div className="col-span-4 text-ink truncate pr-3">
+                                {line.description || entry.description}
+                              </div>
+
+                              {/* Colonne Débit : texte sombre presque noir, tiret gris si vide */}
+                              <div className="col-span-2 text-right pr-4 font-mono font-semibold tabular-nums text-ink border-r border-border">
+                                {Number(line.debit) > 0 ? (
+                                  formatCFA(line.debit)
+                                ) : (
+                                  <span className="text-text-muted select-none">—</span>
+                                )}
+                              </div>
+
+                              {/* Colonne Crédit : texte sombre presque noir, tiret gris si vide */}
+                              <div className="col-span-2 text-right pr-4 font-mono font-semibold tabular-nums text-ink">
+                                {Number(line.credit) > 0 ? (
+                                  formatCFA(line.credit)
+                                ) : (
+                                  <span className="text-text-muted select-none">—</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Version Mobile */}
+                            <div className="lg:hidden flex flex-col gap-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono font-bold text-ink">
+                                  {line.account_code}
+                                </span>
+                                <span className="text-text-muted truncate font-medium">
+                                  {accountLabel}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-ink/80">
+                                {line.description || entry.description}
+                              </div>
+                              <div className="flex items-center justify-between font-mono text-[11px] pt-1">
+                                <span>
+                                  Débit :{" "}
+                                  {Number(line.debit) > 0 ? (
+                                    <strong className="text-ink">{formatCFA(line.debit)}</strong>
+                                  ) : (
+                                    <span className="text-text-muted">—</span>
+                                  )}
+                                </span>
+                                <span>
+                                  Crédit :{" "}
+                                  {Number(line.credit) > 0 ? (
+                                    <strong className="text-ink">{formatCFA(line.credit)}</strong>
+                                  ) : (
+                                    <span className="text-text-muted">—</span>
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Bandeau récapitulatif compact sous la pièce (Design HTML exact) */}
+                      <div className="px-4 py-2 bg-background-secondary border-t border-border flex items-center justify-between flex-wrap gap-2 text-xs">
+                        <div className="flex items-center gap-3 text-xs">
+                          {isPieceBalanced ? (
+                            <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                              Équilibrée
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 font-semibold text-error">
+                              <AlertCircle className="w-4 h-4 text-error" />
+                              Déséquilibrée (Écart : {formatCFA(Math.abs(pieceDebit - pieceCredit))})
+                            </span>
+                          )}
+                          <span className="text-border">|</span>
+                          <span className="font-mono text-ink text-[12px]">
+                            Total débit : <strong className="text-ink">{formatCFA(pieceDebit)}</strong>
+                          </span>
+                          <span className="text-border">·</span>
+                          <span className="font-mono text-ink text-[12px]">
+                            Total crédit : <strong className="text-ink">{formatCFA(pieceCredit)}</strong>
+                          </span>
+                        </div>
+
+                        {cleanStatus === "draft" && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleValidateEntry(entry.id)}
+                              className="h-6 px-2.5 rounded bg-background border border-border text-ink text-[11px] font-semibold hover:bg-background-secondary transition-colors"
+                            >
+                              Imputer définitivement
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* 6. PIED DE TABLEAU AVEC PAGINATION CONFORME (FORMAT DU DESIGN)            */}
+        {/* ========================================================================= */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 border-t border-border text-xs text-text-muted bg-background select-none">
+          {/* Format « 1 à 10 sur 21 pièces » */}
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-ink">
+              {startIdx} à {endIdx} sur {totalEntries} pièce{totalEntries > 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Sélecteur Lignes par page */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-text-muted">Lignes par page :</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="h-8 px-2 rounded border border-border bg-background text-xs font-semibold text-ink focus:outline-none focus:border-ink/50"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+
+            {/* Boutons Précédent / Suivant et bouton numéro carré */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="h-8 px-2.5 rounded bg-background border border-border text-ink hover:bg-background-secondary transition-colors disabled:opacity-50 text-xs font-semibold"
+              >
+                Précédent
+              </button>
+              <div className="h-8 w-8 rounded bg-primary text-ink border border-ink/20 font-semibold flex items-center justify-center text-xs">
+                {page}
+              </div>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= totalPages}
+                className="h-8 px-2.5 rounded bg-background border border-border text-ink hover:bg-background-secondary transition-colors disabled:opacity-50 text-xs font-semibold"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 7. MODALE DE SAISIE COMPTABLE (PIÈCE EN PARTIE DOUBLE SYSCOHADA)          */}
+      {/* ========================================================================= */}
       <JournalEntryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
+          setIsModalOpen(false);
           queryClient.invalidateQueries({ queryKey: ["accounting-entries"] });
         }}
       />

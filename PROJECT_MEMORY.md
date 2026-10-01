@@ -6,6 +6,22 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Correction du Fond Canvas (`bg-background-secondary`) & Contraste Typographique
+
+- **Actions effectuées** :
+  - **Correction du fond global d'application** ([`src/components/layout/AppShell.tsx`](file:///e:/Comptia/src/components/layout/AppShell.tsx)) :
+    - Remplacement de `bg-surface-container-lowest` (blanc `#FFFFFF` produisant un effet blanc sur blanc aveuglant et sans relief) par **`bg-background-secondary`** (`#F5F4F2`).
+    - Les cartes, sections et conteneurs de tableau (`bg-background` `#FFFFFF`) se détachent désormais nettement sur le fond chaud canvas, recréant la hiérarchie visuelle du design.
+  - **Amélioration du contraste de la typographie secondaire** ([`src/app/globals.css`](file:///e:/Comptia/src/app/globals.css)) :
+    - Réajustement de `--muted-foreground` de `52%` à `42%` (`#6E665E`, conforme au token `brand.secondary`), éliminant l'effet de texte gris délavé sur fond clair.
+  - **Lisibilité du tableau et des statuts comptables** ([`src/views/Comptabilite.tsx`](file:///e:/Comptia/src/views/Comptabilite.tsx)) :
+    - En-tête des colonnes du tableau rehaussé en gras et encre Ceilow (`font-bold text-ink uppercase`).
+    - Statuts « Validée » et « Brouillon » passés aux teintes profondes (`text-success-deep` et `text-warning-deep`), supprimant l'aspect de vert clair illisible.
+    - Pastilles d'état des cartes « Écart arithmétique » et « Brouillons » harmonisées avec les couleurs profondes.
+- **Contrôles Qualité** :
+  - `npx tsc --noEmit` : 0 erreur.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes compilées).
+
 ### 2026-10-01 — Refonte UX & Intégration Données Réelles Page Déclarations & TVA DGI (`/tva`)
 
 - **Actions effectuées** :

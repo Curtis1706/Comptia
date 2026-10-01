@@ -785,9 +785,20 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
     - [src/app/globals.css](file:///c:/Projects/brightbook-studio/src/app/globals.css) & [tailwind.config.ts](file:///c:/Projects/brightbook-studio/tailwind.config.ts) : Ajout et harmonisation des tokens sémantiques profonds `--success-deep` (`#0D6E4B`), `--warning-deep` (`#9E4A06`), `--destructive-deep` (`#AA1D1D`) pour assurer un contraste élevé (> 7:1) en mode clair tout en préservant la charte en mode sombre.
     - [src/components/dashboard/StatusBadge.tsx](file:///c:/Projects/brightbook-studio/src/components/dashboard/StatusBadge.tsx) : Refonte des badges `OperationStatusBadge` et `InvoiceStatusBadge` avec fond teinté distinct (`bg-success/20`, `bg-primary/30`, `bg-warning/20`, `bg-destructive/15`), bordures délimitées et typographie contrastée (`text-success-deep`, `text-ink`, `text-warning-deep`, `text-destructive-deep`), rendant les statuts vert, jaune, ambre et rouge immédiatement identifiables.
     - [src/views/Comptabilite.tsx](file:///c:/Projects/brightbook-studio/src/views/Comptabilite.tsx) & [src/views/Lettrage.tsx](file:///c:/Projects/brightbook-studio/src/views/Lettrage.tsx) : Remplacement des classes de montants délavées (`text-success`) par `text-success-deep` (vert émeraude net pour les débits) et `text-destructive-deep` (rouge rubis net pour les crédits).
+- **Activation du Menu d'Actions « ... » & Modale de Détail (Journal des Opérations)** :
+  - **Constat** : Le bouton à trois points (`MoreHorizontal`) sur chaque ligne du tableau de comptabilité était inactif (aucun événement ni menu associé).
+  - **Résolution** :
+    - [src/views/Comptabilite.tsx](file:///c:/Projects/brightbook-studio/src/views/Comptabilite.tsx) : Remplacement du bouton inerte par un `DropdownMenu` complet offrant 4 actions clés :
+      1. *Consulter l'écriture complète* : ouvre une modale détaillée affichant l'intégralité des lignes en partie double, le libellé, le journal, la date, le statut et l'équilibre Débit/Crédit.
+      2. *Copier la référence de pièce* : copie instantanée dans le presse-papier avec confirmation toast.
+      3. *Copier le compte SYSCOHADA* : copie rapide du numéro de compte.
+      4. *Valider l'écriture* (si non validée) : appel direct à `/api/accounting/entries/[id]/validate` sécurisé par `PermissionGate`.
+      5. *Supprimer le brouillon* (si draft) : modale de confirmation explicite (conforme Règle 17).
+    - Ajout de la modale `Dialog` de consultation détaillée avec calcul automatique des totaux débit/crédit et validation inline.
   - **Validation technique (Règle 18)** :
     - `npx tsc --noEmit` : **0 erreur**.
     - `pnpm build` : **0 erreur** (54 pages compilées avec succès).
+
 
 
 

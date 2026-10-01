@@ -6,7 +6,44 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
-### 2026-10-01 — Chargement des Véritables Avatars Salariés & Ajout Pagination sur les Bulletins
+### 2026-10-01 — Refonte UX/UI Page Reporting & États Financiers (`/reporting`) — SYSCOHADA Révisé
+
+- **Actions effectuées** :
+  - **Refonte intégrale de la vue Reporting** ([`src/views/Reporting.tsx`](file:///e:/Comptia/src/views/Reporting.tsx)) conformément aux captures et aux règles de conception Ceilow :
+    - **En-tête commun** : Titre « Reporting & États Financiers », sous-titre explicatif « DSF obligatoire DGI / INSAE et états financiers SYSCOHADA révisé », et bouton secondaire « Exporter en PDF / Imprimer » (fond blanc uni `bg-background`, bordure 1px `border-border`, icône Lucide `Download`).
+    - **Carte principale à 5 onglets** :
+      - Bordure 1px `border-border`, fond uni blanc opaque `bg-background`, ombre subtile `shadow-sm`, coins au format carré `rounded`.
+      - Onglet actif : texte en gras foncé `text-ink font-bold` avec soulignement jaune Ceilow de 2px (`h-[2px] bg-primary`).
+      - Onglets inactifs : texte gris foncé `text-muted hover:text-ink`.
+    - **1. Onglet « Bilan »** :
+      - Mention « Bilan au 01/10/2026 ».
+      - Deux tableaux côte à côte ACTIF et PASSIF (en-têtes en petites majuscules grises `bg-background-secondary`).
+      - Actif : Clients 1 770 000 F CFA, Banques locales en monnaie nationale 5 000 000 F CFA, Total Actif 6 770 000 F CFA.
+      - Passif : Capital social (5 000 000), Capital par dotation (100 000), Fournisseurs dettes en compte (100 000), Personnel rémunérations dues (698 808), Sécurité sociale CNSS Bénin (152 000), TVA facturée (270 000), IPTS retenu sur salaires (72 392), État charges à payer (32 000), Total Passif 6 425 200 F CFA.
+      - Lignes de total en gras avec fond gris clair (`bg-background-secondary`).
+    - **2. Onglet « Compte de résultat »** :
+      - Mention « Exercice 2026 ».
+      - Deux tableaux côte à côte CHARGES (Rémunérations directes 800 000, Charges patronales 155 200, Total charges 955 200) et PRODUITS (Services vendus 1 500 000, Total produits 1 500 000).
+      - Ligne « Résultat net » avec icône `TrendingUp`, montant 544 800 F CFA en vert foncé et gras (`text-success-deep`) sur fond vert très clair uni (`bg-success/15 border border-success-deep/20`).
+    - **3. Onglet « DSF / États SYSCOHADA »** :
+      - Menu déroulant « Exercice : 2026 » en haut à droite.
+      - Bandeau d'information fin : à gauche « DSF SYSCOHADA révisé (DGI Bénin)... », à droite « Équilibre Bilan : Équilibré (Actif = Passif) » avec pastille verte sans emoji.
+      - 3 boutons de sous-navigation : « Bilan SYSCOHADA » (`Scale`), « Compte de Résultat (SIG) » (`BarChart3`), « TAFIRE (Flux Financiers) » (`FileSpreadsheet`), le bouton actif sur fond jaune `bg-primary text-ink`, inactifs sur fond blanc avec bordure 1px.
+      - *Sous-vue Bilan SYSCOHADA* : Deux cartes ACTIF (Emplois) et PASSIF (Ressources), totaux sur fond jaune #FFD946 avec texte noir profond.
+      - *Sous-vue Compte de Résultat (SIG)* : Tableau officiel 3 colonnes (Code en monospace gris, Libellé, Montant), lignes de détail débutant par + ou -, lignes de solde (CA, MB, VA, EBE, REX, RFI, RAO, RHAO, RNET) en gras sur fond gris très clair, trait jaune de 3px à gauche pour les soldes majeurs (CA, VA, EBE, REX, RAO, RNET) avec texte noir, charge de personnel -955 200 en rouge foncé (`text-error-deep`).
+      - *Sous-vue TAFIRE* : 3 cartes (CAF 544 800 F CFA, Variation BFR 444 800 F CFA, Flux Trésorerie Exploitation 100 000 F CFA) avec montants en noir profond.
+    - **4. Onglet « Trésorerie »** :
+      - Mention « Évolution de la trésorerie — 30 derniers jours ».
+      - Graphique en aires plat : courbe vert foncé de 2px (`#0D6E4B`), remplissage vert très clair uni opaque (`#E6FAF1`, zéro dégradé), grille horizontale en pointillés gris clair, axe Y de 0k à 6000k, axe X du 02/09 au 30/09, infobulle sobre au survol.
+    - **5. Onglet « Ratios »** :
+      - 4 cartes indicateurs de même hauteur : SOLVABILITÉ (1.05), RÉSULTAT NET (544 800 F), MARGE NETTE (36.3%), TRÉSORERIE (5 000 000 F).
+      - Valeurs en noir profond et grandes, badges de tendance en vert foncé sur fond vert très clair uni (`text-success-deep bg-success/20 border-success-deep/30`).
+  - **Règles Ceilow scrupuleusement respectées** :
+    - Zéro emoji, zéro glassmorphisme, zéro dégradé.
+    - Typographie tabulaire `tabular-nums font-mono` sur l'ensemble des montants.
+    - Accent jaune #FFD946 réservé aux boutons actifs, totaux de bilan et soulignement de l'onglet actif.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
 
 - **Actions effectuées** :
   - **Véritables Avatars Salariés** ([`src/views/Paie.tsx`](file:///e:/Comptia/src/views/Paie.tsx) & [`src/components/ui/user-avatar.tsx`](file:///e:/Comptia/src/components/ui/user-avatar.tsx)) :

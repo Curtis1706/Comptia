@@ -530,20 +530,20 @@ export const Comptabilite = () => {
             <span
               className={cn(
                 "w-2 h-2 rounded-full",
-                isBalanced ? "bg-success" : "bg-error"
+                isBalanced ? "bg-success-deep" : "bg-error-deep"
               )}
             />
           </div>
           <div className="mt-2">
             <div className="flex items-center gap-1.5 font-bold text-lg text-ink font-mono">
               {isBalanced ? (
-                <div className="flex items-center gap-1.5 text-ink">
-                  <CheckCircle2 className="w-5 h-5 text-success" />
+                <div className="flex items-center gap-1.5 text-success-deep">
+                  <CheckCircle2 className="w-5 h-5 text-success-deep" />
                   <span>Équilibré</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-error">
-                  <AlertCircle className="w-5 h-5 text-error" />
+                <div className="flex items-center gap-1.5 text-error-deep">
+                  <AlertCircle className="w-5 h-5 text-error-deep" />
                   <span>Déséquilibré</span>
                 </div>
               )}
@@ -560,7 +560,7 @@ export const Comptabilite = () => {
             <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
               Brouillons à valider
             </span>
-            <span className="w-2 h-2 rounded-full bg-warning" />
+            <span className="w-2 h-2 rounded-full bg-warning-deep" />
           </div>
           <div className="mt-2">
             <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
@@ -726,7 +726,7 @@ export const Comptabilite = () => {
       {/* ========================================================================= */}
       <div className="bg-background rounded border border-border overflow-hidden shadow-sm">
         {/* En-tête global des colonnes fixe au défilement (Format carré / rounded) */}
-        <div className="hidden lg:grid grid-cols-12 bg-background-secondary px-4 py-2 border-b border-border text-[11px] font-semibold text-text-muted uppercase tracking-wider items-center select-none sticky top-0 z-10">
+        <div className="hidden lg:grid grid-cols-12 bg-background-secondary px-4 py-2.5 border-b border-border text-[11px] font-bold text-ink uppercase tracking-wider items-center select-none sticky top-0 z-10">
           <div className="col-span-1 flex items-center gap-3">
             <Checkbox
               checked={isAllSelected}
@@ -851,22 +851,22 @@ export const Comptabilite = () => {
                       </span>
                     </div>
 
-                    {/* Statut (Format carré rounded du design HTML, pas rounded-full) */}
+                    {/* Statut (Format carré rounded avec contraste profond) */}
                     <div className="col-span-1 flex justify-center">
                       {cleanStatus === "draft" && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border bg-warning/15 text-ink border-warning/40">
-                          <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold border bg-warning/20 text-warning-deep border-warning-deep/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-warning-deep" />
                           Brouillon
                         </span>
                       )}
                       {cleanStatus === "validated" && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border bg-success/15 text-ink border-success/40">
-                          <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold border bg-success/20 text-success-deep border-success-deep/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-success-deep" />
                           Validée
                         </span>
                       )}
                       {cleanStatus === "locked" && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border bg-background-secondary text-ink border-border">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold border bg-background-secondary text-ink border-border">
                           <Lock className="w-3 h-3 text-ink" />
                           Verrouillée
                         </span>
@@ -996,19 +996,19 @@ export const Comptabilite = () => {
                       {/* Statut mobile */}
                       <div>
                         {cleanStatus === "draft" && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-warning/15 text-ink border-warning/40">
-                            <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border bg-warning/20 text-warning-deep border-warning-deep/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-warning-deep" />
                             Brouillon
                           </span>
                         )}
                         {cleanStatus === "validated" && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-success/15 text-ink border-success/40">
-                            <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border bg-success/20 text-success-deep border-success-deep/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-success-deep" />
                             Validée
                           </span>
                         )}
                         {cleanStatus === "locked" && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-background-secondary text-ink border-border">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border bg-background-secondary text-ink border-border">
                             <Lock className="w-2.5 h-2.5 text-ink" />
                             Verrouillée
                           </span>

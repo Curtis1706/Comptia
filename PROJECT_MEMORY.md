@@ -6,6 +6,41 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Refonte UX & Intégration Données Réelles Page Déclarations & TVA DGI (`/tva`)
+
+- **Actions effectuées** :
+  - **Refonte visuelle et structurelle intégrale de la page TVA** ([`src/views/TVA.tsx`](file:///e:/Comptia/src/views/TVA.tsx)) en conformité stricte avec le mockup HTML et les règles de conception Ceilow :
+    - **Header & Action principale** : Titre « Gestion TVA (DGI Bénin) », sous-titre explicatif, et CTA jaune Ceilow `Soumettre la déclaration DGI` (`bg-primary text-ink border border-ink/20 font-semibold rounded`).
+    - **Bandeau réglementaire DGI Bénin** : Rappel de la norme légale (déclaration mensuelle au plus tard le 15 du mois suivant, taux standard 18%), échéance dynamique calculée au 15 du mois suivant la période sélectionnée, et pastille d'avertissement en cas de dépassement de l'échéance légale avec mention des pénalités (10% + 1%/mois).
+    - **3 Cartes de synthèse fiscale (KPI)** :
+      1. *TVA NETTE DUE (PÉRIODE)* : Montant proéminent en typographie tabulaire (`text-4xl font-bold font-mono tabular-nums text-ink`), accompagné du sélecteur interactif de période fiscale (mois de l'exercice en cours).
+      2. *TVA facturée / collectée (Compte 4431)* : Montant en noir comptable sobre (`text-2xl font-semibold font-mono tabular-nums text-ink`), sous-titre « Sur ventes & prestations de services ».
+      3. *TVA déductible / récupérable (Compte 445)* : Montant en noir comptable sobre, sous-titre « Sur achats & frais généraux ».
+    - **Tableau de bord récapitulatif SYSCOHADA (3 colonnes)** :
+      - Col 1 : Chiffre d'affaires HT (Classe 7) et Achats & charges HT (Classe 6).
+      - Col 2 : Type de déclaration (« Mensuelle ») et Statut de calcul (« Aperçu temps réel » avec pastille ambre `rounded`).
+      - Col 3 : Crédit de TVA reportable (Compte 4449) et TVA à payer (Compte 4441).
+    - **Historique chronologique des déclarations DGI (Timeline)** :
+      - En-tête avec bouton fonctionnel « Exporter » téléchargeant l'historique complet en format CSV conforme (séparateur point-virgule, BOM UTF-8).
+      - Indicateurs d'état visuels fidèles : pastille circulaire (`rounded-full`) vert émeraude foncé (`border-success-deep text-success-deep`) avec coche `stroke-[3]` pour les déclarations soumises, pastille horloge pour les brouillons.
+      - Périodes, badges « MENSUELLE » au format carré (`rounded`), dates de création, dates d'échéance et pénalités éventuelles.
+      - Statuts traduits en français : « Soumise » avec vert foncé émeraude lisible et contrasté (`text-success-deep bg-success/20 border-success-deep/30 rounded`), « Brouillon » (`text-warning-deep bg-warning/20 border-warning-deep/30 rounded`).
+      - Zéro translucidité / zéro glassmorphisme : fonds solides purs (`bg-background` et `bg-background-secondary`), suppression de tout alpha (`/40`).
+      - Bouton interactif « Voir le détail » ouvrant une modale détaillée avec ventilation complète des comptes SYSCOHADA (4431, 4452, 4441, 4449).
+    - **Workflow de soumission sécurisé (Modale de confirmation DGI)** :
+      - Modale récapitulative des montants calculés avant télétransmission.
+      - Détection des déclarations déjà soumises pour bloquer les doublons non autorisés.
+      - Alerte visuelle en cas de déclaration tardive au regard du 15 du mois.
+      - Appel des API backend réelles `POST /api/vat/declarations` et `POST /api/vat/declarations/[id]/submit`.
+  - **Zéro Donnée Mockée & Rigueur des Règles** :
+    - Toutes les données proviennent des endpoints API réels (`/api/vat/preview`, `/api/vat/declarations`).
+    - Zéro couleur hexadécimale en dur, utilisation exclusive des variables sémantiques Ceilow (`bg-background`, `border-border`, `text-ink`, `text-text-muted`, `bg-primary`, `bg-success/15`, `bg-warning/15`, `bg-error/15`).
+    - Format carré strict (`rounded` 2px / 0.125rem), aucune bordure `rounded-lg`, `rounded-xl` ou `rounded-full` intempestive (hors pastilles témoins).
+    - Chiffres financiers en police tabulaire (`tabular-nums font-mono`).
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes générées sans erreur).
+
 ### 2026-10-01 — Refonte UX & Alignement Comptabilité SYSCOHADA (Prompts 2 à 6 & Extourne)
 
 - **Actions effectuées** :

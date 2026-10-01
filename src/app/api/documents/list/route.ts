@@ -19,6 +19,19 @@ export async function GET(req: Request) {
       limit: searchParams.get("limit") ?? undefined,
     });
 
+    // Passer en erreur les documents bloqués en extraction depuis plus de 2 minutes
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    await prisma.document.updateMany({
+      where: {
+        company_id: user.company_id,
+        status: { in: ["uploaded", "processing"] },
+        created_at: { lt: twoMinutesAgo },
+      },
+      data: {
+        status: "error",
+      },
+    });
+
     const [docs, total] = await Promise.all([
       prisma.document.findMany({
         where: { company_id: user.company_id },

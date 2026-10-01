@@ -6,6 +6,42 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Harmonisation des Libellés de Navigation Sidebar & Corrections Documents
+
+- **Actions effectuées** :
+  - **Harmonisation des titres des liens de navigation dans la sidebar** ([`src/components/layout/AppSidebar.tsx`](file:///e:/Comptia/src/components/layout/AppSidebar.tsx)) :
+    - Remplacement de « Justificatifs & Documents » par **« Dépenses & Achats »** (clé `documents`, route `/documents`).
+    - Remplacement de « Grand Livre & Écritures » par **« Comptabilité SYSCOHADA »** (clé `comptabilite`, route `/comptabilite`).
+    - Conservation stricte des autres libellés conformes (« Tableau de bord », « Facturation & Clients », « Déclarations & TVA DGI », « Trésorerie & Banque/MoMo », « Paie & Salariés », « Reporting & DSF »).
+  - **Correction des incohérences de statut et de données du tableau** ([`src/views/Documents.tsx`](file:///e:/Comptia/src/views/Documents.tsx)) :
+    - Remplacement du bouton actif « Vérifier » par un bouton désactivé « Extraction... » avec spinner inline pour tout document au statut `processing` ou `uploaded`.
+    - Remplacement de « Non identifié », « 0 F CFA », montant de TVA et compte par des tirets gris discrets `—` tant que l'extraction n'est pas finalisée.
+    - Ajout du statut « Erreur » rouge avec bouton d'action directe « Réessayer » déclenchant immédiatement la relance de l'analyse OCR avec notification Toast.
+  - **Alignement sémantique cartes de synthèse / tableau** :
+    - Renommage rigoureux des 4 cartes selon les statuts réels : « En extraction » (jaune), « À vérifier » (ambre), « Validés » (vert), « En erreur » (rouge).
+    - Chaque carte dispose d'un compteur dynamique, d'une micro-copie explicative et filtre instantanément le tableau au clic.
+    - Ajout de la bordure active noire de 2px (`border-2 border-ink shadow-sm`) sur la carte sélectionnée pour un repérage visuel sans équivoque.
+  - **Amélioration de la lisibilité des fichiers & infobulles** :
+    - Affichage du nom d'origine du fichier en première ligne en gras avec infobulle native (`title={doc.original_filename}`).
+    - Affichage en sous-texte en gris moyen de la taille et du type formaté (ex : « PDF · 240 Ko »).
+  - **Cases à cocher réglementaires** ([`src/components/ui/checkbox.tsx`](file:///e:/Comptia/src/components/ui/checkbox.tsx)) :
+    - Remplacement des cercles jaunes par des cases carrées standard de 16px avec bordure grise (`border-border`), devenant noires (`bg-ink`) une fois cochées, réservant strictement la couleur jaune aux actions principales.
+  - **Colonnes Compte & TVA** :
+    - Affichage du numéro de compte dans une pastille badge sobre et affichage du libellé court tronqué avec infobulle complète (ex : « 628 Divers services extérieurs »).
+    - Colonne TVA déductible : affichage d'un tiret gris `—` dès que la valeur est 0 ou nulle.
+  - **Ergonomie du tableau & Contraste** :
+    - Rehaussement du contraste des dates et des textes secondaires (conformité AA).
+    - Ajout du survol de ligne en gris très clair (`hover:bg-background-secondary/60`).
+    - En-tête de tableau fixé au défilement (`sticky top-0 bg-background-secondary/90 z-10`).
+    - Pastilles de statut clarifiées : point de couleur, texte de 13px et fond clair uni.
+  - **Sécurisation & Logique Backend** :
+    - Détection des doublons à l'envoi dans [`src/app/api/documents/upload/route.ts`](file:///e:/Comptia/src/app/api/documents/upload/route.ts) basée sur l'empreinte nom/taille renvoyant HTTP 409 avec message « Ce fichier existe déjà ».
+    - Délai maximal d'extraction (timeout de 2 minutes) dans [`src/app/api/documents/list/route.ts`](file:///e:/Comptia/src/app/api/documents/list/route.ts) faisant basculer automatiquement les documents bloqués en statut `error` lors du rafraîchissement.
+    - Persistance et restitution garanties du nom de fichier d'origine.
+- **Contrôle Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes générées).
+
 ### 2026-09-30 — Refonte Intégrale de la Page Documents & Justificatifs (3 Écrans & Composants 21st.dev)
 
 - **Actions effectuées** :

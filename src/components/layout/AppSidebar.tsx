@@ -61,7 +61,7 @@ const navGroups: NavGroupConfig[] = [
   {
     heading: "Comptabilité SYSCOHADA",
     items: [
-      { key: "comptabilite", module: "accounting_entries", label: "Grand Livre & Écritures", to: "/comptabilite", icon: BookOpen },
+      { key: "comptabilite", module: "accounting_entries", label: "Comptabilité SYSCOHADA", to: "/comptabilite", icon: BookOpen },
       { key: "tva", module: "vat_declarations", label: "Déclarations & TVA DGI", to: "/tva", icon: CheckCircle2 },
       { key: "rapprochement", module: "bank_reconciliation", label: "Trésorerie & Banque/MoMo", to: "/comptabilite/rapprochement", icon: Wallet },
     ],

@@ -53,6 +53,19 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // 0. Détection de doublon (même nom de fichier et même taille dans l'entreprise)
+    const existingDoc = await prisma.document.findFirst({
+      where: {
+        company_id: user.company_id,
+        original_filename: file.name,
+        file_size: file.size,
+      },
+    });
+
+    if (existingDoc) {
+      return errorResponse("Ce fichier existe déjà parmi vos justificatifs.", 409);
+    }
+
     // 1. Sauvegarde sur le stockage physique Cloudflare R2 (avec fallback local)
     const fileUrl = await storage.uploadFile(buffer, filename, user.company_id, safeMime);
     const base64Data = file.size <= 2 * 1024 * 1024 ? buffer.toString("base64") : undefined;

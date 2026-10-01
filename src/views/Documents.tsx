@@ -15,8 +15,6 @@ import {
   MoreHorizontal,
   Plus,
   Check,
-  Filter,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,8 +34,9 @@ import { toast } from "sonner";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { DocumentUploadDrawer } from "@/components/documents/DocumentUploadDrawer";
 import { DocumentVerificationView } from "@/components/documents/DocumentVerificationView";
+import { SYSCOHADA_EXPENSE_ACCOUNTS } from "@/lib/syscohada-accounts";
 
-type FilterStatus = "all" | "to_verify" | "extracted" | "processed" | "error";
+type FilterStatus = "all" | "processing" | "to_verify" | "processed" | "error";
 
 export function Documents() {
   const queryClient = useQueryClient();
@@ -82,10 +81,10 @@ export function Documents() {
     return Array.isArray(docsRes) ? docsRes : docsRes?.data || [];
   }, [docsRes]);
 
-  // Calcul des métriques pour les 4 cartes de synthèse
+  // Calcul rigoureux des 4 statuts pour cartes & filtres
   const metrics = useMemo(() => {
+    let processing = 0;
     let toVerify = 0;
-    let extracted = 0;
     let processed = 0;
     let error = 0;
 
@@ -95,14 +94,37 @@ export function Documents() {
       } else if (doc.status === "error") {
         error++;
       } else if (doc.status === "processing" || doc.status === "uploaded") {
-        extracted++;
+        processing++;
       } else {
         toVerify++;
       }
     }
 
-    return { toVerify, extracted, processed, error };
+    return { processing, toVerify, processed, error };
   }, [documents]);
+
+  // Helper pour formater le type et la taille d'un fichier
+  const formatFileTypeAndSize = (
+    mime?: string,
+    bytes?: number,
+    filename?: string
+  ) => {
+    const ext =
+      filename?.split(".").pop()?.toUpperCase() ||
+      (mime?.includes("pdf") ? "PDF" : "IMAGE");
+    if (!bytes || bytes <= 0) return ext;
+    const size =
+      bytes < 1024 * 1024
+        ? `${(bytes / 1024).toFixed(0)} Ko`
+        : `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+    return `${ext} · ${size}`;
+  };
+
+  // Helper pour trouver le libellé d'un compte SYSCOHADA
+  const getAccountLabel = (code: string) => {
+    const found = SYSCOHADA_EXPENSE_ACCOUNTS.find((a) => a.code === code);
+    return found ? found.name : "Services extérieurs";
+  };
 
   // Filtrage des documents
   const filteredDocuments = useMemo(() => {
@@ -110,7 +132,7 @@ export function Documents() {
       // 1. Filtre par recherche texte
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const filename = (doc.original_filename || "").toLowerCase();
+        const filename = (doc.original_filename || doc.filename || "").toLowerCase();
         const vendor = (doc.extracted_data?.vendor_name || "").toLowerCase();
         const invNumber = (doc.extracted_data?.invoice_number || "").toLowerCase();
         const account = (doc.extracted_data?.account_code || "").toLowerCase();
@@ -124,18 +146,21 @@ export function Documents() {
         }
       }
 
-      // 2. Filtre par statut
+      // 2. Filtre par statut exact
       if (statusFilter === "processed" && doc.status !== "processed") return false;
       if (statusFilter === "error" && doc.status !== "error") return false;
       if (
-        statusFilter === "extracted" &&
+        statusFilter === "processing" &&
         doc.status !== "processing" &&
         doc.status !== "uploaded"
       )
         return false;
       if (
         statusFilter === "to_verify" &&
-        (doc.status === "processed" || doc.status === "error")
+        (doc.status === "processed" ||
+          doc.status === "error" ||
+          doc.status === "processing" ||
+          doc.status === "uploaded")
       )
         return false;
 
@@ -191,6 +216,10 @@ export function Documents() {
 
   // Actions individuelles
   const handleOpenVerification = (doc: any) => {
+    if (doc.status === "processing" || doc.status === "uploaded") {
+      toast.info("Ce document est en cours d'extraction OCR. Veuillez patienter un instant.");
+      return;
+    }
     const index = documents.findIndex((d) => d.id === doc.id);
     setActiveVerificationIndex(index >= 0 ? index : 0);
     setCurrentView("verify");
@@ -217,7 +246,8 @@ export function Documents() {
 
   const handleDeleteOne = async (doc: any, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (confirm(`Supprimer le document "${doc.original_filename}" ?`)) {
+    const docName = doc.original_filename || doc.filename || "ce document";
+    if (confirm(`Supprimer le document "${docName}" ?`)) {
       try {
         const res = await fetch(`/api/documents/${doc.id}`, {
           method: "DELETE",
@@ -238,7 +268,7 @@ export function Documents() {
   const handleBulkDelete = async () => {
     if (
       !confirm(
-        `Êtes-vous sûr de vouloir supprimer les ${selectedIds.length} justificatifs sélectionnés ?`
+        `Êtes-vous sûr de vouloir supprimer les ${selectedIds.length} justificatif(s) sélectionné(s) ?`
       )
     )
       return;
@@ -265,7 +295,13 @@ export function Documents() {
     let successCount = 0;
     for (const id of selectedIds) {
       const doc = documents.find((d) => d.id === id);
-      if (!doc || doc.status === "processed") continue;
+      if (
+        !doc ||
+        doc.status === "processed" ||
+        doc.status === "processing" ||
+        doc.status === "uploaded"
+      )
+        continue;
 
       const ext = doc.extracted_data || {};
       const amount = Number(ext.amount) || 0;
@@ -315,7 +351,7 @@ export function Documents() {
     const rows = filteredDocuments.map((doc) => {
       const ext = doc.extracted_data || {};
       return [
-        `"${doc.original_filename || ""}"`,
+        `"${doc.original_filename || doc.filename || ""}"`,
         `"${ext.vendor_name || ""}"`,
         `"${ext.date ? formatDate(ext.date) : ""}"`,
         ext.amount || 0,
@@ -398,59 +434,59 @@ export function Documents() {
         </div>
       </section>
 
-      {/* 2. RANGÉE DE 4 CARTES DE SYNTHÈSE COMPACTES ET CLIQUABLES */}
+      {/* 2. RANGÉE DE 4 CARTES DE SYNTHÈSE COMPACTES ET CLIQUABLES (Libellés calqués sur les statuts du tableau) */}
       <section
         aria-label="Synthèse des justificatifs"
         className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto pb-1"
       >
-        {/* Carte 1 : À vérifier */}
+        {/* Carte 1 : En extraction */}
+        <button
+          type="button"
+          onClick={() =>
+            setStatusFilter(statusFilter === "processing" ? "all" : "processing")
+          }
+          className={cn(
+            "p-4 rounded-xl text-left transition-all bg-background select-none flex flex-col justify-between",
+            statusFilter === "processing"
+              ? "border-2 border-ink bg-background shadow-xs"
+              : "border border-border hover:border-border/80 hover:shadow-2xs"
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+              EN EXTRACTION
+            </span>
+            <span className="w-2 h-2 rounded-full bg-muted shrink-0" />
+          </div>
+          <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
+            {metrics.processing}
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Analyse en cours</p>
+        </button>
+
+        {/* Carte 2 : À vérifier */}
         <button
           type="button"
           onClick={() =>
             setStatusFilter(statusFilter === "to_verify" ? "all" : "to_verify")
           }
           className={cn(
-            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            "p-4 rounded-xl text-left transition-all bg-background select-none flex flex-col justify-between",
             statusFilter === "to_verify"
-              ? "border-warning ring-2 ring-warning/30 bg-warning/5"
-              : "border-border hover:border-border/80 hover:shadow-2xs"
+              ? "border-2 border-ink bg-background shadow-xs"
+              : "border border-border hover:border-border/80 hover:shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
               À VÉRIFIER
             </span>
-            <span className="w-2 h-2 rounded-full bg-warning" />
+            <span className="w-2 h-2 rounded-full bg-warning shrink-0" />
           </div>
           <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
             {metrics.toVerify}
           </div>
           <p className="mt-1 text-[11px] text-muted">Données à valider</p>
-        </button>
-
-        {/* Carte 2 : Extraits */}
-        <button
-          type="button"
-          onClick={() =>
-            setStatusFilter(statusFilter === "extracted" ? "all" : "extracted")
-          }
-          className={cn(
-            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
-            statusFilter === "extracted"
-              ? "border-primary ring-2 ring-primary/30 bg-primary/5"
-              : "border-border hover:border-border/80 hover:shadow-2xs"
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
-              EXTRAITS
-            </span>
-            <span className="w-2 h-2 rounded-full bg-primary" />
-          </div>
-          <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
-            {metrics.extracted}
-          </div>
-          <p className="mt-1 text-[11px] text-muted">Analyse en cours</p>
         </button>
 
         {/* Carte 3 : Validés */}
@@ -460,17 +496,17 @@ export function Documents() {
             setStatusFilter(statusFilter === "processed" ? "all" : "processed")
           }
           className={cn(
-            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            "p-4 rounded-xl text-left transition-all bg-background select-none flex flex-col justify-between",
             statusFilter === "processed"
-              ? "border-success ring-2 ring-success/30 bg-success/5"
-              : "border-border hover:border-border/80 hover:shadow-2xs"
+              ? "border-2 border-ink bg-background shadow-xs"
+              : "border border-border hover:border-border/80 hover:shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
               VALIDÉS
             </span>
-            <span className="w-2 h-2 rounded-full bg-success" />
+            <span className="w-2 h-2 rounded-full bg-success shrink-0" />
           </div>
           <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
             {metrics.processed}
@@ -485,17 +521,17 @@ export function Documents() {
             setStatusFilter(statusFilter === "error" ? "all" : "error")
           }
           className={cn(
-            "p-4 rounded-xl border text-left transition-all bg-background select-none flex flex-col justify-between",
+            "p-4 rounded-xl text-left transition-all bg-background select-none flex flex-col justify-between",
             statusFilter === "error"
-              ? "border-error ring-2 ring-error/30 bg-error/5"
-              : "border-border hover:border-border/80 hover:shadow-2xs"
+              ? "border-2 border-ink bg-background shadow-xs"
+              : "border border-border hover:border-border/80 hover:shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">
               EN ERREUR
             </span>
-            <span className="w-2 h-2 rounded-full bg-error" />
+            <span className="w-2 h-2 rounded-full bg-error shrink-0" />
           </div>
           <div className="mt-2 text-2xl font-bold tracking-tight text-ink font-mono tabular-nums">
             {metrics.error}
@@ -531,8 +567,8 @@ export function Documents() {
             className="h-9 rounded-md border border-border bg-background px-3 text-xs text-ink focus:border-ink focus:ring-0"
           >
             <option value="all">Tous les statuts</option>
+            <option value="processing">En extraction</option>
             <option value="to_verify">À vérifier</option>
-            <option value="extracted">En extraction</option>
             <option value="processed">Validé</option>
             <option value="error">Erreur</option>
           </select>
@@ -576,7 +612,7 @@ export function Documents() {
         <aside
           role="region"
           aria-label="Actions groupées"
-          className="p-3 rounded-lg border border-primary/40 bg-primary/10 flex items-center justify-between text-xs text-ink select-none animate-in fade-in-50"
+          className="p-3 rounded-lg border border-ink bg-background-secondary flex items-center justify-between text-xs text-ink select-none animate-in fade-in-50"
         >
           <div className="flex items-center gap-2">
             <span className="font-bold font-mono tabular-nums">
@@ -590,7 +626,7 @@ export function Documents() {
               size="sm"
               onClick={handleBulkValidate}
               disabled={isBulkProcessing}
-              className="h-7 px-3 text-xs font-bold bg-primary text-ink hover:brightness-95"
+              className="h-7 px-3 text-xs font-bold bg-primary text-ink hover:brightness-95 shadow-2xs"
             >
               {isBulkProcessing ? (
                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -615,12 +651,11 @@ export function Documents() {
         </aside>
       )}
 
-      {/* 4. TABLEAU DE DONNÉES AVEC CASES À COCHER & PAGINATION */}
+      {/* 4. TABLEAU DE DONNÉES AVEC CASES À COCHER & EN-TÊTE FIXE */}
       <div className="rounded-xl border border-border bg-background shadow-xs overflow-hidden">
-        {/* Vue Desktop / Tablette */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead className="border-b border-border bg-background-secondary text-muted font-semibold tracking-wider text-[11px] uppercase">
+            <thead className="border-b border-border bg-background-secondary text-muted font-semibold tracking-wider text-[11px] uppercase sticky top-0 z-10 shadow-2xs">
               <tr>
                 <th className="py-3 px-4 w-10">
                   <Checkbox
@@ -686,22 +721,26 @@ export function Documents() {
                   const isError = doc.status === "error";
                   const isProcessing =
                     doc.status === "processing" || doc.status === "uploaded";
-                  const isToVerify = !isProcessed && !isError && !isProcessing;
 
                   const fileUrl = doc.file_url?.startsWith("http")
                     ? doc.file_url
                     : `/api/documents/${doc.id}/file`;
 
+                  const displayName =
+                    doc.original_filename || doc.filename || "Document";
+                  const accountCode = ext.account_code || "628";
+                  const accountLabel = getAccountLabel(accountCode);
+
                   return (
                     <tr
                       key={doc.id}
                       className={cn(
-                        "hover:bg-background-secondary/40 transition-colors group cursor-pointer",
-                        isChecked && "bg-primary/5"
+                        "hover:bg-background-secondary/60 transition-colors group cursor-pointer",
+                        isChecked && "bg-background-secondary/80"
                       )}
                       onClick={() => handleOpenVerification(doc)}
                     >
-                      {/* Checkbox */}
+                      {/* Checkbox carrée 16px avec bordure grise */}
                       <td
                         className="py-3 px-4"
                         onClick={(e) => e.stopPropagation()}
@@ -711,75 +750,114 @@ export function Documents() {
                           onCheckedChange={(checked) =>
                             handleSelectOne(doc.id, Boolean(checked))
                           }
-                          aria-label={`Sélectionner ${doc.original_filename}`}
+                          aria-label={`Sélectionner ${displayName}`}
                         />
                       </td>
 
-                      {/* Fichier (icône + nom tronqué) */}
+                      {/* Colonne Fichier : Nom en gras + sous-texte type/taille */}
                       <td className="py-3 px-4">
-                        <div className="flex items-center gap-2 max-w-[200px]">
+                        <div className="flex items-center gap-2.5 max-w-[240px]">
                           <FileText className="w-4 h-4 text-muted shrink-0" />
-                          <span
-                            className="font-medium text-ink truncate"
-                            title={doc.original_filename}
-                          >
-                            {doc.original_filename || "Document"}
-                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className="font-bold text-ink truncate text-xs"
+                              title={displayName}
+                            >
+                              {displayName}
+                            </p>
+                            <p className="text-[11px] text-muted font-mono mt-0.5">
+                              {formatFileTypeAndSize(
+                                doc.mime_type,
+                                doc.file_size,
+                                displayName
+                              )}
+                            </p>
+                          </div>
                         </div>
                       </td>
 
                       {/* Fournisseur */}
                       <td className="py-3 px-4 font-medium text-ink">
-                        {ext.vendor_name || (
-                          <span className="text-muted italic">Non identifié</span>
+                        {isProcessing ? (
+                          <span className="text-muted font-mono">—</span>
+                        ) : (
+                          ext.vendor_name || (
+                            <span className="text-muted italic">Non identifié</span>
+                          )
                         )}
                       </td>
 
                       {/* Date facture */}
-                      <td className="py-3 px-4 text-muted tnum font-medium">
-                        {ext.date
-                          ? formatDate(ext.date)
-                          : doc.issue_date
-                          ? formatDate(doc.issue_date)
-                          : "—"}
+                      <td className="py-3 px-4 text-ink font-medium tnum font-mono text-xs">
+                        {isProcessing ? (
+                          <span className="text-muted font-mono">—</span>
+                        ) : ext.date ? (
+                          formatDate(ext.date)
+                        ) : doc.issue_date ? (
+                          formatDate(doc.issue_date)
+                        ) : (
+                          <span className="text-muted font-mono">—</span>
+                        )}
                       </td>
 
                       {/* Montant TTC */}
                       <td className="py-3 px-4 font-bold text-right tnum text-ink">
-                        {ext.amount ? formatCFA(Number(ext.amount)) : "0 F CFA"}
+                        {isProcessing ? (
+                          <span className="text-muted font-mono">—</span>
+                        ) : ext.amount && Number(ext.amount) > 0 ? (
+                          formatCFA(Number(ext.amount))
+                        ) : (
+                          <span className="text-muted font-mono">—</span>
+                        )}
                       </td>
 
-                      {/* TVA déductible */}
+                      {/* TVA déductible (tiret gris si 0) */}
                       <td className="py-3 px-4 font-medium text-right tnum text-muted">
-                        {ext.vat_amount ? formatCFA(Number(ext.vat_amount)) : "0 F CFA"}
+                        {isProcessing || !ext.vat_amount || Number(ext.vat_amount) <= 0 ? (
+                          <span className="text-muted font-mono">—</span>
+                        ) : (
+                          formatCFA(Number(ext.vat_amount))
+                        )}
                       </td>
 
-                      {/* Compte (ex. 628) */}
-                      <td className="py-3 px-4 font-mono text-xs font-semibold text-ink">
-                        <span className="px-1.5 py-0.5 rounded bg-background-secondary border border-border">
-                          {ext.account_code || "628"}
-                        </span>
+                      {/* Compte (numéro dans pastille + libellé court à côté) */}
+                      <td className="py-3 px-4">
+                        {isProcessing ? (
+                          <span className="text-muted font-mono">—</span>
+                        ) : (
+                          <div
+                            className="flex items-center gap-1.5 max-w-[190px]"
+                            title={`${accountCode} - ${accountLabel}`}
+                          >
+                            <span className="px-1.5 py-0.5 rounded bg-background-secondary border border-border font-mono text-[11px] font-bold text-ink shrink-0">
+                              {accountCode}
+                            </span>
+                            <span className="text-xs text-ink truncate font-medium">
+                              {accountLabel}
+                            </span>
+                          </div>
+                        )}
                       </td>
 
-                      {/* Statut avec pastille point + texte */}
+                      {/* Statut avec pastille point + texte 12-13px sur fond uni clair */}
                       <td className="py-3 px-4">
                         {isProcessed ? (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink bg-success/20 px-2 py-0.5 rounded border border-success/30">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink bg-success/20 px-2 py-0.5 rounded border border-success/30">
                             <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
                             <span>Validé</span>
                           </span>
                         ) : isError ? (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-error bg-error/15 px-2 py-0.5 rounded border border-error/25">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-error bg-error/15 px-2 py-0.5 rounded border border-error/25">
                             <span className="w-1.5 h-1.5 rounded-full bg-error shrink-0" />
                             <span>Erreur</span>
                           </span>
                         ) : isProcessing ? (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted bg-background-secondary px-2 py-0.5 rounded border border-border">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted bg-background-secondary px-2 py-0.5 rounded border border-border">
                             <span className="w-1.5 h-1.5 rounded-full bg-muted shrink-0" />
                             <span>En extraction</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink bg-warning/20 px-2 py-0.5 rounded border border-warning/30">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink bg-warning/20 px-2 py-0.5 rounded border border-warning/30">
                             <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
                             <span>À vérifier</span>
                           </span>
@@ -787,7 +865,7 @@ export function Documents() {
                       </td>
 
                       {/* Ajouté le */}
-                      <td className="py-3 px-4 text-muted tnum font-medium">
+                      <td className="py-3 px-4 text-muted tnum font-mono text-xs">
                         {doc.created_at ? formatDate(doc.created_at) : "—"}
                       </td>
 
@@ -798,13 +876,24 @@ export function Documents() {
                       >
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Bouton contextuel selon statut */}
-                          {isError ? (
+                          {isProcessing ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              disabled
+                              className="h-7 px-2.5 text-xs font-medium bg-background-secondary text-muted border border-border cursor-not-allowed opacity-75"
+                            >
+                              <Loader2 className="w-3 h-3 mr-1 animate-spin text-muted" />
+                              <span>Extraction...</span>
+                            </Button>
+                          ) : isError ? (
                             <Button
                               type="button"
                               size="sm"
                               variant="outline"
                               onClick={(e) => handleRetryOCR(doc.id, e)}
-                              className="h-7 px-2 text-xs font-semibold text-error border-error/30 hover:bg-error/10"
+                              className="h-7 px-2.5 text-xs font-semibold text-error border-error/30 hover:bg-error/10"
+                              title="Réessayer l'extraction"
                             >
                               <RotateCw className="w-3 h-3 mr-1" />
                               <span>Réessayer</span>
@@ -815,7 +904,7 @@ export function Documents() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleOpenVerification(doc)}
-                              className="h-7 px-2 text-xs font-semibold text-ink border-border hover:bg-background-secondary"
+                              className="h-7 px-2.5 text-xs font-semibold text-ink border-border hover:bg-background-secondary"
                             >
                               <Eye className="w-3 h-3 mr-1" />
                               <span>Voir</span>
@@ -825,7 +914,7 @@ export function Documents() {
                               type="button"
                               size="sm"
                               onClick={() => handleOpenVerification(doc)}
-                              className="h-7 px-2.5 text-xs font-bold bg-primary text-ink hover:brightness-95 shadow-2xs"
+                              className="h-7 px-3 text-xs font-bold bg-primary text-ink hover:brightness-95 shadow-2xs"
                             >
                               <span>Vérifier</span>
                             </Button>
@@ -850,7 +939,7 @@ export function Documents() {
                               <DropdownMenuItem asChild className="text-xs cursor-pointer">
                                 <a
                                   href={fileUrl}
-                                  download={doc.original_filename}
+                                  download={displayName}
                                   className="flex items-center w-full"
                                 >
                                   <Download className="w-3.5 h-3.5 mr-2 text-muted" />

@@ -17,7 +17,6 @@ import {
   RotateCcw,
   Eye,
   X,
-  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,13 +47,12 @@ const JOURNAL_CONFIG: Record<string, { label: string; badge: string }> = {
   od: { label: "Opérations Diverses (OD)", badge: "OD" },
 };
 
-// Statuts simplifiés en 3 états stricts : Brouillon (ambre), Validée (vert), Verrouillée (cadenas gris)
 type CleanStatus = "draft" | "validated" | "locked";
 
 const getCleanStatus = (status: string): CleanStatus => {
   if (status === "draft") return "draft";
   if (status === "locked") return "locked";
-  return "validated"; // "posted" ou "validated" -> Validée
+  return "validated";
 };
 
 export const Comptabilite = () => {
@@ -72,7 +70,7 @@ export const Comptabilite = () => {
 
   const queryClient = useQueryClient();
 
-  // Récupération directe des écritures réelles avec total
+  // Chargement des données réelles avec total
   const { data, isLoading } = useQuery<{ entries: any[]; total: number }>({
     queryKey: ["accounting-entries", debouncedQuery, page, pageSize, statusFilter, journalFilter],
     queryFn: async () => {
@@ -104,7 +102,7 @@ export const Comptabilite = () => {
     }));
   };
 
-  // Liste plate des lignes pour exports et totaux
+  // Liste plate des lignes pour exports
   const allLines = useMemo(() => {
     return entries.flatMap((entry: any) =>
       (entry.lines || []).map((line: any) => ({
@@ -117,7 +115,7 @@ export const Comptabilite = () => {
     );
   }, [entries]);
 
-  // Calculs des indicateurs de synthèse (Partie double)
+  // Calculs synthétiques pour les 4 cartes d'équilibre (Partie double)
   const { totalDebit, totalCredit, ecart, isBalanced, draftsCount } = useMemo(() => {
     let tDebit = 0;
     let tCredit = 0;
@@ -148,7 +146,7 @@ export const Comptabilite = () => {
     );
   };
 
-  // Sélection globale de toutes les pièces affichées
+  // Sélection globale
   const isAllSelected =
     entries.length > 0 && entries.every((e) => selectedEntries.includes(e.id));
 
@@ -183,14 +181,14 @@ export const Comptabilite = () => {
     }
   };
 
-  // Suppression groupée (uniquement les brouillons)
+  // Suppression groupée des brouillons
   const handleBulkDelete = async () => {
     const draftIds = entries
       .filter((e) => selectedEntries.includes(e.id) && e.status === "draft")
       .map((e) => e.id);
 
     if (draftIds.length === 0) {
-      toast.info("Aucune pièce brouillon à supprimer parmi la sélection (les écritures validées ne peuvent pas être supprimées)");
+      toast.info("Aucune écriture brouillon à supprimer parmi la sélection");
       return;
     }
 
@@ -237,7 +235,7 @@ export const Comptabilite = () => {
     }
   };
 
-  // Extourne (contre-passation)
+  // Extourne
   const handleReverseEntry = async (id: string) => {
     if (!confirm("Voulez-vous extourner cette écriture ? Une écriture inverse sera créée pour l'annuler comptablement.")) {
       return;
@@ -260,7 +258,7 @@ export const Comptabilite = () => {
     }
   };
 
-  // Duplication d'une écriture
+  // Duplication
   const handleDuplicateEntry = (entry: any) => {
     toast.info(`Duplication de la pièce ${entry.reference}...`);
     setIsModalOpen(true);
@@ -286,7 +284,7 @@ export const Comptabilite = () => {
     }
   };
 
-  // Export CSV de la sélection ou de toute la vue
+  // Export CSV
   const handleExportCSV = (idsToExport?: string[]) => {
     const targetEntries = idsToExport && idsToExport.length > 0
       ? entries.filter((e) => idsToExport.includes(e.id))
@@ -332,7 +330,7 @@ export const Comptabilite = () => {
     toast.success(`${targetEntries.length} pièce(s) exportée(s) en CSV`);
   };
 
-  // Import CSV avec gestion détaillée des erreurs
+  // Import CSV
   const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -391,13 +389,13 @@ export const Comptabilite = () => {
   const totalPages = Math.ceil(totalEntries / pageSize) || 1;
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-12 font-sans">
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 font-sans">
       {/* ========================================================================= */}
-      {/* 1. EN-TÊTE DE PAGE                                                        */}
+      {/* 1. EN-TÊTE DE PAGE (FORMAT STRICT DU DESIGN HTML)                         */}
       {/* ========================================================================= */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">
+          <h1 className="text-2xl font-bold tracking-tight text-ink font-sans">
             Journal des opérations
           </h1>
           <p className="text-sm text-text-muted mt-0.5">
@@ -418,9 +416,9 @@ export const Comptabilite = () => {
               variant="outline"
               size="sm"
               onClick={() => document.getElementById("csv-import-file")?.click()}
-              className="h-9 px-3 border-border bg-background text-ink hover:bg-background-secondary text-xs font-semibold"
+              className="h-9 px-3 rounded bg-background text-ink border border-border hover:bg-background-secondary text-xs font-semibold"
             >
-              <Upload className="w-3.5 h-3.5 mr-1.5 text-text-muted" />
+              <Upload className="w-4 h-4 mr-1.5 text-text-muted" />
               Importer CSV
             </Button>
           </PermissionGate>
@@ -429,9 +427,9 @@ export const Comptabilite = () => {
             variant="outline"
             size="sm"
             onClick={() => handleExportCSV()}
-            className="h-9 px-3 border-border bg-background text-ink hover:bg-background-secondary text-xs font-semibold"
+            className="h-9 px-3 rounded bg-background text-ink border border-border hover:bg-background-secondary text-xs font-semibold"
           >
-            <Download className="w-3.5 h-3.5 mr-1.5 text-text-muted" />
+            <Download className="w-4 h-4 mr-1.5 text-text-muted" />
             Exporter
           </Button>
 
@@ -439,7 +437,7 @@ export const Comptabilite = () => {
             <Button
               size="sm"
               onClick={() => setIsModalOpen(true)}
-              className="h-9 px-4 bg-primary text-ink hover:brightness-95 font-semibold text-xs transition-transform active:scale-[0.99]"
+              className="h-9 px-4 rounded bg-primary text-ink border border-ink/20 hover:brightness-95 font-semibold text-xs active:scale-[0.99] transition-all"
             >
               <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
               Nouvelle opération
@@ -452,7 +450,7 @@ export const Comptabilite = () => {
       {/* BANNIÈRE D'ERREUR D'IMPORT CSV SI APPLICABLE                             */}
       {/* ========================================================================= */}
       {csvErrors && (
-        <div className="bg-error/10 border border-error/30 rounded-lg p-4 text-ink relative">
+        <div className="bg-error/10 border border-error/30 rounded p-4 text-ink relative">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-2.5">
               <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
@@ -480,95 +478,95 @@ export const Comptabilite = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. LES 4 CARTES SYNTHÉTIQUES D'ÉQUILIBRE (PARTIE DOUBLE SYSCOHADA)        */}
+      {/* 2. LES 4 CARTES SYNTHÉTIQUES D'ÉQUILIBRE (FORMAT CARRÉ ROUNDED DU DESIGN) */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Carte 1 : Total Débit */}
-        <div className="bg-background rounded-lg p-4 border border-border flex flex-col justify-between shadow-sm">
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider font-semibold text-text-muted">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
               Total Débit
             </span>
-            <span className="px-2 py-0.5 rounded bg-background-secondary text-text-muted text-[10px] font-semibold">
-              Période
+            <span className="px-1.5 py-0.5 rounded bg-background-secondary text-text-muted text-[10px] font-semibold">
+              Mois
             </span>
           </div>
-          <div className="mt-3">
-            <div className="font-mono text-xl sm:text-2xl font-bold tracking-tight text-ink tabular-nums">
+          <div className="mt-2">
+            <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
               {formatCFA(totalDebit)}
             </div>
-            <div className="text-xs text-text-muted mt-1">
-              {allLines.length} imputation{allLines.length > 1 ? "s" : ""} enregistrée{allLines.length > 1 ? "s" : ""}
+            <div className="text-xs text-text-muted mt-0.5">
+              {allLines.length} imputations enregistrées
             </div>
           </div>
         </div>
 
         {/* Carte 2 : Total Crédit */}
-        <div className="bg-background rounded-lg p-4 border border-border flex flex-col justify-between shadow-sm">
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider font-semibold text-text-muted">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
               Total Crédit
             </span>
-            <span className="px-2 py-0.5 rounded bg-background-secondary text-text-muted text-[10px] font-semibold">
-              Période
+            <span className="px-1.5 py-0.5 rounded bg-background-secondary text-text-muted text-[10px] font-semibold">
+              Mois
             </span>
           </div>
-          <div className="mt-3">
-            <div className="font-mono text-xl sm:text-2xl font-bold tracking-tight text-ink tabular-nums">
+          <div className="mt-2">
+            <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
               {formatCFA(totalCredit)}
             </div>
-            <div className="text-xs text-text-muted mt-1">
+            <div className="text-xs text-text-muted mt-0.5">
               Partie double respectée
             </div>
           </div>
         </div>
 
         {/* Carte 3 : Écart arithmétique (Balance) */}
-        <div className="bg-background rounded-lg p-4 border border-border flex flex-col justify-between shadow-sm">
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider font-semibold text-text-muted">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
               Écart arithmétique
             </span>
             <span
               className={cn(
-                "w-2.5 h-2.5 rounded-full",
+                "w-2 h-2 rounded-full",
                 isBalanced ? "bg-success" : "bg-error"
               )}
             />
           </div>
-          <div className="mt-3">
-            <div className="flex items-center gap-2">
+          <div className="mt-2">
+            <div className="flex items-center gap-1.5 font-bold text-lg text-ink font-mono">
               {isBalanced ? (
-                <div className="flex items-center gap-1.5 font-bold text-lg text-ink">
+                <div className="flex items-center gap-1.5 text-ink">
                   <CheckCircle2 className="w-5 h-5 text-success" />
                   <span>Équilibré</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 font-bold text-lg text-error">
+                <div className="flex items-center gap-1.5 text-error">
                   <AlertCircle className="w-5 h-5 text-error" />
                   <span>Déséquilibré</span>
                 </div>
               )}
             </div>
-            <div className="text-xs text-text-muted mt-1 font-mono">
+            <div className="text-xs text-text-muted mt-0.5 font-mono">
               Différence : {formatCFA(Math.abs(ecart))}
             </div>
           </div>
         </div>
 
         {/* Carte 4 : Brouillons à valider */}
-        <div className="bg-background rounded-lg p-4 border border-border flex flex-col justify-between shadow-sm">
+        <div className="bg-background rounded p-4 border border-border flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider font-semibold text-text-muted">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
               Brouillons à valider
             </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-warning" />
+            <span className="w-2 h-2 rounded-full bg-warning" />
           </div>
-          <div className="mt-3">
-            <div className="font-mono text-xl sm:text-2xl font-bold tracking-tight text-ink tabular-nums">
-              {draftsCount} pièce{draftsCount > 1 ? "s" : ""}
+          <div className="mt-2">
+            <div className="font-mono text-[22px] leading-tight font-bold tracking-tight text-ink tabular-nums">
+              {draftsCount} pièces
             </div>
-            <div className="text-xs text-text-muted mt-1">
+            <div className="text-xs text-text-muted mt-0.5">
               En attente d'imputation définitive
             </div>
           </div>
@@ -576,13 +574,13 @@ export const Comptabilite = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. BARRE DE FILTRAGE MULTI-CRITÈRES                                       */}
+      {/* 3. BARRE DE FILTRAGE ET SÉLECTION (FORMAT DU DESIGN)                     */}
       {/* ========================================================================= */}
-      <div className="bg-background rounded-lg border border-border p-3 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 shadow-sm">
-        <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+      <div className="bg-background rounded border border-border p-2 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 shadow-sm">
+        <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {/* Recherche */}
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
             <Input
               value={query}
               onChange={(e) => {
@@ -590,7 +588,7 @@ export const Comptabilite = () => {
                 setPage(1);
               }}
               placeholder="Rechercher par libellé, compte, pièce..."
-              className="pl-9 h-9 text-xs bg-background border-border text-ink placeholder:text-text-muted focus-visible:ring-1 focus-visible:ring-primary"
+              className="pl-8 h-9 rounded bg-background border-border text-xs text-ink placeholder:text-text-muted focus-visible:ring-1 focus-visible:ring-primary"
             />
           </div>
 
@@ -602,7 +600,7 @@ export const Comptabilite = () => {
                 setJournalFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
+              className="w-full h-9 px-3 rounded bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
             >
               <option value="all">Tous les journaux</option>
               <option value="purchases">Achats (ACH)</option>
@@ -621,7 +619,7 @@ export const Comptabilite = () => {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
+              className="w-full h-9 px-3 rounded bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
             >
               <option value="all">Tous les statuts</option>
               <option value="validated">Validée</option>
@@ -631,25 +629,43 @@ export const Comptabilite = () => {
           </div>
 
           {/* Filtre Période */}
-          <div className="sm:w-44">
+          <div className="sm:w-56">
             <select
               value={periodFilter}
               onChange={(e) => setPeriodFilter(e.target.value)}
-              className="w-full h-9 px-3 rounded-md bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
+              className="w-full h-9 px-3 rounded bg-background border border-border text-xs text-ink focus:outline-none focus:border-ink/50"
             >
-              <option value="all">Toutes périodes</option>
-              <option value="current">Mois en cours</option>
-              <option value="2026">Exercice 2026</option>
+              <option value="all">Exercice 2026 (Complet)</option>
+              <option value="current">Exercice 2026 (Mois en cours)</option>
             </select>
           </div>
+        </div>
+
+        {/* Bouton d'action groupée direct */}
+        <div className="flex items-center justify-end border-t lg:border-t-0 pt-2 lg:pt-0 border-border">
+          <PermissionGate module="accounting_entries" level="validate">
+            <button
+              disabled={selectedEntries.length === 0}
+              onClick={handleBulkValidate}
+              className={cn(
+                "h-9 px-3 rounded border font-semibold text-xs flex items-center gap-1.5 transition-colors",
+                selectedEntries.length > 0
+                  ? "bg-primary text-ink border-ink/20 hover:brightness-95 cursor-pointer"
+                  : "bg-background border-border text-text-muted cursor-not-allowed opacity-50"
+              )}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Valider sélection ({selectedEntries.length})</span>
+            </button>
+          </PermissionGate>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. BARRE D'ACTIONS GROUPÉES (PROMPT 4)                                     */}
+      {/* 4. BARRE D'ACTIONS GROUPÉES ÉTENDUE LORSQUE COCHÉES                       */}
       {/* ========================================================================= */}
       {selectedEntries.length > 0 && (
-        <div className="bg-background-secondary border border-border rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 animate-in fade-in-50 duration-150">
+        <div className="bg-background-secondary border border-border rounded p-2.5 flex flex-wrap items-center justify-between gap-2.5 animate-in fade-in-50 duration-150">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-primary text-ink text-xs font-bold font-mono">
               {selectedEntries.length}
@@ -664,7 +680,7 @@ export const Comptabilite = () => {
               <Button
                 size="sm"
                 onClick={handleBulkValidate}
-                className="h-8 px-3 text-xs font-semibold bg-primary text-ink hover:brightness-95"
+                className="h-8 px-3 rounded text-xs font-semibold bg-primary text-ink hover:brightness-95"
               >
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                 Valider la sélection
@@ -675,7 +691,7 @@ export const Comptabilite = () => {
               variant="outline"
               size="sm"
               onClick={() => handleExportCSV(selectedEntries)}
-              className="h-8 px-3 text-xs font-semibold border-border bg-background text-ink hover:bg-background-secondary"
+              className="h-8 px-3 rounded text-xs font-semibold border-border bg-background text-ink hover:bg-background-secondary"
             >
               <Download className="w-3.5 h-3.5 mr-1.5 text-text-muted" />
               Exporter
@@ -686,7 +702,7 @@ export const Comptabilite = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleBulkDelete}
-                className="h-8 px-3 text-xs font-semibold border-border text-error hover:bg-error/10 hover:border-error/40"
+                className="h-8 px-3 rounded text-xs font-semibold border-border text-error hover:bg-error/10 hover:border-error/40"
               >
                 <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                 Supprimer
@@ -697,7 +713,7 @@ export const Comptabilite = () => {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedEntries([])}
-              className="h-8 px-2 text-xs text-text-muted hover:text-ink"
+              className="h-8 px-2 rounded text-xs text-text-muted hover:text-ink"
             >
               Désélectionner
             </Button>
@@ -706,11 +722,11 @@ export const Comptabilite = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* 5. TABLEAU GROUPÉ PAR PIÈCE COMPTABLE AVEC SOUS-ÉCRITURES DÉPLIABLES     */}
+      {/* 5. TABLEAU GROUPÉ PAR PIÈCE COMPTABLE (FORMAT EXACT DU DESIGN)             */}
       {/* ========================================================================= */}
-      <div className="bg-background rounded-lg border border-border overflow-hidden shadow-sm">
-        {/* En-tête des colonnes fixe au défilement (Prompt 5) */}
-        <div className="hidden lg:grid grid-cols-12 bg-background-secondary px-4 py-2.5 border-b border-border text-[11px] font-semibold text-text-muted uppercase tracking-wider items-center select-none sticky top-0 z-10">
+      <div className="bg-background rounded border border-border overflow-hidden shadow-sm">
+        {/* En-tête global des colonnes fixe au défilement (Format carré / rounded) */}
+        <div className="hidden lg:grid grid-cols-12 bg-background-secondary px-4 py-2 border-b border-border text-[11px] font-semibold text-text-muted uppercase tracking-wider items-center select-none sticky top-0 z-10">
           <div className="col-span-1 flex items-center gap-3">
             <Checkbox
               checked={isAllSelected}
@@ -721,21 +737,21 @@ export const Comptabilite = () => {
           </div>
           <div className="col-span-2 pl-2">N° Pièce / Réf</div>
           <div className="col-span-1">Journal</div>
-          <div className="col-span-3">Libellé principal</div>
-          <div className="col-span-2 text-right pr-2">Total pièce</div>
+          <div className="col-span-4">Libellé principal</div>
+          <div className="col-span-2 text-right">Total pièce</div>
           <div className="col-span-1 text-center">Statut</div>
-          <div className="col-span-2 text-right">Actions</div>
+          <div className="col-span-1 text-right">Actions</div>
         </div>
 
         {/* Corps du tableau */}
         {isLoading ? (
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-2">
             {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full rounded" />
+              <Skeleton key={i} className="h-11 w-full rounded" />
             ))}
           </div>
         ) : entries.length === 0 ? (
-          /* État vide conforme Prompt 6 */
+          /* État vide */
           <div className="p-16 text-center flex flex-col items-center justify-center">
             <FileText className="w-12 h-12 text-text-muted/40 mb-3" />
             <h3 className="text-sm font-semibold text-ink">
@@ -748,7 +764,7 @@ export const Comptabilite = () => {
               <Button
                 size="sm"
                 onClick={() => setIsModalOpen(true)}
-                className="bg-primary text-ink hover:brightness-95 font-semibold text-xs h-9 px-4"
+                className="bg-primary text-ink hover:brightness-95 font-semibold text-xs h-9 px-4 rounded"
               >
                 <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
                 Nouvelle opération
@@ -767,7 +783,7 @@ export const Comptabilite = () => {
                 badge: entry.journal,
               };
 
-              // Calcul des totaux de cette pièce spécifique
+              // Totaux de cette pièce
               let pieceDebit = 0;
               let pieceCredit = 0;
               (entry.lines || []).forEach((l: any) => {
@@ -778,7 +794,7 @@ export const Comptabilite = () => {
 
               return (
                 <div key={entry.id} className="flex flex-col group/piece">
-                  {/* Ligne Desktop */}
+                  {/* Ligne d'en-tête de la pièce (Desktop) */}
                   <div
                     onClick={() => togglePiece(entry.id)}
                     className={cn(
@@ -789,7 +805,7 @@ export const Comptabilite = () => {
                       isSelected && "!bg-primary/10"
                     )}
                   >
-                    {/* Checkbox & Date (Contraste rehaussé - Prompt 5) */}
+                    {/* Checkbox & Date */}
                     <div
                       className="col-span-1 flex items-center gap-3"
                       onClick={(e) => e.stopPropagation()}
@@ -804,22 +820,22 @@ export const Comptabilite = () => {
                       </span>
                     </div>
 
-                    {/* Référence (Contraste rehaussé - Prompt 5) */}
+                    {/* Référence */}
                     <div className="col-span-2 pl-2 flex items-center gap-1.5 min-w-0">
                       <span className="font-mono text-xs font-bold text-ink tracking-tight truncate">
                         {entry.reference}
                       </span>
                     </div>
 
-                    {/* Journal */}
+                    {/* Journal (Format carré rounded) */}
                     <div className="col-span-1">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-background-secondary text-ink border border-border">
                         {journalInfo.badge}
                       </span>
                     </div>
 
-                    {/* Libellé principal (non italique en brouillon - Prompt 3) */}
-                    <div className="col-span-3 truncate pr-2">
+                    {/* Libellé principal */}
+                    <div className="col-span-4 truncate pr-2">
                       <span
                         className="text-xs font-medium text-ink truncate block"
                         title={entry.description}
@@ -829,78 +845,62 @@ export const Comptabilite = () => {
                     </div>
 
                     {/* Total pièce */}
-                    <div className="col-span-2 text-right pr-2">
+                    <div className="col-span-2 text-right">
                       <span className="font-mono text-xs font-bold text-ink tabular-nums">
                         {formatCFA(pieceDebit)}
                       </span>
                     </div>
 
-                    {/* Statut : 3 états stricts (Prompt 3) */}
+                    {/* Statut (Format carré rounded du design HTML, pas rounded-full) */}
                     <div className="col-span-1 flex justify-center">
                       {cleanStatus === "draft" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-warning/15 text-ink border-warning/40">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border bg-warning/15 text-ink border-warning/40">
                           <span className="w-1.5 h-1.5 rounded-full bg-warning" />
                           Brouillon
                         </span>
                       )}
                       {cleanStatus === "validated" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-success/15 text-ink border-success/40">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border bg-success/15 text-ink border-success/40">
                           <span className="w-1.5 h-1.5 rounded-full bg-success" />
                           Validée
                         </span>
                       )}
                       {cleanStatus === "locked" && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border bg-background-secondary text-ink border-border">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border bg-background-secondary text-ink border-border">
                           <Lock className="w-3 h-3 text-ink" />
                           Verrouillée
                         </span>
                       )}
                     </div>
 
-                    {/* Actions contextuelles : bouton visible + menu ... (Prompt 4) */}
+                    {/* Actions contextuelles : bouton d'action + options + chevron */}
                     <div
-                      className="col-span-2 flex items-center justify-end gap-1.5"
+                      className="col-span-1 flex items-center justify-end gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {/* Bouton contextuel direct */}
-                      {cleanStatus === "draft" ? (
-                        <PermissionGate module="accounting_entries" level="validate">
-                          <Button
-                            size="sm"
-                            onClick={() => handleValidateEntry(entry.id)}
-                            className="h-7 px-2.5 text-xs font-semibold bg-primary text-ink hover:brightness-95 transition-all"
-                          >
-                            Valider
-                          </Button>
-                        </PermissionGate>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => togglePiece(entry.id)}
-                          className="h-7 px-2.5 text-xs font-medium border-border text-ink bg-background hover:bg-background-secondary"
-                        >
-                          <Eye className="w-3 h-3 mr-1 text-text-muted" />
-                          Voir la pièce
-                        </Button>
-                      )}
-
-                      {/* Menu contextuel ... */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-text-muted hover:text-ink hover:bg-background-secondary"
+                            className="h-7 w-7 rounded text-text-muted hover:text-ink hover:bg-background-secondary"
                             title="Options de l'écriture"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-52 bg-background border-border shadow-md">
+                        <DropdownMenuContent align="end" className="w-52 bg-background border-border shadow-md rounded">
+                          <DropdownMenuItem
+                            onClick={() => togglePiece(entry.id)}
+                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary rounded"
+                          >
+                            <Eye className="w-3.5 h-3.5 mr-2 text-text-muted" />
+                            {isExpanded ? "Replier la pièce" : "Voir la pièce"}
+                          </DropdownMenuItem>
+
                           <DropdownMenuItem
                             onClick={() => handleDuplicateEntry(entry)}
-                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary"
+                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary rounded"
                           >
                             <Copy className="w-3.5 h-3.5 mr-2 text-text-muted" />
                             Dupliquer
@@ -909,7 +909,7 @@ export const Comptabilite = () => {
                           {cleanStatus !== "draft" && (
                             <DropdownMenuItem
                               onClick={() => handleReverseEntry(entry.id)}
-                              className="text-xs cursor-pointer text-ink hover:bg-background-secondary font-medium"
+                              className="text-xs cursor-pointer text-ink hover:bg-background-secondary font-medium rounded"
                             >
                               <RotateCcw className="w-3.5 h-3.5 mr-2 text-text-muted" />
                               Extourner
@@ -918,7 +918,7 @@ export const Comptabilite = () => {
 
                           <DropdownMenuItem
                             onClick={() => handleExportCSV([entry.id])}
-                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary"
+                            className="text-xs cursor-pointer text-ink hover:bg-background-secondary rounded"
                           >
                             <Download className="w-3.5 h-3.5 mr-2 text-text-muted" />
                             Télécharger le justificatif
@@ -930,14 +930,14 @@ export const Comptabilite = () => {
                             disabled={cleanStatus === "validated" || cleanStatus === "locked"}
                             onClick={() => handleDeleteEntry(entry.id)}
                             className={cn(
-                              "text-xs cursor-pointer",
+                              "text-xs cursor-pointer rounded",
                               cleanStatus === "draft"
                                 ? "text-error hover:bg-error/10 focus:text-error"
                                 : "text-text-muted opacity-50 cursor-not-allowed"
                             )}
                             title={
                               cleanStatus !== "draft"
-                                ? "Une écriture validée ou verrouillée ne peut pas être supprimée, utilisez l'extourne."
+                                ? "Une écriture validée ne peut pas être supprimée, utilisez l'extourne."
                                 : "Supprimer cette écriture brouillon"
                             }
                           >
@@ -947,11 +947,11 @@ export const Comptabilite = () => {
                         </DropdownMenuContent>
                       </DropdownMenu>
 
-                      {/* Chevron repliable */}
+                      {/* Bouton chevron */}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-text-muted hover:text-ink hover:bg-background-secondary"
+                        className="h-7 w-7 rounded text-text-muted hover:text-ink hover:bg-background-secondary"
                         onClick={(e) => {
                           e.stopPropagation();
                           togglePiece(entry.id);
@@ -968,7 +968,7 @@ export const Comptabilite = () => {
                     </div>
                   </div>
 
-                  {/* Ligne Mobile / Tablette (< lg) - Prompt 6 */}
+                  {/* Ligne Mobile / Tablette (< lg) */}
                   <div
                     onClick={() => togglePiece(entry.id)}
                     className={cn(
@@ -996,19 +996,19 @@ export const Comptabilite = () => {
                       {/* Statut mobile */}
                       <div>
                         {cleanStatus === "draft" && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-warning/15 text-ink border-warning/40">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-warning/15 text-ink border-warning/40">
                             <span className="w-1.5 h-1.5 rounded-full bg-warning" />
                             Brouillon
                           </span>
                         )}
                         {cleanStatus === "validated" && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-success/15 text-ink border-success/40">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-success/15 text-ink border-success/40">
                             <span className="w-1.5 h-1.5 rounded-full bg-success" />
                             Validée
                           </span>
                         )}
                         {cleanStatus === "locked" && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-background-secondary text-ink border-border">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-background-secondary text-ink border-border">
                             <Lock className="w-2.5 h-2.5 text-ink" />
                             Verrouillée
                           </span>
@@ -1041,7 +1041,7 @@ export const Comptabilite = () => {
                           <Button
                             size="sm"
                             onClick={() => handleValidateEntry(entry.id)}
-                            className="h-6 px-2 text-[11px] font-semibold bg-primary text-ink hover:brightness-95"
+                            className="h-6 px-2 rounded text-[11px] font-semibold bg-primary text-ink hover:brightness-95"
                           >
                             Valider
                           </Button>
@@ -1050,7 +1050,7 @@ export const Comptabilite = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => togglePiece(entry.id)}
-                            className="h-6 px-2 text-[11px] font-medium border-border text-ink bg-background"
+                            className="h-6 px-2 rounded text-[11px] font-medium border-border text-ink bg-background"
                           >
                             Voir
                           </Button>
@@ -1060,15 +1060,14 @@ export const Comptabilite = () => {
                   </div>
 
                   {/* ================================================================= */}
-                  {/* SOUS-ÉCRITURES DÉPLIABLES (COLONNES DÉBIT/CRÉDIT SANS VERT/ROUGE) */}
+                  {/* SOUS-ÉCRITURES DÉPLIABLES (STRUCTURE EXACTE DU DESIGN HTML)        */}
                   {/* ================================================================= */}
                   {isExpanded && (
                     <div className="flex flex-col bg-background-secondary/40 border-t border-border animate-in fade-in-50 duration-150">
                       {/* Sous-en-tête interne (Desktop) */}
-                      <div className="hidden lg:grid grid-cols-12 px-4 py-2 bg-background-secondary text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border">
+                      <div className="hidden lg:grid grid-cols-12 px-4 py-1.5 bg-background-secondary text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border">
                         <div className="col-span-4 pl-8">Compte SYSCOHADA</div>
                         <div className="col-span-4">Libellé d'écriture</div>
-                        {/* Colonnes Débit et Crédit côte à côte avec fine séparation - Prompt 2 */}
                         <div className="col-span-2 text-right pr-4 border-r border-border">Débit</div>
                         <div className="col-span-2 text-right pr-4">Crédit</div>
                       </div>
@@ -1080,11 +1079,11 @@ export const Comptabilite = () => {
                         return (
                           <div
                             key={line.id || idx}
-                            className="px-4 py-2.5 border-b border-border/50 hover:bg-background-secondary/70 transition-colors text-xs"
+                            className="px-4 py-2 border-b border-border/50 hover:bg-background-secondary/60 transition-colors text-xs"
                           >
                             {/* Version Desktop */}
                             <div className="hidden lg:grid grid-cols-12 items-center">
-                              {/* Numéro de compte en gras + intitulé en gris moyen à côté - Prompt 5 */}
+                              {/* Numéro de compte en gras + intitulé en gris moyen à côté */}
                               <div className="col-span-4 pl-8 flex items-center gap-2 min-w-0 pr-2">
                                 <span className="font-mono font-bold text-ink shrink-0">
                                   {line.account_code}
@@ -1098,7 +1097,7 @@ export const Comptabilite = () => {
                                 {line.description || entry.description}
                               </div>
 
-                              {/* Colonne Débit : texte presque noir, tiret gris si vide - Prompt 2 */}
+                              {/* Colonne Débit : texte sombre presque noir, tiret gris si vide */}
                               <div className="col-span-2 text-right pr-4 font-mono font-semibold tabular-nums text-ink border-r border-border">
                                 {Number(line.debit) > 0 ? (
                                   formatCFA(line.debit)
@@ -1107,7 +1106,7 @@ export const Comptabilite = () => {
                                 )}
                               </div>
 
-                              {/* Colonne Crédit : texte presque noir, tiret gris si vide - Prompt 2 */}
+                              {/* Colonne Crédit : texte sombre presque noir, tiret gris si vide */}
                               <div className="col-span-2 text-right pr-4 font-mono font-semibold tabular-nums text-ink">
                                 {Number(line.credit) > 0 ? (
                                   formatCFA(line.credit)
@@ -1118,7 +1117,7 @@ export const Comptabilite = () => {
                             </div>
 
                             {/* Version Mobile */}
-                            <div className="lg:hidden flex flex-col gap-1.5">
+                            <div className="lg:hidden flex flex-col gap-1">
                               <div className="flex items-center gap-1.5">
                                 <span className="font-mono font-bold text-ink">
                                   {line.account_code}
@@ -1153,39 +1152,38 @@ export const Comptabilite = () => {
                         );
                       })}
 
-                      {/* Bandeau récapitulatif sous la pièce dépliée */}
-                      <div className="px-4 py-2.5 bg-background-secondary border-t border-border flex items-center justify-between flex-wrap gap-2 text-xs">
-                        <div className="flex items-center gap-3 flex-wrap">
+                      {/* Bandeau récapitulatif compact sous la pièce (Design HTML exact) */}
+                      <div className="px-4 py-2 bg-background-secondary border-t border-border flex items-center justify-between flex-wrap gap-2 text-xs">
+                        <div className="flex items-center gap-3 text-xs">
                           {isPieceBalanced ? (
-                            <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
+                            <span className="inline-flex items-center gap-1 font-semibold text-ink">
                               <CheckCircle2 className="w-4 h-4 text-success" />
                               Équilibrée
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 font-semibold text-error">
+                            <span className="inline-flex items-center gap-1 font-semibold text-error">
                               <AlertCircle className="w-4 h-4 text-error" />
                               Déséquilibrée (Écart : {formatCFA(Math.abs(pieceDebit - pieceCredit))})
                             </span>
                           )}
-                          <span className="text-border hidden sm:inline">|</span>
-                          <span className="font-mono text-ink text-[11px]">
-                            Total débit : <strong>{formatCFA(pieceDebit)}</strong>
+                          <span className="text-border">|</span>
+                          <span className="font-mono text-ink text-[12px]">
+                            Total débit : <strong className="text-ink">{formatCFA(pieceDebit)}</strong>
                           </span>
-                          <span className="text-border hidden sm:inline">·</span>
-                          <span className="font-mono text-ink text-[11px]">
-                            Total crédit : <strong>{formatCFA(pieceCredit)}</strong>
+                          <span className="text-border">·</span>
+                          <span className="font-mono text-ink text-[12px]">
+                            Total crédit : <strong className="text-ink">{formatCFA(pieceCredit)}</strong>
                           </span>
                         </div>
 
                         {cleanStatus === "draft" && (
                           <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
+                            <button
                               onClick={() => handleValidateEntry(entry.id)}
-                              className="h-7 px-3 text-xs font-semibold bg-primary text-ink hover:brightness-95"
+                              className="h-6 px-2.5 rounded bg-background border border-border text-ink text-[11px] font-semibold hover:bg-background-secondary transition-colors"
                             >
-                              Valider l'écriture
-                            </Button>
+                              Imputer définitivement
+                            </button>
                           </div>
                         )}
                       </div>
@@ -1198,9 +1196,9 @@ export const Comptabilite = () => {
         )}
 
         {/* ========================================================================= */}
-        {/* 6. PIED DE TABLEAU AVEC PAGINATION CONFORME (PROMPT 5)                    */}
+        {/* 6. PIED DE TABLEAU AVEC PAGINATION CONFORME (FORMAT DU DESIGN)            */}
         {/* ========================================================================= */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 border-t border-border text-xs text-text-muted bg-background select-none">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 border-t border-border text-xs text-text-muted bg-background select-none">
           {/* Format « 1 à 10 sur 21 pièces » */}
           <div className="flex items-center gap-2">
             <span className="font-semibold text-ink">
@@ -1227,29 +1225,25 @@ export const Comptabilite = () => {
               </select>
             </div>
 
-            {/* Boutons Précédent / Suivant */}
+            {/* Boutons Précédent / Suivant et bouton numéro carré */}
             <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="h-8 px-3 text-xs border-border text-ink hover:bg-background-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-8 px-2.5 rounded bg-background border border-border text-ink hover:bg-background-secondary transition-colors disabled:opacity-50 text-xs font-semibold"
               >
                 Précédent
-              </Button>
-              <div className="h-8 min-w-[32px] px-2 rounded bg-primary text-ink font-semibold flex items-center justify-center text-xs">
-                {page} / {totalPages}
+              </button>
+              <div className="h-8 w-8 rounded bg-primary text-ink border border-ink/20 font-semibold flex items-center justify-center text-xs">
+                {page}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages}
-                className="h-8 px-3 text-xs border-border text-ink hover:bg-background-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-8 px-2.5 rounded bg-background border border-border text-ink hover:bg-background-secondary transition-colors disabled:opacity-50 text-xs font-semibold"
               >
                 Suivant
-              </Button>
+              </button>
             </div>
           </div>
         </div>

@@ -12,6 +12,10 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - **Correction du typage `JournalEntryModal`** ([`src/views/Comptabilite.tsx`](file:///e:/Comptia/src/views/Comptabilite.tsx)) :
     - Remplacement de `onCreated` par la prop réelle `onSuccess` pour fermer la modale et invalider les requêtes.
     - Zéro donnée mockée : conservation intégrale du flux de données réelles (`/api/accounting/entries`).
+  - **Alignement Géométrique au Format Carré (`rounded` 2px / 4px) & Couleurs du Design** :
+    - Remplacement de tous les arrondis excessifs (`rounded-lg`, `rounded-full`, `rounded-md`) par le format quasi-carré du design HTML (`rounded`, 2px/0.125rem).
+    - Application aux cards de synthèse, conteneur du tableau, boutons d'action, sélecteurs, champs de recherche et badges de statut/journal.
+    - Alignement scrupuleux des couleurs sur la charte : cartes blanches nettes, badges avec puces précises, bouton de page numéroté carré jaune Ceilow (`h-8 w-8 rounded bg-primary text-ink border border-ink/20`).
   - **Prompt 2 : Montants & Couleurs (Sobriété financière & Règle 3)** :
     - Colonnes Débit et Crédit affichées en texte sombre presque noir (`text-ink`), sans vert ni rouge sur les lignes.
     - Colonnes Débit et Crédit côte à côte avec fine séparation verticale (`border-r border-border`).

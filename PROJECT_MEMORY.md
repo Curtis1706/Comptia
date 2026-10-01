@@ -6,6 +6,21 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-01 — Résolution de Conflit Git & Adoption Prioritaire de la Version de Firinze (`Comptabilite.tsx`)
+
+- **Contexte & Décision** :
+  - Conflits de fusion détectés dans [`src/views/Comptabilite.tsx`](file:///c:/Projects/brightbook-studio/src/views/Comptabilite.tsx) entre les modifications locales et le commit distant `e0f210b` de Firinze.
+  - Conformément à la directive explicite de l'utilisateur (« Les modifications de Firinze doivent dominer sur les miennes »), la version de Firinze a été intégralement retenue.
+- **Caractéristiques de la version retenue** :
+  - **Tableau dépliable par pièce comptable** : Découpage par pièces (`expandedPieces`), sous-lignes détaillées pour les débits/crédits avec comptes SYSCOHADA, et bandeau récapitulatif d'équilibre unitaire.
+  - **4 cartes synthétiques de partie double** : Total Débit, Total Crédit, Écart arithmétique et Brouillons à valider avec pastilles sémantiques profondes (`text-success-deep`, `text-warning-deep`, `text-error-deep`).
+  - **Actions avancées de ligne et de lot** : Extourne comptable (`POST /api/accounting/entries/[id]/reverse`), duplication, validation individuelle ou groupée (`bulk-validate`), suppression sécurisée des brouillons (`handleBulkDelete`).
+  - **Gestion enrichie des erreurs CSV** : Bannière dédiée `csvErrors` avec liste détaillée des lignes non conformes.
+  - **Pagination complète** : Bornes explicites (« 1 à 10 sur X pièces »), sélecteur de taille de page (10, 20, 50, 100) et boutons Précédent/Suivant.
+- **Contrôles Qualité** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build de production Next.js validé avec succès (54 routes compilées sans erreur).
+
 ### 2026-10-01 — Correction du Fond Canvas (`bg-background-secondary`) & Contraste Typographique
 
 - **Actions effectuées** :

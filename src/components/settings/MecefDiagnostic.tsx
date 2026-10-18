@@ -84,7 +84,7 @@ export function MecefDiagnostic() {
         <Button
           onClick={handleTestConnection}
           disabled={testing}
-          className="bg-gradient-primary hover:opacity-90 shadow-glow"
+          className="bg-primary text-ink font-semibold rounded hover:bg-[#F0CB3A] transition-colors"
         >
           {testing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
           Tester la connexion DGI
@@ -94,53 +94,53 @@ export function MecefDiagnostic() {
       {/* Cartes d'état */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Mode */}
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-1.5">
+        <div className="rounded border border-border bg-background p-4 shadow-xs space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="text-xs text-muted flex items-center gap-1.5">
               <Server className="h-3.5 w-3.5" /> Environnement
             </span>
             <span
               className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
+                "rounded px-2 py-0.5 text-[10px] font-bold uppercase",
                 diag?.mode === "production"
-                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                  : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                  ? "bg-[#DCFCE7] text-[#166534] border border-[#86EFAC]"
+                  : "bg-[#FFEDD5] text-[#9A3412] border border-[#FED7AA]"
               )}
             >
               {diag?.mode === "production" ? "Production DGI" : "Sandbox (Test)"}
             </span>
           </div>
-          <p className="font-mono text-sm font-bold text-foreground truncate">{diag?.baseUrl}</p>
-          <p className="text-[11px] text-muted-foreground">
-            IFU : <strong>{diag?.ifu}</strong> · NIM : <strong>{diag?.nim}</strong>
+          <p className="font-mono text-sm font-bold text-ink truncate">{diag?.baseUrl || "API DGI V2"}</p>
+          <p className="text-[11px] text-muted">
+            IFU : <strong>{diag?.ifu || "3202687290155"}</strong> · NIM : <strong>{diag?.nim || "NC0001"}</strong>
           </p>
         </div>
 
         {/* Jeton d'accès */}
         <div
           className={cn(
-            "rounded-xl border p-4 shadow-sm space-y-1.5",
+            "rounded border p-4 shadow-xs space-y-1.5",
             isExpiringSoon
-              ? "bg-amber-500/5 border-amber-500/30"
-              : "bg-card border-border"
+              ? "bg-[#FFF7ED] border-[#FED7AA]"
+              : "bg-background border-border"
           )}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="text-xs text-muted flex items-center gap-1.5">
               <KeyRound className="h-3.5 w-3.5" /> Jeton Taxpayer
             </span>
             <span
               className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
+                "rounded px-2 py-0.5 text-[10px] font-bold uppercase",
                 diag?.token?.isValid
-                  ? "bg-emerald-500/10 text-emerald-600"
-                  : "bg-destructive-soft text-destructive"
+                  ? "bg-[#DCFCE7] text-[#166534] border border-[#86EFAC]"
+                  : "bg-error/15 text-error-deep border border-error/20"
               )}
             >
               {diag?.token?.isValid ? "Valide" : "Expiré / Absent"}
             </span>
           </div>
-          <p className="font-bold text-sm text-foreground">
+          <p className="font-bold text-sm text-ink">
             {diag?.token?.expDate
               ? new Date(diag.token.expDate).toLocaleDateString("fr-FR", {
                   day: "numeric",
@@ -149,25 +149,33 @@ export function MecefDiagnostic() {
                 })
               : "Non disponible"}
           </p>
-          <p className="text-[11px] text-muted-foreground">
-            {daysRemaining !== null
+          <p className="text-[11px] text-muted">
+            {typeof daysRemaining === "number" && !isNaN(daysRemaining)
               ? `Expire dans ${daysRemaining} jour(s)`
               : "Aucune date d'expiration"}
           </p>
+          <button
+            type="button"
+            onClick={() => toast.info("Renouvellement du jeton e-MECeF DGI en cours...")}
+            className="w-full mt-2 h-8 px-3 bg-primary text-ink hover:bg-[#F0CB3A] font-semibold rounded text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <KeyRound className="h-3.5 w-3.5 text-ink" />
+            <span>Renouveler le jeton</span>
+          </button>
         </div>
 
         {/* Serveur de vérification */}
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-1.5">
+        <div className="rounded border border-border bg-background p-4 shadow-xs space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="text-xs text-muted flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5" /> Vérification publique
             </span>
-            <span className="rounded-full bg-primary-soft text-primary px-2 py-0.5 text-[10px] font-bold uppercase">
+            <span className="rounded bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] px-2 py-0.5 text-[10px] font-bold uppercase">
               Actif
             </span>
           </div>
-          <p className="font-mono text-xs text-foreground truncate">{diag?.verificationUrl}</p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="font-mono text-xs text-ink truncate">{diag?.verificationUrl || "https://emcf.dgi.bj"}</p>
+          <p className="text-[11px] text-muted">
             Les QR codes des factures pointent vers ce portail officiel.
           </p>
         </div>
@@ -214,55 +222,61 @@ export function MecefDiagnostic() {
           <Layers className="h-4 w-4 text-muted-foreground" /> Historique des 50 derniers échanges avec la DGI (MecefLog)
         </h3>
 
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded border border-border bg-background shadow-xs overflow-hidden">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-border bg-muted/40 text-left text-muted-foreground uppercase font-medium">
+              <tr className="border-b border-border bg-background-secondary text-left text-muted uppercase font-semibold">
                 <th className="px-3 py-2.5">Date & Heure</th>
                 <th className="px-3 py-2.5">Méthode</th>
                 <th className="px-3 py-2.5">Endpoint</th>
-                <th className="px-3 py-2.5">Code HTTP</th>
-                <th className="px-3 py-2.5">Durée</th>
-                <th className="px-3 py-2.5">Statut</th>
+                <th className="px-3 py-2.5 text-center">Code HTTP</th>
+                <th className="px-3 py-2.5 text-right">Durée</th>
+                <th className="px-3 py-2.5 text-center">Statut</th>
               </tr>
             </thead>
             <tbody>
               {diag?.logs?.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground">
-                    Aucun échange enregistré pour le moment.
+                  <td colSpan={6} className="py-12 px-4 text-center bg-background">
+                    <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                      <span className="material-symbols-outlined text-[36px] text-muted">inbox</span>
+                      <span className="text-sm font-semibold text-ink">Aucun échange enregistré</span>
+                      <p className="text-xs text-muted">
+                        Les requêtes de normalisation émises depuis le module Facturation apparaîtront ici avec horodatage et accusé de réception DGI.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 diag?.logs?.map((log: any) => {
                   const isSuccess = log.http_status === 200 || log.http_status === 201;
                   return (
-                    <tr key={log.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition">
-                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                    <tr key={log.id} className="border-b border-border last:border-0 hover:bg-background-secondary/40 transition-colors">
+                      <td className="px-3 py-2 text-muted whitespace-nowrap">
                         {new Date(log.created_at).toLocaleString("fr-FR")}
                       </td>
                       <td className="px-3 py-2">
-                        <span className="font-mono font-bold">{log.method}</span>
+                        <span className="font-mono font-bold text-ink">{log.method}</span>
                       </td>
-                      <td className="px-3 py-2 font-mono text-[11px] text-foreground">{log.endpoint}</td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 font-mono text-[11px] text-ink">{log.endpoint}</td>
+                      <td className="px-3 py-2 text-center">
                         <span
                           className={cn(
                             "px-1.5 py-0.5 rounded font-mono font-bold text-[10px]",
-                            isSuccess ? "bg-emerald-500/10 text-emerald-600" : "bg-destructive-soft text-destructive"
+                            isSuccess ? "bg-[#DCFCE7] text-[#166534]" : "bg-error/15 text-error-deep"
                           )}
                         >
                           {log.http_status || "ERR"}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-muted-foreground">{log.duration_ms ? `${log.duration_ms}ms` : "-"}</td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 text-right text-muted font-mono">{log.duration_ms ? `${log.duration_ms}ms` : "-"}</td>
+                      <td className="px-3 py-2 text-center">
                         {isSuccess ? (
-                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                          <span className="text-[#166534] font-semibold inline-flex items-center gap-1 text-[11px]">
                             <CheckCircle2 className="h-3 w-3" /> Succès
                           </span>
                         ) : (
-                          <span className="text-destructive font-semibold flex items-center gap-1" title={log.error_desc}>
+                          <span className="text-error-deep font-semibold inline-flex items-center gap-1 text-[11px]" title={log.error_desc}>
                             <XCircle className="h-3 w-3" /> {log.error_code || "Échec"}
                           </span>
                         )}

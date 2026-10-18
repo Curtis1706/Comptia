@@ -15,9 +15,13 @@ export async function POST(req: Request) {
       return errorResponse("Veuillez sélectionner au moins une transaction de chaque côté", 400);
     }
 
+    // Sécurisation multi-tenant et calcul des montants
     const [bankSum, ledgerSum] = await Promise.all([
       prisma.bankTransaction.aggregate({
-        where: { id: { in: bank_ids } },
+        where: {
+          id: { in: bank_ids },
+          statement: { company_id: user.company_id },
+        },
         _sum: { amount: true },
       }),
       prisma.journalLine.aggregate({
@@ -33,17 +37,24 @@ export async function POST(req: Request) {
     const bankTotal = Number(bankSum._sum.amount || 0);
     const ledgerTotal = Number(ledgerSum._sum.debit || 0) - Number(ledgerSum._sum.credit || 0);
 
-    if (Math.abs(bankTotal - ledgerTotal) > 0.01) {
-      return errorResponse(`Équilibre non respecté. Écart: ${bankTotal - ledgerTotal}`, 400);
+    const diff = Math.abs(bankTotal - ledgerTotal);
+    if (diff > 0.01) {
+      return errorResponse(`Équilibre non respecté. Écart: ${Math.round((bankTotal - ledgerTotal) * 100) / 100} F CFA`, 400);
     }
 
     await prisma.$transaction([
       prisma.bankTransaction.updateMany({
-        where: { id: { in: bank_ids } },
+        where: {
+          id: { in: bank_ids },
+          statement: { company_id: user.company_id },
+        },
         data: { status: "MATCHED" },
       }),
       prisma.journalLine.updateMany({
-        where: { id: { in: ledger_ids } },
+        where: {
+          id: { in: ledger_ids },
+          company_id: user.company_id,
+        },
         data: {
           reconciliation_status: "MATCHED",
           bank_transaction_id: bank_ids[0],

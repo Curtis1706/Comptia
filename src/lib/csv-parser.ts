@@ -376,3 +376,108 @@ export function detectAndParseCSV(text: string): ParseCSVResult {
     delimiter,
   };
 }
+
+export interface RawBankOperation {
+  date: string;
+  description: string;
+  reference?: string;
+  amount: number;
+}
+
+/**
+ * Extrait directement les lignes brutes d'opérations bancaires d'un relevé CSV
+ * Conforme au modèle BankTransaction de Ceilow :
+ * - Montant positif : Entrée de fonds (Crédit sur le relevé / versement)
+ * - Montant négatif : Sortie de fonds (Débit sur le relevé / retrait)
+ */
+export function parseRawBankStatementCSV(text: string, customDelimiter?: string): RawBankOperation[] {
+  const delimiter = customDelimiter || detectDelimiter(text);
+  const rawRows = parseCSVToRows(text, delimiter);
+
+  if (rawRows.length === 0) return [];
+
+  // Trouver la ligne d'en-tête la plus pertinente
+  let headerIndex = -1;
+  for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
+    const row = rawRows[i].map((c) => c.toLowerCase());
+    if (
+      row.some((c) => c.includes("date") || c.includes("jour")) &&
+      row.some(
+        (c) =>
+          c.includes("libell") ||
+          c.includes("desc") ||
+          c.includes("motif") ||
+          c.includes("montant") ||
+          c.includes("debit") ||
+          c.includes("credit") ||
+          c.includes("solde")
+      )
+    ) {
+      headerIndex = i;
+      break;
+    }
+  }
+
+  const header =
+    headerIndex !== -1
+      ? rawRows[headerIndex].map((c) => c.toLowerCase().trim())
+      : rawRows[0].map((c) => c.toLowerCase().trim());
+
+  const dataRows = headerIndex !== -1 ? rawRows.slice(headerIndex + 1) : rawRows.slice(1);
+
+  const colDate = header.findIndex((h) => h.includes("date") || h.includes("jour"));
+  const colDesc = header.findIndex(
+    (h) => h.includes("libell") || h.includes("desc") || h.includes("motif") || h.includes("opérat") || h.includes("detail")
+  );
+  const colRef = header.findIndex(
+    (h) => h.includes("ref") || h.includes("pièce") || h.includes("piece") || h.includes("num")
+  );
+  const colDebit = header.findIndex(
+    (h) => h.includes("debit") || h.includes("débit") || h.includes("dépense") || h.includes("retrait") || h.includes("sortie")
+  );
+  const colCredit = header.findIndex(
+    (h) => h.includes("credit") || h.includes("crédit") || h.includes("recette") || h.includes("versement") || h.includes("entrée")
+  );
+  const colAmount = header.findIndex(
+    (h) => h.includes("montant") || h.includes("solde") || h.includes("valeur") || h.includes("amount")
+  );
+
+  const operations: RawBankOperation[] = [];
+
+  dataRows.forEach((cols, idx) => {
+    if (cols.length < 2) return;
+
+    const dateRaw = colDate !== -1 ? cols[colDate] : cols[0];
+    const date = parseFrenchDate(dateRaw);
+
+    const desc =
+      colDesc !== -1 && cols[colDesc] ? cols[colDesc].trim() : cols[1]?.trim() || `Opération bancaire ${idx + 1}`;
+
+    const ref = colRef !== -1 && cols[colRef] ? cols[colRef].trim() : undefined;
+
+    let amount = 0;
+
+    if (colDebit !== -1 && colCredit !== -1) {
+      const debit = parseFrenchNumber(cols[colDebit]);
+      const credit = parseFrenchNumber(cols[colCredit]);
+      if (credit > 0) amount = credit;
+      else if (debit > 0) amount = -debit;
+    } else if (colAmount !== -1) {
+      amount = parseFrenchNumber(cols[colAmount]);
+    } else if (cols.length >= 3) {
+      amount = parseFrenchNumber(cols[2]);
+    }
+
+    if (amount !== 0) {
+      operations.push({
+        date,
+        description: desc,
+        reference: ref,
+        amount,
+      });
+    }
+  });
+
+  return operations;
+}
+

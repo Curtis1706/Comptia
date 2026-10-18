@@ -6,6 +6,34 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-18 — Intégration Complète & Opérationnelle du Rapprochement Bancaire & Trésorerie
+
+- **Contexte & Diagnostic Initial** :
+  - Audit des fonctionnalités de rapprochement bancaire : le schéma Prisma comportait les modèles `BankStatement` et `BankTransaction`, mais aucun moyen d'importer de relevé n'existait, la table `BankTransaction` était toujours vide, l'API de consultation `GET` souffrait d'un bug bloquant exigeant la permission `write` au lieu de `read`, les filtres par compte de trésorerie (521, 585, 571) étaient ignorés côté backend, et l'interface comportait des recherches statiques inopérantes ainsi qu'une impossibilité d'annuler (dé-rapprocher) les écritures.
+- **Actions Réalisées** :
+  - **1. Module d'import de relevés bancaires & Mobile Money** :
+    - Enrichissement de [`src/lib/csv-parser.ts`](file:///c:/Projects/brightbook-studio/src/lib/csv-parser.ts) avec `parseRawBankStatementCSV` capable d'extraire automatiquement dates, libellés, références et montants signés (+ entrée, - sortie) selon les normes bancaires et SYSCOHADA.
+    - Création de la route API [`src/app/api/accounting/reconcile/bank/import/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/bank/import/route.ts) qui enregistre en transaction atomique Prisma un `BankStatement` et les `BankTransaction` associés avec bornes de dates et audit trail.
+    - Création du composant [`src/components/accounting/BankStatementImportModal.tsx`](file:///c:/Projects/brightbook-studio/src/components/accounting/BankStatementImportModal.tsx) avec sélection du compte (521, 585, 571), glisser-déposer de fichier CSV, prévisualisation tabulaire instantanée, synthèse (recettes, dépenses, solde net) et bouton de chargement d'un exemple de relevé pour les tests.
+  - **2. Fonctionnalité d'annulation (Dé-rapprochement / Unmatch)** :
+    - Création de la route API [`src/app/api/accounting/reconcile/unmatch/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/unmatch/route.ts) permettant de réinitialiser le statut d'une transaction bancaire et des lignes comptables associées à `UNMATCHED`, avec dissociation du lien `bank_transaction_id` et journalisation d'audit.
+  - **3. Correction & Renforcement des API de rapprochement** :
+    - [`src/app/api/accounting/reconcile/bank/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/bank/route.ts) : passage de la permission requise de `write` à `read`, gestion des filtres `source` (521, 585, 571), `status` (`unmatched` / `matched`) et recherche textuelle insensible à la casse.
+    - [`src/app/api/accounting/reconcile/ledger/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/ledger/route.ts) : prise en compte du filtre `source` sur les comptes du grand livre (521 Banque, 585 Mobile Money, 571 Caisse), gestion du statut (`unmatched` / `matched`), recherche multi-critères et inclusion des transactions bancaires liées.
+    - [`src/app/api/accounting/reconcile/match/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/match/route.ts) : sécurisation multi-tenant stricte et vérification arithmétique rigoureuse de l'écart.
+  - **4. Refonte Intégrale de la Vue Rapprochement** ([`src/views/Rapprochement.tsx`](file:///c:/Projects/brightbook-studio/src/views/Rapprochement.tsx)) :
+    - Navigation par onglets : **Opérations à rapprocher** et **Historique rapproché**.
+    - Sélecteur de trésorerie dynamique (Banque 521, Mobile Money 585, Caisse 571) avec réinitialisation synchronisée des sélections.
+    - Deux colonnes interactives (Relevé vs Comptabilité) avec champs de recherche réactifs en temps réel.
+    - Skeletons de chargement épousant fidèlement le format des cartes (règle 8).
+    - Calcul en direct des sélections (Total relevé, Total grand livre, Écart arithmétique) et validation conditionnelle du bouton CTA.
+    - Bandeau récapitulatif ergonomique au bas de l'écran lors d'une sélection.
+    - Onglet d'historique avec tableau des correspondances et bouton « Dé-rapprocher » direct.
+    - Conformité stricte aux tokens sémantiques Ceilow (`bg-background`, `border-border`, `text-ink`, `text-text-muted`, `bg-primary`, `text-success`, `text-error`), angles carrés (`rounded`), montants tabulaires `font-mono tabular-nums`, et zéro emoji.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build Next.js validé avec succès (56 routes générées sans erreur).
+
 ### 2026-10-01 — Chargement des Véritables Avatars Salariés & Ajout Pagination sur les Bulletins
 
 - **Actions effectuées** :

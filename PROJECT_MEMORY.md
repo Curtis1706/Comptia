@@ -6,6 +6,26 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-18 — Optimisation Avancée de l'Importation par Image (Photo & Scan OCR, Capture Mobile, Édition en Ligne)
+
+- **Contexte & Ravitaillement UX** :
+  - L'importation d'image pour le relevé bancaire et les pièces de trésorerie a été enrichie pour offrir une ergonomie de premier ordre : prise en photo directe sur smartphone/tablette, drag-and-drop d'images, aperçu miniature avec métadonnées, et capacité d'édition en ligne pour corriger instantanément une faute de frappe ou une hésitation OCR.
+- **Actions Réalisées** :
+  - **1. Onglet dédié « Photo & Scan OCR »** ([`src/components/accounting/BankStatementImportModal.tsx`](file:///c:/Projects/brightbook-studio/src/components/accounting/BankStatementImportModal.tsx)) :
+    - Mise en avant prioritaire de l'option « Photo & Scan OCR » avec zone de Drag & Drop réactive (`isDraggingPhoto`).
+    - Intégration du bouton « Prendre une photo » exploitant la caméra arrière des smartphones/tablettes (`capture="environment"`).
+    - Intégration du bouton « Sélectionner une photo / image » pour les fichiers JPG, JPEG, PNG, WEBP sur desktop.
+    - Mini-carte d'aperçu de l'image sélectionnée (`URL.createObjectURL`) avec affichage du nom, du poids et de l'indicateur d'extraction.
+  - **2. Édition en Ligne des Opérations Extraites** :
+    - Ajout d'un mode d'édition en direct sur chaque ligne du tableau de prévisualisation (bouton modifier `Edit2`).
+    - L'utilisateur peut ajuster la date, corriger le libellé, changer le sens (Recette `+` ou Dépense `−`), modifier le montant ou la référence en un clic avant de valider l'importation.
+  - **3. Parser OCR Renforcé (Dates Françaises & Mobile Money)** ([`src/lib/bank-ocr-parser.ts`](file:///c:/Projects/brightbook-studio/src/lib/bank-ocr-parser.ts)) :
+    - Normalisation des dates textuelles avec mois en français complets ou abrégés (ex: `18 oct 2026`, `24-novembre-2026`, `05/04/2026`).
+    - Détection spécialisée des formats de transactions Mobile Money (MTN MoMo, Moov Money, Celtiis Cash) et bordereaux de banque.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage TypeScript.
+  - `pnpm build` : 56 routes compilées avec succès, build de production validé.
+
 ### 2026-10-18 — Import Multi-Modal des Relevés Bancaires (Photo/Scan OCR, Copier-Coller Excel & Saisie Manuelle)
 
 - **Contexte & Besoin Utilisateur** :

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,13 @@ import {
   ClipboardPaste,
   Plus,
   Trash2,
-  FileCheck,
+  FileSpreadsheet,
+  Image as ImageIcon,
+  Edit2,
+  Check,
+  X,
+  Smartphone,
+  Eye,
 } from "lucide-react";
 
 interface Props {
@@ -33,16 +39,38 @@ interface Props {
   onSuccess: () => void;
 }
 
-type ImportMode = "file" | "paste" | "manual";
+type ImportMode = "photo" | "file" | "paste" | "manual";
 
 export function BankStatementImportModal({ open, onOpenChange, defaultSource = "bank", onSuccess }: Props) {
   const [source, setSource] = useState<"bank" | "mobile_money" | "cash">(defaultSource);
-  const [importMode, setImportMode] = useState<ImportMode>("file");
+  const [importMode, setImportMode] = useState<ImportMode>("photo");
   const [statementName, setStatementName] = useState("");
   const [operations, setOperations] = useState<RawBankOperation[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzingOCR, setIsAnalyzingOCR] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [fileSizeStr, setFileSizeStr] = useState("");
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
+  // États drag & drop
+  const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+
+  // Édition en ligne d'une ligne extraite
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<{
+    date: string;
+    description: string;
+    reference: string;
+    amount: string;
+    type: "credit" | "debit";
+  }>({
+    date: "",
+    description: "",
+    reference: "",
+    amount: "",
+    type: "credit",
+  });
 
   // Saisie manuelle directe
   const [manualDate, setManualDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -54,21 +82,36 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
   // Zone copier-coller
   const [pastedText, setPastedText] = useState("");
 
-  // Gestion du fichier (CSV, Image ou PDF)
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Traitement universel d'un fichier (Image, PDF ou CSV)
+  const processUploadedFile = async (file: File) => {
     if (!file) return;
 
     setFileName(file.name);
+    const sizeKb = file.size / 1024;
+    setFileSizeStr(sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} Mo` : `${sizeKb.toFixed(0)} Ko`);
+
     if (!statementName) {
       setStatementName(file.name.replace(/\.[^/.]+$/, ""));
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
-    const isImageOrPdf = ["pdf", "jpg", "jpeg", "png", "webp"].includes(ext) || file.type.startsWith("image/");
+    const isImage = ["jpg", "jpeg", "png", "webp"].includes(ext) || file.type.startsWith("image/");
+    const isPdf = ext === "pdf" || file.type === "application/pdf";
 
-    // 1. Si c'est une image ou un PDF -> Traitement OCR serveur
-    if (isImageOrPdf) {
+    // Si c'est une image, préparer l'aperçu miniature
+    if (isImage) {
+      const url = URL.createObjectURL(file);
+      setImagePreviewUrl(url);
+    } else {
+      setImagePreviewUrl(null);
+    }
+
+    // 1. Image ou PDF -> Traitement par le moteur OCR serveur
+    if (isImage || isPdf) {
       setIsAnalyzingOCR(true);
       try {
         const formData = new FormData();
@@ -85,19 +128,19 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
           setOperations(json.data.operations);
           toast.success(`${json.data.operations.length} opération(s) extraite(s) par reconnaissance optique (OCR) !`);
         } else if (json.data?.raw_text) {
-          toast.warning("L'image a été lue, mais vérifiez les montants extraits.");
-          // Tentative d'analyse de secours
+          // Tentative d'analyse de secours avec le parseur textuel
           const fallbackOps = parseBankTextToOperations(json.data.raw_text);
           if (fallbackOps.length > 0) {
             setOperations(fallbackOps);
+            toast.warning(`${fallbackOps.length} opération(s) détectée(s). Veuillez vérifier les montants.`);
           } else {
-            toast.error("Aucune opération financière clairement détectée. Vous pouvez utiliser la saisie manuelle ou le copier-coller.");
+            toast.error("Texte lu mais aucune opération financière clairement structurée. Vous pouvez ajuster ou saisir manuellement.");
           }
         } else {
           toast.error(json.error || "Impossible d'extraire des opérations depuis ce document.");
         }
       } catch {
-        toast.error("Erreur lors de l'analyse OCR de l'image.");
+        toast.error("Erreur réseau lors de l'analyse OCR.");
       } finally {
         setIsAnalyzingOCR(false);
       }
@@ -123,6 +166,26 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
       toast.success(`${parsed.length} opération(s) détectée(s) avec succès.`);
     };
     reader.readAsText(file);
+  };
+
+  // Gestionnaires Drag & Drop Photo
+  const handlePhotoDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingPhoto(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processUploadedFile(file);
+    }
+  };
+
+  // Gestionnaires Drag & Drop Fichier (CSV/PDF)
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingFile(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processUploadedFile(file);
+    }
   };
 
   // Traitement du copier-coller
@@ -179,8 +242,56 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
     toast.success("Ligne ajoutée au relevé.");
   };
 
+  // Début d'édition en ligne d'une ligne
+  const handleStartEdit = (index: number) => {
+    const op = operations[index];
+    setEditingIndex(index);
+    setEditForm({
+      date: op.date,
+      description: op.description,
+      reference: op.reference || "",
+      amount: Math.abs(op.amount).toString(),
+      type: op.amount >= 0 ? "credit" : "debit",
+    });
+  };
+
+  // Sauvegarde de l'édition en ligne
+  const handleSaveEdit = () => {
+    if (editingIndex === null) return;
+    const amountNum = parseFloat(editForm.amount.replace(/[^0-9.-]/g, ""));
+    if (isNaN(amountNum) || amountNum <= 0) {
+      toast.error("Montant invalide.");
+      return;
+    }
+
+    const finalAmount = editForm.type === "credit" ? amountNum : -amountNum;
+
+    setOperations((prev) =>
+      prev.map((op, idx) =>
+        idx === editingIndex
+          ? {
+              date: editForm.date,
+              description: editForm.description.trim() || "Opération",
+              reference: editForm.reference.trim() || undefined,
+              amount: finalAmount,
+            }
+          : op
+      )
+    );
+
+    setEditingIndex(null);
+    toast.success("Ligne mise à jour.");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+  };
+
   const handleRemoveRow = (index: number) => {
     setOperations((prev) => prev.filter((_, idx) => idx !== index));
+    if (editingIndex === index) {
+      setEditingIndex(null);
+    }
   };
 
   const handleLoadSample = () => {
@@ -227,8 +338,11 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
   const handleReset = () => {
     setOperations([]);
     setFileName("");
+    setFileSizeStr("");
+    setImagePreviewUrl(null);
     setStatementName("");
     setPastedText("");
+    setEditingIndex(null);
   };
 
   const totalCredit = operations.filter((op) => op.amount > 0).reduce((sum, op) => sum + op.amount, 0);
@@ -273,13 +387,13 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-background border border-border text-ink rounded p-6 font-sans">
+      <DialogContent className="max-w-3xl bg-background border border-border text-ink rounded p-6 font-sans max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold font-sans">
             Importer un relevé de trésorerie
           </DialogTitle>
           <DialogDescription className="text-text-muted text-sm font-sans">
-            Importez vos flux par fichier (CSV, Excel, PDF), photo/scan de relevé ou bordereau (OCR), copier-coller de tableau ou saisie manuelle.
+            Chargez vos flux par photo ou scan de bordereau/reçu (OCR), fichier (CSV, Excel, PDF), copier-coller de SMS ou saisie manuelle.
           </DialogDescription>
         </DialogHeader>
 
@@ -310,81 +424,237 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
           </div>
 
           {/* Onglets de mode d'importation */}
-          <div className="flex items-center gap-1 border-b border-border pb-1">
+          <div className="flex items-center gap-1 border-b border-border pb-1 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setImportMode("photo")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors whitespace-nowrap",
+                importMode === "photo"
+                  ? "border-primary text-ink bg-background-secondary/60 font-bold"
+                  : "border-transparent text-text-muted hover:text-ink"
+              )}
+            >
+              <Camera className="h-3.5 w-3.5 text-primary" />
+              Photo & Scan OCR
+            </button>
             <button
               type="button"
               onClick={() => setImportMode("file")}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors whitespace-nowrap",
                 importMode === "file"
-                  ? "border-primary text-ink bg-background-secondary/50 font-bold"
+                  ? "border-primary text-ink bg-background-secondary/60 font-bold"
                   : "border-transparent text-text-muted hover:text-ink"
               )}
             >
-              <UploadCloud className="h-3.5 w-3.5 text-primary" />
-              Fichier ou Photo (CSV / PDF / Image)
+              <FileSpreadsheet className="h-3.5 w-3.5 text-text-muted" />
+              Fichier CSV / PDF
             </button>
             <button
               type="button"
               onClick={() => setImportMode("paste")}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors whitespace-nowrap",
                 importMode === "paste"
-                  ? "border-primary text-ink bg-background-secondary/50 font-bold"
+                  ? "border-primary text-ink bg-background-secondary/60 font-bold"
                   : "border-transparent text-text-muted hover:text-ink"
               )}
             >
               <ClipboardPaste className="h-3.5 w-3.5 text-warning" />
-              Copier-Coller Excel / SMS
+              Copier-Coller SMS / Excel
             </button>
             <button
               type="button"
               onClick={() => setImportMode("manual")}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors whitespace-nowrap",
                 importMode === "manual"
-                  ? "border-primary text-ink bg-background-secondary/50 font-bold"
+                  ? "border-primary text-ink bg-background-secondary/60 font-bold"
                   : "border-transparent text-text-muted hover:text-ink"
               )}
             >
               <Plus className="h-3.5 w-3.5 text-success" />
-              Saisie manuelle directe
+              Saisie manuelle
             </button>
           </div>
 
-          {/* CONTENU DU MODE 1 : FICHIER & PHOTO */}
+          {/* ONGLET 1 : PHOTO & SCAN OCR D'IMAGE */}
+          {importMode === "photo" && (
+            <div className="space-y-3">
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingPhoto(true);
+                }}
+                onDragLeave={() => setIsDraggingPhoto(false)}
+                onDrop={handlePhotoDrop}
+                className={cn(
+                  "rounded border-2 border-dashed p-5 text-center transition-colors",
+                  isDraggingPhoto
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-background-secondary/40"
+                )}
+              >
+                {isAnalyzingOCR ? (
+                  <div className="py-6 flex flex-col items-center justify-center space-y-2">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    <p className="text-sm font-semibold text-ink">Reconnaissance optique (OCR) en cours...</p>
+                    <p className="text-xs text-text-muted">Extraction des opérations bancaires depuis votre image ou photo.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                      <div className="h-10 w-10 rounded bg-primary/20 flex items-center justify-center text-primary">
+                        <Camera className="h-5 w-5" />
+                      </div>
+                      <div className="h-10 w-10 rounded bg-background-secondary flex items-center justify-center text-text-muted">
+                        <ImageIcon className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-ink">
+                      Glissez une photo de relevé, bordereau bancaire ou reçu ici
+                    </p>
+                    <p className="text-xs text-text-muted mt-1 max-w-md mx-auto">
+                      Formats supportés : <strong>JPG, JPEG, PNG, WEBP</strong>. Idéal pour bordereaux de versement espèces, avis d&apos;opéré, chèques et captures d&apos;écran Mobile Money.
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                      {/* Bouton Caméra (Mobile / Smartphone) */}
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="inline-flex items-center gap-2 rounded bg-background border border-border px-3 py-2 text-xs font-semibold text-ink shadow-sm hover:bg-background-secondary transition"
+                      >
+                        <Smartphone className="h-4 w-4 text-primary" />
+                        Prendre une photo
+                        <input
+                          ref={cameraInputRef}
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) processUploadedFile(f);
+                          }}
+                          className="hidden"
+                        />
+                      </button>
+
+                      {/* Bouton Sélecteur d'image standard */}
+                      <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        className="inline-flex items-center gap-2 rounded bg-primary px-4 py-2 text-xs font-semibold text-ink shadow-sm hover:bg-primary/90 transition"
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                        Sélectionner une photo / image
+                        <input
+                          ref={photoInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) processUploadedFile(f);
+                          }}
+                          className="hidden"
+                        />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Aperçu miniature de l'image sélectionnée si présente */}
+              {imagePreviewUrl && (
+                <div className="flex items-center gap-3 p-2.5 rounded border border-border bg-background-secondary/30">
+                  <div className="h-14 w-14 rounded overflow-hidden border border-border bg-background flex-shrink-0 relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Aperçu du relevé"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-ink truncate">{fileName}</p>
+                    <p className="text-[10px] text-text-muted mt-0.5">{fileSizeStr} &bull; Image analysée par OCR</p>
+                    <span className="inline-flex items-center gap-1 text-[10px] text-success font-medium mt-1">
+                      <CheckCircle2 className="h-3 w-3" /> Image chargée
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setImagePreviewUrl(null);
+                      setFileName("");
+                    }}
+                    className="h-7 w-7 p-0 text-text-muted hover:text-error"
+                    title="Retirer cette image"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ONGLET 2 : FICHIER CSV / PDF */}
           {importMode === "file" && (
-            <div className="rounded border-2 border-dashed border-border p-6 text-center bg-background-secondary/40">
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDraggingFile(true);
+              }}
+              onDragLeave={() => setIsDraggingFile(false)}
+              onDrop={handleFileDrop}
+              className={cn(
+                "rounded border-2 border-dashed p-5 text-center transition-colors",
+                isDraggingFile
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-background-secondary/40"
+              )}
+            >
               {isAnalyzingOCR ? (
                 <div className="py-6 flex flex-col items-center justify-center space-y-2">
                   <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                  <p className="text-sm font-semibold text-ink">Analyse optique (OCR) en cours...</p>
-                  <p className="text-xs text-text-muted">Extraction des opérations bancaires depuis votre document ou photo.</p>
+                  <p className="text-sm font-semibold text-ink">Analyse du fichier PDF en cours...</p>
+                  <p className="text-xs text-text-muted">Extraction du texte et des colonnes financières.</p>
                 </div>
               ) : (
                 <>
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <UploadCloud className="h-8 w-8 text-primary" />
-                    <Camera className="h-7 w-7 text-text-muted" />
+                    <UploadCloud className="h-7 w-7 text-primary" />
+                    <FileText className="h-7 w-7 text-text-muted" />
                   </div>
                   <p className="text-sm font-medium text-ink">
-                    Glissez votre fichier de relevé ou photo ici
+                    Glissez votre fichier de relevé CSV ou PDF ici
                   </p>
                   <p className="text-xs text-text-muted mt-1 max-w-md mx-auto">
-                    Formats acceptés : <strong>CSV, TXT, PDF, JPG, PNG, WEBP</strong> (photo de bordereau bancaire, avis d&apos;opéré, capture MoMo).
+                    Formats acceptés : <strong>CSV, TXT, TSV, PDF</strong>. Détection automatique des séparateurs et colonnes débit/crédit.
                   </p>
 
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-                    <label className="cursor-pointer inline-flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm font-semibold text-ink shadow-sm hover:bg-primary/90 transition">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="cursor-pointer inline-flex items-center gap-2 rounded bg-primary px-4 py-2 text-xs font-semibold text-ink shadow-sm hover:bg-primary/90 transition"
+                    >
                       <FileText className="h-4 w-4" />
-                      Choisir un fichier ou une photo
+                      Choisir un fichier CSV ou PDF
                       <input
+                        ref={fileInputRef}
                         type="file"
-                        accept=".csv,.txt,.tsv,.pdf,image/png,image/jpeg,image/webp"
-                        onChange={handleFileChange}
+                        accept=".csv,.txt,.tsv,.pdf"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) processUploadedFile(f);
+                        }}
                         className="hidden"
                       />
-                    </label>
+                    </button>
 
                     <Button
                       type="button"
@@ -401,14 +671,14 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
             </div>
           )}
 
-          {/* CONTENU DU MODE 2 : COPIER-COLLER */}
+          {/* ONGLET 3 : COPIER-COLLER */}
           {importMode === "paste" && (
             <div className="space-y-3 bg-background-secondary/30 p-4 rounded border border-border">
               <div>
                 <Label className="text-xs font-semibold text-text-muted">Collez votre texte ici (lignes Excel ou SMS MoMo)</Label>
                 <Textarea
                   rows={4}
-                  placeholder={`Exemple Excel :\n18/10/2026\tVirement client SOBEBRA\tVIR-001\t350000\n18/10/2026\tFrais de compte\t-12500`}
+                  placeholder={`Exemple Excel :\n18/10/2026\tVirement client SOBEBRA\tVIR-001\t350000\n18/10/2026\tFrais de compte\t-12500\n\nOu SMS MoMo :\nVous avez recu 50000 FCFA de 22997000000. ID: 8847291`}
                   value={pastedText}
                   onChange={(e) => setPastedText(e.target.value)}
                   className="mt-1 font-mono text-xs rounded border-border bg-background"
@@ -428,7 +698,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
             </div>
           )}
 
-          {/* CONTENU DU MODE 3 : SAISIE MANUELLE */}
+          {/* ONGLET 4 : SAISIE MANUELLE */}
           {importMode === "manual" && (
             <div className="space-y-3 bg-background-secondary/40 p-4 rounded border border-border">
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
@@ -444,7 +714,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                 <div className="sm:col-span-2">
                   <Label className="text-[10px] font-bold uppercase text-text-muted">Libellé de l&apos;opération</Label>
                   <Input
-                    placeholder="Ex: Virement reçu client X"
+                    placeholder="Ex: Virement reçu client SOBEBRA"
                     value={manualDesc}
                     onChange={(e) => setManualDesc(e.target.value)}
                     className="mt-1 h-8 text-xs rounded border-border"
@@ -495,7 +765,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
             </div>
           )}
 
-          {/* TABLEAU DES OPÉRATIONS EXTRAITES / PRÉVISUALISATION */}
+          {/* TABLEAU DES OPÉRATIONS EXTRAITES / PRÉVISUALISATION ET ÉDITION */}
           {operations.length > 0 && (
             <div className="space-y-3 pt-2">
               {/* Synthèse des données */}
@@ -524,45 +794,127 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                 </div>
               </div>
 
-              {/* Table avec suppression de ligne */}
-              <div className="border border-border rounded max-h-48 overflow-y-auto">
+              {/* Table avec édition et suppression de ligne */}
+              <div className="border border-border rounded max-h-56 overflow-y-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-background-secondary border-b border-border text-[9px] uppercase font-bold text-text-muted sticky top-0">
                     <tr>
-                      <th className="p-2">Date</th>
+                      <th className="p-2 w-24">Date</th>
                       <th className="p-2">Libellé</th>
-                      <th className="p-2">Réf</th>
-                      <th className="p-2 text-right">Montant</th>
-                      <th className="p-2 text-center w-8"></th>
+                      <th className="p-2 w-28">Réf</th>
+                      <th className="p-2 text-right w-28">Montant</th>
+                      <th className="p-2 text-center w-16">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {operations.map((op, idx) => (
-                      <tr key={idx} className="hover:bg-background-secondary/60">
-                        <td className="p-2 font-mono text-text-muted whitespace-nowrap">{formatDate(op.date)}</td>
-                        <td className="p-2 font-medium text-ink truncate max-w-xs">{op.description}</td>
-                        <td className="p-2 font-mono text-text-muted">{op.reference || "—"}</td>
-                        <td className={cn("p-2 text-right font-mono tabular-nums font-semibold whitespace-nowrap", op.amount > 0 ? "text-success" : "text-error")}>
-                          {op.amount > 0 ? `+${formatCFA(op.amount)}` : `-${formatCFA(Math.abs(op.amount))}`}
-                        </td>
-                        <td className="p-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveRow(idx)}
-                            className="text-text-muted hover:text-error transition"
-                            title="Supprimer cette ligne"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {operations.map((op, idx) => {
+                      const isEditing = editingIndex === idx;
+
+                      if (isEditing) {
+                        return (
+                          <tr key={idx} className="bg-primary/5">
+                            <td className="p-1">
+                              <Input
+                                type="date"
+                                value={editForm.date}
+                                onChange={(e) => setEditForm((prev) => ({ ...prev, date: e.target.value }))}
+                                className="h-7 text-xs rounded border-border"
+                              />
+                            </td>
+                            <td className="p-1">
+                              <Input
+                                value={editForm.description}
+                                onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                                className="h-7 text-xs rounded border-border"
+                              />
+                            </td>
+                            <td className="p-1">
+                              <Input
+                                placeholder="Réf"
+                                value={editForm.reference}
+                                onChange={(e) => setEditForm((prev) => ({ ...prev, reference: e.target.value }))}
+                                className="h-7 text-xs rounded border-border"
+                              />
+                            </td>
+                            <td className="p-1">
+                              <div className="flex items-center gap-1">
+                                <select
+                                  value={editForm.type}
+                                  onChange={(e) => setEditForm((prev) => ({ ...prev, type: e.target.value as any }))}
+                                  className="h-7 rounded border border-border bg-background text-[10px] text-ink outline-none px-1"
+                                >
+                                  <option value="credit">+</option>
+                                  <option value="debit">−</option>
+                                </select>
+                                <Input
+                                  type="number"
+                                  value={editForm.amount}
+                                  onChange={(e) => setEditForm((prev) => ({ ...prev, amount: e.target.value }))}
+                                  className="h-7 text-xs font-mono tabular-nums rounded border-border"
+                                />
+                              </div>
+                            </td>
+                            <td className="p-1 text-center whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={handleSaveEdit}
+                                  className="p-1 text-success hover:bg-success/20 rounded"
+                                  title="Enregistrer la modification"
+                                >
+                                  <Check className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEdit}
+                                  className="p-1 text-text-muted hover:bg-background-secondary rounded"
+                                  title="Annuler"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return (
+                        <tr key={idx} className="hover:bg-background-secondary/60">
+                          <td className="p-2 font-mono text-text-muted whitespace-nowrap">{formatDate(op.date)}</td>
+                          <td className="p-2 font-medium text-ink truncate max-w-xs">{op.description}</td>
+                          <td className="p-2 font-mono text-text-muted truncate max-w-[120px]">{op.reference || "—"}</td>
+                          <td className={cn("p-2 text-right font-mono tabular-nums font-semibold whitespace-nowrap", op.amount > 0 ? "text-success" : "text-error")}>
+                            {op.amount > 0 ? `+${formatCFA(op.amount)}` : `-${formatCFA(Math.abs(op.amount))}`}
+                          </td>
+                          <td className="p-2 text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(idx)}
+                                className="text-text-muted hover:text-primary transition"
+                                title="Modifier cette ligne"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveRow(idx)}
+                                className="text-text-muted hover:text-error transition"
+                                title="Supprimer cette ligne"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
               <div className="flex justify-between items-center text-xs text-text-muted">
-                <span>{fileName ? <>Fichier : <strong className="text-ink">{fileName}</strong></> : "Saisie en cours"}</span>
+                <span>{fileName ? <>Source : <strong className="text-ink">{fileName}</strong></> : "Saisie en cours"}</span>
                 <button
                   type="button"
                   onClick={handleReset}

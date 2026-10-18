@@ -34,6 +34,23 @@ const FRENCH_MONTHS: Record<string, string> = {
   déc: "12",
 };
 
+export interface BankStatementMetadata {
+  bankName?: string;
+  accountNumber?: string;
+  accountHolder?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  initialBalance?: number;
+  finalBalance?: number;
+  hasZeroMovement?: boolean;
+}
+
+export interface BankOCRAnalysisResult {
+  metadata: BankStatementMetadata;
+  operations: RawBankOperation[];
+  rawText: string;
+}
+
 /**
  * Convertit une date textuelle (ex: "18 oct 2026", "24-novembre-2026", "05/04/2026")
  * en format ISO "YYYY-MM-DD"
@@ -65,6 +82,83 @@ export function normalizeDateFromText(text: string): string {
 }
 
 /**
+ * Extrait les métadonnées d'en-tête et de soldes d'un relevé bancaire (ex: Bank of Africa, Ecobank, UBA)
+ */
+export function parseBankStatementMetadata(text: string): BankStatementMetadata {
+  if (!text) return {};
+
+  const meta: BankStatementMetadata = {};
+
+  // 1. Détection de la banque
+  const bankMatch = text.match(/(?:BANK OF AFRICA|BOA|ECOBANK|UBA|SOCIETE GENERALE|SGB|CORIS BANK|CORIS|NSIA BANQUE|NSIA|BIIC|BSIC|BGFIBANK|BGFI|ORABANK|CBAO|AFRILAND|CCEI)/i);
+  if (bankMatch) {
+    const b = bankMatch[0].toUpperCase();
+    if (b.includes("AFRICA") || b === "BOA") meta.bankName = "BANK OF AFRICA (BOA)";
+    else if (b.includes("ECOBANK")) meta.bankName = "ECOBANK BÉNIN";
+    else if (b.includes("UBA")) meta.bankName = "UBA BÉNIN";
+    else if (b.includes("SOCIETE") || b === "SGB") meta.bankName = "SOCIÉTÉ GÉNÉRALE";
+    else if (b.includes("CORIS")) meta.bankName = "CORIS BANK INTERNATIONAL";
+    else if (b.includes("BIIC")) meta.bankName = "BIIC BÉNIN";
+    else meta.bankName = b;
+  }
+
+  // 2. Numéro de compte
+  const accountMatch = text.match(/compte[\s:#]*([0-9A-Z]{8,24})/i);
+  if (accountMatch) {
+    meta.accountNumber = accountMatch[1].replace(/[^0-9A-Z]/g, "");
+  }
+
+  // 3. Période du relevé
+  const periodMatch = text.match(/p[eé]riode\s+du\s+(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4})\s+au\s+(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4})/i);
+  if (periodMatch) {
+    meta.periodStart = normalizeDateFromText(periodMatch[1]);
+    meta.periodEnd = normalizeDateFromText(periodMatch[2]);
+  }
+
+  // 4. Titulaire du compte
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const accountIdx = lines.findIndex(l => /compte[\s:#]*[0-9A-Z]+/i.test(l));
+  if (accountIdx !== -1 && accountIdx + 1 < lines.length) {
+    const candidateHolder = lines[accountIdx + 1].trim();
+    if (candidateHolder.length >= 3 && !/date|solde|relevé|page/i.test(candidateHolder)) {
+      meta.accountHolder = candidateHolder;
+    }
+  }
+
+  // 5. Soldes (Ancien solde et Nouveau solde)
+  const ancienLine = lines.find(l => /ancien\s+solde/i.test(l));
+  if (ancienLine) {
+    const nums = ancienLine.match(/\b\d{1,3}(?:[\s.]\d{3})*(?:[,\.]\d{2})?\b/g);
+    if (nums && nums.length > 0) {
+      const lastNum = nums[nums.length - 1];
+      meta.initialBalance = Math.abs(parseFrenchNumber(lastNum));
+    }
+  }
+
+  const nouveauLine = lines.find(l => /nouveau\s+solde/i.test(l));
+  if (nouveauLine) {
+    const nums = nouveauLine.match(/\b\d{1,3}(?:[\s.]\d{3})*(?:[,\.]\d{2})?\b/g);
+    if (nums && nums.length > 0) {
+      const lastNum = nums[nums.length - 1];
+      meta.finalBalance = Math.abs(parseFrenchNumber(lastNum));
+    }
+  }
+
+  // 6. Détection de relevé sans mouvements (0 débits, 0 crédits)
+  const totauxZeroMatch = text.match(/totaux[\s:]*0[\s|]+0/i) || text.match(/débit[\s:]*0\b[\s\S]*?crédit[\s:]*0\b/i);
+  if (
+    totauxZeroMatch ||
+    (meta.initialBalance !== undefined &&
+      meta.finalBalance !== undefined &&
+      meta.initialBalance === meta.finalBalance)
+  ) {
+    meta.hasZeroMovement = true;
+  }
+
+  return meta;
+}
+
+/**
  * Analyse le texte brut extrait d'une image ou d'un PDF de relevé / reçu bancaire / MoMo
  * et extrait des opérations bancaires structurées.
  */
@@ -77,6 +171,22 @@ export function parseBankTextToOperations(text: string): RawBankOperation[] {
     .filter((l) => l.length > 0);
 
   const operations: RawBankOperation[] = [];
+
+  // Mots-clés excluant les lignes de récapitulatif / soldes
+  const skipKeywords = [
+    "ancien solde",
+    "nouveau solde",
+    "solde initial",
+    "solde final",
+    "solde precedent",
+    "solde précédent",
+    "totaux",
+    "total mouvements",
+    "sauf erreur",
+    "page 1",
+    "page 2",
+    "relevé de compte",
+  ];
 
   // Expression régulière pour dates : DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, ou 18 oct 2026
   const dateRegex = /\b(\d{1,2}[\s\/\.\-](?:[a-zA-Z]{3,10}|\d{1,2})[\s\/\.\-]\d{2,4}|\d{4}[/.-]\d{1,2}[/.-]\d{1,2})\b/i;
@@ -97,8 +207,6 @@ export function parseBankTextToOperations(text: string): RawBankOperation[] {
     "dépôt",
     "entree",
     "entrée",
-    "solde créditeur",
-    "solde crediteur",
     "remise",
     "alimentation",
   ];
@@ -163,6 +271,13 @@ export function parseBankTextToOperations(text: string): RawBankOperation[] {
   // 2. Analyse ligne par ligne (Relevés bancaires tabulaires ou multi-lignes)
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    const lowerLine = line.toLowerCase();
+
+    // Ignorer les lignes d'en-tête de solde ou totaux
+    if (skipKeywords.some((kw) => lowerLine.includes(kw))) {
+      continue;
+    }
+
     const dateMatch = line.match(dateRegex);
 
     if (dateMatch) {
@@ -174,7 +289,6 @@ export function parseBankTextToOperations(text: string): RawBankOperation[] {
       let isDebit = false;
       let isCredit = false;
 
-      const lowerLine = line.toLowerCase();
       if (debitKeywords.some((kw) => lowerLine.includes(kw))) isDebit = true;
       if (creditKeywords.some((kw) => lowerLine.includes(kw))) isCredit = true;
 
@@ -194,12 +308,15 @@ export function parseBankTextToOperations(text: string): RawBankOperation[] {
       // Si pas trouvé sur la même ligne, regarder la ligne suivante
       if (matchedAmount === null && i + 1 < lines.length) {
         const nextLine = lines[i + 1];
-        const nextAmounts = nextLine.match(new RegExp(amountRegex, "g"));
-        if (nextAmounts && nextAmounts.length > 0) {
-          const val = parseFrenchNumber(nextAmounts[nextAmounts.length - 1]);
-          if (Math.abs(val) >= 100) {
-            matchedAmount = val;
-            matchedDesc += " " + nextLine;
+        const nextLower = nextLine.toLowerCase();
+        if (!skipKeywords.some((kw) => nextLower.includes(kw))) {
+          const nextAmounts = nextLine.match(new RegExp(amountRegex, "g"));
+          if (nextAmounts && nextAmounts.length > 0) {
+            const val = parseFrenchNumber(nextAmounts[nextAmounts.length - 1]);
+            if (Math.abs(val) >= 100) {
+              matchedAmount = val;
+              matchedDesc += " " + nextLine;
+            }
           }
         }
       }
@@ -239,39 +356,56 @@ export function parseBankTextToOperations(text: string): RawBankOperation[] {
 
   // 3. Cas particulier : Ticket / Reçu unique (Bordereau de versement, avis d'opéré unique)
   if (operations.length === 0) {
-    const dateMatch = text.match(dateRegex);
-    const dateStr = dateMatch ? normalizeDateFromText(dateMatch[0]) : new Date().toISOString().split("T")[0];
+    const isBalanceOnly = lines.some((l) => /ancien\s+solde|nouveau\s+solde|totaux/i.test(l));
+    if (!isBalanceOnly) {
+      const dateMatch = text.match(dateRegex);
+      const dateStr = dateMatch ? normalizeDateFromText(dateMatch[0]) : new Date().toISOString().split("T")[0];
 
-    // Trouver le montant principal
-    const numbers = text.match(new RegExp(amountRegex, "g"));
-    if (numbers && numbers.length > 0) {
-      let maxVal = 0;
-      for (const n of numbers) {
-        const val = Math.abs(parseFrenchNumber(n));
-        if (val > maxVal) maxVal = val;
-      }
+      // Trouver le montant principal
+      const numbers = text.match(new RegExp(amountRegex, "g"));
+      if (numbers && numbers.length > 0) {
+        let maxVal = 0;
+        for (const n of numbers) {
+          const val = Math.abs(parseFrenchNumber(n));
+          if (val > maxVal) maxVal = val;
+        }
 
-      if (maxVal >= 100) {
-        const lower = text.toLowerCase();
-        const isDebit = debitKeywords.some((kw) => lower.includes(kw));
-        const isCredit = creditKeywords.some((kw) => lower.includes(kw));
+        if (maxVal >= 100) {
+          const lower = text.toLowerCase();
+          const isDebit = debitKeywords.some((kw) => lower.includes(kw));
+          const isCredit = creditKeywords.some((kw) => lower.includes(kw));
 
-        // Détection référence
-        const refMatch = text.match(/\b(VIR[-_0-9a-zA-Z]+|TXN[-_0-9a-zA-Z]+|ID:?\s*[0-9]+|REF:?\s*[0-9a-zA-Z]+|CHQ[-_0-9a-zA-Z]+)\b/i);
-        const ref = refMatch ? refMatch[0] : undefined;
+          // Détection référence
+          const refMatch = text.match(/\b(VIR[-_0-9a-zA-Z]+|TXN[-_0-9a-zA-Z]+|ID:?\s*[0-9]+|REF:?\s*[0-9a-zA-Z]+|CHQ[-_0-9a-zA-Z]+)\b/i);
+          const ref = refMatch ? refMatch[0] : undefined;
 
-        // Première ligne significative comme libellé
-        const firstLine = lines.find((l) => l.length > 5 && !dateRegex.test(l)) || (isCredit ? "Versement bancaire" : "Opération bancaire");
+          // Première ligne significative comme libellé
+          const firstLine = lines.find((l) => l.length > 5 && !dateRegex.test(l)) || (isCredit ? "Versement bancaire" : "Opération bancaire");
 
-        operations.push({
-          date: dateStr,
-          description: firstLine.slice(0, 100),
-          reference: ref,
-          amount: isDebit && !isCredit ? -maxVal : maxVal,
-        });
+          operations.push({
+            date: dateStr,
+            description: firstLine.slice(0, 100),
+            reference: ref,
+            amount: isDebit && !isCredit ? -maxVal : maxVal,
+          });
+        }
       }
     }
   }
 
   return operations;
+}
+
+/**
+ * Analyse complète d'un document bancaire : extrait métadonnées et opérations
+ */
+export function analyzeBankDocumentText(text: string): BankOCRAnalysisResult {
+  const metadata = parseBankStatementMetadata(text);
+  const operations = parseBankTextToOperations(text);
+
+  return {
+    metadata,
+    operations,
+    rawText: text,
+  };
 }

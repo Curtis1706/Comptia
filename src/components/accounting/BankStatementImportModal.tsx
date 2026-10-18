@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { parseRawBankStatementCSV, RawBankOperation } from "@/lib/csv-parser";
-import { parseBankTextToOperations } from "@/lib/bank-ocr-parser";
+import { analyzeBankDocumentText, BankStatementMetadata } from "@/lib/bank-ocr-parser";
 import { formatCFA, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -30,7 +30,8 @@ import {
   Check,
   X,
   Smartphone,
-  AlertCircle,
+  Building2,
+  Info,
 } from "lucide-react";
 
 interface Props {
@@ -42,11 +43,87 @@ interface Props {
 
 type ImportMode = "photo" | "file" | "paste" | "manual";
 
+/**
+ * Prétraitement d'image haute fidélité via HTML5 Canvas :
+ * - Agrandit les captures d'écran basse résolution (72 DPI) vers une taille optimale (~2200px)
+ * - Convertit en niveaux de gris et renforce le contraste pour une lisibilité parfaite des tables
+ */
+async function preprocessImageForOCR(file: File): Promise<Blob | File> {
+  if (typeof window === "undefined" || !file.type.startsWith("image/")) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(file);
+
+        // Facteur de mise à l'échelle (optimisé pour les petits textes de captures d'écran)
+        const scale = img.naturalWidth < 1600 ? Math.min(3, 2200 / img.naturalWidth) : 1.5;
+        const targetWidth = Math.round(img.naturalWidth * scale);
+        const targetHeight = Math.round(img.naturalHeight * scale);
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        // Amélioration de contraste linéaire
+        const imgData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          // Luminance
+          let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          // Étirement du contraste
+          gray = (gray - 128) * 1.35 + 128;
+          gray = Math.max(0, Math.min(255, gray));
+
+          data[i] = gray;
+          data[i + 1] = gray;
+          data[i + 2] = gray;
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else resolve(file);
+          },
+          "image/png",
+          1.0
+        );
+      } catch (err) {
+        console.warn("[OCR Preprocess] Erreur canvas, utilisation du fichier d'origine :", err);
+        resolve(file);
+      }
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+
+    img.src = url;
+  });
+}
+
 export function BankStatementImportModal({ open, onOpenChange, defaultSource = "bank", onSuccess }: Props) {
   const [source, setSource] = useState<"bank" | "mobile_money" | "cash">(defaultSource);
   const [importMode, setImportMode] = useState<ImportMode>("photo");
   const [statementName, setStatementName] = useState("");
   const [operations, setOperations] = useState<RawBankOperation[]>([]);
+  const [detectedMeta, setDetectedMeta] = useState<BankStatementMetadata | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzingOCR, setIsAnalyzingOCR] = useState(false);
   const [ocrProgress, setOcrProgress] = useState(0);
@@ -89,18 +166,21 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Moteur OCR hybride ultra-robuste (Navigateur WebAssembly en priorité + Secours API)
+  // Moteur OCR hybride avec prétraitement Canvas et analyse de métadonnées
   const runOCR = async (file: File) => {
     setIsAnalyzingOCR(true);
     setOcrProgress(15);
-    setOcrStatusText("Préparation de l'image...");
+    setOcrStatusText("Optimisation haute résolution de l'image...");
+    setDetectedMeta(null);
 
     let rawExtractedText = "";
 
-    // 1. TENTATIVE OCR CLIENT DIRECTE (Web Worker WASM)
-    // Permet d'éviter les timeouts serveurs Vercel et fonctionne instantanément
     try {
-      setOcrStatusText("Initialisation du moteur de reconnaissance...");
+      // 1. Prétraitement Canvas (Upscaling 2.5x + Contraste)
+      const processedBlob = await preprocessImageForOCR(file);
+
+      // 2. Tesseract WebAssembly dans le navigateur
+      setOcrStatusText("Initialisation de la reconnaissance optique...");
       setOcrProgress(30);
 
       const { createWorker } = await import("tesseract.js");
@@ -117,7 +197,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
         },
       });
 
-      const result = await worker.recognize(file);
+      const result = await worker.recognize(processedBlob);
       await worker.terminate();
 
       rawExtractedText = result.data.text || "";
@@ -125,7 +205,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
     } catch (clientErr) {
       console.warn("[OCR Client] Secours vers API serveur :", clientErr);
 
-      // 2. SECOURS API SERVEUR SI LE NAVIGATEUR NE SUPPORTE PAS
+      // Secours API Serveur si WebAssembly n'est pas supporté
       try {
         setOcrStatusText("Traitement via le serveur sécurisé...");
         const formData = new FormData();
@@ -142,12 +222,6 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
 
         if (res.ok && json?.success) {
           rawExtractedText = json.data?.raw_text || "";
-          if (json.data?.operations?.length > 0) {
-            setOperations(json.data.operations);
-            toast.success(`${json.data.operations.length} opération(s) extraite(s) avec succès !`);
-            setIsAnalyzingOCR(false);
-            return;
-          }
         } else {
           throw new Error(json?.error || `Erreur serveur (${res.status})`);
         }
@@ -159,12 +233,25 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
       }
     }
 
-    // Analyse textuelle des opérations
+    // 3. Analyse intelligente du texte extrait
     if (rawExtractedText.trim().length > 0) {
-      const parsedOps = parseBankTextToOperations(rawExtractedText);
-      if (parsedOps.length > 0) {
-        setOperations(parsedOps);
-        toast.success(`${parsedOps.length} opération(s) extraite(s) de votre document !`);
+      const analysis = analyzeBankDocumentText(rawExtractedText);
+      setDetectedMeta(analysis.metadata);
+
+      // Auto-renommage intelligent du relevé si la banque est identifiée
+      if (analysis.metadata.bankName) {
+        const periodStr = analysis.metadata.periodEnd ? `au ${analysis.metadata.periodEnd}` : "Octobre 2026";
+        const accountStr = analysis.metadata.accountNumber ? ` - ${analysis.metadata.accountNumber}` : "";
+        setStatementName(`Relevé ${analysis.metadata.bankName}${accountStr} (${periodStr})`);
+      }
+
+      if (analysis.operations.length > 0) {
+        setOperations(analysis.operations);
+        toast.success(`${analysis.operations.length} opération(s) extraite(s) avec succès !`);
+      } else if (analysis.metadata.hasZeroMovement) {
+        toast.info(
+          `Relevé ${analysis.metadata.bankName || "bancaire"} identifié : aucun mouvement sur la période (Débit: 0, Crédit: 0).`
+        );
       } else {
         // Si le texte est extrait mais la mise en page est atypique
         setPastedText(rawExtractedText);
@@ -172,7 +259,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
         toast.warning("Texte lu depuis l'image. Vérifiez et cliquez sur 'Convertir en opérations'.");
       }
     } else {
-      toast.error("Aucun texte lisible détecté sur cette photo. Essayez avec un meilleur éclairage.");
+      toast.error("Aucun texte lisible détecté sur cette photo. Essayez avec une meilleure résolution.");
     }
 
     setIsAnalyzingOCR(false);
@@ -261,7 +348,11 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
 
     // 2. Si pas concluant, tenter l'analyseur textuel intelligent (MoMo SMS, avis d'opéré)
     if (parsed.length === 0) {
-      parsed = parseBankTextToOperations(pastedText);
+      const analysis = analyzeBankDocumentText(pastedText);
+      parsed = analysis.operations;
+      if (analysis.metadata.bankName) {
+        setDetectedMeta(analysis.metadata);
+      }
     }
 
     if (parsed.length === 0) {
@@ -404,6 +495,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
     setStatementName("");
     setPastedText("");
     setEditingIndex(null);
+    setDetectedMeta(null);
     setOcrProgress(0);
     setOcrStatusText("");
   };
@@ -585,7 +677,7 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                       Glissez une photo de relevé, bordereau bancaire ou reçu ici
                     </p>
                     <p className="text-xs text-text-muted mt-1 max-w-md mx-auto">
-                      Formats supportés : <strong>JPG, JPEG, PNG, WEBP</strong>. Idéal pour bordereaux de versement espèces, avis d&apos;opéré, chèques et captures d&apos;écran Mobile Money.
+                      Formats supportés : <strong>JPG, JPEG, PNG, WEBP</strong>. Détection automatique de la banque (BOA, Ecobank, UBA, etc.), du compte, de la période et des écritures.
                     </p>
 
                     <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
@@ -647,9 +739,9 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-ink truncate">{fileName}</p>
-                    <p className="text-[10px] text-text-muted mt-0.5">{fileSizeStr} &bull; Image analysée par OCR</p>
+                    <p className="text-[10px] text-text-muted mt-0.5">{fileSizeStr} &bull; Image analysée par OCR haute résolution</p>
                     <span className="inline-flex items-center gap-1 text-[10px] text-success font-medium mt-1">
-                      <CheckCircle2 className="h-3 w-3" /> Image chargée
+                      <CheckCircle2 className="h-3 w-3" /> Image traitée
                     </span>
                   </div>
                   <Button
@@ -659,6 +751,8 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                     onClick={() => {
                       setImagePreviewUrl(null);
                       setFileName("");
+                      setDetectedMeta(null);
+                      setOperations([]);
                     }}
                     className="h-7 w-7 p-0 text-text-muted hover:text-error"
                     title="Retirer cette image"
@@ -834,6 +928,56 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                   Ajouter cette opération
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* BANDEAU DES MÉTADONNÉES BANCAIRES DÉTECTÉES */}
+          {detectedMeta && (detectedMeta.bankName || detectedMeta.accountNumber || detectedMeta.accountHolder) && (
+            <div className="rounded border border-primary/30 bg-primary/5 p-3 text-xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-bold text-ink">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span>{detectedMeta.bankName || "Relevé bancaire"}</span>
+                </div>
+                {detectedMeta.accountNumber && (
+                  <span className="font-mono text-[11px] bg-background px-2 py-0.5 rounded border border-border text-ink">
+                    Compte : {detectedMeta.accountNumber}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-text-muted pt-1 border-t border-border/50">
+                {detectedMeta.accountHolder && (
+                  <div>
+                    Titulaire : <strong className="text-ink">{detectedMeta.accountHolder}</strong>
+                  </div>
+                )}
+                {detectedMeta.periodStart && detectedMeta.periodEnd && (
+                  <div>
+                    Période : <strong className="text-ink">{formatDate(detectedMeta.periodStart)} au {formatDate(detectedMeta.periodEnd)}</strong>
+                  </div>
+                )}
+                {detectedMeta.initialBalance !== undefined && (
+                  <div>
+                    Solde initial : <strong className="font-mono text-ink">{formatCFA(detectedMeta.initialBalance)}</strong>
+                  </div>
+                )}
+                {detectedMeta.finalBalance !== undefined && (
+                  <div>
+                    Solde final : <strong className="font-mono text-ink">{formatCFA(detectedMeta.finalBalance)}</strong>
+                  </div>
+                )}
+              </div>
+
+              {/* Cas spécifique : Aucun mouvement constaté sur la période */}
+              {operations.length === 0 && detectedMeta.hasZeroMovement && (
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-text-muted bg-background/60 p-2 rounded border border-border">
+                  <Info className="h-4 w-4 text-warning flex-shrink-0" />
+                  <span>
+                    Ce document a été identifié avec succès. Les totaux indiquent <strong>0 opération</strong> sur cette période (Débit : 0 F CFA &bull; Crédit : 0 F CFA).
+                  </span>
+                </div>
+              )}
             </div>
           )}
 

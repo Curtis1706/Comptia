@@ -6,6 +6,29 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-18 — Prétraitement Haute Résolution Canvas/Sharp & Analyseur de Relevés Bancaires (BOA, Ecobank, UBA)
+
+- **Analyse du Résultat sur la Capture Bank of Africa (BOA)** :
+  - L'utilisateur a testé l'OCR avec une capture d'écran d'un relevé officiel Bank of Africa Bénin (`729 x 363` pixels, 72 DPI) pour le titulaire ALOHOUTADE ADECHINAN HARR (Compte 06202350000).
+  - Deux constats clés ont été identifiés :
+    1. **Absence d'opérations sur la période** : Dans ce relevé, les lignes de tableau indiquent littéralement `Totaux : Débit 0 | Crédit 0` et un solde constant de `394 542 F CFA` (du 01/10/2026 au 17/10/2026). Il n'y a donc aucune transaction financière à importer sur cette période.
+    2. **Impact du bandeau sombre sur Tesseract** : Le bandeau d'en-tête vert foncé (`#00875A`) avec texte blanc en contraste inversé et la très faible résolution (72 DPI, caractères de 8 pixels) provoquaient une binarisation bruyante sur Tesseract (`CSC me CS CR EE...`).
+- **Actions Réalisées** :
+  - **1. Prétraitement Haute Résolution Hybride (Canvas client & Sharp serveur)** :
+    - Mise à l'échelle automatique (upscaling 2.5x vers ~2200px) : les caractères de 8px sont ré-échantillonnés à 22px (hauteur optimale pour le réseau de neurones LSTM de Tesseract).
+    - Étirement de contraste linéaire pour séparer les bordures des chiffres et nettoyer le bruit des bandeaux colorés.
+  - **2. Moteur d'Extraction de Métadonnées Bancaires** ([`src/lib/bank-ocr-parser.ts`](file:///c:/Projects/brightbook-studio/src/lib/bank-ocr-parser.ts)) :
+    - Détection automatique de l'établissement bancaire (Bank of Africa, Ecobank, UBA, Société Générale, Coris, BIIC, NSIA, etc.).
+    - Extraction du numéro de compte (ex: `06202350000`), du nom du titulaire (`ALOHOUTADE ADECHINAN HARR`), de la période couverte et des soldes initial / final.
+    - Détection intelligente des relevés sans mouvement (`hasZeroMovement`) : si les totaux débit/crédit sont nuls ou si le solde initial égale le solde final sans lignes intermédiaires, le système informe précisément l'utilisateur au lieu de générer une incompréhension.
+  - **3. Bandeau Visuel d'En-tête Bancaire** ([`src/components/accounting/BankStatementImportModal.tsx`](file:///c:/Projects/brightbook-studio/src/components/accounting/BankStatementImportModal.tsx)) :
+    - Affichage d'une carte récapitulative élégante (Banque, Compte, Titulaire, Période, Solde constaté).
+    - Message explicatif si aucune écriture n'est présente sur la période.
+    - Remplissage automatique de l'intitulé du relevé (ex: `Relevé BANK OF AFRICA (BOA) - 06202350000 (au 17/10/2026)`).
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur.
+  - `pnpm build` : 56 routes compilées avec succès.
+
 ### 2026-10-18 — Résolution du Bug OCR : Architecture Hybride WebAssembly (Client) + Secours Serveur Sécurisé
 
 - **Diagnostic de l'Anomalie (« Erreur réseau lors de l'analyse OCR »)** :

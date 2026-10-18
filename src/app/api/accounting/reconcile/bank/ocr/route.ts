@@ -1,6 +1,6 @@
 import { requirePermission } from "@/lib/require-permission";
-import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
-import { parseBankTextToOperations } from "@/lib/bank-ocr-parser";
+import { successJson, errorResponse } from "@/lib/api-response";
+import { analyzeBankDocumentText } from "@/lib/bank-ocr-parser";
 import Tesseract from "tesseract.js";
 import os from "os";
 
@@ -72,14 +72,31 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Si image ou PDF sans texte extrait (document scanné) : Tesseract sécurisé
+    // 2. Si image ou PDF sans texte direct : Prétraitement Sharp haute résolution + Tesseract
     if ((!extractedText || extractedText.trim().length === 0) && isImage) {
+      let processedBuffer = buffer;
+      try {
+        const sharpModule = await import("sharp");
+        const sharp = sharpModule.default;
+        const meta = await sharp(buffer).metadata();
+        if (meta.width && meta.width < 1600) {
+          const scale = Math.min(3, 2200 / meta.width);
+          processedBuffer = await sharp(buffer)
+            .resize({ width: Math.round(meta.width * scale) })
+            .linear(1.35, -20)
+            .grayscale()
+            .toBuffer();
+        }
+      } catch (sharpErr) {
+        console.warn("[Bank OCR] Prétraitement Sharp ignoré :", sharpErr);
+      }
+
       let worker: any = null;
       try {
         worker = await Tesseract.createWorker("fra", 1, {
           cachePath: os.tmpdir(),
         });
-        const result = await worker.recognize(buffer);
+        const result = await worker.recognize(processedBuffer);
         extractedText = result.data.text || "";
       } catch (tessErr) {
         console.warn("[Bank OCR] Tesseract échec worker :", tessErr);
@@ -96,16 +113,18 @@ export async function POST(req: Request) {
       return successJson({
         operations: [],
         count: 0,
+        metadata: {},
         raw_text: "",
         message: "Aucun texte lisible n'a pu être extrait. Vous pouvez utiliser le copier-coller ou la saisie manuelle.",
       });
     }
 
-    const operations = parseBankTextToOperations(extractedText);
+    const analysis = analyzeBankDocumentText(extractedText);
 
     return successJson({
-      operations,
-      count: operations.length,
+      operations: analysis.operations,
+      count: analysis.operations.length,
+      metadata: analysis.metadata,
       raw_text: extractedText.slice(0, 2000),
     });
   } catch (err: any) {

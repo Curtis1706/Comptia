@@ -6,6 +6,28 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-18 — Visibilité Complète des Pages Comptables dans la Sidebar & Barre de Navigation Dédiée
+
+- **Diagnostic de l'Anomalie** :
+  - Sur l'interface déployée, le lien « Trésorerie & Banque/MoMo » n'apparaissait pas dans la sidebar sous la section « COMPTABILITÉ SYSCOHADA ». De même, les pages « Lettrage des Tiers » et « Comptes Tiers » étaient inaccessibles depuis la navigation principale.
+  - **Cause racine identifiée** : La fonction `filterItem` de [`src/components/layout/AppSidebar.tsx`](file:///c:/Projects/brightbook-studio/src/components/layout/AppSidebar.tsx) applique le filtre sectoriel `isModuleEnabledForSector(sector, item.key)`. Dans [`src/constants/sector-modules.ts`](file:///c:/Projects/brightbook-studio/src/constants/sector-modules.ts), les clés `"rapprochement"` et `"lettrage"` étaient omises de la liste `SECTOR_MODULES` de l'intégralité des secteurs d'activité, causant le masquage automatique du module.
+- **Actions Réalisées** :
+  - **1. Correction de la matrice sectorielle** ([`src/constants/sector-modules.ts`](file:///c:/Projects/brightbook-studio/src/constants/sector-modules.ts)) :
+    - Ajout des clés `"rapprochement"` et `"lettrage"` dans les modules autorisés pour l'ensemble des 12 secteurs économiques béninois (commerce, services, BTP, tech, etc.).
+  - **2. Enrichissement de la barre latérale** ([`src/components/layout/AppSidebar.tsx`](file:///c:/Projects/brightbook-studio/src/components/layout/AppSidebar.tsx)) :
+    - Exposition directe de l'ensemble des pages de la suite comptable SYSCOHADA dans `navGroups` :
+      - *Comptabilité SYSCOHADA* (`/comptabilite`)
+      - *Trésorerie & Banque/MoMo* (`/comptabilite/rapprochement`)
+      - *Lettrage des Tiers* (`/comptabilite/lettrage`)
+      - *Comptes Tiers* (`/comptabilite/tiers`)
+      - *Déclarations & TVA DGI* (`/tva`)
+  - **3. Création du composant de sous-navigation unifiée** ([`src/components/accounting/AccountingNav.tsx`](file:///c:/Projects/brightbook-studio/src/components/accounting/AccountingNav.tsx)) :
+    - Barre d'onglets persistante intégrée en en-tête des 4 vues comptables ([`Comptabilite.tsx`](file:///c:/Projects/brightbook-studio/src/views/Comptabilite.tsx), [`Rapprochement.tsx`](file:///c:/Projects/brightbook-studio/src/views/Rapprochement.tsx), [`Lettrage.tsx`](file:///c:/Projects/brightbook-studio/src/views/Lettrage.tsx), [`ThirdParties.tsx`](file:///c:/Projects/brightbook-studio/src/views/ThirdParties.tsx)).
+    - Permet de basculer instantanément d'un clic entre le Journal, le Rapprochement, le Lettrage et les Tiers sans repasser par le menu latéral.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build Next.js validé avec succès (56 routes générées sans erreur).
+
 ### 2026-10-18 — Intégration Complète & Opérationnelle du Rapprochement Bancaire & Trésorerie
 
 - **Contexte & Diagnostic Initial** :

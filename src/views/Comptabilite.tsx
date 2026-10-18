@@ -36,6 +36,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { formatCFA, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { detectAndParseCSV } from "@/lib/csv-parser";
+import { AccountingNav } from "@/components/accounting/AccountingNav";
 import { toast } from "sonner";
 
 const JOURNAL_CONFIG: Record<string, { label: string; badge: string }> = {
@@ -390,6 +391,8 @@ export const Comptabilite = () => {
 
   return (
     <div className="space-y-4 max-w-[1600px] mx-auto pb-12 font-sans">
+      <AccountingNav />
+
       {/* ========================================================================= */}
       {/* 1. EN-TÊTE DE PAGE (FORMAT STRICT DU DESIGN HTML)                         */}
       {/* ========================================================================= */}

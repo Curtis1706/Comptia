@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Search,
   X,
+  Link2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
@@ -62,8 +63,10 @@ const navGroups: NavGroupConfig[] = [
     heading: "Comptabilité SYSCOHADA",
     items: [
       { key: "comptabilite", module: "accounting_entries", label: "Comptabilité SYSCOHADA", to: "/comptabilite", icon: BookOpen },
-      { key: "tva", module: "vat_declarations", label: "Déclarations & TVA DGI", to: "/tva", icon: CheckCircle2 },
       { key: "rapprochement", module: "bank_reconciliation", label: "Trésorerie & Banque/MoMo", to: "/comptabilite/rapprochement", icon: Wallet },
+      { key: "lettrage", module: "accounting_entries", label: "Lettrage des Tiers", to: "/comptabilite/lettrage", icon: Link2 },
+      { key: "tiers", module: "third_parties", label: "Comptes Tiers", to: "/comptabilite/tiers", icon: Users },
+      { key: "tva", module: "vat_declarations", label: "Déclarations & TVA DGI", to: "/tva", icon: CheckCircle2 },
     ],
   },
   {

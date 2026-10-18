@@ -5,6 +5,7 @@ import { Search, UserCheck, ShieldCheck, Filter, Loader2, Link2 } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { AccountingNav } from "@/components/accounting/AccountingNav";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import { formatCFA, formatDate } from "@/lib/format";
@@ -61,6 +62,7 @@ export const Lettrage = () => {
 
   return (
     <div className="space-y-6">
+      <AccountingNav />
       <PageHeader
         title="Lettrage Tiers"
         subtitle="Associez vos factures à leurs règlements pour équilibrer vos comptes de tiers"

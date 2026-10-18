@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { BankStatementImportModal } from "@/components/accounting/BankStatementImportModal";
+import { AccountingNav } from "@/components/accounting/AccountingNav";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import { formatCFA, formatDate } from "@/lib/format";
@@ -177,6 +178,7 @@ export const Rapprochement = () => {
 
   return (
     <div className="space-y-6 font-sans">
+      <AccountingNav />
       <PageHeader
         title="Rapprochement Bancaire & Trésorerie"
         subtitle="Rapprochez vos relevés bancaires (521) et Mobile Money (585) avec vos écritures comptables SYSCOHADA"

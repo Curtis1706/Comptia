@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { AccountingNav } from "@/components/accounting/AccountingNav";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -125,6 +126,7 @@ export const ThirdParties = () => {
 
   return (
     <div className="space-y-6">
+      <AccountingNav />
       <PageHeader
         title="Comptes de tiers"
         subtitle="Clients et Fournisseurs/Prestataires — soldes et coordonnées"

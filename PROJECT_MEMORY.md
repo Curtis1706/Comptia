@@ -6,6 +6,23 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-18 — Import Multi-Modal des Relevés Bancaires (Photo/Scan OCR, Copier-Coller Excel & Saisie Manuelle)
+
+- **Contexte & Besoin Utilisateur** :
+  - Dans la pratique des entreprises et cabinets au Bénin, les relevés et justificatifs de trésorerie ne sont pas limités aux fichiers CSV. Les utilisateurs disposent très souvent de **photos de bordereaux de banque / reçus papier**, de **captures d'écran de transactions Mobile Money (MTN MoMo, Moov Money)**, d'extraits **PDF** officiels, de tableaux **Excel** copiés ou souhaitent simplement **saisir manuellement** quelques opérations sans manipulation de fichier.
+- **Actions Réalisées** :
+  - **1. Moteur d'extraction OCR & Analyse textuelle bancaire** :
+    - Création de [`src/lib/bank-ocr-parser.ts`](file:///c:/Projects/brightbook-studio/src/lib/bank-ocr-parser.ts) capable d'analyser du texte brut issu d'un scan ou d'un reçu (reconnaissance des dates francophones, montants signés selon le sens débit/crédit, libellés et références VIR/CHQ/TXN).
+    - Création de la route API [`src/app/api/accounting/reconcile/bank/ocr/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/bank/ocr/route.ts) qui analyse les images (PNG, JPG, WEBP via `tesseract.js`) et documents PDF (via `pdfjs-dist`) pour en extraire automatiquement les opérations financières.
+  - **2. Refonte multi-modale de la fenêtre d'importation** ([`src/components/accounting/BankStatementImportModal.tsx`](file:///c:/Projects/brightbook-studio/src/components/accounting/BankStatementImportModal.tsx)) :
+    - **Mode 1 : Fichier ou Photo** (CSV, TXT, PDF, JPG, PNG, WEBP) avec déclenchement automatique de l'analyse OCR et retour visuel pendant le traitement.
+    - **Mode 2 : Copier-Coller** pour coller directement des lignes depuis un tableur Excel ou un message de confirmation SMS MoMo.
+    - **Mode 3 : Saisie manuelle directe** pour ajouter des opérations une par une (Date, Libellé, Sens Recette/Dépense, Montant, Référence).
+    - **Tableau de contrôle interactif** permettant de supprimer une ligne indésirable, de vérifier les totaux calculés en direct (Recettes, Dépenses, Solde net) avant l'injection définitive en base de données via l'API.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : Build Next.js validé avec succès (56 routes compilées sans warning bloquant).
+
 ### 2026-10-18 — Visibilité Complète des Pages Comptables dans la Sidebar & Barre de Navigation Dédiée
 
 - **Diagnostic de l'Anomalie** :

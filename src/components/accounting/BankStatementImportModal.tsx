@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { parseRawBankStatementCSV, RawBankOperation } from "@/lib/csv-parser";
 import { parseBankTextToOperations } from "@/lib/bank-ocr-parser";
 import { formatCFA, formatDate } from "@/lib/format";
@@ -29,7 +30,7 @@ import {
   Check,
   X,
   Smartphone,
-  Eye,
+  AlertCircle,
 } from "lucide-react";
 
 interface Props {
@@ -48,6 +49,8 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
   const [operations, setOperations] = useState<RawBankOperation[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzingOCR, setIsAnalyzingOCR] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const [ocrStatusText, setOcrStatusText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileSizeStr, setFileSizeStr] = useState("");
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -86,6 +89,95 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Moteur OCR hybride ultra-robuste (Navigateur WebAssembly en priorité + Secours API)
+  const runOCR = async (file: File) => {
+    setIsAnalyzingOCR(true);
+    setOcrProgress(15);
+    setOcrStatusText("Préparation de l'image...");
+
+    let rawExtractedText = "";
+
+    // 1. TENTATIVE OCR CLIENT DIRECTE (Web Worker WASM)
+    // Permet d'éviter les timeouts serveurs Vercel et fonctionne instantanément
+    try {
+      setOcrStatusText("Initialisation du moteur de reconnaissance...");
+      setOcrProgress(30);
+
+      const { createWorker } = await import("tesseract.js");
+      const worker = await createWorker("fra", 1, {
+        logger: (m) => {
+          if (m.status === "recognizing text") {
+            const p = Math.round((m.progress || 0) * 100);
+            setOcrProgress(30 + Math.round(p * 0.65));
+            setOcrStatusText(`Reconnaissance des caractères : ${p}%`);
+          } else if (m.status === "loading language traineddata") {
+            setOcrStatusText("Chargement du dictionnaire français...");
+            setOcrProgress(25);
+          }
+        },
+      });
+
+      const result = await worker.recognize(file);
+      await worker.terminate();
+
+      rawExtractedText = result.data.text || "";
+      setOcrProgress(100);
+    } catch (clientErr) {
+      console.warn("[OCR Client] Secours vers API serveur :", clientErr);
+
+      // 2. SECOURS API SERVEUR SI LE NAVIGATEUR NE SUPPORTE PAS
+      try {
+        setOcrStatusText("Traitement via le serveur sécurisé...");
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/accounting/reconcile/bank/ocr", {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        });
+
+        const isJson = res.headers.get("content-type")?.includes("application/json");
+        const json = isJson ? await res.json() : null;
+
+        if (res.ok && json?.success) {
+          rawExtractedText = json.data?.raw_text || "";
+          if (json.data?.operations?.length > 0) {
+            setOperations(json.data.operations);
+            toast.success(`${json.data.operations.length} opération(s) extraite(s) avec succès !`);
+            setIsAnalyzingOCR(false);
+            return;
+          }
+        } else {
+          throw new Error(json?.error || `Erreur serveur (${res.status})`);
+        }
+      } catch (serverErr: any) {
+        console.error("[OCR Serveur] Échec :", serverErr);
+        toast.error(serverErr?.message || "Impossible de lire cette image.");
+        setIsAnalyzingOCR(false);
+        return;
+      }
+    }
+
+    // Analyse textuelle des opérations
+    if (rawExtractedText.trim().length > 0) {
+      const parsedOps = parseBankTextToOperations(rawExtractedText);
+      if (parsedOps.length > 0) {
+        setOperations(parsedOps);
+        toast.success(`${parsedOps.length} opération(s) extraite(s) de votre document !`);
+      } else {
+        // Si le texte est extrait mais la mise en page est atypique
+        setPastedText(rawExtractedText);
+        setImportMode("paste");
+        toast.warning("Texte lu depuis l'image. Vérifiez et cliquez sur 'Convertir en opérations'.");
+      }
+    } else {
+      toast.error("Aucun texte lisible détecté sur cette photo. Essayez avec un meilleur éclairage.");
+    }
+
+    setIsAnalyzingOCR(false);
+  };
+
   // Traitement universel d'un fichier (Image, PDF ou CSV)
   const processUploadedFile = async (file: File) => {
     if (!file) return;
@@ -110,44 +202,13 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
       setImagePreviewUrl(null);
     }
 
-    // 1. Image ou PDF -> Traitement par le moteur OCR serveur
+    // 1. Image ou PDF scanné -> Moteur OCR
     if (isImage || isPdf) {
-      setIsAnalyzingOCR(true);
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const res = await fetch("/api/accounting/reconcile/bank/ocr", {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        });
-
-        const json = await res.json();
-        if (json.success && json.data?.operations?.length > 0) {
-          setOperations(json.data.operations);
-          toast.success(`${json.data.operations.length} opération(s) extraite(s) par reconnaissance optique (OCR) !`);
-        } else if (json.data?.raw_text) {
-          // Tentative d'analyse de secours avec le parseur textuel
-          const fallbackOps = parseBankTextToOperations(json.data.raw_text);
-          if (fallbackOps.length > 0) {
-            setOperations(fallbackOps);
-            toast.warning(`${fallbackOps.length} opération(s) détectée(s). Veuillez vérifier les montants.`);
-          } else {
-            toast.error("Texte lu mais aucune opération financière clairement structurée. Vous pouvez ajuster ou saisir manuellement.");
-          }
-        } else {
-          toast.error(json.error || "Impossible d'extraire des opérations depuis ce document.");
-        }
-      } catch {
-        toast.error("Erreur réseau lors de l'analyse OCR.");
-      } finally {
-        setIsAnalyzingOCR(false);
-      }
+      await runOCR(file);
       return;
     }
 
-    // 2. Si c'est un fichier texte / CSV
+    // 2. Fichier texte / CSV
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
@@ -204,13 +265,13 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
     }
 
     if (parsed.length === 0) {
-      toast.error("Impossible de reconnaître des opérations dans le texte collé. Vérifiez les dates et les montants.");
+      toast.error("Impossible de reconnaître des opérations dans le texte. Vérifiez les dates et les montants.");
       return;
     }
 
     setOperations((prev) => [...prev, ...parsed]);
     setPastedText("");
-    toast.success(`${parsed.length} opération(s) ajoutée(s) depuis le presse-papiers !`);
+    toast.success(`${parsed.length} opération(s) ajoutée(s) avec succès !`);
   };
 
   // Ajout manuel d'une ligne
@@ -343,6 +404,8 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
     setStatementName("");
     setPastedText("");
     setEditingIndex(null);
+    setOcrProgress(0);
+    setOcrStatusText("");
   };
 
   const totalCredit = operations.filter((op) => op.amount > 0).reduce((sum, op) => sum + op.amount, 0);
@@ -497,10 +560,16 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
                 )}
               >
                 {isAnalyzingOCR ? (
-                  <div className="py-6 flex flex-col items-center justify-center space-y-2">
+                  <div className="py-6 flex flex-col items-center justify-center space-y-3 max-w-sm mx-auto">
                     <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                    <p className="text-sm font-semibold text-ink">Reconnaissance optique (OCR) en cours...</p>
-                    <p className="text-xs text-text-muted">Extraction des opérations bancaires depuis votre image ou photo.</p>
+                    <div className="space-y-1 w-full text-center">
+                      <p className="text-sm font-semibold text-ink">Reconnaissance optique (OCR) en cours</p>
+                      <p className="text-xs text-text-muted">{ocrStatusText || "Extraction des opérations bancaires..."}</p>
+                    </div>
+                    <div className="w-full space-y-1">
+                      <Progress value={ocrProgress} className="h-2 bg-background border border-border" />
+                      <p className="text-[10px] font-mono tabular-nums text-text-muted text-right">{ocrProgress}%</p>
+                    </div>
                   </div>
                 ) : (
                   <>
@@ -618,10 +687,13 @@ export function BankStatementImportModal({ open, onOpenChange, defaultSource = "
               )}
             >
               {isAnalyzingOCR ? (
-                <div className="py-6 flex flex-col items-center justify-center space-y-2">
+                <div className="py-6 flex flex-col items-center justify-center space-y-3 max-w-sm mx-auto">
                   <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                  <p className="text-sm font-semibold text-ink">Analyse du fichier PDF en cours...</p>
-                  <p className="text-xs text-text-muted">Extraction du texte et des colonnes financières.</p>
+                  <div className="space-y-1 w-full text-center">
+                    <p className="text-sm font-semibold text-ink">Analyse du fichier en cours</p>
+                    <p className="text-xs text-text-muted">{ocrStatusText || "Extraction du texte et des colonnes financières..."}</p>
+                  </div>
+                  <Progress value={ocrProgress} className="h-2 bg-background border border-border" />
                 </div>
               ) : (
                 <>

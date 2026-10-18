@@ -2,6 +2,7 @@ import { requirePermission } from "@/lib/require-permission";
 import { successJson, errorResponse, handlePrismaError } from "@/lib/api-response";
 import { parseBankTextToOperations } from "@/lib/bank-ocr-parser";
 import Tesseract from "tesseract.js";
+import os from "os";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -16,7 +17,8 @@ async function getPdfJs() {
 }
 
 export async function POST(req: Request) {
-  const permCheck = await requirePermission(req, "bank_reconciliation", "write");
+  // Permission 'read' sur bank_reconciliation suffit pour analyser un document en aperçu
+  const permCheck = await requirePermission(req, "bank_reconciliation", "read");
   if (!permCheck.ok) return permCheck.response;
 
   try {
@@ -45,6 +47,7 @@ export async function POST(req: Request) {
 
     let extractedText = "";
 
+    // 1. Si PDF : extraction du flux textuel direct via pdfjs-dist
     if (isPdf) {
       try {
         const pdfjs = await getPdfJs();
@@ -69,20 +72,33 @@ export async function POST(req: Request) {
       }
     }
 
-    // Si c'est une image ou si le PDF n'a pas donné de texte (PDF scanné / image)
+    // 2. Si image ou PDF sans texte extrait (document scanné) : Tesseract sécurisé
     if ((!extractedText || extractedText.trim().length === 0) && isImage) {
+      let worker: any = null;
       try {
-        const {
-          data: { text: tesseractText },
-        } = await Tesseract.recognize(buffer, "fra+eng");
-        extractedText = tesseractText;
+        worker = await Tesseract.createWorker("fra", 1, {
+          cachePath: os.tmpdir(),
+        });
+        const result = await worker.recognize(buffer);
+        extractedText = result.data.text || "";
       } catch (tessErr) {
-        console.warn("[Bank OCR] Tesseract échec :", tessErr);
+        console.warn("[Bank OCR] Tesseract échec worker :", tessErr);
+      } finally {
+        if (worker) {
+          try {
+            await worker.terminate();
+          } catch {}
+        }
       }
     }
 
     if (!extractedText || extractedText.trim().length === 0) {
-      return errorResponse("Impossible d'extraire du texte lisible depuis cette image ou ce PDF.", 422);
+      return successJson({
+        operations: [],
+        count: 0,
+        raw_text: "",
+        message: "Aucun texte lisible n'a pu être extrait. Vous pouvez utiliser le copier-coller ou la saisie manuelle.",
+      });
     }
 
     const operations = parseBankTextToOperations(extractedText);
@@ -90,9 +106,10 @@ export async function POST(req: Request) {
     return successJson({
       operations,
       count: operations.length,
-      raw_text: extractedText.slice(0, 1000),
+      raw_text: extractedText.slice(0, 2000),
     });
-  } catch (err) {
-    return handlePrismaError(err);
+  } catch (err: any) {
+    console.error("[POST /api/accounting/reconcile/bank/ocr] Erreur :", err);
+    return errorResponse(err?.message || "Erreur interne lors de l'analyse OCR", 500);
   }
 }

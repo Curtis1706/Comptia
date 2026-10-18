@@ -6,6 +6,26 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-18 — Résolution du Bug OCR : Architecture Hybride WebAssembly (Client) + Secours Serveur Sécurisé
+
+- **Diagnostic de l'Anomalie (« Erreur réseau lors de l'analyse OCR »)** :
+  - Sur le serveur (notamment en environnement Vercel / Serverless), l'appel à `tesseract.js` via Node.js instancie un thread `worker_threads`. Lorsque ce worker tente d'écrire les modèles de langue (`fra.traineddata.gz`) dans le système de fichier en lecture seule (`/var/task`), ou subit un dépassement de délai de 10s sur Vercel, une exception non gérée dans le thread worker provoque l'effondrement de la requête HTTP (`process.nextTick throw err`). La connexion HTTP est coupée brutalement, générant une erreur réseau côté client. De plus, la route exigeait indûment la permission `write` sur `bank_reconciliation` pour une simple analyse en prévisualisation.
+- **Actions Réalisées** :
+  - **1. Exécution Prioritaire de l'OCR Côté Client (Web Worker WebAssembly)** ([`src/components/accounting/BankStatementImportModal.tsx`](file:///c:/Projects/brightbook-studio/src/components/accounting/BankStatementImportModal.tsx)) :
+    - Importation dynamique de `tesseract.js` dans le navigateur à la demande.
+    - L'analyse d'image s'exécute directement dans le navigateur de l'utilisateur via WebAssembly : aucune contrainte de timeout Vercel, aucun crash serveur, et mise en cache automatique des dictionnaires dans IndexedDB.
+    - Ajout d'une barre de progression interactive en direct (`Progress` shadcn) affichant le pourcentage réel d'avancement de la reconnaissance (`0% → 100%`).
+  - **2. Secours Serveur Durci & Résilient** ([`src/app/api/accounting/reconcile/bank/ocr/route.ts`](file:///c:/Projects/brightbook-studio/src/app/api/accounting/reconcile/bank/ocr/route.ts)) :
+    - Remplacement de la permission requise par `read` (accessible à tous les rôles autorisés à consulter la trésorerie).
+    - Configuration explicite du cache Tesseract sur le répertoire temporaire autorisé `os.tmpdir()`.
+    - Encadrement strict du cycle de vie du worker avec `try/finally { await worker.terminate(); }` pour prévenir toute fuite de processus.
+    - Format de réponse standardisé JSON `{ success, data, error }` sans crash HTML.
+  - **3. Expérience Utilisateur Tolérante aux Mises en Page Atypiques** :
+    - Si une photo ou capture d'écran contient du texte mais avec une disposition non conforme aux regex standards, le texte extrait est automatiquement injecté dans l'onglet « Copier-Coller » avec bascule automatique d'onglet, permettant à l'utilisateur de cliquer sur « Convertir en opérations » ou de corriger un détail en toute autonomie.
+- **Contrôles Qualité & Validation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : 56 routes compilées avec succès.
+
 ### 2026-10-18 — Optimisation Avancée de l'Importation par Image (Photo & Scan OCR, Capture Mobile, Édition en Ligne)
 
 - **Contexte & Ravitaillement UX** :

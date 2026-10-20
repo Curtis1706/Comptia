@@ -2,38 +2,37 @@
 
 import React, { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const errorParam = searchParams.get("error");
+  const registered = searchParams.get("registered");
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email.trim() || !formData.password) {
-      toast.error("Veuillez renseigner votre email et mot de passe.");
+      toast.error("Veuillez renseigner votre email et votre mot de passe.");
       return;
     }
 
@@ -47,9 +46,9 @@ function LoginForm() {
       });
 
       if (result?.error || !result?.ok) {
-        toast.error("Identifiants incorrects ou compte inactif. Veuillez réessayer.");
+        toast.error("Identifiants incorrects ou compte inactif. Veuillez vérifier vos accès.");
       } else {
-        toast.success("Connexion réussie ! Redirection...");
+        toast.success("Connexion réussie ! Redirection en cours...");
         window.location.href = callbackUrl;
       }
     } catch {
@@ -60,70 +59,81 @@ function LoginForm() {
   };
 
   const handleForgotPassword = () => {
-    toast.info("Pour réinitialiser votre mot de passe, veuillez vous rapprocher de l'administrateur de votre entreprise.");
+    toast.info("Pour réinitialiser votre mot de passe, veuillez vous rapprocher de l'administrateur de votre entreprise ou contacter le support Ceilow.");
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      {/* En-tête mobile avec bouton retour */}
-      <div className="lg:hidden mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-text-muted hover:text-ink transition-colors min-h-[44px]"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Retour à l'accueil
-        </Link>
-      </div>
-
-      {/* Logo Ceilow */}
-      <div className="mb-8">
+    <div className="w-full max-w-[420px] flex flex-col">
+      {/* En-tête mobile (Logo & retour) */}
+      <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-border">
         <Link href="/" className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
           <Image
             src="/logo/ceilow_web_sombre.svg"
             alt="Ceilow"
-            width={130}
+            width={120}
             height={32}
-            className="h-8 w-auto"
+            className="h-8 w-auto dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo/ceilow_web_jaune.svg"
+            alt="Ceilow"
+            width={120}
+            height={32}
+            className="h-8 w-auto hidden dark:block"
             priority
           />
         </Link>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-ink transition-colors min-h-[44px]"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Accueil</span>
+        </Link>
       </div>
 
-      {/* Titre et sous-titre */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-          Ravi de vous revoir
+      {/* Titre & sous-titre de connexion */}
+      <div className="flex flex-col gap-2 mb-6">
+        <h1 className="text-2xl sm:text-[28px] font-semibold text-ink leading-[34px] tracking-tight">
+          Content de vous revoir
         </h1>
-        <p className="text-sm text-text-muted mt-2">
-          Vous n'avez pas de compte ?{" "}
-          <Link
-            href="/register"
-            className="text-ink font-semibold underline decoration-primary underline-offset-4 hover:text-primary transition-colors min-h-[44px] inline-flex items-center"
-          >
-            Créer un compte
-          </Link>
+        <p className="text-base text-text-muted leading-6">
+          Connectez-vous pour accéder à votre espace Ceilow.
         </p>
       </div>
 
+      {/* Alerte compte créé avec succès */}
+      {registered && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-success/30 bg-success/10 p-4 text-sm text-ink">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+          <div className="space-y-1">
+            <p className="font-semibold text-ink">Compte configuré avec succès</p>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Votre espace entreprise et votre plan SYSCOHADA sont prêts. Vous pouvez maintenant vous connecter.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Alerte compte suspendu */}
       {errorParam === "account_suspended" && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-error/30 bg-error/10 p-4 text-sm text-error">
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-error">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-error" />
           <div className="space-y-1">
-            <p className="font-semibold">Compte suspendu</p>
+            <p className="font-semibold">Accès restreint</p>
             <p className="text-xs text-error/90 leading-relaxed">
-              Ce compte a été suspendu par un administrateur. Veuillez contacter votre responsable d'entreprise pour réactiver votre accès.
+              Ce compte a été suspendu par un administrateur. Veuillez contacter le gestionnaire de votre organisation.
             </p>
           </div>
         </div>
       )}
 
       {/* Formulaire de connexion */}
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Adresse email */}
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="block text-sm font-medium text-ink">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* Champ Email */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="email" className="text-sm font-semibold text-ink">
             Adresse email
           </label>
           <input
@@ -132,16 +142,16 @@ function LoginForm() {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            placeholder="exemple@entreprise.bj"
-            className="w-full px-4 py-3 min-h-[44px] text-sm text-ink bg-background border border-border rounded-xl outline-none transition-all placeholder:text-text-muted focus:border-ink focus:ring-2 focus:ring-primary/40"
+            placeholder="Saisir…"
             required
             autoComplete="email"
+            className="w-full h-12 px-4 text-base text-ink bg-background border border-border rounded-lg outline-none transition-all placeholder:text-text-muted focus:border-ink focus:ring-2 focus:ring-primary/40"
           />
         </div>
 
-        {/* Mot de passe */}
-        <div className="space-y-1.5">
-          <label htmlFor="password" className="block text-sm font-medium text-ink">
+        {/* Champ Mot de passe */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="password" className="text-sm font-semibold text-ink">
             Mot de passe
           </label>
           <div className="relative">
@@ -151,16 +161,16 @@ function LoginForm() {
               name="password"
               value={formData.password}
               onChange={handleInputChange}
-              placeholder="Saisissez votre mot de passe"
-              className="w-full px-4 py-3 pr-12 min-h-[44px] text-sm text-ink bg-background border border-border rounded-xl outline-none transition-all placeholder:text-text-muted focus:border-ink focus:ring-2 focus:ring-primary/40"
+              placeholder="Saisir…"
               required
               autoComplete="current-password"
+              className="w-full h-12 px-4 pr-12 text-base text-ink bg-background border border-border rounded-lg outline-none transition-all placeholder:text-text-muted focus:border-ink focus:ring-2 focus:ring-primary/40"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-text-muted hover:text-ink rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-text-muted hover:text-ink rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {showPassword ? (
                 <EyeOff className="w-5 h-5" />
@@ -171,95 +181,114 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Options : Se souvenir de moi & Mot de passe oublié */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <label className="flex items-center gap-2.5 text-sm text-text-muted cursor-pointer min-h-[44px]">
-            <input
-              type="checkbox"
-              name="rememberMe"
-              checked={formData.rememberMe}
-              onChange={handleInputChange}
-              className="w-4 h-4 text-ink border-border rounded accent-ink focus:ring-2 focus:ring-primary/40 cursor-pointer"
-            />
-            <span>Se souvenir de moi</span>
-          </label>
-
+        {/* Lien Mot de passe oublié */}
+        <div className="flex justify-end pt-0.5">
           <button
             type="button"
             onClick={handleForgotPassword}
-            className="text-sm text-text-muted hover:text-ink font-medium underline underline-offset-2 transition-colors min-h-[44px] inline-flex items-center"
+            className="text-sm font-semibold text-ink hover:text-primary transition-colors min-h-[44px] inline-flex items-center"
           >
             Mot de passe oublié ?
           </button>
         </div>
 
-        {/* Bouton de soumission */}
+        {/* Bouton Primaire : Se connecter */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full min-h-[48px] bg-ink text-white font-medium text-sm rounded-xl hover:bg-ink/90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60 cursor-pointer"
+          className="w-full h-11 min-h-[44px] bg-primary border-2 border-primary text-ink font-semibold text-[15px] rounded-lg hover:bg-primary-hover active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink disabled:opacity-60 cursor-pointer"
         >
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <Loader2 className="w-4 h-4 animate-spin text-ink" />
               <span>Connexion en cours...</span>
             </>
           ) : (
             <span>Se connecter</span>
           )}
         </button>
+
+        {/* Séparateur « ou » */}
+        <div className="flex items-center gap-3 w-full py-1">
+          <div className="h-[1px] bg-border flex-1" />
+          <span className="text-sm text-text-muted select-none">ou</span>
+          <div className="h-[1px] bg-border flex-1" />
+        </div>
+
+        {/* Bouton Secondaire : Demander une démo */}
+        <Link
+          href="/demo"
+          className="w-full h-11 min-h-[44px] border-2 border-ink bg-transparent hover:bg-ink/5 active:scale-[0.99] text-ink font-semibold text-[15px] rounded-lg flex items-center justify-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span>Demander une démo</span>
+        </Link>
+
+        {/* Création de compte */}
+        <p className="text-center text-sm text-ink pt-2">
+          Pas encore de compte ?{" "}
+          <Link
+            href="/register"
+            className="font-semibold underline underline-offset-4 hover:text-primary transition-colors"
+          >
+            Créer un compte gratuitement
+          </Link>
+        </p>
       </form>
 
-      {/* Note de réassurance */}
-      <p className="mt-8 text-center text-xs text-text-muted">
-        Système sécurisé conforme SYSCOHADA Révisé et DGI Bénin
-      </p>
+      {/* Footer / mentions de réassurance */}
+      <div className="mt-12 pt-6 border-t border-border/60 text-center">
+        <p className="text-xs font-medium text-text-muted">
+          © 2026 Ceilow · Confidentialité et mentions légales · Contact
+        </p>
+      </div>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen w-full flex bg-background">
-      {/* Panneau gauche : Section Image (visible sur desktop/tablette large) */}
-      <div className="hidden lg:block lg:flex-1 relative overflow-hidden bg-ink">
-        {/* Bouton retour vers l'accueil */}
-        <div className="absolute top-6 left-6 z-20">
-          <Link
-            href="/"
-            title="Retour à l'accueil"
-            className="w-11 h-11 bg-ink/75 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-ink hover:border-primary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </Link>
-        </div>
+    <main className="min-h-screen w-full flex flex-col lg:flex-row bg-background-secondary">
+      {/* ── PANNEAU GAUCHE : MARQUE (Panneau-de-marque.svg) ── */}
+      <div className="hidden lg:flex lg:w-[640px] xl:w-[640px] shrink-0 min-h-screen bg-ink relative overflow-hidden items-center justify-center">
+        {/* Logo Ceilow cliquable renvoyant vers l'accueil */}
+        <Link
+          href="/"
+          title="Ceilow — Retour à l'accueil"
+          aria-label="Ceilow — Retour à l'accueil"
+          className="absolute top-6 left-8 sm:top-8 sm:left-12 w-52 h-20 z-30 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span className="sr-only">Retour à l'accueil Ceilow</span>
+        </Link>
 
-        {/* Image du panneau gauche */}
-        <div className="absolute inset-0">
+        {/* Panneau de marque officiel */}
+        <div className="relative w-full h-full min-h-screen flex items-center justify-center">
           <Image
-            src="/login.jpg"
-            alt="Ceilow"
-            fill
+            src="/Panneau-de-marque.svg"
+            alt="Ceilow - Votre gestion financière, enfin simple"
+            width={640}
+            height={960}
             priority
-            className="object-cover"
-            sizes="(max-width: 1024px) 0vw, 50vw"
+            className="w-full h-full object-cover max-h-screen select-none"
           />
         </div>
       </div>
 
-      {/* Panneau droit : Section Formulaire */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 lg:p-12 xl:p-16 bg-background">
-        <Suspense
-          fallback={
-            <div className="flex flex-col items-center justify-center gap-3 p-8">
-              <Loader2 className="w-8 h-8 animate-spin text-ink" />
-              <p className="text-sm text-text-muted">Chargement de la page...</p>
-            </div>
-          }
-        >
-          <LoginForm />
-        </Suspense>
+      {/* ── PANNEAU DROIT : FORMULAIRE ── */}
+      <div className="flex-1 min-h-screen flex flex-col justify-between items-center px-6 py-8 sm:px-12 sm:py-12 lg:px-16 lg:py-16">
+        {/* Espace supérieur flexible */}
+        <div className="w-full flex-1 flex items-center justify-center">
+          <Suspense
+            fallback={
+              <div className="flex flex-col items-center justify-center gap-3 p-8">
+                <Loader2 className="w-8 h-8 animate-spin text-ink" />
+                <p className="text-sm text-text-muted">Chargement de la page...</p>
+              </div>
+            }
+          >
+            <LoginForm />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

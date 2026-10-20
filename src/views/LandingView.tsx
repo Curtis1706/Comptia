@@ -26,131 +26,15 @@ import {
   FileCheck2,
   Lock,
   Star,
-  Menu,
-  X,
 } from "lucide-react";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export default function LandingView() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen flex flex-col bg-background text-ink selection:bg-primary selection:text-ink font-sans">
-      {/* ── HEADER ────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 w-full bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6 lg:gap-10">
-            <Link
-              href="/"
-              className="flex items-center group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded-lg min-h-[44px]"
-              aria-label="Ceilow Accueil"
-            >
-              <Image
-                src="/logo/ceilow_web_sombre.svg"
-                alt="Ceilow"
-                width={130}
-                height={32}
-                className="h-7 sm:h-8 w-auto"
-                priority
-              />
-            </Link>
-            <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-muted-foreground">
-              <a className="hover:text-ink transition-colors py-1" href="#produit">
-                Produit
-              </a>
-              <a className="hover:text-ink transition-colors py-1" href="#fonctionnalites">
-                Fonctionnalités
-              </a>
-              <a className="hover:text-ink transition-colors py-1" href="#tarifs">
-                Tarifs
-              </a>
-              <a className="hover:text-ink transition-colors py-1" href="#engagements">
-                Engagements
-              </a>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/login"
-              className="text-[14px] font-semibold text-ink hover:text-muted-foreground px-3 py-2 min-h-[44px] items-center transition-colors hidden sm:inline-flex"
-            >
-              Se connecter
-            </Link>
-            <Link
-              href="/demo"
-              className="hidden sm:inline-flex items-center justify-center text-[14px] font-semibold text-ink bg-primary hover:brightness-95 px-5 py-2.5 rounded-xl transition-all shadow-sm min-h-[44px]"
-            >
-              Demander une démo
-            </Link>
-            <Link
-              href="/demo"
-              className="sm:hidden inline-flex items-center justify-center text-xs font-semibold text-ink bg-primary hover:brightness-95 px-3 py-2 rounded-lg transition-all shadow-sm min-h-[44px]"
-            >
-              Démo
-            </Link>
-            <button
-              type="button"
-              className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-ink rounded-lg hover:bg-background-secondary focus:outline-none"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Ouvrir le menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border bg-background px-4 pt-4 pb-6 space-y-4 shadow-lg">
-            <nav className="flex flex-col gap-1 text-base font-medium text-ink">
-              <a
-                className="hover:text-ink hover:bg-background-secondary transition-colors min-h-[44px] flex items-center px-3 rounded-lg"
-                href="#produit"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Produit
-              </a>
-              <a
-                className="hover:text-ink hover:bg-background-secondary transition-colors min-h-[44px] flex items-center px-3 rounded-lg"
-                href="#fonctionnalites"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Fonctionnalités
-              </a>
-              <a
-                className="hover:text-ink hover:bg-background-secondary transition-colors min-h-[44px] flex items-center px-3 rounded-lg"
-                href="#tarifs"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Tarifs
-              </a>
-              <a
-                className="hover:text-ink hover:bg-background-secondary transition-colors min-h-[44px] flex items-center px-3 rounded-lg"
-                href="#engagements"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Engagements
-              </a>
-            </nav>
-            <div className="pt-3 border-t border-border flex flex-col gap-2.5">
-              <Link
-                className="min-h-[44px] flex items-center justify-center text-sm font-semibold text-ink bg-primary hover:brightness-95 px-4 py-2.5 rounded-xl transition-all shadow-sm text-center"
-                href="/demo"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Demander une démo
-              </Link>
-              <Link
-                className="min-h-[44px] flex items-center justify-center text-sm font-semibold text-ink border border-border hover:bg-background-secondary px-4 py-2.5 rounded-xl transition-colors text-center"
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Se connecter à mon espace
-              </Link>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* ── HEADER PUBLIC UNIFIÉ ────────────────────────────────────────────── */}
+      <PublicHeader className="sticky top-0 z-50 border-b border-white/10" />
 
       <main className="flex-grow">
         {/* ── 1. HERO SECTION ─────────────────────────────────────────────── */}
@@ -557,13 +441,17 @@ export default function LandingView() {
         </section>
 
         {/* ── 5. VITRINE IMMERSIVE CHOWCASE (STYLE CHARIOW) ────────────── */}
-        <ShowcaseSections />
+        <div id="modules">
+          <ShowcaseSections />
+        </div>
 
         {/* ── 6. GRILLE DES 12 FONCTIONNALITÉS (21ST.DEV FEATURES 8 BENTO) ── */}
-        <FeaturesEight />
+        <div id="fonctionnalites">
+          <FeaturesEight />
+        </div>
 
-        {/* ── 7. ENGAGEMENTS CEILOW ───────────────────────────────────────── */}
-        <section className="w-full py-20 bg-background-secondary border-t border-border" id="engagements">
+        {/* ── 7. ENGAGEMENTS & ACCOMPAGNEMENT CEILOW ─────────────────────── */}
+        <section className="w-full py-20 bg-background-secondary border-t border-border" id="accompagnement">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
             <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink text-center tracking-tight">
               Plus qu&apos;un logiciel, un vrai partenaire au Bénin
@@ -915,151 +803,8 @@ export default function LandingView() {
         </section>
       </main>
 
-      {/* ── 11. FOOTER SOBRE & ÉPURÉ ─────────────────────────────────────── */}
-      <footer className="w-full bg-ink text-white border-t border-border/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 pb-12 border-b border-border/20">
-            {/* Logo officiel sombre / jaune */}
-            <div className="col-span-2 flex flex-col justify-start">
-              <Link href="/" className="flex items-center focus:outline-none rounded-lg min-h-[44px] w-fit">
-                <Image
-                  src="/logo/ceilow_web_jaune.svg"
-                  alt="Ceilow"
-                  width={130}
-                  height={32}
-                  className="h-8 w-auto"
-                />
-              </Link>
-              <p className="mt-3 text-sm text-border max-w-sm leading-relaxed">
-                Ceilow, La gestion financière, tout simplement.
-              </p>
-            </div>
-
-            {/* Colonne 1: Produit */}
-            <div className="flex flex-col gap-3 text-sm">
-              <span className="font-semibold text-primary uppercase text-xs tracking-widest font-mono">
-                Produit
-              </span>
-              <nav className="flex flex-col gap-2 text-border">
-                <a className="hover:text-white transition-colors py-1" href="#produit">
-                  Facturation
-                </a>
-                <a className="hover:text-white transition-colors py-1" href="#produit">
-                  Rapprochement bancaire
-                </a>
-                <a className="hover:text-white transition-colors py-1" href="#produit">
-                  Déclarations TVA
-                </a>
-                <a className="hover:text-white transition-colors py-1" href="#tarifs">
-                  Tarifs
-                </a>
-              </nav>
-            </div>
-
-            {/* Colonne 2: Ressources */}
-            <div className="flex flex-col gap-3 text-sm">
-              <span className="font-semibold text-primary uppercase text-xs tracking-widest font-mono">
-                Ressources
-              </span>
-              <nav className="flex flex-col gap-2 text-border">
-                <a className="hover:text-white transition-colors py-1" href="#engagements">
-                  Centre d&apos;aide
-                </a>
-                <a className="hover:text-white transition-colors py-1" href="#engagements">
-                  Normes DGI &amp; e-MECeF
-                </a>
-                <a className="hover:text-white transition-colors py-1" href="#engagements">
-                  Guides
-                </a>
-                <Link className="hover:text-white transition-colors py-1" href="/login">
-                  Connexion Client
-                </Link>
-              </nav>
-            </div>
-
-            {/* Colonne 3: Entreprise & Légal */}
-            <div className="flex flex-col gap-6 text-sm">
-              <div className="flex flex-col gap-2.5">
-                <span className="font-semibold text-primary uppercase text-xs tracking-widest font-mono">
-                  Entreprise
-                </span>
-                <nav className="flex flex-col gap-2 text-border">
-                  <a className="hover:text-white transition-colors py-1" href="#engagements">
-                    À propos
-                  </a>
-                  <a className="hover:text-white transition-colors py-1" href="mailto:contact@ceilow.bj">
-                    Contact
-                  </a>
-                </nav>
-              </div>
-              <div className="flex flex-col gap-2.5">
-                <span className="font-semibold text-primary uppercase text-xs tracking-widest font-mono">
-                  Légal
-                </span>
-                <nav className="flex flex-col gap-1.5 text-border text-xs">
-                  <span className="hover:text-white transition-colors cursor-pointer py-0.5">Mentions légales</span>
-                  <span className="hover:text-white transition-colors cursor-pointer py-0.5">Politique de confidentialité</span>
-                  <span className="hover:text-white transition-colors cursor-pointer py-0.5">Conditions d&apos;utilisation</span>
-                </nav>
-              </div>
-            </div>
-          </div>
-
-          {/* Copyright & Liens Réseaux Sociaux */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-border">
-            <div>
-              © 2025 Ceilow. Tous droits réservés.
-            </div>
-            {/* Social media links */}
-            <div className="flex items-center gap-4 text-border">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="LinkedIn"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                </svg>
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="X (Twitter)"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="Facebook"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z"/>
-                </svg>
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="Instagram"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* ── FOOTER PUBLIC UNIFIÉ ────────────────────────────────────────── */}
+      <PublicFooter />
     </div>
   );
 }

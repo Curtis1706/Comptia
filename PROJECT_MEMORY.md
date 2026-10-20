@@ -6,7 +6,263 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
-### 2026-10-18 — Prétraitement Haute Résolution Canvas/Sharp & Analyseur de Relevés Bancaires (BOA, Ecobank, UBA)
+### 2026-10-20 — Suppression du Bouton « Accueil » et Logo Ceilow Cliquable vers l'Accueil (/login et /register)
+
+- **Demande Utilisateur** :
+  - Supprimer le bouton `← Accueil` présent en haut à gauche du panneau de marque sur les pages de connexion ([`src/app/login/page.tsx`](file:///e:/Comptia/src/app/login/page.tsx)) et d'inscription ([`src/app/register/page.tsx`](file:///e:/Comptia/src/app/register/page.tsx)).
+  - Rendre le logo Ceilow vectoriel directement cliquable dans le panneau latéral pour rediriger l'utilisateur vers la page d'accueil (`/`).
+- **Actions Réalisées** :
+  - **1. Page de connexion ([`src/app/login/page.tsx`](file:///e:/Comptia/src/app/login/page.tsx))** : Suppression du bouton flottant `← Accueil`. Positionnement d'un lien overlay accessible (`<Link href="/" ...>`) précisément calibré sur l'emplacement du logo Ceilow dans `Panneau-de-marque.svg` (`top-6 left-8 sm:top-8 sm:left-12 w-52 h-20 z-30 cursor-pointer`), avec outline d'accessibilité (`focus-visible:ring-primary`).
+  - **2. Page d'inscription ([`src/app/register/page.tsx`](file:///e:/Comptia/src/app/register/page.tsx))** : Même ajustement rigoureux, suppression du bouton discret `← Accueil` et intégration du lien sur le logo Ceilow vers `/`.
+- **Règles Ceilow** :
+  - Respect strict des tokens sémantiques, zéro emoji, accessibilité clavier préservée avec `sr-only` et `focus-visible`.
+
+### 2026-10-20 — Autorisation d'Accès Public aux Pages Légales dans le Middleware
+
+- **Problème Identifié** :
+  - Les requêtes non authentifiées vers [`/mentions-legales`](file:///e:/Comptia/src/app/mentions-legales/page.tsx), [`/confidentialite`](file:///e:/Comptia/src/app/confidentialite/page.tsx), [`/cgu`](file:///e:/Comptia/src/app/cgu/page.tsx) et [`/verify-email`](file:///e:/Comptia/src/app/verify-email/page.tsx) étaient interceptées par [`src/middleware.ts`](file:///e:/Comptia/src/middleware.ts) et redirigées vers `/login` car ces chemins manquaient dans la liste `PUBLIC_PATHS`.
+- **Correction Appliquée** :
+  - Ajout explicite de `"/mentions-legales"`, `"/confidentialite"`, `"/cgu"` et `"/verify-email"` dans le tableau `PUBLIC_PATHS` de [`src/middleware.ts`](file:///e:/Comptia/src/middleware.ts).
+  - Ces pages sont désormais librement consultables par tout visiteur sans exiger d'authentification préalable.
+
+### 2026-10-20 — Correction du Bouton CTA PublicHeader (« Demander une démo » sans retour à la ligne)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Correction immédiate du bouton CTA dans [`src/components/layout/PublicHeader.tsx`](file:///e:/Comptia/src/components/layout/PublicHeader.tsx).
+  - Remplacement de l'ancien libellé erroné *« Démarrer gratuitement »* par le libellé officiel *« Demander une démo »*.
+  - Suppression de tout retour à la ligne avec `whitespace-nowrap` et padding adapté (`px-5`), pour un alignement horizontal parfait sur une seule ligne.
+  - Redirection du lien vers [`/demo`](file:///e:/Comptia/src/app/demo/page.tsx) sur desktop et dans le menu tiroir mobile.
+
+### 2026-10-20 — Implémentation « Légal · CGU » (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de l'écran « Légal · CGU » (`/* Légal · CGU */`) sur [`src/app/cgu/page.tsx`](file:///e:/Comptia/src/app/cgu/page.tsx).
+  - En-tête sombre (`bg-ink`, 396px) avec `PublicHeader` (1200x80px), badge jaune Ceilow *« Légal »*, titre Display 56px *« CGU »*, sous-titre *« Conditions générales d'utilisation du service Ceilow. »*, et mention de mise à jour.
+  - Système d'onglets de navigation légale (360px x 43px) avec onglet *CGU* actif (bordure inférieure `border-b-[3px] border-primary font-semibold text-ink`).
+  - Corps en deux colonnes (1008px) :
+    - **Sommaire sticky (264px)** : Carte `bg-background border border-border rounded-2xl p-6` avec les 10 liens exacts de la maquette, défilement fluide et détection de section active au scroll.
+    - **Article (696px)** :
+      - Note de rédaction conforme sur le cadre contractuel.
+      - 10 sections juridiques complètes et fidèles au texte Figma :
+        1. *1. Objet* (Acceptation des CGU par l'utilisateur).
+        2. *2. Le service* (Périmètre facturation, TVA, rapprochement bancaire, homologation e-MECeF DGI).
+        3. *3. Création de compte* (Comptes professionnels majeurs, confidentialité des identifiants).
+        4. *4. Plans et tarifs* (Plan Gratuit 10 factures/mois, plan Pro 15 000 FCFA/mois avec 14 jours d'essai, Mobile Money & CB).
+        5. *5. Obligations de l'utilisateur* (Exactitude des déclarations, utilisation licite).
+        6. *6. Responsabilité de Ceilow* (Obligation de moyens, exclusion du conseil comptable/juridique personnalisé).
+        7. *7. Données et propriété intellectuelle* (Propriété exclusive des données par le client, droits réservés sur le logiciel).
+        8. *8. Suspension et résiliation* (Droit de clôture, préavis et délai d'export des archives).
+        9. *9. Modification des CGU* (Mise à jour en ligne et notification d'évolution).
+        10. *10. Droit applicable et litiges* (Droit béninois et tribunaux de Cotonou).
+  - Pied de page unifié `PublicFooter` (1200px x 104px en 4 colonnes).
+- **Conformité & Règles Ceilow** :
+  - Tokens sémantiques exclusifs (`ink`, `primary`, `background-secondary`, `background`, `border`, `text-muted`).
+  - Zéro emoji, icônes vectorielles Lucide React (`Info`).
+  - Typographie *Inter* avec chiffres tabulaires (`tabular-nums`) pour les tarifs et durées.
+
+### 2026-10-20 — Implémentation « Légal · Confidentialité » (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de l'écran « Légal · Confidentialité » (`/* Légal · Confidentialité */`) sur [`src/app/confidentialite/page.tsx`](file:///e:/Comptia/src/app/confidentialite/page.tsx).
+  - En-tête sombre (`bg-ink`, 396px) avec `PublicHeader` (1200x80px), badge jaune Ceilow *« Légal »*, titre Display 56px *« Confidentialité »*, sous-titre *« Comment Ceilow collecte, utilise et protège vos données personnelles. »*, et mention de mise à jour.
+  - Système d'onglets de navigation légale (360px x 43px) avec onglet *Confidentialité* actif (bordure inférieure `border-b-[3px] border-primary font-semibold text-ink`).
+  - Corps en deux colonnes (1008px) :
+    - **Sommaire sticky (264px)** : Carte `bg-background border border-border rounded-2xl p-6` avec les 10 liens exacts de la maquette, défilement fluide et détection de section active au scroll.
+    - **Article (696px)** :
+      - Note de rédaction conforme sur la protection des données.
+      - 10 sections juridiques complètes et fidèles au texte Figma :
+        1. *1. Responsable du traitement* (Ceilow Technologies SAS, contact dpo@ceilow.bj).
+        2. *2. Données collectées* (Données de compte, d'entreprise, facturation/comptabilité, contact, techniques).
+        3. *3. Finalités* (Exécution des services, e-MECeF, support, sécurité).
+        4. *4. Durée de conservation* (10 ans selon le CGI Bénin et l'Acte Uniforme OHADA).
+        5. *5. Destinataires et sous-traitants* (Équipes habilitées, DGI, hébergement sécurisé ISO 27001).
+        6. *6. Sécurité* (Chiffrement TLS 1.3, mots de passe hachés, RBAC, sauvegardes chiffrées).
+        7. *7. Vos droits* (Accès, rectification, effacement, portabilité, contact DPO).
+        8. *8. Cookies* (Cookies de session strictement nécessaires et mesure d'audience).
+        9. *9. Cadre légal et réclamation* (Code du numérique béninois loi n° 2017-20, recours APDP Bénin).
+        10. *10. Modifications* (Suivi des versions et notifications d'évolutions).
+  - Pied de page unifié `PublicFooter` (1200px x 104px en 4 colonnes).
+- **Conformité & Règles Ceilow** :
+  - Tokens sémantiques exclusifs (`ink`, `primary`, `background-secondary`, `background`, `border`, `text-muted`).
+  - Zéro emoji, icônes vectorielles Lucide React (`Info`).
+  - Typographie *Inter* avec chiffres tabulaires (`tabular-nums`).
+
+### 2026-10-20 — Implémentation « Légal · Mentions légales » & Espace Légal Unifié (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de l'écran « Légal · Mentions légales » (`/* Légal · Mentions légales */`) sur [`src/app/mentions-legales/page.tsx`](file:///e:/Comptia/src/app/mentions-legales/page.tsx).
+  - En-tête sombre (`bg-ink`, 396px) avec `PublicHeader` (navigation 1200x80px), badge jaune Ceilow *« Légal »*, titre Display 56px *« Mentions légales »*, sous-titre *« Informations sur l'éditeur et l'hébergement du site Ceilow. »*, et mention de mise à jour.
+  - Système d'onglets de navigation légale (360px) :
+    - *Mentions légales* (actif : bordure inférieure `border-b-[3px] border-primary font-semibold text-ink`).
+    - *Confidentialité* (menant vers [`src/app/confidentialite/page.tsx`](file:///e:/Comptia/src/app/confidentialite/page.tsx)).
+    - *CGU* (menant vers [`src/app/cgu/page.tsx`](file:///e:/Comptia/src/app/cgu/page.tsx)).
+  - Corps en deux colonnes (1008px) :
+    - **Sommaire sticky (264px)** : Carte blanche `bg-background border border-border rounded-2xl p-6` avec défilement fluide et indicateur de section active en direct au scroll.
+    - **Article (696px)** :
+      - Note d'information réglementaire avec icône `Info` dans une pastille circulaire.
+      - 8 sections juridiques complètes adaptées au droit béninois et OHADA (1. Éditeur du site, 2. Directeur de la publication, 3. Hébergement, 4. Propriété intellectuelle, 5. Responsabilité, 6. Liens hypertextes, 7. Données personnelles & Code du numérique béninois, 8. Droit applicable et tribunaux compétents de Cotonou).
+  - Pied de page unifié `PublicFooter` (1200px x 104px en 4 colonnes).
+- **Actions Réalisées** :
+  - **1. Page Mentions Légales ([`src/app/mentions-legales/page.tsx`](file:///e:/Comptia/src/app/mentions-legales/page.tsx))** : Conforme au pixel près aux spécifications Figma, responsive mobile-first, navigation interne par ancres avec décalage de header fixe (`scroll-mt-28`).
+  - **2. Pages Complémentaires ([`src/app/confidentialite/page.tsx`](file:///e:/Comptia/src/app/confidentialite/page.tsx), [`src/app/cgu/page.tsx`](file:///e:/Comptia/src/app/cgu/page.tsx))** : Créées avec le même gabarit, même style d'onglets, sommaire interactif et pied de page unifié pour garantir zéro lien mort depuis le footer ou les onglets.
+  - **3. Respect Intégral des Règles Ceilow** :
+    - Tokens sémantiques stricts (`ink`, `primary`, `background-secondary`, `background`, `border`, `text-muted`).
+    - Zéro emoji, icônes vectorielles Lucide React (`Info`, `ShieldCheck`, `Scale`).
+    - Typographie *Inter* avec chiffres tabulaires (`tabular-nums`) pour les numéros RCCM, IFU et montants de capital.
+    - Accessibilité : attributs ARIA `aria-current="page"`, `aria-label`, zones tactiles $\ge 44\text{px}$.
+
+### 2026-10-20 — Implémentation « E-mail de vérification » et Unification Header/Footer Publics (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de l'écran « E-mail de vérification » (`/* E-mail de vérification */`) avec héro sombre (`#332E29`), titre *« Vérifiez votre boîte mail »*, sous-titre *« Nous vous avons envoyé un lien pour activer votre compte. »*, boîte d'alerte verte conforme avec coche, bouton primaire 160px *« Retour à l'accueil »* et bouton secondaire 133px *« Se connecter »*.
+  - Unification globale du Header (`PublicHeader`) et du Footer (`PublicFooter`) sur **toutes les pages publiques** (`/`, `/demo`, `/verify-email`) selon les spécifications Figma exactes.
+- **Actions Réalisées** :
+  - **1. Page E-mail de vérification ([`src/app/verify-email/page.tsx`](file:///e:/Comptia/src/app/verify-email/page.tsx))** :
+    - En-tête sombre (`bg-ink`) avec `PublicHeader` et textes Display/Inter centrés.
+    - Boîte d'alerte verte (`bg-success/20`, `border-success/40`, pastille `bg-success-deep` avec icône Lucide `Check` blanche) avec personnalisation dynamique si `?email=...` est présent.
+    - Boutons Ceilow respectant les dimensions Figma : Primaire 160x44px (*« Retour à l'accueil »*) et Secondaire 133x44px (*« Se connecter »*).
+    - Enveloppé dans un `<Suspense>` pour compatibilité CSR/SSR sans avertissement Next.js.
+  - **2. Composants Partagés Header & Footer ([`src/components/layout/PublicHeader.tsx`](file:///e:/Comptia/src/components/layout/PublicHeader.tsx), [`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx))** :
+    - `PublicHeader` : Navigation 1200px x 80px, logo officiel Ceilow, liens (Fonctionnalités, Tarifs, Accompagnement), action « Se connecter » soulignée, et bouton Primaire Ceilow 192x44px « Démarrer gratuitement », avec menu mobile responsive.
+    - `PublicFooter` : Structure exacte en 4 colonnes Figma (1200px x 104px) :
+      - Colonne 1 (245px) : Logo Ceilow jaune + copyright `© 2026 Ceilow. Tous droits réservés.`.
+      - Colonne 2 (130px) : Produit (Facturation, TVA et déclarations, Tarifs).
+      - Colonne 3 (163px) : Ressources (Centre d'aide, Guides, Normes DGI et e-MECeF).
+      - Colonne 4 (112px) : Légal (Mentions légales, Confidentialité, CGU).
+  - **3. Harmonisation sur [`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx)** :
+    - Remplacement de l'ancien header et de l'ancien footer par `<PublicHeader />` et `<PublicFooter />`.
+    - Ajout des ancres de navigation `id="modules"`, `id="tarifs"`, `id="accompagnement"` pour assurer une continuité parfaite de navigation.
+  - **4. Conformité & Rules Ceilow** :
+    - Tokens sémantiques stricts (`ink`, `primary`, `background-secondary`, `background`, `border`, `success`, `text-muted`).
+    - Zéro emoji, icônes Lucide React (`Check`, `Loader2`, `Menu`, `X`).
+    - Respect des cibles tactiles $\ge 44\text{px}$ et typographie Inter avec chiffres tabulaires.
+
+### 2026-10-20 — Intégration des Menus Déroulants Animés « Demande de démo — liste ouverte » (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle du composant de menu déroulant personnalisé animé (`/* Demande de démo — liste ouverte */` / `/* Liste des sujets */`) sur [`src/app/demo/page.tsx`](file:///e:/Comptia/src/app/demo/page.tsx).
+  - Remplace le select HTML natif par un composant dropdown interactif haut de gamme, fluide et animé.
+- **Actions Réalisées** :
+  - **1. Sélecteurs personnalisés animés (Secteur & Taille d'équipe)** :
+    - Bouton déclencheur 48px avec chevron Lucide [`ChevronDown`](file:///e:/Comptia/src/app/demo/page.tsx) animé (rotation à 180° à l'ouverture).
+    - Menu contextuel flottant (`shadow-elevated`, fond `bg-background`, bordure `border-border`, coins `rounded-xl`, animation `animate-scale-in`).
+    - Éléments de liste avec retour au survol (`hover:bg-background-secondary/70`) et état actif avec coche [`Check`](file:///e:/Comptia/src/app/demo/page.tsx).
+    - Fermeture automatique au clic extérieur via `useRef` + `useEffect`.
+  - **2. Micro-animations & Dynamisme** :
+    - Animations discrètes et soignées (`animate-fade-in`, `animate-scale-in`, micro-transitions sur les puces vert menthe au survol, scaling tactile des boutons).
+  - **3. Respect des Règles Ceilow** :
+    - Tokens sémantiques exclusifs (`bg-background`, `bg-background-secondary`, `border-border`, `shadow-elevated`, `primary`, `ink`, `success`).
+    - Zéro emoji, icônes Lucide React (`ChevronDown`, `Check`, `X`, `Loader2`).
+    - Accessibilité : rôles ARIA `listbox`, `option`, `aria-expanded` et `aria-haspopup`.
+
+### 2026-10-20 — Implémentation des États d'Erreur « Demande de démo — erreurs » (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle des états d'erreur selon la maquette Figma (`/* Demande de démo — erreurs */`) sur [`src/app/demo/page.tsx`](file:///e:/Comptia/src/app/demo/page.tsx).
+- **Actions Réalisées** :
+  - **1. Bannière d'alerte générale « Envoi impossible »** :
+    - Affichée sous le titre du formulaire en cas d'erreur de soumission (`bg-error/10`, `border-error/30`, coins `rounded-xl`, pastille circulaire rouge avec icône croix [`X`](file:///e:/Comptia/src/app/demo/page.tsx)).
+    - Message clair : *« Envoi impossible — Vérifiez les champs indiqués ci-dessous puis réessayez. »*
+  - **2. États d'erreur inline sur chaque champ** :
+    - Bordure active rouge corail `border-2 border-error` pour les champs invalides.
+    - Message d'erreur textuel *« Erreur : vérifiez cette valeur. »* au format typographique conforme sous le champ concerné.
+    - Focus automatique sur le premier champ en erreur (conforme Règle 16).
+  - **3. Erreur de consentement (Case à cocher)** :
+    - Bordure `border-error` sur la case si le consentement n'est pas coché.
+    - Message d'erreur explicatif affiché sous la case à cocher.
+  - **4. Respect des Règles Ceilow** :
+    - Tokens sémantiques stricts (`border-error`, `text-error`, `bg-error/10`, `ink`, `primary`, etc.).
+    - Zéro emoji, icônes Lucide React (`X`, `Check`, `Loader2`).
+    - Typographie *Inter* avec chiffres tabulaires.
+
+### 2026-10-20 — Implémentation de l'État « Demande de démo envoyée » (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de l'état de confirmation lorsque la demande de démo est envoyée (`/* Demande de démo envoyée */`).
+  - Héro sombre (`bg-ink`) mis à jour avec le titre *« Merci, votre demande est envoyée »* et sous-titre *« Notre équipe vous répondra pour convenir d'un créneau. »*.
+  - Zone centrale avec boîte d'alerte verte (`bg-success/20`, bordure success, pastille circulaire verte avec coche blanche) et textes explicatifs.
+  - Boutons d'action : Bouton Primaire Ceilow *« Retour à l'accueil »* (160px, `bg-primary`, `border-2 border-primary`, 44px) et Bouton Secondaire *« Créer un compte »* (192px, `border-2 border-ink`, 44px) menant vers [`/register`](file:///e:/Comptia/src/app/register/page.tsx).
+- **Actions Réalisées** :
+  - **1. Logique d'affichage dynamique** ([`src/app/demo/page.tsx`](file:///e:/Comptia/src/app/demo/page.tsx)) :
+    - Gestion de l'état soumis soit après validation du formulaire, soit directement via le paramètre d'URL `?submitted=true`.
+    - Enveloppement dans un `<Suspense>` pour supporter `useSearchParams()` sans avertissement SSR.
+  - **2. Respect Intégral des Règles Ceilow** :
+    - Tokens sémantiques exclusifs (`ink`, `primary`, `background-secondary`, `background`, `border`, `success`, `text-muted`).
+    - Zéro emoji, icônes Lucide React (`Check`, `Loader2`).
+    - Typographie *Inter* avec chiffres tabulaires (`tabular-nums`).
+    - Zones tactiles $\ge 44\text{px}$.
+
+### 2026-10-20 — Réimplémentation de la Page « Demander une démo » (Maquette Figma & Rules Ceilow)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de la maquette Figma complète pour la page « Demander une démo » ([`src/app/demo/page.tsx`](file:///e:/Comptia/src/app/demo/page.tsx)).
+  - Mise en page globale : en-tête héro sombre `#332E29`, section de contenu centrale bicolore sur fond `#F8F6F2`, et pied de page institutionnel 4 colonnes.
+- **Actions Réalisées** :
+  - **1. En-tête Héro Sombre (`bg-ink`)** :
+    - Navigation alignée (max 1200px) avec logo Ceilow vectoriel officiel (`/logo/ceilow_web_jaune.svg`), liens vers Fonctionnalités, Tarifs, Accompagnement, bouton souligné « Se connecter » et CTA primaire « Démarrer gratuitement ».
+    - Héro centré avec titre d'accroche *« Voyez Ceilow en action »* et sous-titre explicatif.
+  - **2. Section Contenu & Formulaire** :
+    - **Colonne gauche (400px)** : *« Ce que vous verrez pendant la démo »* avec les 4 points clés accompagnés des puces vert menthe Ceilow (`bg-success`), carte de réassurance *« Durée et format »* (30 minutes sans engagement) et mention de conformité DGI e-MECeF / SYSCOHADA.
+    - **Formulaire droit (560px, card blanche `rounded-[20px]`)** :
+      - Ligne horizontale Prénom & Nom (`gap: 12px`, 48px de hauteur, placeholder `"Saisir…"`).
+      - Champ « Adresse email professionnelle » et champ téléphone WhatsApp format international.
+      - Champ « Nom de l'entreprise » et deux sélecteurs : Secteur d'activité (matrice sectorielle Bénin) et Taille d'équipe.
+      - Champ textarea « Votre besoin ou message (Optionnel) ».
+      - Case à cocher conforme (20x20px, bordure ink, icône check).
+      - Bouton Primaire Ceilow « Planifier ma démo » avec spinner inline et retour visuel personnalisé de confirmation.
+  - **3. Pied de Page Sombre (`bg-ink`)** :
+    - 4 colonnes : Marque & copyright, Produit (Facturation, TVA, Tarifs), Ressources (Centre d'aide, Guides, Normes DGI) et Légal (Mentions légales, Confidentialité, CGU).
+  - **4. Respect des Règles Ceilow** :
+    - Tokens sémantiques exclusifs (`ink`, `primary`, `background-secondary`, `background`, `border`, `success`, `error`, `text-muted`).
+    - Zéro emoji, icônes Lucide React (`Check`, `CheckCircle2`, `Loader2`).
+    - Typographie *Inter* avec chiffres tabulaires (`tabular-nums`).
+    - Zones tactiles $\ge 44\text{px}$.
+
+### 2026-10-20 — Réimplémentation de la Page d'Inscription (Maquette Figma & Panneau de Marque)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de la maquette Figma pour la page d'inscription (`/register`).
+  - Utilisation du panneau de marque officiel [`public/Panneau-de-marque.svg`](file:///e:/Comptia/public/Panneau-de-marque.svg) sur le volet gauche (fond `#332E29`, filigrane Ceilow, wordmark, proposition de valeur et puces de réassurance).
+- **Actions Réalisées** :
+  - **1. Structure & Respect du Layout Figma** ([`src/app/register/page.tsx`](file:///e:/Comptia/src/app/register/page.tsx)) :
+    - Split desktop 640px / 800px avec panneau de marque et formulaire centré sur 420px.
+    - Étape 1 conforme à la maquette :
+      - Ligne horizontale `sm:flex-row` pour « Prénom » et « Nom » (largeur 204px chacun, hauteur 48px).
+      - Champ « Adresse email » avec gestion des erreurs inline (`border-error`, texte explicatif).
+      - Champ « Mot de passe » avec toggle eye accessible et aide courte (*« 8 caractères minimum, une majuscule et un chiffre. »*).
+      - Case à cocher personnalisée (20x20px, bordure ink, icône check) pour l'acceptation des CGU et de la confidentialité.
+      - Bouton primaire Ceilow (« Créer mon compte »), séparateur « ou », bouton secondaire (« Demander une démo ») et lien « Vous avez déjà un compte ? Se connecter ».
+    - Étape 2 fluide pour la conformité SYSCOHADA & DGI Bénin :
+      - Raison sociale de l'entreprise, forme juridique OHADA (SARL, SAS, SUARL, EI...), secteur d'activité et numéro IFU (13 chiffres).
+      - Bouton de validation finale (« Finaliser mon inscription ») appelant `/api/auth/register` et redirection vers `/login?registered=true`.
+  - **2. Respect des Règles Ceilow** :
+    - Tokens sémantiques exclusifs (`primary`, `ink`, `background-secondary`, `background`, `border`, `text-muted`, `error`, `success`).
+    - Zéro emoji, icônes Lucide React (`Eye`, `EyeOff`, `ArrowLeft`, `Check`, `Loader2`, `Building2`).
+    - Typographie *Inter* avec chiffres tabulaires (`tabular-nums`) pour l'IFU.
+    - Zones tactiles $\ge 44\text{px}$.
+
+### 2026-10-20 — Réimplémentation de la Page de Connexion (Maquette Figma & Panneau de Marque)
+
+- **Contexte & Spécifications Utilisateur** :
+  - Intégration fidèle de la maquette Figma fournie pour la page de connexion (`/login`).
+  - Utilisation officielle du panneau de marque vectoriel [`public/Panneau-de-marque.svg`](file:///e:/Comptia/public/Panneau-de-marque.svg) pour le volet visuel de gauche (fond `#332E29`, filigrane picto Ceilow, wordmark, proposition de valeur « Votre gestion financière, enfin simple. » et les 3 points clés SYSCOHADA / Bénin).
+- **Actions Réalisées** :
+  - **1. Structure & Mise en Page Mobile-First** ([`src/app/login/page.tsx`](file:///e:/Comptia/src/app/login/page.tsx)) :
+    - Desktop : Disposition split 640px / 800px avec panneau de marque à gauche et formulaire centré à droite.
+    - Mobile : Masquage responsive du panneau latéral lourd, affichage dynamique du logo officiel Ceilow et du lien de retour accueil.
+  - **2. Respect Intégral des Règles Design Ceilow** :
+    - Tokens sémantiques stricts (`primary`, `ink`, `background-secondary`, `background`, `border`, `text-muted`, `success`, `error`), aucune couleur hexadécimale en dur.
+    - Typographie : *Inter* avec chiffres tabulaires (`tnum`), hiérarchie de labels claire et alignement précis.
+    - Zéro emoji : utilisation exclusive des icônes Lucide React (`Eye`, `EyeOff`, `Loader2`, `ArrowLeft`, `AlertCircle`).
+    - Zones tactiles respectées (hauteur des boutons et liens ≥ 44px).
+  - **3. Fonctionnalités & Expérience Utilisateur** :
+    - Authentification réelle via NextAuth v5 (`signIn("credentials")`) avec redirection vers le `callbackUrl` ou le dashboard.
+    - Feedback immédiat via Sonner (`toast.success`, `toast.error`, `toast.info`).
+    - Gestion des alertes visuelles (confirmation de compte créé via `registered=true`, compte restreint via `error=account_suspended`).
+    - Bouton primaire Ceilow (« Se connecter ») avec spinner inline désactivé lors de la soumission.
+    - Séparateur visuel « ou » et bouton secondaire Ceilow (« Demander une démo ») menant vers [`/demo`](file:///e:/Comptia/src/app/demo/page.tsx).
+    - Lien d'inscription (« Créer un compte gratuitement ») et mentions de pied de page (« © 2026 Ceilow · Confidentialité et mentions légales · Contact »).
+
 
 - **Analyse du Résultat sur la Capture Bank of Africa (BOA)** :
   - L'utilisateur a testé l'OCR avec une capture d'écran d'un relevé officiel Bank of Africa Bénin (`729 x 363` pixels, 72 DPI) pour le titulaire ALOHOUTADE ADECHINAN HARR (Compte 06202350000).

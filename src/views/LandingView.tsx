@@ -1,809 +1,901 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FeaturesEight } from "@/components/landing/FeaturesEight";
-import { ShowcaseSections } from "@/components/landing/ShowcaseSections";
 import {
-  FileText,
-  CreditCard,
-  BookOpen,
-  Receipt,
-  Users,
-  TrendingUp,
-  Building2,
-  Command,
-  BellRing,
-  ShieldCheck,
-  FileSpreadsheet,
-  Layers,
   ArrowRight,
-  Check,
-  TrendingDown,
-  DollarSign,
-  Headphones,
-  FileCheck2,
+  PlayCircle,
   Lock,
+  CheckCircle2,
+  Calendar,
+  CloudUpload,
+  RefreshCw,
+  QrCode,
+  ArrowUpDown,
+  PieChart,
+  Check,
   Star,
+  ArrowDown,
+  Building2,
+  BadgeCheck,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { CockpitTabletDemo } from "@/components/landing/CockpitTabletDemo";
 
 export default function LandingView() {
+  // ── 1. GESTION DU WORKFLOW EN ACTION (3 ÉTAPES AVEC AUTOPLAY & BARRE DE PROGRESSION) ──
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [progressPercent, setProgressPercent] = useState(0);
+
+  useEffect(() => {
+    const STEP_DURATION = 4000; // 4 secondes par étape
+    const UPDATE_FREQ = 40; // mise à jour toutes les 40ms
+
+    const interval = setInterval(() => {
+      setProgressPercent((prev) => {
+        const next = prev + (UPDATE_FREQ / STEP_DURATION) * 100;
+        if (next >= 100) {
+          setCurrentStep((current) => (current === 3 ? 1 : ((current + 1) as 1 | 2 | 3)));
+          return 0;
+        }
+        return next;
+      });
+    }, UPDATE_FREQ);
+
+    return () => clearInterval(interval);
+  }, [currentStep]);
+
+  const selectManualTab = (step: 1 | 2 | 3) => {
+    setCurrentStep(step);
+    setProgressPercent(0);
+  };
+
+
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-ink selection:bg-primary selection:text-ink font-sans">
-      {/* ── HEADER PUBLIC UNIFIÉ ────────────────────────────────────────────── */}
-      <PublicHeader className="sticky top-0 z-50 border-b border-white/10" />
+    <div className="min-h-screen flex flex-col bg-background text-ink font-sans selection:bg-primary selection:text-ink">
+      {/* ── HEADER PUBLIC UNIFIÉ ACTUEL (bg-ink text-white) ────────────────────── */}
+      <PublicHeader className="sticky top-0 z-50" />
 
       <main className="flex-grow">
-        {/* ── 1. HERO SECTION ─────────────────────────────────────────────── */}
-        <section className="relative w-full pt-10 sm:pt-14 md:pt-20 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-          {/* Centered H1 (Strictly 2 lines on desktop/tablet, clean non-broken wrap on mobile) */}
-          <h1 className="font-display text-[22px] sm:text-3xl md:text-[38px] lg:text-[46px] xl:text-[50px] font-bold text-ink max-w-6xl mx-auto tracking-tight leading-[1.25] sm:leading-[1.2]">
-            <span className="block md:whitespace-nowrap">Votre comptabilité, vos factures et votre TVA,</span>
-            <span className="block mt-1 sm:mt-2 md:whitespace-nowrap">
-              <span className="bg-primary text-ink px-2.5 sm:px-3 py-0.5 rounded-md sm:rounded-lg inline-block">
-                gérées automatiquement au Bénin.
-              </span>
-            </span>
-          </h1>
+        <div className="flex flex-col w-full">
+          {/* ── SECTION 1 : HERO SOMBRE PLEINE PAGE (min-h-[calc(100vh-5rem)]) ── */}
+          <section className="relative w-full bg-ink text-white min-h-[calc(100vh-5rem)] flex flex-col justify-between pt-8 sm:pt-12 pb-16 sm:pb-24 overflow-hidden">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center my-auto">
 
-          {/* Centered Subtitle */}
-          <p className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed px-1 sm:px-0">
-            Ceilow s'occupe de vos factures, de votre comptabilité et de vos déclarations fiscales et sociales, pour que vous puissiez vous concentrer sur votre entreprise.
-          </p>
-
-          {/* Centered CTAs */}
-          <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-ink font-semibold text-[15px] sm:text-base hover:brightness-95 transition-all shadow-sm active:scale-95"
-            >
-              <span>Souscrire</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/demo"
-              className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-background border border-border text-ink font-semibold text-[15px] sm:text-base hover:bg-background-secondary transition-all"
-            >
-              Demander une démo
-            </Link>
-          </div>
-
-          {/* Browser Mockup (Inspired by SaaS Template, Clean White & Bordered) */}
-          <div className="mt-14 w-full max-w-5xl mx-auto rounded-2xl border border-border bg-background shadow-xl shadow-ink/5 overflow-hidden text-left relative">
-            {/* Browser Top Bar */}
-            <div className="bg-background-secondary border-b border-border px-4 py-3 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-error"></span>
-                  <span className="w-3 h-3 rounded-full bg-warning"></span>
-                  <span className="w-3 h-3 rounded-full bg-success"></span>
-                </div>
-                <div className="flex items-center gap-2 pl-3 text-xs font-mono text-muted-foreground border-l border-border">
-                  <span className="font-semibold text-ink">app.ceilow.bj</span>
-                  <span className="text-border">/</span>
-                  <span className="bg-background px-2 py-0.5 rounded border border-border text-ink">
-                    Bénin Entreprise SARL
+              {/* H1 Mot pour Mot : Strictement 2 lignes sur tablette et desktop */}
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[44px] xl:text-[50px] font-bold tracking-tight text-white max-w-6xl mx-auto leading-[1.25] text-center">
+                <span className="block md:whitespace-nowrap">
+                  Votre comptabilité, vos factures et votre TVA,
+                </span>
+                <span className="block mt-2 sm:mt-3 md:whitespace-nowrap">
+                  <span className="bg-primary text-ink px-4 py-1 rounded-xl inline-block">
+                    gérées automatiquement au Bénin.
                   </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 bg-success/20 border border-success/40 text-success-deep px-2.5 py-0.5 rounded-full text-xs font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success-deep"></span>
-                  e-MECeF Certifié DGI
                 </span>
-                <span className="hidden sm:inline text-xs font-medium px-2 py-0.5 bg-background rounded border border-border text-muted-foreground font-mono">
-                  Conforme normes béninoises
-                </span>
-              </div>
-            </div>
+              </h1>
 
-            {/* Internal Dashboard View */}
-            <div className="p-5 sm:p-6 space-y-6 bg-background">
-              {/* 3 KPI Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* KPI 1: CA */}
-                <div className="bg-background-secondary border border-border rounded-xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Chiffre d&apos;Affaires
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
-                      <DollarSign className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div>
-                      <div className="text-xl font-bold font-mono text-ink tabular-nums">28 450 000 FCFA</div>
-                      <div className="text-xs font-medium text-success-deep flex items-center gap-1 mt-1">
-                        <TrendingUp className="w-3 h-3" />
-                        <span>+18.4% ce trimestre</span>
-                      </div>
-                    </div>
-                    <svg className="w-20 h-8" viewBox="0 0 80 32" fill="none" aria-hidden="true">
-                      <path d="M2 28 C 15 26, 25 18, 40 14 C 55 10, 65 6, 78 2" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                </div>
+              {/* Paragraphe Sous-titre Mot pour Mot */}
+              <p className="text-base sm:text-lg text-border max-w-2xl mt-5 leading-relaxed">
+                Ceilow s&apos;occupe de vos factures, de votre comptabilité et de vos déclarations fiscales et sociales, pour que vous puissiez vous concentrer sur votre entreprise.
+              </p>
 
-                {/* KPI 2: Charges */}
-                <div className="bg-background-secondary border border-border rounded-xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Dépenses d&apos;Exploitation
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
-                      <Receipt className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div>
-                      <div className="text-xl font-bold font-mono text-ink tabular-nums">14 120 000 FCFA</div>
-                      <div className="text-xs font-medium text-success-deep flex items-center gap-1 mt-1">
-                        <TrendingDown className="w-3 h-3" />
-                        <span>-4.2% ce mois</span>
-                      </div>
-                    </div>
-                    <svg className="w-20 h-8" viewBox="0 0 80 32" fill="none" aria-hidden="true">
-                      <path d="M2 6 C 20 8, 35 22, 50 18 C 65 14, 72 26, 78 28" stroke="hsl(var(--ink))" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* KPI 3: Trésorerie */}
-                <div className="bg-background-secondary border border-border rounded-xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Trésorerie Disponible
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center text-ink">
-                      <CreditCard className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div>
-                      <div className="text-xl font-bold font-mono text-ink tabular-nums">9 800 000 FCFA</div>
-                      <div className="text-xs font-medium text-success-deep flex items-center gap-1 mt-1">
-                        <TrendingUp className="w-3 h-3" />
-                        <span>+12.5% vs mois précédent</span>
-                      </div>
-                    </div>
-                    <svg className="w-20 h-8" viewBox="0 0 80 32" fill="none" aria-hidden="true">
-                      <path d="M2 24 C 20 22, 35 12, 50 14 C 65 16, 70 8, 78 4" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cashflow Chart + VAT Summary Card */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 border border-border rounded-xl p-5 flex flex-col justify-between">
-                  <div className="flex items-center justify-between pb-3 border-b border-border">
-                    <div>
-                      <h3 className="text-sm font-semibold text-ink font-display">
-                        Flux d&apos;encaissements et dépenses
-                      </h3>
-                      <p className="text-xs text-muted-foreground">Suivi financier temps réel en FCFA</p>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className="flex items-center gap-1.5 text-ink font-medium">
-                        <span className="w-2.5 h-2.5 rounded-full bg-primary"></span> Entrées
-                      </span>
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <span className="w-2.5 h-2.5 rounded-full bg-border"></span> Sorties
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="w-full h-40 pt-4">
-                    <svg className="w-full h-full" viewBox="0 0 520 140" preserveAspectRatio="none" aria-hidden="true">
-                      <line stroke="hsl(var(--border))" strokeDasharray="4,4" strokeWidth="1" x1="0" x2="520" y1="20" y2="20" />
-                      <line stroke="hsl(var(--border))" strokeDasharray="4,4" strokeWidth="1" x1="0" x2="520" y1="70" y2="70" />
-                      <line stroke="hsl(var(--border))" strokeDasharray="4,4" strokeWidth="1" x1="0" x2="520" y1="120" y2="120" />
-                      <polygon fill="hsl(var(--primary))" fillOpacity="0.2" points="0,110 45,100 90,92 135,85 180,72 225,75 270,55 315,48 360,35 405,30 450,32 520,12 520,135 0,135" />
-                      <polyline fill="none" stroke="hsl(var(--muted-foreground))" strokeDasharray="4,3" strokeWidth="1.8" points="0,125 45,115 90,105 135,95 180,90 225,95 270,75 315,70 360,65 405,60 450,55 520,50" />
-                      <polyline fill="none" stroke="hsl(var(--ink))" strokeWidth="2.5" strokeLinecap="round" points="0,110 45,100 90,92 135,85 180,72 225,75 270,55 315,48 360,35 405,30 450,32 520,12" />
-                      <circle cx="520" cy="12" fill="hsl(var(--primary))" r="4.5" stroke="hsl(var(--ink))" strokeWidth="2" />
-                    </svg>
-                  </div>
-                  <div className="flex justify-between text-[11px] font-mono text-muted-foreground pt-2 border-t border-border">
-                    <span>Jan</span><span>Fév</span><span>Mar</span><span>Avr</span><span>Mai</span><span>Juin</span><span>Juil</span><span>Août</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Déc</span>
-                  </div>
-                </div>
-
-                {/* VAT Status Card */}
-                <div className="border border-border rounded-xl p-5 flex flex-col justify-between bg-background-secondary">
-                  <div>
-                    <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      <span>Déclarations DGI Bénin</span>
-                      <span className="w-5 h-5 rounded-full bg-success/30 text-success-deep flex items-center justify-center font-bold text-xs">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                    <h4 className="font-display font-semibold text-base text-ink mt-2">
-                      TVA du mois en cours
-                    </h4>
-                    <p className="text-xs text-muted-foreground">Calculée automatiquement selon le taux légal 18%</p>
-
-                    <div className="mt-4 bg-background p-3.5 rounded-lg border border-border space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">TVA Collectée :</span>
-                        <span className="font-mono font-medium text-ink tabular-nums">3 420 000 FCFA</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">TVA Déductible :</span>
-                        <span className="font-mono font-medium text-ink tabular-nums">1 890 000 FCFA</span>
-                      </div>
-                      <div className="pt-2 border-t border-border flex justify-between text-xs font-semibold">
-                        <span className="text-ink">Net à reverser :</span>
-                        <span className="font-mono text-success-deep tabular-nums font-bold">1 530 000 FCFA</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Télédéclaration DGI</span>
-                    <span className="font-semibold text-success-deep">Prête • Échéance 15</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 2. LOGOS ENTREPRISES BÉNINOISES ─────────────────────────────── */}
-        <section className="w-full py-10 border-y border-border bg-background-secondary">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-            <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Des entreprises et indépendants béninois simplifient leur gestion avec Ceilow
-            </p>
-            <div className="mt-6 w-full flex flex-wrap items-center justify-center gap-8 sm:gap-12 lg:gap-16 text-muted-foreground">
-              <div className="font-display font-bold tracking-tight text-base text-ink">BÉNIN LOGISTIQUE</div>
-              <div className="font-display font-semibold tracking-tight text-base text-ink">NovaConseil Cotonou</div>
-              <div className="font-display font-bold tracking-wider text-sm uppercase text-ink">FIDUCIAIRE DU LITTORAL</div>
-              <div className="font-display font-bold tracking-tight text-base text-ink">AGRIBÉNIN</div>
-              <div className="font-display font-medium tracking-tight text-base text-ink">ATLANTIQUE SERVICES</div>
-              <div className="font-display font-semibold tracking-tight text-sm text-ink">TRANSIT &amp; COMMERCE BÉNIN</div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 3. STATISTIQUES CLÉS ────────────────────────────────────────── */}
-        <section className="w-full py-16 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-background-secondary border border-border p-6 sm:p-8 rounded-xl">
-              <div className="flex flex-col items-center text-center p-2">
-                <span className="text-3xl sm:text-4xl font-bold font-mono text-ink tabular-nums">500+</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2">
-                  Entreprises actives
-                </span>
-              </div>
-              <div className="flex flex-col items-center text-center p-2 border-l border-border">
-                <span className="text-3xl sm:text-4xl font-bold font-mono text-ink tabular-nums">98.7%</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2">
-                  Satisfaction client
-                </span>
-              </div>
-              <div className="flex flex-col items-center text-center p-2 border-t md:border-t-0 md:border-l border-border">
-                <span className="text-3xl sm:text-4xl font-bold font-mono text-ink tabular-nums">&lt; 2s</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2">
-                  Temps de calcul moyen
-                </span>
-              </div>
-              <div className="flex flex-col items-center text-center p-2 border-t md:border-t-0 border-l border-border">
-                <span className="text-3xl sm:text-4xl font-bold font-mono text-ink tabular-nums">99.9%</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2">
-                  Disponibilité plateforme
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 4. SECTION AUTOMATISATION & PHOTOS AUTHENTIQUES ─────────────── */}
-        <section className="w-full py-20 bg-background border-t border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-ink max-w-3xl tracking-tight">
-              Gagnez des heures chaque mois sur votre gestion
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-              Une solution tout-en-un pour facturer, synchroniser vos comptes et préparer vos obligations fiscales. Vous éliminez les saisies manuelles et gardez le contrôle total de vos finances.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/demo"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-ink font-semibold text-sm hover:brightness-95 transition-all shadow-sm gap-2 min-h-[44px]"
-              >
-                <span>Demander une démo</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            {/* Authenticity Grid */}
-            <div className="mt-14 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
-              {/* Left Photo & Real Case */}
-              <div className="lg:col-span-6 space-y-4">
-                <div className="rounded-xl overflow-hidden border border-border bg-background-secondary">
-                  <img
-                    className="w-full h-80 object-cover object-center"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkmSMjnCev0X_R2nJOkmaj6knAf6_fOWAa-1YPKJVxzJa3eVhTkmtDtotESf9CbsyvSh9Wz5q7oyZrsieOHct3WEfDyyS_9PQMmXSa41cgdYzTK8ZbVKHhQXS8qT4iDbZO9W8Eq2j8xF-_KxkiW4Y7LcQ--K_8kQLhhsX8ZJOo_uT4gqo9WcfSnaVKP7_HcAZ7dwzhf0XiCURzr19VuzrENWcZKPEvTYRdVQBLL0Vt-eIVBoLhrgZ0"
-                    alt="Équipe comptable et financière béninoise à Cotonou"
-                  />
-                  <div className="p-4 bg-background border-t border-border flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-mono uppercase text-muted-foreground font-semibold">
-                        Cas d&apos;usage réel • Entreprise béninoise
-                      </div>
-                      <div className="text-sm font-semibold font-display text-ink">
-                        Bilan mensuel et facturation clôturés en 35 minutes
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold px-2.5 py-1 bg-success/20 text-success-deep rounded border border-success/40">
-                      Conforme e-MECeF
-                    </span>
-                  </div>
-                </div>
-
-                {/* KPI Metric row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 bg-background-secondary border border-border rounded-xl text-center">
-                    <span className="text-[11px] font-semibold text-muted-foreground block">Taux Régularité</span>
-                    <span className="text-base font-bold font-mono text-ink tabular-nums mt-0.5 block">99.2%</span>
-                  </div>
-                  <div className="p-3 bg-background-secondary border border-border rounded-xl text-center">
-                    <span className="text-[11px] font-semibold text-muted-foreground block">Facturé ce mois</span>
-                    <span className="text-base font-bold font-mono text-ink tabular-nums mt-0.5 block">4,85M FCFA</span>
-                  </div>
-                  <div className="p-3 bg-background-secondary border border-border rounded-xl text-center">
-                    <span className="text-[11px] font-semibold text-muted-foreground block">Déclarations DGI</span>
-                    <span className="text-base font-bold font-mono text-success-deep tabular-nums mt-0.5 block">100% à jour</span>
-                  </div>
-                  <div className="p-3 bg-background-secondary border border-border rounded-xl text-center">
-                    <span className="text-[11px] font-semibold text-muted-foreground block">Factures e-MECeF</span>
-                    <span className="text-base font-bold font-mono text-ink tabular-nums mt-0.5 block">142 émises</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Activity Chart & Banking direct preview */}
-              <div className="lg:col-span-6 bg-background-secondary border border-border p-6 rounded-xl space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Activité Hebdomadaire
-                    </span>
-                    <div className="text-2xl font-bold font-display text-ink mt-0.5">180 opérations</div>
-                    <span className="text-xs font-semibold text-success-deep inline-flex items-center gap-1 mt-1">
-                      <TrendingUp className="w-3 h-3" />
-                      Rapprochement automatique fluide
-                    </span>
-                  </div>
-                  <div className="bg-background border border-border rounded-lg px-3 py-1.5 text-xs font-medium text-ink">
-                    Semaine en cours
-                  </div>
-                </div>
-
-                {/* CSS Bars Chart */}
-                <div className="bg-background border border-border p-4 rounded-xl">
-                  <div className="h-36 flex items-end justify-between gap-3 pt-4 px-2">
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-border rounded-t" style={{ height: "45%" }}></div>
-                      <span className="text-[11px] font-mono text-muted-foreground">Lun</span>
-                    </div>
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-border rounded-t" style={{ height: "60%" }}></div>
-                      <span className="text-[11px] font-mono text-muted-foreground">Mar</span>
-                    </div>
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-border rounded-t" style={{ height: "52%" }}></div>
-                      <span className="text-[11px] font-mono text-muted-foreground">Mer</span>
-                    </div>
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-primary rounded-t" style={{ height: "90%" }}></div>
-                      <span className="text-[11px] font-mono font-semibold text-ink">Jeu</span>
-                    </div>
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-primary rounded-t" style={{ height: "78%" }}></div>
-                      <span className="text-[11px] font-mono text-muted-foreground">Ven</span>
-                    </div>
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-border rounded-t" style={{ height: "25%" }}></div>
-                      <span className="text-[11px] font-mono text-muted-foreground">Sam</span>
-                    </div>
-                    <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full bg-border/60 rounded-t" style={{ height: "12%" }}></div>
-                      <span className="text-[11px] font-mono text-muted-foreground">Dim</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Secondary Image preview */}
-                <div className="rounded-xl overflow-hidden border border-border bg-background flex items-center gap-4 p-3">
-                  <Image
-                    src="/images/finance-manager.jpg"
-                    alt="Responsable administrative et financière"
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                  />
-                  <div>
-                    <div className="text-xs font-bold text-ink">Compatibilité bancaire béninoise</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      Intégrez vos relevés BOA Bénin, Ecobank, BIIC, NSIA, BGFI et toutes banques opérant au Bénin.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 5. VITRINE IMMERSIVE CHOWCASE (STYLE CHARIOW) ────────────── */}
-        <div id="modules">
-          <ShowcaseSections />
-        </div>
-
-        {/* ── 6. GRILLE DES 12 FONCTIONNALITÉS (21ST.DEV FEATURES 8 BENTO) ── */}
-        <div id="fonctionnalites">
-          <FeaturesEight />
-        </div>
-
-        {/* ── 7. ENGAGEMENTS & ACCOMPAGNEMENT CEILOW ─────────────────────── */}
-        <section className="w-full py-20 bg-background-secondary border-t border-border" id="accompagnement">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink text-center tracking-tight">
-              Plus qu&apos;un logiciel, un vrai partenaire au Bénin
-            </h2>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
-              <div className="bg-background border border-border p-8 rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-ink">
-                  <Headphones className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold font-display text-ink mt-6">Accompagnement Local</h3>
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  Support réactif par téléphone et messagerie, guides pratiques et assistance pour configurer vos comptes et vos factures.
-                </p>
-              </div>
-
-              <div className="bg-background border border-border p-8 rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-ink">
-                  <FileCheck2 className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold font-display text-ink mt-6">Conformité DGI Garantie</h3>
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  Respect scrupuleux des exigences fiscales de la DGI et de la CNSS, avec mises à jour automatiques à chaque évolution légale.
-                </p>
-              </div>
-
-              <div className="bg-background border border-border p-8 rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-ink">
-                  <Lock className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold font-display text-ink mt-6">Sécurité des Données</h3>
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  Vos informations financières sont chiffrées de bout en bout, sauvegardées quotidiennement et protégées selon les normes bancaires.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 8. TÉMOIGNAGES ─────────────────────────────────────────────── */}
-        <section className="w-full py-20 bg-background border-t border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink text-center tracking-tight">
-              Ils nous font confiance
-            </h2>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
-              {/* Testimonial 1 */}
-              <div className="bg-background-secondary border border-border p-8 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1 text-primary">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm sm:text-base text-ink leading-relaxed">
-                    &ldquo;La conformité des factures et le calcul de la TVA nous prenaient des jours entiers chaque fin de mois. Avec Ceilow, nos déclarations sont prêtes à l&apos;avance et nos factures partent directement.&rdquo;
-                  </p>
-                </div>
-                <div className="mt-8 pt-5 border-t border-border flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary font-bold text-ink flex items-center justify-center font-display text-sm">
-                    FD
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-ink font-display">Fatima Dossou</div>
-                    <div className="text-xs text-muted-foreground">Responsable Financière, Agro-alimentaire • Cotonou</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Testimonial 2 */}
-              <div className="bg-background-secondary border border-border p-8 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1 text-primary">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm sm:text-base text-ink leading-relaxed">
-                    &ldquo;La clarté des écritures et la rigueur du lettrage nous ont convaincus. Nous recommandons désormais Ceilow à nos clients dirigeants qui veulent une gestion moderne et sans erreur.&rdquo;
-                  </p>
-                </div>
-                <div className="mt-8 pt-5 border-t border-border flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-ink text-white font-bold flex items-center justify-center font-display text-sm">
-                    GA
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-ink font-display">Gilles Agossou</div>
-                    <div className="text-xs text-muted-foreground">Expert-Comptable, Cabinet Conseil • Cotonou</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Testimonial 3 */}
-              <div className="bg-background-secondary border border-border p-8 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1 text-primary">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm sm:text-base text-ink leading-relaxed">
-                    &ldquo;En tant que dirigeant, j&apos;ai enfin une vision nette de ma trésorerie disponible en FCFA. Le rapprochement avec nos banques locales se fait en quelques clics sans prise de tête.&rdquo;
-                  </p>
-                </div>
-                <div className="mt-8 pt-5 border-t border-border flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary font-bold text-ink flex items-center justify-center font-display text-sm">
-                    MK
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-ink font-display">Marc Kouton</div>
-                    <div className="text-xs text-muted-foreground">Directeur Général, Entreprise Logistique • Bénin</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 9. TARIFS EN FCFA ───────────────────────────────────────────── */}
-        <section className="w-full py-20 bg-background-secondary border-t border-border" id="tarifs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink tracking-tight">
-              Des tarifs clairs et transparents en FCFA
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-              Sans frais cachés, résiliable à tout moment, conçu pour s&apos;adapter à la taille de votre entreprise.
-            </p>
-
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
-              {/* Plan 1: Gratuit */}
-              <div className="bg-background border border-border p-8 rounded-xl flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Gratuit</span>
-                  <div className="mt-4 flex items-baseline">
-                    <span className="text-4xl font-bold font-mono text-ink tabular-nums">0</span>
-                    <span className="text-sm font-semibold text-muted-foreground ml-2">FCFA / mois</span>
-                  </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Idéal pour les indépendants qui débutent leur facturation.
-                  </p>
-                  <ul className="mt-6 space-y-3 text-xs text-ink">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Jusqu&apos;à 10 factures certifiées par mois
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Devis et avoirs en PDF
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Export simple des données
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <span className="w-4 h-4 text-center">✕</span>
-                      Déclarations TVA automatisées
-                    </li>
-                  </ul>
-                </div>
-                <div className="mt-8">
-                  <Link
-                    href="/register"
-                    className="w-full inline-flex items-center justify-center py-2.5 rounded-xl border border-border text-ink font-semibold text-xs hover:bg-background-secondary transition-all"
-                  >
-                    Commencer gratuitement
-                  </Link>
-                </div>
-              </div>
-
-              {/* Plan 2: Pro (Recommandé) */}
-              <div className="bg-background border-2 border-primary p-8 rounded-xl flex flex-col justify-between relative shadow-sm">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-ink text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
-                  Recommandé
-                </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-ink">Pro</span>
-                  <div className="mt-4 flex items-baseline">
-                    <span className="text-4xl font-bold font-mono text-ink tabular-nums">15 000</span>
-                    <span className="text-sm font-semibold text-muted-foreground ml-2">FCFA / mois</span>
-                  </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Pour les PME actives qui souhaitent automatiser factures, TVA et comptes.
-                  </p>
-                  <ul className="mt-6 space-y-3 text-xs text-ink">
-                    <li className="flex items-center gap-2 font-medium">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Factures e-MECeF illimitées
-                    </li>
-                    <li className="flex items-center gap-2 font-medium">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Rapprochement bancaire assisté
-                    </li>
-                    <li className="flex items-center gap-2 font-medium">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Calcul automatique de la TVA mensuelle DGI
-                    </li>
-                    <li className="flex items-center gap-2 font-medium">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Journaux officiels et documents conformes
-                    </li>
-                    <li className="flex items-center gap-2 font-medium">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Gestion de la paie jusqu&apos;à 10 salariés
-                    </li>
-                  </ul>
-                </div>
-                <div className="mt-8">
-                  <Link
-                    href="/register"
-                    className="w-full inline-flex items-center justify-center py-2.5 rounded-xl bg-primary text-ink font-semibold text-xs hover:brightness-95 transition-all shadow-sm"
-                  >
-                    Essai gratuit 14 jours
-                  </Link>
-                </div>
-              </div>
-
-              {/* Plan 3: Entreprise */}
-              <div className="bg-background border border-border p-8 rounded-xl flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Entreprise &amp; Cabinet</span>
-                  <div className="mt-4 flex items-baseline">
-                    <span className="text-3xl font-bold font-display text-ink">Sur devis</span>
-                  </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Pour les holdings, cabinets d&apos;expertise et grandes structures.
-                  </p>
-                  <ul className="mt-6 space-y-3 text-xs text-ink">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Gestion multi-entreprises centralisée
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Volume illimité d&apos;écritures et collaborateurs
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Interlocuteur dédié et accompagnement sur site
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
-                      Intégration sur-mesure de vos outils existants
-                    </li>
-                  </ul>
-                </div>
-                <div className="mt-8">
-                  <a
-                    href="mailto:contact@ceilow.bj"
-                    className="w-full inline-flex items-center justify-center py-2.5 rounded-xl border border-border text-ink font-semibold text-xs hover:bg-background-secondary transition-all"
-                  >
-                    Contacter notre équipe
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 10. BANNIÈRE CTA FINALE (LIGNES TOPOGRAPHIQUES DORÉES LUMINEUSES) ── */}
-        <section className="w-full py-16 sm:py-20 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative bg-ink rounded-2xl sm:rounded-3xl py-14 sm:py-20 px-6 sm:px-12 text-center text-white border border-border/30 overflow-hidden shadow-2xl">
-              {/* Lueur et lignes dorées lumineuses en background (subtiles, brillantes, sans encombrer) */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-                {/* Halo lumineux doré central qui fait briller l'espace */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[750px] h-[280px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 1200 480"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  preserveAspectRatio="none"
+              {/* CTAs Centrés : BOUTON PRINCIPAL JAUNE + BOUTON SECONDAIRE BLANC SOLIDE */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-7 w-full max-w-md sm:max-w-none">
+                {/* CTA 1 : Primaire Jaune Ceilow */}
+                <Link
+                  href="/register"
+                  className="cta-button w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-ink text-base px-8 py-3.5 rounded-xl font-bold shadow-md hover:bg-primary-hover active:scale-[0.99] transition-all min-h-[48px]"
                 >
-                  <defs>
-                    <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-                      <stop offset="25%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
-                      <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.9" />
-                      <stop offset="75%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-                    </linearGradient>
-                    <linearGradient id="goldSoft" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-                      <stop offset="30%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
-                      <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity="0.5" />
-                      <stop offset="85%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-                    </linearGradient>
-                    <filter id="goldShineFilter" x="-10%" y="-10%" width="120%" height="120%">
-                      <feGaussianBlur stdDeviation="1.5" result="blur" />
-                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                  </defs>
+                  <span>Souscrire</span>
+                  <ArrowRight className="w-5 h-5 icon-arrow" />
+                </Link>
 
-                  {/* Vague supérieure dorée */}
-                  <path
-                    d="M-50 130 C220 50, 480 180, 750 95 C980 25, 1120 150, 1250 100"
-                    stroke="url(#goldGlow)"
-                    strokeWidth="1.2"
-                    filter="url(#goldShineFilter)"
-                  />
-                  <path
-                    d="M-50 170 C240 90, 500 220, 770 135 C1000 65, 1140 190, 1250 140"
-                    stroke="url(#goldSoft)"
-                    strokeWidth="0.8"
-                  />
-
-                  {/* Vague inférieure dorée */}
-                  <path
-                    d="M-50 350 C260 420, 540 300, 820 385 C1020 445, 1160 330, 1250 365"
-                    stroke="url(#goldGlow)"
-                    strokeWidth="1.2"
-                    filter="url(#goldShineFilter)"
-                  />
-                  <path
-                    d="M-50 310 C240 380, 520 260, 800 345 C1000 405, 1140 290, 1250 325"
-                    stroke="url(#goldSoft)"
-                    strokeWidth="0.8"
-                  />
-                </svg>
+                {/* CTA 2 : Secondaire Blanc Pur Opaque Solide */}
+                <Link
+                  href="/demo"
+                  className="cta-button w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-background text-ink text-base px-8 py-3.5 rounded-xl font-bold border border-border shadow-md hover:bg-background-secondary active:scale-[0.99] transition-all min-h-[48px]"
+                >
+                  <PlayCircle className="w-5 h-5 icon-arrow text-ink" />
+                  <span>Demander une démo</span>
+                </Link>
               </div>
 
-              {/* Contenu de la bannière */}
-              <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+              {/* ── COCKPIT TABLETTE RÉALISTE AVEC DÉMO ANIMÉE 20S ── */}
+              <CockpitTabletDemo />
+            </div>
+          </section>
 
-                {/* Titre */}
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display tracking-tight text-white leading-tight">
-                  Prêt à moderniser votre gestion financière ?
-                </h2>
+          {/* ── SECTION 2 : BANDEAU DE RÉASSURANCE LOCALE (MARQUEE CONTINU) ────────── */}
+          <section className="w-full bg-background-secondary border-y border-border py-6 overflow-hidden select-none">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-4">
+              <p className="text-text-muted font-semibold text-xs tracking-widest uppercase">
+                Des entreprises et cabinets d&apos;expertise comptable béninois pilotent leur gestion avec Ceilow
+              </p>
+            </div>
 
-                {/* Sous-titre */}
-                <p className="mt-4 text-sm sm:text-base md:text-lg text-border max-w-xl leading-relaxed">
-                  Rejoignez les entreprises béninoises qui gèrent leur comptabilité, facturation et TVA depuis Ceilow.
-                </p>
+            {/* Ticker Marquee Infini Continu */}
+            <div className="relative w-full flex overflow-hidden">
+              <div className="animate-marquee items-center gap-12 whitespace-nowrap">
+                {/* Piste 1 */}
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  BÉNIN LOGISTIQUE <span className="text-text-muted font-normal text-xs">(Transport &amp; Transit Cotonou)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  NOVACONSEIL COTONOU <span className="text-text-muted font-normal text-xs">(Conseil en Gestion)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  FIDUCIAIRE DU LITTORAL <span className="text-text-muted font-normal text-xs">(Expertise Comptable OECCA)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  AGRIBÉNIN <span className="text-text-muted font-normal text-xs">(Agro-alimentaire Bohicon)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  ATLANTIQUE SERVICES <span className="text-text-muted font-normal text-xs">(Prestations B2B Ganhi)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  TRANSIT &amp; COMMERCE BÉNIN <span className="text-text-muted font-normal text-xs">(Port Autonome de Cotonou)</span>
+                </div>
 
-                {/* Bouton d'action unique et centré */}
-                <div className="mt-8 flex items-center justify-center w-full sm:w-auto">
-                  <Link
-                    href="/demo"
-                    className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-ink font-semibold text-[15px] hover:brightness-95 transition-all shadow-sm active:scale-95"
-                  >
-                    <span>Demander une démo</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                {/* Piste 2 (Duplicata seamless) */}
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  BÉNIN LOGISTIQUE <span className="text-text-muted font-normal text-xs">(Transport &amp; Transit Cotonou)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  NOVACONSEIL COTONOU <span className="text-text-muted font-normal text-xs">(Conseil en Gestion)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  FIDUCIAIRE DU LITTORAL <span className="text-text-muted font-normal text-xs">(Expertise Comptable OECCA)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  AGRIBÉNIN <span className="text-text-muted font-normal text-xs">(Agro-alimentaire Bohicon)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  ATLANTIQUE SERVICES <span className="text-text-muted font-normal text-xs">(Prestations B2B Ganhi)</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-ink tracking-wider text-sm">
+                  <span className="w-2.5 h-2.5 bg-primary rounded-sm" />
+                  TRANSIT &amp; COMMERCE BÉNIN <span className="text-text-muted font-normal text-xs">(Port Autonome de Cotonou)</span>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* ── SECTION 3 : LES 3 GRANDS BÉNÉFICES MÉTIERS ───────────────────────── */}
+          <section className="w-full py-20 bg-background">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-2xl mx-auto text-center mb-16">
+                <span className="text-xs font-bold text-ink uppercase tracking-widest bg-primary/20 px-3 py-1 rounded-full">
+                  Architecture SYSCOHADA &amp; DGI
+                </span>
+                <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink mt-3 tracking-tight">
+                  L&apos;ingénierie financière pensée pour le cadre réglementaire béninois
+                </h2>
+                <p className="text-text-muted mt-3 text-base leading-relaxed">
+                  Fini les doubles saisies et les risques de redressement. Vos opérations quotidiennes alimentent en continu votre grand livre et vos liasses fiscales.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* BÉNÉFICE 1 : FACTURES CERTIFIÉES DGI (Micro-animation Tampon e-MECeF) */}
+                <div className="p-6 sm:p-8 rounded-2xl bg-background-secondary border border-border shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-ink mb-6 group-hover:bg-primary group-hover:text-ink transition-colors">
+                      <QrCode className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold text-ink mb-3 leading-snug">
+                      Vos factures certifiées DGI en 1 clic, zéro pénalité fiscale.
+                    </h3>
+                    <p className="text-sm text-text-muted leading-relaxed">
+                      Connecté directement aux serveurs de la Direction Générale des Impôts (e-MECeF). Chaque facture émise reçoit immédiatement sa signature cryptographique, son NIM et son QR code normalisé conforme à la loi des finances.
+                    </p>
+                  </div>
+
+                  {/* Facture interactive avec tampon animé e-MECeF */}
+                  <div className="mt-8 p-4 rounded-xl bg-background border border-border shadow-xs relative overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-ink">FACTURE NORMALISÉE</span>
+                        <span className="text-[10px] text-text-muted font-mono">N° 2026-F-00452</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-ink tabular-nums">750 000 FCFA</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 relative">
+                      {/* Tampon officiel vert animé */}
+                      <div className="px-2.5 py-1 rounded bg-success/20 border-2 border-success-deep text-success-deep text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 animate-stamp select-none shadow-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-success-deep" />
+                        <span>CERTIFIÉ e-MECeF</span>
+                      </div>
+
+                      {/* QR Code Fiscal Virtuel SVG */}
+                      <div
+                        className="w-10 h-10 p-1 bg-ink text-primary rounded-lg flex items-center justify-center hover:scale-105 transition-transform"
+                        title="QR Code DGI"
+                      >
+                        <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                          <path d="M2 2h8v8H2zm2 2v4h4V4zm10-2h8v8h-8zm2 2v4h4V4zM2 14h8v8H2zm2 2v4h4v-4zm10-2h3v3h-3zm5 0h3v3h-3zm-5 5h3v3h-3zm5 0h3v3h-3zm-2-2h2v2h-2zm-6-6h2v2h-2zm10 0h2v2h-2z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BÉNÉFICE 2 : BANQUES & MOBILE MONEY (Micro-animation Magnetic Match) */}
+                <div className="p-6 sm:p-8 rounded-2xl bg-background-secondary border border-border shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-ink mb-6 group-hover:bg-primary group-hover:text-ink transition-colors">
+                      <ArrowUpDown className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold text-ink mb-3 leading-snug">
+                      Toutes vos banques et comptes Mobile Money au même endroit.
+                    </h3>
+                    <p className="text-sm text-text-muted leading-relaxed">
+                      Synchronisation fluide avec BOA Bénin, Ecobank, BIIC, NSIA, BGFI ainsi que MTN MoMo et Moov Money. L&apos;algorithme Ceilow réconcilie automatiquement les encaissements avec les factures correspondantes.
+                    </p>
+                  </div>
+
+                  {/* Animation de Matching Magnétique à 2 Cartes */}
+                  <div className="mt-8 p-4 rounded-xl bg-background border border-border space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between text-[11px] p-2.5 rounded-lg bg-background-secondary border border-border magnetic-box-down">
+                      <span className="font-medium text-ink flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-success-deep" /> Virement BOA Client A
+                      </span>
+                      <span className="font-mono font-bold tabular-nums text-ink">2 500 000 FCFA</span>
+                    </div>
+
+                    {/* Flèche aimantée centrale */}
+                    <div className="flex items-center justify-center -my-1 text-ink relative z-10">
+                      <span className="w-6 h-6 rounded-full bg-primary text-ink flex items-center justify-center shadow-xs">
+                        <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] p-2.5 rounded-lg bg-background-secondary border border-border magnetic-box-up">
+                      <span className="font-medium text-ink flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-primary" /> Facture N° 088 (Client A)
+                      </span>
+                      <span className="font-mono font-bold tabular-nums text-ink">2 500 000 FCFA</span>
+                    </div>
+
+                    <div className="mt-2 text-center pt-1">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-success/20 border border-success/40 text-success-deep text-[11px] font-bold">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                        Lettré 100% Automatique
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BÉNÉFICE 3 : COMPTABILITÉ & TVA OHADA (Jauge Circulaire Animée) */}
+                <div className="p-6 sm:p-8 rounded-2xl bg-background-secondary border border-border shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-ink mb-6 group-hover:bg-primary group-hover:text-ink transition-colors">
+                      <PieChart className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold text-ink mb-3 leading-snug">
+                      La comptabilité et la TVA qui se font toutes seules.
+                    </h3>
+                    <p className="text-sm text-text-muted leading-relaxed">
+                      Chaque opération génère ses écritures au Plan Comptable Général OHADA Révisé. Votre déclaration de TVA est tenue à jour en temps réel avec le calcul exact de la TVA déductible et collectée.
+                    </p>
+                  </div>
+
+                  {/* Jauge circulaire / Progression TVA SVG */}
+                  <div className="mt-8 p-4 rounded-xl bg-background border border-border flex items-center gap-4">
+                    <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                      <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                        <path
+                          className="text-border"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3.8"
+                        />
+                        <path
+                          className="text-success-deep gauge-circle"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeDasharray="100, 100"
+                          strokeLinecap="round"
+                          strokeWidth="3.8"
+                        />
+                      </svg>
+                      <span className="absolute font-mono font-bold text-xs text-ink">100%</span>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-ink">Liasse &amp; TVA Prêtes</span>
+                      <span className="text-[11px] text-text-muted">Prêt pour téléversement DGI</span>
+                      <span className="font-mono text-xs font-bold text-success-deep tabular-nums mt-0.5 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-success-deep" /> Solde : Conforme
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-2">
+                    <Link
+                      href="/#modules"
+                      className="cta-button text-xs font-bold text-ink hover:text-primary transition-colors flex items-center gap-1 min-h-[44px]"
+                    >
+                      <span>Découvrir tous les modules comptables</span>
+                      <ArrowRight className="w-4 h-4 icon-arrow" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SECTION 4 : DÉMONSTRATION EN ACTION (WORKFLOW CEILOW INTERACTIF) ── */}
+          <section className="w-full py-20 bg-background-secondary border-y border-border">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-2xl mx-auto text-center mb-10">
+                <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink tracking-tight">
+                  Voyez à quelle vitesse votre gestion se simplifie.
+                </h2>
+                <p className="text-text-muted mt-3 text-base">
+                  Un parcours sans couture, de la vente à la clôture comptable.
+                </p>
+              </div>
+
+              {/* Onglets de workflow avec barres de progression individuelles */}
+              <div className="w-full max-w-4xl mx-auto">
+                <div className="grid grid-cols-3 gap-2 p-1.5 rounded-xl bg-background mb-8 border border-border">
+                  {/* Onglet 1 */}
+                  <button
+                    type="button"
+                    onClick={() => selectManualTab(1)}
+                    className={`relative py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all flex flex-col items-center justify-center overflow-hidden min-h-[44px] cursor-pointer ${
+                      currentStep === 1
+                        ? "bg-background-secondary text-ink shadow-xs"
+                        : "text-text-muted hover:text-ink"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 relative z-10">
+                      <span
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                          currentStep === 1 ? "bg-primary text-ink" : "bg-border text-text-muted"
+                        }`}
+                      >
+                        1
+                      </span>
+                      <span className="hidden sm:inline">Création Facture</span>
+                    </div>
+                    {/* Progress bar track pour l'autoplay */}
+                    <div
+                      className="absolute bottom-0 left-0 h-1 bg-primary transition-all duration-100 ease-linear"
+                      style={{ width: currentStep === 1 ? `${progressPercent}%` : "0%" }}
+                    />
+                  </button>
+
+                  {/* Onglet 2 */}
+                  <button
+                    type="button"
+                    onClick={() => selectManualTab(2)}
+                    className={`relative py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all flex flex-col items-center justify-center overflow-hidden min-h-[44px] cursor-pointer ${
+                      currentStep === 2
+                        ? "bg-background-secondary text-ink shadow-xs"
+                        : "text-text-muted hover:text-ink"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 relative z-10">
+                      <span
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                          currentStep === 2 ? "bg-primary text-ink" : "bg-border text-text-muted"
+                        }`}
+                      >
+                        2
+                      </span>
+                      <span className="hidden sm:inline">Encaissement &amp; Synchro</span>
+                    </div>
+                    <div
+                      className="absolute bottom-0 left-0 h-1 bg-primary transition-all duration-100 ease-linear"
+                      style={{ width: currentStep === 2 ? `${progressPercent}%` : "0%" }}
+                    />
+                  </button>
+
+                  {/* Onglet 3 */}
+                  <button
+                    type="button"
+                    onClick={() => selectManualTab(3)}
+                    className={`relative py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all flex flex-col items-center justify-center overflow-hidden min-h-[44px] cursor-pointer ${
+                      currentStep === 3
+                        ? "bg-background-secondary text-ink shadow-xs"
+                        : "text-text-muted hover:text-ink"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 relative z-10">
+                      <span
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                          currentStep === 3 ? "bg-primary text-ink" : "bg-border text-text-muted"
+                        }`}
+                      >
+                        3
+                      </span>
+                      <span className="hidden sm:inline">Écritures &amp; Déclarations</span>
+                    </div>
+                    <div
+                      className="absolute bottom-0 left-0 h-1 bg-primary transition-all duration-100 ease-linear"
+                      style={{ width: currentStep === 3 ? `${progressPercent}%` : "0%" }}
+                    />
+                  </button>
+                </div>
+
+                {/* Contenu des Onglets */}
+                <div className="bg-background rounded-2xl p-6 sm:p-8 shadow-sm border border-border min-h-[320px] flex items-center">
+                  {/* Étape 1 : Création Facture */}
+                  {currentStep === 1 && (
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+                      <div className="space-y-4">
+                        <span className="px-2.5 py-1 rounded bg-primary/20 text-ink text-xs font-bold tracking-wide">
+                          ÉTAPE 1 / 3
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-ink">
+                          Édition assistée &amp; certification e-MECeF en temps réel
+                        </h4>
+                        <p className="text-sm text-text-muted leading-relaxed">
+                          Sélectionnez votre client béninois avec son IFU. Le système applique automatiquement le taux de TVA (18% ou exonéré selon le CGI Bénin) et génère le numéro de facture séquentiel immuable.
+                        </p>
+                        <ul className="space-y-2 text-xs text-ink font-medium">
+                          <li className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                            <span>Recherche instantanée des clients par numéro IFU</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                            <span>Signature électronique DGI horodatée</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="p-5 rounded-xl bg-background-secondary text-xs space-y-3 border border-border">
+                        <div className="flex justify-between font-bold text-ink">
+                          <span>Client : SOCOB S.A. (Cotonou)</span>
+                          <span className="font-mono">IFU: 320188941092</span>
+                        </div>
+                        <div className="p-3 bg-background rounded-lg space-y-2 border border-border">
+                          <div className="flex justify-between text-text-muted">
+                            <span>Prestation de conseil logistique</span>
+                            <span className="font-mono tabular-nums text-ink font-semibold">1 000 000 FCFA</span>
+                          </div>
+                          <div className="flex justify-between text-text-muted">
+                            <span>TVA légale (18%)</span>
+                            <span className="font-mono tabular-nums text-ink font-semibold">180 000 FCFA</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-ink pt-2 border-t border-border">
+                            <span>Total TTC</span>
+                            <span className="font-mono tabular-nums text-ink font-bold">1 180 000 FCFA</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Étape 2 : Encaissement & Synchro */}
+                  {currentStep === 2 && (
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+                      <div className="space-y-4">
+                        <span className="px-2.5 py-1 rounded bg-primary/20 text-ink text-xs font-bold tracking-wide">
+                          ÉTAPE 2 / 3
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-ink">
+                          Détection automatique bancaire &amp; Mobile Money
+                        </h4>
+                        <p className="text-sm text-text-muted leading-relaxed">
+                          Dès que le client règle par virement bancaire ou MTN Mobile Money, la transaction est détectée et rapprochée de la facture d&apos;origine en quelques secondes.
+                        </p>
+                        <ul className="space-y-2 text-xs text-ink font-medium">
+                          <li className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                            <span>Élimination des bordereaux manuels</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                            <span>Alertes immédiates en cas d&apos;écart de règlement</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="p-5 rounded-xl bg-background-secondary text-xs space-y-3 border border-border">
+                        <div className="p-3 bg-background rounded-lg flex items-center justify-between border border-border">
+                          <div className="flex items-center gap-2">
+                            <span className="w-8 h-8 rounded bg-primary flex items-center justify-center font-bold text-xs text-ink">
+                              MoMo
+                            </span>
+                            <div>
+                              <div className="font-bold text-ink">Paiement Reçu SOCOB</div>
+                              <div className="text-[10px] text-text-muted font-mono">ID: MTN-BJ-904128</div>
+                            </div>
+                          </div>
+                          <span className="font-mono font-bold text-success-deep tabular-nums">+1 180 000 FCFA</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-success/20 border border-success/40 text-success-deep font-semibold text-center text-xs">
+                          Statut : Facture Soldée &amp; Quittancée
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Étape 3 : Écritures & Déclarations */}
+                  {currentStep === 3 && (
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+                      <div className="space-y-4">
+                        <span className="px-2.5 py-1 rounded bg-primary/20 text-ink text-xs font-bold tracking-wide">
+                          ÉTAPE 3 / 3
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-ink">
+                          Écritures SYSCOHADA et liasse DGI prêtes
+                        </h4>
+                        <p className="text-sm text-text-muted leading-relaxed">
+                          L&apos;opération est automatiquement ventilée : Débit Compte 521 (Banque) ou 571 (Caisse), Crédit Compte 701 (Vente) et Crédit Compte 443 (TVA facturée). Votre balance générale reste équilibrée en permanence.
+                        </p>
+                        <ul className="space-y-2 text-xs text-ink font-medium">
+                          <li className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                            <span>Export direct vers les logiciels d&apos;audit et commissaires aux comptes</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                            <span>Génération de l&apos;état annuel 301 et du tableau des flux</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="p-5 rounded-xl bg-background-secondary font-mono text-xs space-y-2 border border-border">
+                        <div className="grid grid-cols-12 text-text-muted font-semibold border-b border-border pb-1">
+                          <span className="col-span-3">Compte</span>
+                          <span className="col-span-5">Libellé</span>
+                          <span className="col-span-2 text-right">Débit</span>
+                          <span className="col-span-2 text-right">Crédit</span>
+                        </div>
+                        <div className="grid grid-cols-12 text-ink">
+                          <span className="col-span-3 font-bold">521000</span>
+                          <span className="col-span-5 text-text-muted truncate">Banque BOA</span>
+                          <span className="col-span-2 text-right font-bold tabular-nums">1 180k</span>
+                          <span className="col-span-2 text-right text-text-muted">-</span>
+                        </div>
+                        <div className="grid grid-cols-12 text-ink">
+                          <span className="col-span-3 font-bold">701000</span>
+                          <span className="col-span-5 text-text-muted truncate">Prestations B2B</span>
+                          <span className="col-span-2 text-right text-text-muted">-</span>
+                          <span className="col-span-2 text-right font-bold tabular-nums">1 000k</span>
+                        </div>
+                        <div className="grid grid-cols-12 text-ink">
+                          <span className="col-span-3 font-bold">443100</span>
+                          <span className="col-span-5 text-text-muted truncate">TVA Facturée</span>
+                          <span className="col-span-2 text-right text-text-muted">-</span>
+                          <span className="col-span-2 text-right font-bold tabular-nums">180k</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SECTION 5 : CHIFFRES CLÉS & PREUVES SOCIALES ─────────────────────── */}
+          <section className="w-full py-20 bg-background">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* 4 KPIs d'impact */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border text-center">
+                  <div className="font-mono text-3xl sm:text-4xl font-bold text-ink tabular-nums">500+</div>
+                  <p className="text-xs sm:text-sm text-text-muted mt-2 font-medium">
+                    Entreprises et indépendants actifs au Bénin
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border text-center">
+                  <div className="font-mono text-3xl sm:text-4xl font-bold text-ink tabular-nums">98.7%</div>
+                  <p className="text-xs sm:text-sm text-text-muted mt-2 font-medium">
+                    Taux de satisfaction client certifié
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border text-center">
+                  <div className="font-mono text-3xl sm:text-4xl font-bold text-ink tabular-nums">&lt; 2s</div>
+                  <p className="text-xs sm:text-sm text-text-muted mt-2 font-medium">
+                    Temps moyen de certification e-MECeF
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border text-center">
+                  <div className="font-mono text-3xl sm:text-4xl font-bold text-success-deep tabular-nums">99.9%</div>
+                  <p className="text-xs sm:text-sm text-text-muted mt-2 font-medium">
+                    Disponibilité garantie de nos serveurs
+                  </p>
+                </div>
+              </div>
+
+              {/* 3 Témoignages Vérifiés */}
+              <div className="max-w-2xl mx-auto text-center mb-12">
+                <h3 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+                  Ce que disent les praticiens et dirigeants au Bénin
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Témoignage 1 */}
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1 text-primary mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <p className="text-ink text-sm leading-relaxed italic">
+                      &ldquo;Avant Ceilow, nous passions trois jours complets chaque début de mois à rapprocher les encaissements MoMo et banques pour notre déclaration TVA. Désormais, tout est prêt le 2 du mois, sans aucune erreur.&rdquo;
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-border flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-ink">
+                      FD
+                    </div>
+                    <div>
+                      <div className="font-bold text-ink text-sm">Fatima Dossou</div>
+                      <div className="text-xs text-text-muted">Resp. Financière, Agro-alimentaire Cotonou</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Témoignage 2 */}
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1 text-primary mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <p className="text-ink text-sm leading-relaxed italic">
+                      &ldquo;En tant qu&apos;expert-comptable, Ceilow est une bénédiction. Mes clients PME saisissent leurs factures qui sont validées DGI à la source. Je récupère des balances SYSCOHADA saines pour clôturer sans friction.&rdquo;
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-border flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-ink text-white flex items-center justify-center font-bold">
+                      GA
+                    </div>
+                    <div>
+                      <div className="font-bold text-ink text-sm">Gilles Agossou</div>
+                      <div className="text-xs text-text-muted">Expert-Comptable, Cabinet Conseil Cotonou</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Témoignage 3 */}
+                <div className="p-6 rounded-2xl bg-background-secondary border border-border flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1 text-primary mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <p className="text-ink text-sm leading-relaxed italic">
+                      &ldquo;La vitesse de certification e-MECeF est remarquable. Moins de 2 secondes au guichet du port pour remettre la facture conforme au chauffeur. Zéro retard, zéro litige avec l&apos;administration fiscale.&rdquo;
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-border flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-ink">
+                      MK
+                    </div>
+                    <div>
+                      <div className="font-bold text-ink text-sm">Marc Kouton</div>
+                      <div className="text-xs text-text-muted">DG, Entreprise Logistique Bénin</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SECTION 6 : GRILLE TARIFAIRE RÉSUMÉE (EN FCFA) ───────────────────── */}
+          <section className="w-full py-20 bg-background-secondary border-t border-border" id="tarifs">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-2xl mx-auto text-center mb-16">
+                <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink tracking-tight">
+                  Des tarifs clairs et transparents en FCFA
+                </h2>
+                <p className="text-text-muted mt-3 text-base">
+                  Sans frais cachés, sans engagement. Changez de formule ou résiliez à tout moment selon l&apos;évolution de votre volume d&apos;activité.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+                {/* PLAN GRATUIT */}
+                <div className="p-8 rounded-2xl bg-background border border-border shadow-xs flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-ink">Plan Gratuit</h3>
+                    <p className="text-text-muted mt-1 text-xs">Pour les consultants et indépendants qui débutent.</p>
+                    <div className="mt-6 flex items-baseline">
+                      <span className="font-mono text-3xl font-bold text-ink tabular-nums">0 FCFA</span>
+                      <span className="text-text-muted text-xs ml-1">/ mois</span>
+                    </div>
+                    <ul className="mt-8 space-y-3 text-xs text-ink">
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>10 factures certifiées e-MECeF / mois</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Devis &amp; Proforma normalisés PDF</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Export comptable simple (Excel / CSV)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>1 utilisateur administrateur</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="mt-8">
+                    <Link
+                      href="/register"
+                      className="cta-button w-full block text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
+                    >
+                      Commencer gratuitement
+                    </Link>
+                  </div>
+                </div>
+
+                {/* PLAN PRO (RECOMMANDÉ) */}
+                <div className="p-8 rounded-2xl bg-background shadow-md relative flex flex-col justify-between border-2 border-primary">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 bg-primary text-ink text-[11px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+                    Recommandé
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-ink">Plan Pro</h3>
+                    <p className="text-text-muted mt-1 text-xs">Pour les PME, commerçants et prestataires de services.</p>
+                    <div className="mt-6 flex items-baseline">
+                      <span className="font-mono text-3xl font-bold text-ink tabular-nums">15 000 FCFA</span>
+                      <span className="text-text-muted text-xs ml-1">/ mois</span>
+                    </div>
+                    <ul className="mt-8 space-y-3 text-xs text-ink font-medium">
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Factures e-MECeF illimitées</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Rapprochement bancaire &amp; MoMo direct</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Déclaration TVA DGI automatique</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Journaux SYSCOHADA temps réel</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Gestion de paie (jusqu&apos;à 10 salariés)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Support prioritaire basé à Cotonou</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="mt-8">
+                    <Link
+                      href="/register"
+                      className="cta-button w-full block text-center py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-ink font-bold text-sm shadow transition-all min-h-[44px] flex items-center justify-center"
+                    >
+                      Essai gratuit 14 jours
+                    </Link>
+                  </div>
+                </div>
+
+                {/* PLAN ENTREPRISE & CABINET */}
+                <div className="p-8 rounded-2xl bg-background border border-border shadow-xs flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-ink">Plan Entreprise &amp; Cabinet</h3>
+                    <p className="text-text-muted mt-1 text-xs">
+                      Pour les groupes, holdings et cabinets d&apos;expertise comptable.
+                    </p>
+                    <div className="mt-6 flex items-baseline">
+                      <span className="font-mono text-3xl font-bold text-ink">Sur devis</span>
+                    </div>
+                    <ul className="mt-8 space-y-3 text-xs text-ink">
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Multi-entreprises et consolidation de groupe</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Volume de facturation et écritures illimité</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>API ouverte pour ERP interne</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Formation sur site à Cotonou &amp; Porto-Novo</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success-deep flex-shrink-0" />
+                        <span>Chargé de compte dédié OECCA</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="mt-8">
+                    <Link
+                      href="/demo"
+                      className="cta-button w-full block text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
+                    >
+                      Contacter notre équipe
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lien Comparatif */}
+              <div className="mt-12 text-center">
+                <Link
+                  href="/tarifs"
+                  className="cta-button inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:text-primary transition-colors min-h-[44px]"
+                >
+                  <span>
+                    Vous hésitez ? Comparez toutes les fonctionnalités en détail sur notre grille comparative complète des tarifs
+                  </span>
+                  <ArrowRight className="w-4 h-4 icon-arrow" />
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SECTION 7 : BANNIÈRE FINALE DE CONVERSION (CHOCOLAT / INK SANS FLOU) ── */}
+          <section className="relative w-full bg-ink text-white py-20 lg:py-24 overflow-hidden border-t border-border">
+            <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
+                Prêt à moderniser votre gestion financière ?
+              </h2>
+              <p className="text-base sm:text-lg text-border max-w-xl mx-auto mb-8 leading-relaxed">
+                Rejoignez les dirigeants béninois qui pilotent leur entreprise avec Ceilow.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/demo"
+                  className="cta-button w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-ink text-base px-8 py-3.5 rounded-xl font-bold shadow-md hover:bg-primary-hover active:scale-[0.99] transition-all min-h-[48px]"
+                >
+                  <Calendar className="w-5 h-5 icon-arrow" />
+                  <span>Demander une démo</span>
+                </Link>
+              </div>
+              <div className="mt-4">
+                <Link
+                  href="/register"
+                  className="cta-button inline-flex items-center gap-1 text-xs text-border hover:text-primary transition-colors underline underline-offset-4 min-h-[44px]"
+                >
+                  <span>ou créez votre compte gratuit en 2 minutes</span>
+                  <ArrowRight className="w-3.5 h-3.5 icon-arrow" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
 
-      {/* ── FOOTER PUBLIC UNIFIÉ ────────────────────────────────────────── */}
+      {/* ── FOOTER PUBLIC UNIFIÉ ACTUEL (bg-ink text-white avec logo officiel) ── */}
       <PublicFooter />
     </div>
   );

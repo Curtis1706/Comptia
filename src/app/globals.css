@@ -173,6 +173,95 @@
   .text-muted {
     color: hsl(var(--muted-foreground)) !important;
   }
+
+  /* Animations landing page pures CSS sans blur */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Tampon e-MECeF animation */
+  @keyframes stampIn {
+    0% { transform: scale(2.2) rotate(-12deg); opacity: 0; }
+    65% { transform: scale(0.95) rotate(-3deg); opacity: 1; }
+    85% { transform: scale(1.04) rotate(-3deg); }
+    100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+  }
+
+  .animate-stamp {
+    animation: stampIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite alternate;
+    animation-duration: 4s;
+  }
+
+  /* Matching magnétique interactif */
+  @keyframes magneticPulse {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(4px); }
+    50% { transform: translateY(0); }
+  }
+
+  @keyframes magneticPulseUp {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-4px); }
+    50% { transform: translateY(0); }
+  }
+
+  .magnetic-box-down {
+    animation: magneticPulse 4s ease-in-out infinite;
+  }
+
+  .magnetic-box-up {
+    animation: magneticPulseUp 4s ease-in-out infinite;
+  }
+
+  /* Jauge SVG animée */
+  @keyframes progressGauge {
+    0% { stroke-dashoffset: 100; }
+    50% { stroke-dashoffset: 0; }
+    85% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 100; }
+  }
+
+  .gauge-circle {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    animation: progressGauge 5s ease-in-out infinite;
+  }
+
+  /* Ondulation vectorielle nette fond CTA */
+  @keyframes waveDrift {
+    0% { transform: translateY(0px) scaleY(1); }
+    50% { transform: translateY(-8px) scaleY(1.03); }
+    100% { transform: translateY(0px) scaleY(1); }
+  }
+
+  .animate-topo-lines {
+    animation: waveDrift 9s ease-in-out infinite;
+  }
+
+  /* Micro-interaction des boutons avec flèche */
+  .cta-button {
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .cta-button:hover {
+    transform: scale(1.02);
+  }
+  .cta-button .icon-arrow {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .cta-button:hover .icon-arrow {
+    transform: translateX(3px);
+  }
 }
 
 @media print {

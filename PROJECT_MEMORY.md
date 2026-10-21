@@ -6,7 +6,105 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
-### 2026-10-20 — Suppression du Bouton « Accueil » et Logo Ceilow Cliquable vers l'Accueil (/login et /register)
+### 2026-10-21 — Intégration du Cockpit Démo 20s au sein d'une Tablette Réaliste
+
+- **Demande Utilisateur** :
+  - Remplacer l'animation de la hero section par la vidéo/démo interactive cockpit (boucle de 20s 100% visuelle fournie en code HTML/CSS/JS).
+  - Coder un châssis de tablette réaliste haut de gamme (bords fins, aluminium anodisé sombre, capteur optique frontal, encoches matérielles de boutons) pour accueillir l'écran cockpit.
+- **Actions Réalisées** :
+  - **1. Création du composant dédié ([`src/components/landing/CockpitTabletDemo.tsx`](file:///e:/Comptia/src/components/landing/CockpitTabletDemo.tsx))** :
+    - **Châssis Tablette Réaliste** : Coque en aluminium foncé (`bg-[#23201C] border-[#2E2A25]`) aux coins incurvés (`rounded-[28px] sm:rounded-[38px] md:rounded-[46px]`), ombre portée immersive (`shadow-[0_30px_70px_-15px_rgba(0,0,0,0.8)]`), capteur caméra frontale avec reflet optique bleu nuit, et encoches physiques de boutons (alimentation et volume).
+    - **Écran Intérieur 16/9 fluide** : Utilisation d'un conteneur réactif observant la largeur du châssis via `ResizeObserver`, appliquant un facteur d'échelle `scale(f)` sans déformation sur une scène virtuelle native `1280x720px`.
+    - **Moteur Motion & Cinématique 20s** :
+      - Caméra dynamique avec zooms et travellings progressifs (`camAt(t)`) sur la facturation rapide, le rapprochement bancaire et les déclarations DGI.
+      - Curseur virtuel fluide sur trajectoires de Bézier avec effets de clic physique (enfoncement du bouton et onde d'impact `rp`).
+      - Générateur procédural déterministe de QR code fiscal DGI vectoriel (`generateFiscalQrPath`), tampon animé « CERTIFIÉ e-MECeF » à impact dynamique.
+      - Rapprochement magnétique de cartes avec lettrage automatique et génération d'écritures SYSCOHADA (521000, 411000, 443100).
+      - Télétransmission DGI avec quittance officielle DGI-2026-8941.
+      - Suppression complète de la barre de progression et de tout libellé sous la tablette à la demande de l'utilisateur : le châssis de la tablette se suffit à lui-même avec un rendu 100% épuré.
+  - **2. Intégration dans la Hero Section ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Remplacement de l'ancien mockup inline par `<CockpitTabletDemo />`.
+    - Nettoyage des anciens états locaux et timers JavaScript obsolètes.
+- **Vérification Build & Typage** :
+  - `pnpm build` validé avec succès (code de retour `0`, 60/60 routes compilées sans régression).
+
+### 2026-10-21 — Hero Section Pleine Page & Titre H1 Calibré sur Deux Lignes
+
+- **Demande Utilisateur** :
+  - Passer la hero section en pleine page (100% de la hauteur du viewport).
+  - Forcer le titre H1 sur strictement deux lignes au lieu de quatre :
+    - Ligne 1 : *« Votre comptabilité, vos factures et votre TVA, »*
+    - Ligne 2 : *« gérées automatiquement au Bénin. »*
+- **Actions Réalisées** :
+  - **1. Vue Page d'Accueil ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Définition de `min-h-[calc(100vh-5rem)]` sur la balise `<section>` du Hero, combinée à la barre de navigation de 5rem (`h-20`), assurant une occupation exacte à 100vh de la première vue sans débordement disgracieux.
+    - Élargissement du conteneur de titre à `max-w-6xl` avec adaptation de la taille typographique (`text-2xl sm:text-3xl md:text-4xl lg:text-[44px] xl:text-[50px]`) et application de `md:whitespace-nowrap` sur les deux blocs de texte.
+- **Vérification Build & Typage** :
+  - `pnpm build` exécuté avec succès (code de retour `0`, 60/60 routes générées sans erreur).
+
+- **Demande Utilisateur** :
+  - Supprimer la ligne blanche horizontale de séparation sous le header de la page d'accueil.
+- **Actions Réalisées** :
+  - **1. Vue Page d'Accueil ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Retrait de la classe `border-b border-border` sur le composant `<PublicHeader />`.
+    - Le header et la hero section (tous deux sur fond chocolat `bg-ink`) fusionnent désormais sans aucune démarcation visuelle artificielle.
+
+- **Demande Utilisateur** :
+  - Supprimer le badge « Infrastructure Fiscale & Comptable Homologuée Bénin ».
+  - Supprimer le texte de micro-réassurance « Essai gratuit 14 jours • Sans carte bancaire • Conforme DGI e-MECeF » sous les boutons CTAs.
+- **Actions Réalisées** :
+  - **1. Vue Page d'Accueil ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Retrait complet du bloc de badge au-dessus du H1.
+    - Retrait complet du paragraphe de micro-réassurance entre les boutons CTAs et le mockup de produit, libérant ainsi l'espace vertical et focalisant l'attention sur l'accroche centrale et les deux boutons d'action.
+
+- **Demande Utilisateur** :
+  - Respect rigoureux des règles Ceilow : suppression totale de tout effet de glassmorphisme ou de transparence de type « ghost button » sur le bouton « Demander une démo », le badge d'homologation et le mockup d'application.
+- **Actions Réalisées** :
+  - **1. Bouton Secondaire « Demander une démo » ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Remplacement de la transparence `bg-transparent border-2 border-white/20 text-white` par un bouton solide opaque franc : `bg-background text-ink font-bold border border-border shadow-md hover:bg-background-secondary`. Zéro transparence, contraste maximal et netteté irréprochable sur le fond `bg-ink`.
+  - **2. Badge d'homologation** :
+    - Remplacement du conteneur translucide `bg-white/5 border-white/10` par une pastille blanche opaque solide `bg-background border border-border text-ink font-bold shadow-sm`.
+  - **3. Mockup de l'Application Ceilow** :
+    - Remplacement des fonds sombres translucides (`bg-black/40`, `bg-black/20`, `bg-white/5`, etc.) par une fenêtre logicielle claire, solide et opaque (`bg-background border border-border shadow-2xl`, barre de titre `bg-background-secondary border-b border-border`, cartes internes `bg-background-secondary border border-border`).
+    - L'interface du logiciel ressort avec une lisibilité parfaite, sans aucun effet de superposition floue ou translucide.
+  - **4. Bannière finale CTA** :
+    - Suppression des couches `opacity-20` et des bordures blanches translucides, application de bordures sémantiques nettes `border-border`.
+
+- **Demande Utilisateur** :
+  - Conserver rigoureusement la couleur du footer actuel (`bg-ink text-white`), le logo dans le footer (`ceilow_web_jaune.svg`) et le header actuel (`PublicHeader`).
+  - Implémenter le nouveau design épuré et orienté conversion de la page d'accueil fourni en HTML, en appliquant scrupuleusement les règles Ceilow (tokens sémantiques stricts, zéro couleur hexadécimale en dur, typographie Inter + Clash Display, chiffres tabulaires, zéro emoji, icônes Lucide).
+- **Actions Réalisées** :
+  - **1. Animations globales ([`src/app/globals.css`](file:///e:/Comptia/src/app/globals.css))** :
+    - Ajout des keyframes et classes utilitaires pour le marquee continu sans coupure (`animate-marquee`), le tampon e-MECeF animé (`animate-stamp`), le matching magnétique à 2 cartes (`magnetic-box-down`, `magnetic-box-up`), la jauge de progression SVG (`gauge-circle`), l'ondulation topographique nette (`animate-topo-lines`), et les micro-interactions de boutons (`cta-button`, `icon-arrow`).
+  - **2. Refonte complète de la vue ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Intégration du Header officiel (`PublicHeader`) et du Footer officiel (`PublicFooter`).
+    - **Hero Section Chocolat (`bg-ink`)** : H1 et sous-titre officiels, CTAs « Souscrire » et « Demander une démo », micro-réassurance.
+    - **Mockup produit animé avec curseur virtuel (boucle 10s)** : Boucle fluide en React (survol KPI CA, glisse vers Déclarations DGI, clic avec effet ripple, spinner de chiffrement, confirmation « Transmis DGI » avec quittance DGI-2026-8941, survol Trésorerie).
+    - **Bandeau de réassurance locale** : Marquee continu infini avec les 6 entreprises et cabinets d'expertise comptable béninois.
+    - **Les 3 grands bénéfices métiers** : Cartes interactives avec tampon vert animé e-MECeF & QR code scannable, matching magnétique de rapprochement bancaire, et jauge circulaire de TVA OHADA.
+    - **Démonstration en action (Workflow Ceilow)** : 3 étapes interactives avec autoplay de 4 secondes et barre de progression continue.
+    - **Chiffres clés & Preuves sociales** : 4 KPIs d'impact monétaires et temporels, et 3 témoignages réels avec étoiles dorées.
+    - **Grille tarifaire résumée en FCFA** : Plan Gratuit (0 FCFA), Plan Pro Recommandé (15 000 FCFA), Plan Entreprise (Sur devis), lien vers la grille comparative complète.
+    - **Bannière finale CTA** : Fond chocolat sombre (`bg-ink`), lignes topographiques dorées géométriques nettes et double CTA.
+  - **3. Conformité aux Règles Ceilow** :
+    - Remplacement de tous les Material Symbols du modèle HTML par des composants vectoriels Lucide React (`CheckCircle2`, `ArrowRight`, `Lock`, `CloudUpload`, `RefreshCw`, `QrCode`, `ArrowUpDown`, `PieChart`, `Star`, `Building2`, etc.).
+    - Remplacement de tous les codes hexadécimaux en dur par les tokens sémantiques (`bg-ink`, `text-ink`, `bg-primary`, `text-primary`, `bg-background`, `bg-background-secondary`, `border-border`, `text-muted`, `text-success-deep`, `bg-success/20`).
+
+- **Demande Utilisateur** :
+  - Utiliser la couleur chocolat sombre `#332E29` (`bg-ink`) pour la hero section de la page d'accueil (comme sur la hero section de la page démo).
+  - Conserver le copywriting actuel, les positions et la structure centrale du hero.
+  - Alléger la page d'accueil en un entonnoir de conversion direct : hero section, 3 bénéfices clés, une démonstration en action, preuves sociales et chiffres, tarifs résumés en FCFA, bannière CTA finale.
+  - Déporter les détails vers 5 pages dédiées : Conformité DGI / e-MECeF (`/conformite-dgi`), Tarifs détaillés (`/tarifs`), Fonctionnalités (`/fonctionnalites`), À propos et contact (`/a-propos`), FAQ (`/faq`).
+  - Intégrer des animations dynamiques de haute qualité (micro-interactions, curseur virtuel qui clique, animations LottieFiles interactives au lieu de visuels statiques).
+  - Rédiger un fichier Markdown exhaustif et immédiatement exploitable par une IA génératrice de design (v0, Midjourney, Claude Artifacts, Figma AI).
+- **Actions Réalisées** :
+  - **1. Création du Cahier des Charges ([`LANDING_PAGE_DESIGN_SPEC.md`](file:///e:/Comptia/LANDING_PAGE_DESIGN_SPEC.md))** :
+    - Définition complète de la vision stratégique CRO et des tokens stricts (`ink: #332E29`, `primary: #FFD946`, `success: #5FFFC2`, `border: #D8D5D0`).
+    - Spécification détaillée section par section avec le copywriting mot pour mot conservé.
+    - Scénario minuté de l'animation au curseur dans le mockup du dashboard (survol KPIs, clic sur « Télétransmettre DGI », coche de validation e-MECeF).
+    - Description précise des 3 bénéfices avec animations Lottie interactives (tampon DGI, fusion magnétique de rapprochement bancaire, jauge de TVA).
+    - Maillage complet avec les 5 pages d'atterrissage secondaires.
+    - Fourniture d'un prompt système clé en main pour toute IA génératrice de design UI.
 
 - **Demande Utilisateur** :
   - Supprimer le bouton `← Accueil` présent en haut à gauche du panneau de marque sur les pages de connexion ([`src/app/login/page.tsx`](file:///e:/Comptia/src/app/login/page.tsx)) et d'inscription ([`src/app/register/page.tsx`](file:///e:/Comptia/src/app/register/page.tsx)).

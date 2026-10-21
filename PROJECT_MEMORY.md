@@ -22,6 +22,7 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
       - Rapprochement magnétique de cartes avec lettrage automatique et génération d'écritures SYSCOHADA (521000, 411000, 443100).
       - Télétransmission DGI avec quittance officielle DGI-2026-8941.
       - Suppression complète de la barre de progression et de tout libellé sous la tablette à la demande de l'utilisateur : le châssis de la tablette se suffit à lui-même avec un rendu 100% épuré.
+      - **Correction du décalage lors du redémarrage (loop reset)** : Remplacement de l'écrasement global `el.className = 'pn'` par `classList.remove('ok')` / `classList.remove('m', 'l')` / `classList.remove('s1', 's2')`. Cela préserve intégralement les classes de positionnement relatif (`relative`) de chaque conteneur, éliminant tout décalage d'éléments lors des cycles suivants.
   - **2. Intégration dans la Hero Section ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
     - Remplacement de l'ancien mockup inline par `<CockpitTabletDemo />`.
     - Nettoyage des anciens états locaux et timers JavaScript obsolètes.

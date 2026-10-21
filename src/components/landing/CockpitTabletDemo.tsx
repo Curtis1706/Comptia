@@ -254,9 +254,15 @@ export function CockpitTabletDemo() {
     }
 
     const reset = () => {
-      if (invRef.current) invRef.current.className = "pn";
-      if (recRef.current) recRef.current.className = "pn";
-      if (tvRef.current) tvRef.current.className = "k tv";
+      if (invRef.current) {
+        invRef.current.classList.remove("ok");
+      }
+      if (recRef.current) {
+        recRef.current.classList.remove("m", "l");
+      }
+      if (tvRef.current) {
+        tvRef.current.classList.remove("s1", "s2");
+      }
       roll(v1Ref.current, 29630000, 28450000);
       roll(v2Ref.current, 10980000, 9800000);
     };
@@ -777,6 +783,12 @@ export function CockpitTabletDemo() {
 
       {/* ── RÈGLES DE STYLE CSS DU COCKPIT (ANIMATIONS RÉACTIVES PURES) ── */}
       <style jsx global>{`
+        /* Conteneurs avec positionnement relatif strict */
+        .pn,
+        .k {
+          position: relative !important;
+        }
+
         /* Facturation rapide active */
         .pn.ok .stamp {
           opacity: 1 !important;

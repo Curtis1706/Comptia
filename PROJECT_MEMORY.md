@@ -6,6 +6,30 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-21 — Intégration du Logo Officiel Ceilow dans la Barre du Cockpit Démo
+
+- **Demande Utilisateur** :
+  - Remplacer le badge jaune avec « C » et le texte brut « Ceilow » par le logo officiel Ceilow du header dans la barre supérieure de l'animation cockpit.
+- **Actions Réalisées** :
+  - **1. Vue Cockpit Démo ([`src/components/landing/CockpitTabletDemo.tsx`](file:///e:/Comptia/src/components/landing/CockpitTabletDemo.tsx))** :
+    - Remplacement du `<span className="w-7 h-7 bg-primary">C</span><span>Ceilow</span>` par le composant officiel Next.js `<Image src="/logo/ceilow_web_sombre.svg" alt="Ceilow" width={110} height={28} className="h-7 w-auto" />`.
+    - Conforme aux règles Ceilow (version fond clair pour l'interface blanche du cockpit).
+- **Vérification Build & Typage** :
+  - Validation par `pnpm build` (code de retour `0`).
+
+### 2026-10-21 — Agrandissement et Réajustement Vertical du Titre H1
+
+- **Demande Utilisateur** :
+  - Faire grossir le titre principal H1 de la hero section.
+  - Abaisser la position du titre pour aérer la composition sous la barre de navigation.
+- **Actions Réalisées** :
+  - **1. Vue Page d'Accueil ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Augmentation de l'échelle typographique : `text-3xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[60px]` avec interlignage calibré `leading-[1.2]` et conteneur étendu `max-w-7xl`.
+    - Abaissement vertical avec une marge supérieure `mt-4 sm:mt-8`, décollant harmonieusement le bloc d'accroche du header.
+    - Élargissement et padding généreux sur le badge jaune `px-4 sm:px-6 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-sm`.
+- **Vérification Build & Typage** :
+  - Validation par `pnpm build` (code de retour `0`).
+
 ### 2026-10-21 — Intégration du Cockpit Démo 20s au sein d'une Tablette Réaliste
 
 - **Demande Utilisateur** :

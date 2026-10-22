@@ -64,13 +64,13 @@ export default function LandingView() {
           <section className="relative w-full bg-ink text-white min-h-[calc(100vh-5rem)] flex flex-col justify-between pt-8 sm:pt-12 pb-16 sm:pb-24 overflow-hidden">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center my-auto">
 
-              {/* H1 Mot pour Mot : Strictement 2 lignes sur tablette et desktop */}
-              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[44px] xl:text-[50px] font-bold tracking-tight text-white max-w-6xl mx-auto leading-[1.25] text-center">
+              {/* H1 Mot pour Mot : Strictement 2 lignes sur tablette et desktop, agrandi et abaissé */}
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[60px] font-bold tracking-tight text-white max-w-7xl mx-auto leading-[1.2] text-center mt-4 sm:mt-8">
                 <span className="block md:whitespace-nowrap">
                   Votre comptabilité, vos factures et votre TVA,
                 </span>
-                <span className="block mt-2 sm:mt-3 md:whitespace-nowrap">
-                  <span className="bg-primary text-ink px-4 py-1 rounded-xl inline-block">
+                <span className="block mt-2.5 sm:mt-3.5 md:whitespace-nowrap">
+                  <span className="bg-primary text-ink px-4 sm:px-6 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl inline-block shadow-sm">
                     gérées automatiquement au Bénin.
                   </span>
                 </span>

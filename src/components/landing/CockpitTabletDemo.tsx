@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 // Pré-calcul vectoriel déterministe du QR code fiscal DGI (grille 21x21)
 function generateFiscalQrPath(): string {
@@ -461,11 +462,16 @@ export function CockpitTabletDemo() {
             >
               {/* ── BARRE SUPÉRIEURE DU DASHBOARD ── */}
               <div className="absolute left-0 top-0 w-[1280px] h-14 border-b border-border bg-background flex items-center justify-between px-6 box-border">
-                <div className="flex items-center gap-2.5 font-bold text-lg text-ink">
-                  <span className="w-7 h-7 rounded-lg bg-primary text-ink flex items-center justify-center text-sm font-black">
-                    C
-                  </span>
-                  <span>Ceilow</span>
+                <div className="flex items-center gap-3">
+                  {/* Logo officiel Ceilow (version fond clair pour l'interface logicielle) */}
+                  <Image
+                    src="/logo/ceilow_web_sombre.svg"
+                    alt="Ceilow"
+                    width={110}
+                    height={28}
+                    className="h-7 w-auto"
+                    priority
+                  />
                   <span className="font-normal text-sm text-text-muted pl-3 border-l border-border">
                     Bénin Entreprise SARL
                   </span>

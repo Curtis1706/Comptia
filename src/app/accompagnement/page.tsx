@@ -790,7 +790,7 @@ export default function AccompagnementPage() {
               Un accompagnement accessible, qui s&apos;adapte à votre taille
             </h2>
             <p className="mt-3 text-base text-text-muted max-w-xl mx-auto">
-              Ne payez que pour ce dont vous avez réellement besoin. Nos formules claires en FCFA vous déchargent de la gestion administrative sans aucun frais caché.
+              Ne payez que pour ce dont vous avez réellement besoin. Nos formules claires vous déchargent de la gestion administrative sans aucun frais caché.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">

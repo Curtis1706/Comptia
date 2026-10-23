@@ -2,6 +2,41 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-10-23 — Rédaction Complète du Document de Spécification, Design & Copywriting de la Page Fonctionnalités ([`FONCTIONNALITES_SPEC.md`](file:///e:/Comptia/FONCTIONNALITES_SPEC.md))
+
+- **Demande Utilisateur** :
+  - Rédiger le document markdown complet (`.md`) pour la page **Fonctionnalités** (`/fonctionnalites`).
+  - S'inspirer fidèlement de la capture esthétique haute fidélité transmise (modèle de landing page Indy adaptée aux entreprises et indépendants au Bénin).
+  - Intégrer une forte dimension visuelle et interactive : abondance de SVGs animés légers, cadrés et contextuels (smartphone, fiches de paie dynamiques, graphiques de trésorerie).
+  - Répondre avec acuité à la question psychologique : *« celui qui vient sur la page fonctionnalité, il s'attend à quoi ? tout doit être pensé conversion et utilité »*.
+  - Appliquer rigoureusement le skill `/copywriting` (bénéfices d'abord, verbes d'action, zéro jargon abstrait, CTAs courts de 1 à 3 mots) et les règles Ceilow (zéro emoji, tokens sémantiques, absence de faux badges).
+- **Diagnostic UX & Psychologie du Visiteur de la Page Fonctionnalités** :
+  - *Qui arrive sur cette page ?* Un dirigeant (SARL, SAS, ETS, commerce) ou un indépendant en phase d'évaluation technique. Il n'est pas là pour lire une documentation académique mais pour vérifier en quelques secondes : *« Est-ce que cet outil résout mon problème réel sans me faire perdre de temps ? »*.
+  - *Ses angoisses & attentes directes* :
+    - Émettre des factures normalisées DGI avec QR code e-MECeF en 3 secondes sans bug.
+    - Suivre ses encaissements Mobile Money (MTN MoMo, Moov) et bancaires sur une seule vue sans perdre ses reçus.
+    - Sortir des fiches de paie conformes sans redressement CNSS.
+    - Être prêt pour la TVA avant le 10 du mois sans calculs manuels complexes.
+- **Contenu du Document Livré ([`FONCTIONNALITES_SPEC.md`](file:///e:/Comptia/FONCTIONNALITES_SPEC.md))** :
+  - **1. Psychologie du Visiteur & Philosophie de Copywriting** : Analyse fine des freins d'achat, du besoin de réassurance par la preuve visuelle, et application des frameworks PAS (Problème-Agitation-Solution) et AIDA.
+  - **2. Table des Tokens & Équivalences Ceilow** : Remplacement de tous les styles arbitraires par les tokens sémantiques purs (`primary`, `ink`, `background`, `background-secondary`, `border`, `success`). Typographie vitrine en Clash Display et données chiffrées en Inter avec chiffres tabulaires (`tabular-nums`).
+  - **3. Architecture Visuelle Complète (8 Sections Majeures)** :
+    - *Hero Split-Screen* : Titre H1 puissant (*« La paie et les factures de votre société, enfin ultra-simples »*), checklist 3 bénéfices à puces d'accent, double CTA et mockup smartphone SVG avec carte animée de salaire net calculé.
+    - *Ruban de Réassurance Immédiate* : 4 piliers de confiance locale (50+ entreprises, DGI certifiée, MoMo & banques, support Cotonou 48h).
+    - *Grand Showcase Interactif* : Mockup smartphone synchronisé avec un accordéon 3 étapes sur la paie et la gestion d'équipe sans erreur CNSS.
+    - *Bannière d'Autorité Sombre `bg-ink`* : 5 piliers d'excellence illustrés par des pictogrammes vectoriels géométriques (Intuitif, Disponible, Tout compris, Transparent, 100% Conforme).
+    - *Split-Callout Trésorerie & Comptabilité* : Message de clarté financière adossé à un tableau de bord vectoriel interactif à barres animées.
+    - *Preuve Sociale Sombre `bg-ink`* : En-tête avec picto calendrier vectoriel + 3 cartes de dirigeants locaux réels (Cadjehoun, Ganhi, Calavi).
+    - *Bannière Pré-Footer Lifestyle* : Carte arrondie chaleureuse avec photo locale souriante, double CTA et microcopy déculpabilisante (*« Essai de 14 jours sans engagement — Aucune carte bancaire requise »*).
+    - *Grille des 6 Piliers Fonctionnels* : Vue d'ensemble des 6 modules clés de l'écosystème avec micro-accents visuels.
+  - **4. Copywriting Intégral Section par Section** :
+    - Textes complets, accroches, sous-titres, alternatives A/B de test et justifications UX Writing.
+    - Élimination intégrale du jargon technique au profit de bénéfices concrets.
+  - **5. Guide de Microcopy & Checklist de Conformité** :
+    - Règles strictes pour les états de factures DGI, les alertes fiscales et le respect des règles de marque.
+
+---
+
 ### 2026-10-23 — Refonte Intégrale du Copywriting de la Page Accompagnement (/copywriting : Utilité, Clarté & Conversion)
 
 - **Demande Utilisateur** :

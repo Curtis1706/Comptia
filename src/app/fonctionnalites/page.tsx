@@ -122,9 +122,8 @@ export default function FonctionnalitesPage() {
               <div className="lg:col-span-7 flex flex-col items-start space-y-6">
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-clash text-ink leading-[1.12] tracking-tight">
                   La paie et les factures de votre société,{" "}
-                  <span className="relative inline-block">
-                    <span className="relative z-10">enfin ultra-simples</span>
-                    <span className="absolute bottom-1.5 left-0 w-full h-3 bg-primary/40 -z-0 rounded-xs" />
+                  <span className="text-primary underline decoration-primary decoration-4 underline-offset-6">
+                    enfin ultra-simples
                   </span>
                 </h1>
 
@@ -135,7 +134,7 @@ export default function FonctionnalitesPage() {
                 {/* Checklist des bénéfices (sans badges superflus) */}
                 <div className="flex flex-col space-y-3.5 pt-1 w-full">
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success/20 text-success-deep flex items-center justify-center">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-ink flex items-center justify-center font-bold">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span className="text-sm sm:text-base text-ink font-medium">
@@ -144,7 +143,7 @@ export default function FonctionnalitesPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success/20 text-success-deep flex items-center justify-center">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-ink flex items-center justify-center font-bold">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span className="text-sm sm:text-base text-ink font-medium">
@@ -153,7 +152,7 @@ export default function FonctionnalitesPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success/20 text-success-deep flex items-center justify-center">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-ink flex items-center justify-center font-bold">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span className="text-sm sm:text-base text-ink font-medium">
@@ -181,7 +180,7 @@ export default function FonctionnalitesPage() {
                 </div>
 
                 <p className="text-xs text-text-muted flex items-center gap-2 pt-1">
-                  <ShieldCheck className="w-4 h-4 text-success-deep" />
+                  <ShieldCheck className="w-4 h-4 text-ink" />
                   <span>14 jours d&apos;essai sans engagement • Sans carte bancaire requise</span>
                 </p>
               </div>
@@ -191,31 +190,30 @@ export default function FonctionnalitesPage() {
                 {/* ── SVG ANIMÉ STRATÉGIQUE N°1 : SCANNER VECTORIEL e-MECeF / RADAR DE CERTIFICATION ── */}
                 <div className="relative z-10 w-full max-w-[340px]">
                   {/* Smartphone Frame épuré */}
-                  <div className="bg-ink p-3 rounded-[2.5rem] shadow-sm border-2 border-border/60 relative">
+                  <div className="bg-ink p-3 rounded-[2.5rem] shadow-xs border-2 border-border relative">
                     {/* Top Speaker / Camera Notch */}
                     <div className="w-24 h-4 bg-ink mx-auto rounded-full mb-3 flex items-center justify-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
-                      <div className="w-8 h-1.5 rounded-full bg-white/10" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#3D3830]" />
+                      <div className="w-8 h-1.5 rounded-full bg-[#3D3830]" />
                     </div>
 
                     {/* Écran intérieur blanc */}
                     <div className="bg-background rounded-[2rem] p-4 flex flex-col space-y-4 overflow-hidden border border-border">
-                      {/* Entête d'écran */}
+                      {/* Entête d'écran avec LOGO OFFICIEL CEILOW (Plus de Ceilow Mobile) */}
                       <div className="flex items-center justify-between border-b border-border pb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center font-bold text-xs text-ink">
-                            C
-                          </span>
-                          <div>
-                            <div className="text-[11px] uppercase tracking-wider text-text-muted">
-                              Bonjour Alain
-                            </div>
-                            <div className="text-sm font-bold text-ink leading-none">
-                              Ceilow Mobile
-                            </div>
-                          </div>
+                        <div className="flex items-center">
+                          <Image
+                            src="/logo/ceilow_web_sombre.svg"
+                            alt="Ceilow"
+                            width={90}
+                            height={24}
+                            className="h-5 w-auto"
+                            priority
+                          />
                         </div>
-                        <Smartphone className="w-4 h-4 text-text-muted" />
+                        <span className="text-[11px] text-text-muted font-medium font-mono">
+                          Direction Générale
+                        </span>
                       </div>
 
                       {/* Sélecteur d'onglets smartphone */}
@@ -235,14 +233,14 @@ export default function FonctionnalitesPage() {
                       <div className="bg-background-secondary border border-border rounded-xl p-4 relative group">
                         <div className="flex items-start justify-between">
                           <div>
-                            <div className="text-xs font-semibold text-success-deep flex items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-success-deep" />
+                            <div className="text-xs font-semibold text-ink flex items-center gap-1 bg-success px-2 py-0.5 rounded">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-ink" />
                               <span>Validé CNSS / DGI</span>
                             </div>
-                            <div className="text-base font-bold text-ink mt-1">Mars 2026</div>
-                            <div className="text-xs text-text-muted">Direction Générale • Alain T.</div>
+                            <div className="text-base font-bold text-ink mt-2">Mars 2026</div>
+                            <div className="text-xs text-text-muted">Alain T. • Gérant</div>
                           </div>
-                          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-ink">
+                          <div className="w-9 h-9 rounded-full bg-primary text-ink flex items-center justify-center shadow-xs">
                             <Receipt className="w-4 h-4" />
                           </div>
                         </div>
@@ -289,7 +287,7 @@ export default function FonctionnalitesPage() {
                           </div>
 
                           {/* Sceau tournant discret */}
-                          <div className="w-8 h-8 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center text-ink flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full border border-border bg-primary text-ink flex items-center justify-center flex-shrink-0">
                             <Check className="w-4 h-4 text-ink stroke-[3]" />
                           </div>
                         </div>
@@ -304,10 +302,10 @@ export default function FonctionnalitesPage() {
                       {/* Indicateur de synchronisation fiscale */}
                       <div className="bg-background-secondary p-2.5 rounded-lg border border-border flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-success-deep" />
+                          <span className="w-2 h-2 rounded-full bg-success" />
                           <span className="text-xs text-ink font-medium">Télédéclaration DGI / CNSS</span>
                         </div>
-                        <span className="font-mono text-[11px] font-bold text-success-deep">Synchronisé</span>
+                        <span className="font-mono text-[11px] font-bold text-ink bg-success px-2 py-0.5 rounded">Synchronisé</span>
                       </div>
                     </div>
                   </div>
@@ -626,7 +624,7 @@ export default function FonctionnalitesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 w-full">
               {/* Pilier 1 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center mb-4 text-primary">
+                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
                   <Zap className="w-7 h-7" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">Intuitif</h3>
@@ -637,7 +635,7 @@ export default function FonctionnalitesPage() {
 
               {/* Pilier 2 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center mb-4 text-primary">
+                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
                   <Headphones className="w-7 h-7" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">Disponible</h3>
@@ -648,7 +646,7 @@ export default function FonctionnalitesPage() {
 
               {/* Pilier 3 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center mb-4 text-primary">
+                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
                   <Sparkles className="w-7 h-7" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">Tout compris</h3>
@@ -659,7 +657,7 @@ export default function FonctionnalitesPage() {
 
               {/* Pilier 4 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center mb-4 text-primary">
+                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
                   <Search className="w-7 h-7" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">Transparent</h3>
@@ -670,7 +668,7 @@ export default function FonctionnalitesPage() {
 
               {/* Pilier 5 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center mb-4 text-success">
+                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-success">
                   <ShieldCheck className="w-7 h-7" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">100% Conforme</h3>
@@ -734,7 +732,7 @@ export default function FonctionnalitesPage() {
                     <span className="text-xs uppercase tracking-wider text-text-muted">Évolution des Encaissements</span>
                     <div className="text-2xl font-bold text-ink font-mono tabular-nums">4 850 000 FCFA</div>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-success-deep bg-success/20 px-2.5 py-1 rounded">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-ink bg-success px-2.5 py-1 rounded">
                     <TrendingUp className="w-3.5 h-3.5" /> +18% ce mois
                   </span>
                 </div>
@@ -745,7 +743,7 @@ export default function FonctionnalitesPage() {
                     {/* Onde radar pulsante en arrière-plan */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 100">
                       <circle cx="200" cy="50" r="18" fill="none" stroke="#FFD946" strokeWidth="2" className="pulse-wave" />
-                      <circle cx="200" cy="50" r="36" fill="none" stroke="#FFD946" strokeWidth="1" opacity="0.25" />
+                      <circle cx="200" cy="50" r="36" fill="none" stroke="#FFD946" strokeWidth="1" opacity="0.4" />
                       {/* Lignes de flux en pointillés animés */}
                       <path d="M 60 50 L 180 50" stroke="#FFD946" strokeWidth="2" className="stream-flow" />
                       <path d="M 340 50 L 220 50" stroke="#332E29" strokeWidth="2" className="stream-flow" />
@@ -753,7 +751,7 @@ export default function FonctionnalitesPage() {
 
                     {/* Source 1 : Mobile Money */}
                     <div className="flex items-center gap-2 z-10">
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 text-ink flex items-center justify-center font-bold text-xs border border-primary/40">
+                      <div className="w-8 h-8 rounded-lg bg-primary text-ink flex items-center justify-center font-bold text-xs border border-border shadow-xs">
                         MoMo
                       </div>
                       <div>
@@ -773,7 +771,7 @@ export default function FonctionnalitesPage() {
                         <div className="text-xs font-bold text-ink text-right">Banques</div>
                         <div className="text-[10px] text-text-muted font-mono text-right">28% virements</div>
                       </div>
-                      <div className="w-8 h-8 rounded-lg bg-ink/10 text-ink flex items-center justify-center font-bold text-xs border border-border">
+                      <div className="w-8 h-8 rounded-lg bg-background text-ink flex items-center justify-center font-bold text-xs border border-border shadow-xs">
                         <Landmark className="w-4 h-4 text-ink" />
                       </div>
                     </div>
@@ -826,8 +824,8 @@ export default function FonctionnalitesPage() {
                       <span className="w-3 h-3 rounded-xs bg-ink" /> 28% Virements
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-success-deep font-semibold bg-success/20 px-2.5 py-1 rounded">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1.5 text-ink font-semibold bg-success px-2.5 py-1 rounded">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-ink" />
                     <span>Rapprochement à jour</span>
                   </div>
                 </div>
@@ -997,7 +995,7 @@ export default function FonctionnalitesPage() {
               {/* Pilier 1 : Facturation certifiée */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 text-ink flex items-center justify-center mb-5 border border-primary/30">
+                  <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Receipt className="w-6 h-6 text-ink" />
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Facturation certifiée</h3>
@@ -1017,7 +1015,7 @@ export default function FonctionnalitesPage() {
               {/* Pilier 2 : Trésorerie & Mobile Money */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 text-ink flex items-center justify-center mb-5 border border-primary/30">
+                  <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Wallet className="w-6 h-6 text-ink" />
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Trésorerie &amp; Mobile Money</h3>
@@ -1037,7 +1035,7 @@ export default function FonctionnalitesPage() {
               {/* Pilier 3 : Paie & Déclarations sociales */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 text-ink flex items-center justify-center mb-5 border border-primary/30">
+                  <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <UserCheck className="w-6 h-6 text-ink" />
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Paie &amp; Déclarations sociales</h3>
@@ -1057,7 +1055,7 @@ export default function FonctionnalitesPage() {
               {/* Pilier 4 : Dépenses & Reçus scannés */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 text-ink flex items-center justify-center mb-5 border border-primary/30">
+                  <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Scan className="w-6 h-6 text-ink" />
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Dépenses &amp; Reçus scannés</h3>
@@ -1077,7 +1075,7 @@ export default function FonctionnalitesPage() {
               {/* Pilier 5 : Déclarations fiscales à l'avance */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 text-ink flex items-center justify-center mb-5 border border-primary/30">
+                  <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Calendar className="w-6 h-6 text-ink" />
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Déclarations fiscales à l&apos;avance</h3>
@@ -1097,7 +1095,7 @@ export default function FonctionnalitesPage() {
               {/* Pilier 6 : Clôture annuelle sans panique */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 text-ink flex items-center justify-center mb-5 border border-primary/30">
+                  <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Layers className="w-6 h-6 text-ink" />
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Clôture annuelle sans panique</h3>

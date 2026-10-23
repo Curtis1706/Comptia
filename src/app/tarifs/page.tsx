@@ -827,10 +827,10 @@ export default function TarifsPage() {
 
           {/* ── 7. BANNIÈRE CONSEILLER SOMBRE (FOND INK PUR SANS GLASS) ─────── */}
           <section className="w-full px-4 sm:px-6 lg:px-8 pb-16 max-w-7xl mx-auto">
-            <div className="bg-ink text-white rounded-2xl p-8 sm:p-12 overflow-hidden relative border border-white/10 shadow-xs">
+            <div className="bg-ink text-white rounded-2xl p-8 sm:p-12 overflow-hidden relative border border-[#474138] shadow-xs">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-7 flex flex-col items-start justify-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#3D3830] text-primary text-xs font-semibold uppercase tracking-wider mb-3 border border-white/10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#3D3830] text-primary text-xs font-semibold uppercase tracking-wider mb-3 border border-[#474138]">
                     <span className="w-2 h-2 rounded-full bg-primary" />
                     <span>Accompagnement Personnalisé</span>
                   </div>
@@ -866,8 +866,8 @@ export default function TarifsPage() {
                 </div>
 
                 <div className="lg:col-span-5 flex justify-center lg:justify-end">
-                  <div className="relative w-full max-w-sm rounded-xl overflow-hidden border border-white/10 shadow-xs bg-[#3D3830]">
-                    <div className="w-full h-64 md:h-72 bg-ink/50 relative flex items-center justify-center">
+                  <div className="relative w-full max-w-sm rounded-xl overflow-hidden border border-[#474138] shadow-xs bg-[#3D3830]">
+                    <div className="w-full h-64 md:h-72 bg-ink relative flex items-center justify-center">
                       <Image
                         src="/images/conseillere-cotonou.jpg"
                         alt="Conseillère clientèle Ceilow à Cotonou"
@@ -1169,13 +1169,13 @@ export default function TarifsPage() {
                 </Link>
                 <Link
                   href="/demo"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-[#3D3830] text-white border border-white/10 text-xs font-bold rounded-xl hover:bg-[#474138] transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-[#3D3830] text-white border border-[#474138] text-xs font-bold rounded-xl hover:bg-[#474138] transition-colors flex items-center justify-center gap-2 min-h-[48px]"
                 >
                   <Calendar className="w-4 h-4" />
                   <span>Planifier une démonstration guidée</span>
                 </Link>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-white/60 text-xs mt-8 pt-4 border-t border-white/10">
+              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-white/60 text-xs mt-8 pt-4 border-t border-[#474138]">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                   <span>Sans carte bancaire requise</span>

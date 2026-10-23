@@ -496,7 +496,7 @@ export default function AccompagnementPage() {
               {/* 5 Piliers illustrés */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
                 <div className="space-y-3 p-3">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-[#3D3830] border border-[#474138] flex items-center justify-center text-primary">
                     <Sparkles className="w-7 h-7" />
                   </div>
                   <h3 className="font-bold text-sm sm:text-base text-white">Simple</h3>
@@ -504,7 +504,7 @@ export default function AccompagnementPage() {
                 </div>
 
                 <div className="space-y-3 p-3">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-[#3D3830] border border-[#474138] flex items-center justify-center text-primary">
                     <Headphones className="w-7 h-7" />
                   </div>
                   <h3 className="font-bold text-sm sm:text-base text-white">Dédié</h3>
@@ -512,7 +512,7 @@ export default function AccompagnementPage() {
                 </div>
 
                 <div className="space-y-3 p-3">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-[#3D3830] border border-[#474138] flex items-center justify-center text-primary">
                     <Award className="w-7 h-7" />
                   </div>
                   <h3 className="font-bold text-sm sm:text-base text-white">Clé en main</h3>
@@ -520,7 +520,7 @@ export default function AccompagnementPage() {
                 </div>
 
                 <div className="space-y-3 p-3">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-[#3D3830] border border-[#474138] flex items-center justify-center text-primary">
                     <Search className="w-7 h-7" />
                   </div>
                   <h3 className="font-bold text-sm sm:text-base text-white">Transparent</h3>
@@ -528,7 +528,7 @@ export default function AccompagnementPage() {
                 </div>
 
                 <div className="col-span-2 sm:col-span-1 space-y-3 p-3">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-[#3D3830] border border-[#474138] flex items-center justify-center text-primary">
                     <ShieldCheck className="w-7 h-7" />
                   </div>
                   <h3 className="font-bold text-sm sm:text-base text-white">Sérénité totale</h3>
@@ -1025,10 +1025,10 @@ export default function AccompagnementPage() {
         <section className="py-20 bg-background border-b border-border" id="accompagnement">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             {/* Bloc Sombre : Support Client à Cotonou */}
-            <div className="bg-ink text-white rounded-3xl overflow-hidden border border-white/10 shadow-sm">
+            <div className="bg-ink text-white rounded-3xl overflow-hidden border border-[#474138] shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
                 <div className="lg:col-span-7 p-8 sm:p-12 space-y-6">
-                  <span className="inline-block px-3 py-1 bg-white/10 text-primary border border-white/20 rounded-full text-xs font-semibold">
+                  <span className="inline-block px-3 py-1 bg-[#3D3830] text-primary border border-[#474138] rounded-full text-xs font-semibold">
                     Assistance dédiée à Cotonou
                   </span>
                   <h3 className="text-2xl sm:text-4xl font-bold font-clash text-white tracking-tight leading-tight">

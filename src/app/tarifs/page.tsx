@@ -869,10 +869,9 @@ export default function TarifsPage() {
                   <div className="relative w-full max-w-sm rounded-xl overflow-hidden border border-white/10 shadow-xs bg-[#3D3830]">
                     <div className="w-full h-64 md:h-72 bg-ink/50 relative flex items-center justify-center">
                       <Image
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaRoxTal1prYz7Xqnv1mXMsL1h3dhoeu88r5SyXRys7GnHiQ9x-V0bxrdeDVyUIrp0-w5_QM--iGsM8r08q5L7cHzU5SU_HSeP2NfgL6tuIzXfphKGp672ymt0GTCHAIgL2UAvTpgwi3JfMUaCmU5E2Gp1zoEXsdos55NL6vFh1uljlAi_yfsuVQFVeXlP7Eb-FzKZYywxTmVhgvebaHqW4RilFe8if6J8KiGpqbaOKnuBgv-vQGTD"
+                        src="/images/conseillere-cotonou.jpg"
                         alt="Conseillère clientèle Ceilow à Cotonou"
                         fill
-                        unoptimized
                         className="object-cover object-center"
                         sizes="(max-width: 768px) 100vw, 384px"
                       />
@@ -896,10 +895,9 @@ export default function TarifsPage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-center">
                 <div className="lg:col-span-5 h-full min-h-[260px] relative bg-background-secondary">
                   <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXIHJ_ukkhBGQTd_ZomRcHvmO2Dk6DrIPC8kfGgNQ8TzwYSy6she--aUMOzzDqQG6LJCqD9PhZ94A75_8Se8BtoFdpceVQdifO782E6Aji_BXgxRB0LUg4ThLc_USF5JFGz7PlP9cX0t3QKoeXC_z53TDXTfeIrbjcdk0Y0E0VdzbcSohqgyY0sIrIUCafjEfQd5ljCnFXAclSIn5W2Jlj_LlUnEW2tUT_Pm3zfv3AqR4RQv7qzxLS"
+                    src="/images/collaboration-comptable.jpg"
                     alt="Équipe Ceilow en collaboration à Cotonou"
                     fill
-                    unoptimized
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 500px"
                   />
@@ -913,7 +911,7 @@ export default function TarifsPage() {
                     Vous avez déjà un comptable ? Ceilow s&apos;adapte sans rien bousculer.
                   </h3>
                   <p className="text-xs sm:text-sm text-text-muted mb-6 leading-relaxed">
-                    Comme plus de 450 indépendants et PME au Bénin, gagnez du temps et déléguez la corvée. Notre équipe à Cotonou vous accompagne dans la reprise de vos écritures et la clôture avec votre ancien prestataire.
+                    Comme plus de 50 indépendants et PME au Bénin, gagnez du temps et déléguez la corvée. Notre équipe à Cotonou vous accompagne dans la reprise de vos écritures et la clôture avec votre ancien prestataire.
                   </p>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <Link
@@ -942,7 +940,7 @@ export default function TarifsPage() {
                     Confiance &amp; Rigueur
                   </span>
                   <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink">
-                    Approuvé par plus de 450 dirigeants et cabinets au Bénin
+                    Approuvé par plus de 50 dirigeants et cabinets au Bénin
                   </h2>
                 </div>
                 <div className="flex items-center gap-3 bg-background px-4 py-2 rounded-xl border border-border shadow-xs shrink-0">
@@ -989,10 +987,9 @@ export default function TarifsPage() {
 
                   <div className="lg:col-span-5 h-72 lg:h-full min-h-[280px] relative bg-background-secondary">
                     <Image
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXVniB1Q9lSTut3MqQ4UTMog-UvHhMJP-n3QjTxKFAd3V4MdwjXzbA-VYZP28QNM3iDk3I3ASRsfH3KaJKQH-QKcbOYO5dSC1P-I42k5XN33t9xQDAzG3YDg3JnHRHLLTFUI1UTJLhbCmMHrkhFuTThmfahYYbQTpa5wnJH_UnTQ7zBPBr0GYjOP2p-aSc5bvcOCE-n5B1Yis5zIy3IyXWib7vyIRMmhcvwrjJqOit0bEvO_cvwLzl"
+                      src="/images/dirigeante-benin.jpg"
                       alt="Aurélie Tokpanou, utilisatrice Ceilow à Cotonou"
                       fill
-                      unoptimized
                       className="object-cover object-top"
                       sizes="(max-width: 1024px) 100vw, 500px"
                     />
@@ -1094,10 +1091,9 @@ export default function TarifsPage() {
 
                 <div className="lg:col-span-5 h-72 lg:h-full min-h-[280px] relative bg-background-secondary">
                   <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVnXlVolGX-yQubTRuLILCX0B6IXIV5Jd-EeiuIgGqOmstxeDaX8sUQKZj3VLimYejtq5hyIAr39iUhP_bFBJHtbaI_VbYfy67OICHdomCnvKBn-FY1gzjEZfWOKSaZiCn2-ni3ti0UdMQ7QMF_0584SyTGCcRBCftPcvnK12pfQo5bK1tjVEpc4cN2wd0i5u-GKuS5-CM5dIUonWZDTwKeWTz9fsZOwVSXUStuRBEG-Uf1oxgoAGR"
-                    alt="Entrepreneur béninois gérant son activité sur smartphone avec Ceilow"
+                    src="/images/collaboration-comptable.jpg"
+                    alt="Dirigeants béninois collaborant sur leur gestion d'activité avec Ceilow"
                     fill
-                    unoptimized
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 500px"
                   />

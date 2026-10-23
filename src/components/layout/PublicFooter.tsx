@@ -10,7 +10,7 @@ interface PublicFooterProps {
 export function PublicFooter({ className = "" }: PublicFooterProps) {
   return (
     <footer className={`w-full bg-ink text-white pt-20 pb-14 border-t border-white/10 ${className}`}>
-      <div className="w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20">
+      <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-20">
         {/* Grille principale 12 colonnes hautement aérée */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 pb-16 border-b border-white/10">
           

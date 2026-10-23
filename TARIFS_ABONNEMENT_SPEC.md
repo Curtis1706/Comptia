@@ -304,7 +304,7 @@ Lever l'objection majeure : *« J'ai déjà des habitudes, changer d'outil va me
 - **Badge** : `Transition Clé en Main`
 - **Titre H3** : « Vous avez déjà un comptable ? Ceilow s'adapte sans rien bousculer. »
 - **Paragraphe** :
-  « Comme plus de 450 dirigeants au Bénin, libérez-vous de la saisie manuelle sans changer vos partenariats. Nous créons un accès gratuit pour votre expert-comptable pour qu'il récupère des balances propres sans vous déranger. »
+  « Comme plus de 50 dirigeants au Bénin, libérez-vous de la saisie manuelle sans changer vos partenariats. Nous créons un accès gratuit pour votre expert-comptable pour qu'il récupère des balances propres sans vous déranger. »
 - **CTA** : `Être accompagné gratuitement pour la transition`
 - **Garantie** : « Reprise de vos données et balances 100 % assurée ».
 
@@ -313,7 +313,7 @@ Lever l'objection majeure : *« J'ai déjà des habitudes, changer d'outil va me
 ### 9. Avis Vérifiés & Preuve Sociale Locale
 
 #### En-tête
-- « Approuvé par plus de 450 dirigeants et cabinets au Bénin » — Note moyenne vérifiée : **4.9 / 5**.
+- « Approuvé par plus de 50 dirigeants et cabinets au Bénin » — Note moyenne vérifiée : **4.9 / 5**.
 
 #### Carte Vedette (Mise en Avant)
 - **Avis d'Aurélie Tokpanou** (Fondatrice & CEO, Tokpanou Consulting Group — Cotonou, Ganhi) :

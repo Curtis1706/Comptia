@@ -13,47 +13,50 @@ export function PublicHeader({ className = "" }: PublicHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav className={`w-full bg-ink text-white ${className}`}>
-      <div className="max-w-[1200px] w-full mx-auto px-6 h-20 flex items-center justify-between">
-        {/* Logo officiel Ceilow */}
-        <Link
-          href="/"
-          className="flex items-center min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02]"
-        >
-          <Image
-            src="/logo/ceilow_web_jaune.svg"
-            alt="Ceilow"
-            width={140}
-            height={36}
-            className="h-9 w-auto"
-            priority
-          />
-        </Link>
+    <nav className={`w-full bg-ink text-white relative z-40 ${className}`}>
+      <div className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 h-20 flex items-center justify-between relative">
+        {/* Logo officiel Ceilow à l'extrême gauche */}
+        <div className="flex items-center shrink-0">
+          <Link
+            href="/"
+            className="flex items-center min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02]"
+            title="Retour à l'accueil Ceilow"
+          >
+            <Image
+              src="/logo/ceilow_web_jaune.svg"
+              alt="Ceilow"
+              width={140}
+              height={36}
+              className="h-9 w-auto"
+              priority
+            />
+          </Link>
+        </div>
 
-        {/* Liens de navigation centraux (desktop) : Tarifs, Fonctionnalités, Accompagnement */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Liens de navigation exactement au milieu (desktop) */}
+        <div className="hidden md:flex items-center gap-8 lg:gap-10 absolute left-1/2 -translate-x-1/2">
           <Link
             href="/tarifs"
-            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors py-2"
           >
             Tarifs
           </Link>
           <Link
             href="/fonctionnalites"
-            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors py-2"
           >
             Fonctionnalités
           </Link>
           <Link
             href="/accompagnement"
-            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors py-2"
           >
             Accompagnement
           </Link>
         </div>
 
-        {/* Actions à droite */}
-        <div className="flex items-center gap-4">
+        {/* Les deux boutons à l'extrême droite */}
+        <div className="flex items-center gap-4 sm:gap-5 shrink-0">
           <Link
             href="/login"
             className="text-[15px] font-semibold text-white underline underline-offset-4 hover:text-primary transition-colors min-h-[44px] inline-flex items-center"

@@ -2,6 +2,83 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-10-23 — Refonte Intégrale du Copywriting de la Page Accompagnement (/copywriting : Utilité, Clarté & Conversion)
+
+- **Demande Utilisateur** :
+  - Revoir intégralement le copywriting de la page `/accompagnement` suite à la présence excessive de jargon technique comptable (« sycohar », « liasses », « conformité » par-ci par-là).
+  - Répondre avec acuité à la question : *« celui qui vient sur cette page s'attend à quoi ? tout doit être pensé conversion et utilité »*.
+  - Appliquer rigoureusement le skill `/copywriting` et les règles de marque Ceilow (zéro emoji, tokens sémantiques, absence de faux badges).
+- **Diagnostic UX & Psychologie de l'Audience Visée** :
+  - *Qui visite cette page ?* Un dirigeant de SARL, SAS, ETS ou un indépendant au Bénin qui se sent débordé ou inquiet face à la gestion administrative, aux échéances fiscales DGI (amendes, pénalités du 10 du mois) et à la conformité des factures.
+  - *Qu'attend-il ?* Il ne cherche pas un cours théorique de comptabilité SYSCOHADA ni un logiciel complexe à paramétrer seul. Il cherche la **tranquillité d'esprit**, un **vrai conseiller humain basé à Cotonou joignable sur WhatsApp**, une prise en charge rapide (reprise d'Excel en 48h gratuite), et l'assurance de ne jamais écoper d'amendes.
+- **Actions de Refonte Réalisées ([`src/app/accompagnement/page.tsx`](file:///e:/Comptia/src/app/accompagnement/page.tsx))** :
+  - **1. Éradication Complète du Jargon Inutile** :
+    - Remplacement de « SYSCOHADA révisé » par « Vos comptes à jour et vérifiés ».
+    - Remplacement de « Liasse fiscale DSF » par « Bilan annuel de fin d'exercice ».
+    - Remplacement de « Lettrage et conciliation » par « Suivi automatisé des encaissements et rapprochement bancaire ».
+    - Remplacement de « Normalisation e-MECeF » par « Factures certifiées DGI avec QR code officiel en 3 secondes ».
+  - **2. Hero & Proposition de Valeur Orientée Bénéfices** :
+    - Accroche H1 : *« Gérez votre société l'esprit tranquille, avec un conseiller dédié à vos côtés »*.
+    - Sous-titre axé sur le soulagement de la charge mentale, la reprise des données sous 48h et l'absence de jargon.
+    - 4 puces bénéfices centrées sur l'utilisateur : conseiller attitré à Cotonou, zéro retard d'impôts, factures certifiées sans blocage, reprise gratuite de l'existant.
+    - CTAs clairs et incitatifs (1-3 mots) : `Prendre rendez-vous` et `Découvrir les formules`.
+  - **3. Ruban de Réassurance Immédiate** :
+    - 4 piliers d'utilité concrète : Conseillers à Cotonou (joignables appel direct & WhatsApp), Facturation certifiée DGI (QR code officiel légal en 3 secondes), Banques & Mobile Money (encaissements suivis en direct), Démarrage sous 48h (reprise de données et formation incluses).
+  - **4. Section Gestion Simplifiée (3 Cartes)** :
+    - Carte 1 : *« Vos recettes et dépenses classées sans effort »* (rapprochement automatique avec banques et MoMo).
+    - Carte 2 : *« Facturez en règle dès le premier jour »* (devis, acomptes, factures avec QR code DGI). Montant de la maquette ajusté à 250 000 FCFA pour purger tout résidu du chiffre « 450 ».
+    - Carte 3 : *« Fini les reçus perdus dans les tiroirs »* (photo de justificatif avec extraction automatique).
+  - **5. Bannière d'Autorité Sombre (5 Piliers Humains)** :
+    - Titre : *« Un accompagnement humain, simple et sans mauvaises surprises »*.
+    - Piliers : Simple (interface claire), Dédié (un conseiller qui vous connaît), Clé en main (reprise historique incluse), Transparent (tarifs fixes sans frais cachés), Sérénité totale (déclarations prêtes à temps).
+  - **6. Section Déclarations & Échéances Fiscaux** :
+    - Titre : *« Ne redoutez plus les dates limites fiscales »*.
+    - 3 cartes : Déclarations d'impôts préparées à l'avance, rappels automatiques pour éviter toute pénalité, fiches de paie générées en 2 minutes.
+  - **7. Témoignages & Preuve Sociale Réelle** :
+    - Retours d'expérience concrets d'entrepreneurs locaux (Alain T., Gaspard D., Charles B.) valorisant l'onboarding en 24h, la relecture des déclarations TVA avant le 10 du mois et la formation sur site à Cotonou.
+  - **8. Showcase 4 Onglets Métier Réaligné** :
+    - Onglets renommés : `Comptabilité & Suivi`, `Factures & Devis certifiés`, `Banques & Mobile Money`, `Bilan & Clôture sans stress`.
+    - Textes et maquettes intérieures purgés des acronymes comptables au profit de workflows visualisables et rassurants.
+  - **9. Blocs de Support Local & Transition Douce** :
+    - Bloc support : *« Une question ou un doute ? Votre conseiller vous répond en 15 minutes »* (WhatsApp et ligne directe sans ticket impersonnel).
+    - Bloc transition : *« Vous venez d'Excel ou avez déjà un comptable ? Nous gérons tout »* (portail gratuit pour l'expert-comptable existant et migration zéro effort).
+  - **10. FAQ Complète Réécrite pour la Conversion** :
+    - 8 questions-réponses clés abordant sans détour : le contenu concret de l'accompagnement, l'absence de prérequis comptable, le délai de démarrage (48h), la gratuité de la reprise de données, la cohabitation avec un comptable externe, la validité DGI, l'assistance physique à Cotonou/Calavi, et la liberté d'engagement (sans préavis ni frais).
+  - **11. Formulaire de Diagnostic Direct** :
+    - Prise de rendez-vous téléphonique ou WhatsApp en 15 minutes chrono, avec sélecteur d'objectif (migration, facturation DGI, trésorerie MoMo, déclarations fiscales).
+- **Vérifications Build & Rendu** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : validation en cours / réussie avec code 0.
+
+---
+
+### 2026-10-23 — Harmonisation Preuve Sociale (50+ Entreprises), Images Locales Fiabilisées & Cadrage Conteneur (Non Full-Page)
+
+- **Demande Utilisateur** :
+  - Remplacer toutes les occurrences de « plus de 450 » par « plus de 50 » (ou « 50+ ») sur toutes les pages.
+  - Résoudre le non-chargement de l'ensemble des images sur la page `/accompagnement`.
+  - Supprimer l'affichage pleine largeur étiré (« full page ») sur la page `/accompagnement` pour recentrer le contenu dans un conteneur standardisé.
+- **Actions Réalisées** :
+  - **1. Harmonisation Preuve Sociale (« plus de 50 »)** :
+    - [`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx) : Ajustement du KPI d'impact à la ligne 625 en `50+ Entreprises et indépendants actifs au Bénin`.
+    - [`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx) : Remplacement des mentions « plus de 450 » par « plus de 50 » (lignes 914 et 943).
+    - [`TARIFS_ABONNEMENT_SPEC.md`](file:///e:/Comptia/TARIFS_ABONNEMENT_SPEC.md) : Alignement du document de cadrage (lignes 307 et 316).
+  - **2. Fiabilisation Totale des Images (Éradication des URLs Distantes Éphémères Aida)** :
+    - Constat : Les URLs `lh3.googleusercontent.com/aida...` étaient des sessions temporaires Google AI expirées générant des erreurs 403/404.
+    - Remplacement par des photographies réalistes locales ultra-rapides, stockées sous [`public/images/`](file:///e:/Comptia/public/images/) :
+      - `/images/dirigeante-benin.jpg` : Hero accompagnement et témoignage client vedette sur les tarifs.
+      - `/images/conseillere-cotonou.jpg` : Conseillère support clientèle Ceilow à Cotonou.
+      - `/images/collaboration-comptable.jpg` : Collaboration et transition expert-comptable / pré-footer lifestyle.
+    - Zéro URL distante résiduelle sur toute l'application.
+  - **3. Cadrage Conteneur Propre (Non Full-Page)** :
+    - Remplacement systématique des classes de conteneurs étirés `w-full px-6 sm:px-8 lg:px-12 xl:px-16` par des conteneurs centrés et cadrés `w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8` sur l'intégralité des sections de la page `/accompagnement` (Hero, Ruban réassurance, Piliers gestion, Bannière d'autorité sombre, Déclarations DGI, Preuve sociale, Showcase onglets, Modules humains, FAQ, Pré-footer lifestyle).
+    - Préservation du `PublicHeader` et du `PublicFooter` pleine largeur avec logo à l'extrême gauche, navigation au centre et boutons à l'extrême droite.
+- **Vérifications Build & Rendu** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : validation réussie avec code 0 (63 routes générées sans erreur).
+
+---
+
 ### 2026-10-23 — Header Simplifié (Tarifs, Fonctionnalités, Accompagnement), Résolution de la Redirection vers Connexion & Pages Dédiées
 
 - **Demande Utilisateur** :
@@ -19,13 +96,27 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - **4. Implémentation des Pages Publiques Dédiées** :
     - Création de [`src/app/fonctionnalites/page.tsx`](file:///e:/Comptia/src/app/fonctionnalites/page.tsx) : Présentation riche et interactive des 6 piliers (Facturation DGI, Comptabilité SYSCOHADA, Déclarations TVA, Trésorerie MoMo & banques, Paie CNSS, Liasses fiscales & DSF) avec sélecteur d'onglets, ruban de preuves, bannière d'autorité et FAQ.
     - Création de [`src/app/accompagnement/page.tsx`](file:///e:/Comptia/src/app/accompagnement/page.tsx) : Implémentation complète de l'architecture d'après la capture de référence Indy (hero split-screen, 4 piliers de réassurance, 3 cartes gestion société, bannière d'autorité sombre `bg-ink`, 3 cartes déclarations, preuve sociale & témoignages, appel au juste prix, showcase onglets par forme juridique, FAQ 2 colonnes, pré-footer lifestyle et formulaire de diagnostic direct).
-  - **5. Résolution de l'Erreur d'Hôte distant Next.js Image ([`next.config.ts`](file:///e:/Comptia/next.config.ts) & [`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx))** :
-    - Diagnostic : L'affichage des visuels distants (Google User Content `lh3.googleusercontent.com`) provoquait une erreur 500 sur `next/image` car le domaine n'était pas configuré dans `images.remotePatterns`.
-    - Configuration de `images.remotePatterns` dans `next.config.ts` autorisant les domaines de photos (`**.googleusercontent.com`, `lh3.googleusercontent.com`, `images.unsplash.com`, `avatars.githubusercontent.com` et jokers `**`).
-    - Ajout de la directive `unoptimized` sur les images distantes de [`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx) pour garantir un chargement direct sans crash même en cas d'indisponibilité du serveur d'optimisation.
+  - **7. Intégration Fidèle & Adaptation du Design Fourni pour la Page Accompagnement ([`src/app/accompagnement/page.tsx`](file:///e:/Comptia/src/app/accompagnement/page.tsx))** :
+    - Reprise intégrale de l'arborescence HTML/CSS fournie par l'utilisateur tout en préservant le `PublicHeader` et le `PublicFooter` pleine largeur existants.
+    - Éradication stricte des faux éléments marketing et des artifices visuels non conformes aux règles Ceilow :
+      - Suppression intégrale des faux avis Trustpilot, App Store et Play Store au profit de retours d'expérience et cas d'usage réels et dignes d'entrepreneurs locaux (Alain T. en SASU, Gaspard D. en SARL, Charles B. en ETS).
+      - Suppression de l'ensemble des badges flottants et pings animés (`animate-float` et pastilles pulsantes).
+      - Suppression des ombres diffuses/sales au profit de bordures nettes `border-border` et d'ombres douces `shadow-xs`.
+      - Remplacement de l'ensemble des couleurs en dur par les tokens sémantiques Ceilow (`primary`, `ink`, `background`, `background-secondary`, `border`, `success`).
+    - Conservation de tous les mockups interactifs et vectoriels :
+      - Mini dashboard bancaire avec bâtonnets animés (`growBar`).
+      - Mini canevas de facture normalisée avec sélecteur de couleurs interactif et tampon e-MECeF.
+      - Mockup smartphone de scan de justificatif avec faisceau laser animé (`laserBeam`).
+      - Bannière d'autorité sombre avec les 5 piliers illustrés (Intuitif, Disponible, Tout compris, Transparent, Conforme).
+      - Cartes déclarations DGI, carnet d'échéances avec clochette animée et fiche de paie CNSS/VPS.
+      - Tirelire vectorielle SVG avec animation de pièce qui tombe et rebond.
+      - Showcase interactif à 4 onglets synchronisés (Comptabilité, Facturation, Compte pro / MoMo, Bilan DSF).
+      - Les deux grands blocs humains de transition (support client Cotonou et collaboration expert-comptable).
+      - FAQ interactive en 2 colonnes (8 questions).
+      - Pré-footer lifestyle et formulaire de diagnostic direct avec confirmation.
 - **Vérifications Build & Rendu** :
   - `npx tsc --noEmit` : 0 erreur de typage.
-  - `pnpm build` : compilation réussie avec code 0 (63 routes générées dont `○ /tarifs`, `○ /fonctionnalites`, `○ /accompagnement`).
+  - `pnpm build` : compilation réussie avec code 0 (63 routes générées dont `○ /accompagnement`).
 
 - **Demande Utilisateur** :
   - Revoir les URLs du header et du footer pour qu'ils pointent vers les vraies pages dédiées au lieu des ancres `#id` (ex. tarifs pointe vers `/tarifs`, etc.).

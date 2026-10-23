@@ -622,7 +622,7 @@ export default function LandingView() {
               {/* 4 KPIs d'impact */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
                 <div className="p-6 rounded-2xl bg-background-secondary border border-border text-center">
-                  <div className="font-mono text-3xl sm:text-4xl font-bold text-ink tabular-nums">500+</div>
+                  <div className="font-mono text-3xl sm:text-4xl font-bold text-ink tabular-nums">50+</div>
                   <p className="text-xs sm:text-sm text-text-muted mt-2 font-medium">
                     Entreprises et indépendants actifs au Bénin
                   </p>

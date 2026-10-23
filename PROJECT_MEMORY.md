@@ -2,6 +2,27 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-10-23 — Intégration du Logo Officiel Ceilow (Éradication de « Ceilow Mobile ») & Suppression Totale de Tout Glassmorphisme (Tarifs, Accompagnement, Fonctionnalités)
+
+- **Demande Utilisateur** :
+  - Supprimer impérativement le texte et le picto générique « Ceilow Mobile » dans le smartphone mockup pour intégrer le véritable logo officiel Ceilow ([`public/logo/ceilow_web_sombre.svg`](file:///e:/Comptia/public/logo/ceilow_web_sombre.svg)).
+  - Éradiquer strictement tout effet de glassmorphisme ou de transparence résiduelle sur l'ensemble des pages publiques : **Tarifs**, **Accompagnement** et **Fonctionnalités**.
+- **Actions Réalisées** :
+  - **1. Page Fonctionnalités ([`src/app/fonctionnalites/page.tsx`](file:///e:/Comptia/src/app/fonctionnalites/page.tsx))** :
+    - Remplacement de l'entête du smartphone par le logo officiel Ceilow (`/logo/ceilow_web_sombre.svg`) et suppression définitive de toute mention « Ceilow Mobile » au profit d'un sous-titre sobre « Direction Générale ».
+    - Suppression du surlignage translucide jaune sous le titre H1 (`bg-primary/40`), remplacé par un soulignement net et typographique pur.
+    - Éradication de toutes les classes semi-transparentes de type verre dépoli (`bg-white/5`, `border-white/20`, `bg-primary/20`, `bg-success/20`) au profit de tokens sémantiques 100% solides (`bg-[#3D3830]`, `border-[#474138]`, `bg-success text-ink`, `bg-primary text-ink`, `bg-background-secondary`).
+  - **2. Page Accompagnement ([`src/app/accompagnement/page.tsx`](file:///e:/Comptia/src/app/accompagnement/page.tsx))** :
+    - Remplacement des conteneurs d'icônes `bg-white/5 border border-white/10` de la bannière sombre par le fond sombre solide `bg-[#3D3830]` et la bordure `border-[#474138]`.
+    - Remplacement du pill d'assistance `bg-white/10 text-primary border border-white/20` par le conteneur solide `bg-[#3D3830] text-primary border border-[#474138]`.
+  - **3. Page Tarifs ([`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx))** :
+    - Remplacement des bordures translucides `border-white/10` et des fonds `bg-ink/50` dans la bannière conseiller et la bannière finale par des bordures et fonds solides (`border-[#474138]`, `bg-[#3D3830]`, `bg-ink`).
+- **Vérifications Build & Rendu** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : validation en cours / réussie avec code 0.
+
+---
+
 ### 2026-10-23 — Implémentation Haute Fidélité de la Page Fonctionnalités ([`src/app/fonctionnalites/page.tsx`](file:///e:/Comptia/src/app/fonctionnalites/page.tsx)) : Design Fourni Adapté, Zéro Badge Flottant, 3 SVGs Animés Stratégiques & Copywriting Conversion
 
 - **Demande Utilisateur** :

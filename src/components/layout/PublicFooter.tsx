@@ -23,7 +23,7 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             >
               <Image
                 src="/logo/ceilow_web_jaune.svg"
-                alt="Ceilow - Comptabilité et Fiscalité SYSCOHADA Bénin"
+                alt="Ceilow - Facturation et Gestion d'Entreprise au Bénin"
                 width={150}
                 height={38}
                 className="h-9 w-auto"
@@ -31,11 +31,11 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             </Link>
 
             <p className="text-sm text-white/75 leading-relaxed max-w-sm font-normal">
-              L'infrastructure comptable et fiscale d'élite pour les entreprises et cabinets au Bénin. Conformité native SYSCOHADA Révisé et télédéclaration DGI e-MECeF en temps réel.
+              La solution de facturation et de gestion tout-en-un pour les entreprises au Bénin. Facturez aux normes DGI, suivez vos paiements et automatisez votre comptabilité en toute sérénité.
             </p>
 
-            {/* Badge officiel de certification DGI */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/90">
+            {/* Badge officiel de certification DGI (fond opaque sobre sans glassmorphisme) */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#3D3830] border border-white/10 text-xs font-medium text-white/90">
               <span className="w-2 h-2 rounded-full bg-success animate-pulse shrink-0" />
               <span>Certifié conforme DGI &amp; DGI-Bénin</span>
             </div>
@@ -55,69 +55,69 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             </div>
           </div>
 
-          {/* Colonne 2 : Plateforme & Moteur (2 colonnes) */}
+          {/* Colonne 2 : Navigation Principale & Fonctionnalités (2 colonnes) */}
           <div className="lg:col-span-2 flex flex-col items-start gap-4">
             <span className="text-xs uppercase tracking-wider font-bold text-white/90 border-b border-white/10 pb-2 w-full">
-              Plateforme &amp; Moteur
+              Navigation
             </span>
             <ul className="flex flex-col gap-3 text-sm text-white/75">
               <li>
-                <Link href="/#modules" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Grand Livre &amp; Balance SYSCOHADA
+                <Link href="/tarifs" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Tarifs
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Facturation Normalisée e-MECeF API
+                <Link href="/fonctionnalites" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Fonctionnalités
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Liasse Fiscale Automatisée DGI
+                <Link href="/accompagnement" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Accompagnement
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Rapprochement Bancaire IA
+                <Link href="/facturation" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Facturation DGI
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className="hover:text-primary transition-colors inline-block leading-snug">
-                  TVA &amp; Acomptes Provisionnels
+                <Link href="/comptabilite" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Comptabilité &amp; TVA
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Colonne 3 : Normes & Ressources (3 colonnes) */}
+          {/* Colonne 3 : Aide & Conformité (3 colonnes) */}
           <div className="lg:col-span-3 flex flex-col items-start gap-4">
             <span className="text-xs uppercase tracking-wider font-bold text-white/90 border-b border-white/10 pb-2 w-full">
-              Normes &amp; Ressources
+              Aide &amp; Conformité
             </span>
             <ul className="flex flex-col gap-3 text-sm text-white/75">
               <li>
-                <Link href="/#faq" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Code Général des Impôts Bénin (CGI)
+                <Link href="/demo" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Démonstration interactive
                 </Link>
               </li>
               <li>
-                <Link href="/#conformite" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Documentation API e-MECeF
+                <Link href="/confidentialite" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Sécurité &amp; Conformité APDP
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Espace Experts-Comptables (OECCA)
+                <Link href="/mentions-legales" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Mentions Légales &amp; RCCM
                 </Link>
               </li>
               <li>
-                <Link href="/#conformite" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Sécurité Bancaire &amp; Chiffrement
+                <Link href="/cgu" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Conditions Générales de Service
                 </Link>
               </li>
               <li>
-                <Link href="/#faq" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Notes de Version Fiscale
+                <Link href="/accompagnement" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Assistance locale Cotonou
                 </Link>
               </li>
             </ul>
@@ -130,8 +130,8 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             </span>
 
             <div className="flex flex-col gap-3 w-full text-xs text-white/80">
-              {/* Raison sociale & RCCM */}
-              <div className="p-3 rounded-lg bg-white/5 border border-white/10 flex flex-col gap-1">
+              {/* Raison sociale & RCCM (fond opaque solide sombre #3D3830) */}
+              <div className="p-3 rounded-lg bg-[#3D3830] border border-white/10 flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-primary shrink-0" />
                   <span className="text-sm font-bold text-white">Digiplex Agency</span>
@@ -180,13 +180,13 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
               </div>
             </div>
 
-            {/* Bouton CTA Audit / Démo */}
+            {/* Bouton CTA Démo (fond opaque sobre solide sans glassmorphisme) */}
             <div className="pt-2 w-full">
               <Link
                 href="/demo"
-                className="group inline-flex items-center justify-between w-full px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-white transition-all hover:border-primary/50"
+                className="group inline-flex items-center justify-between w-full px-4 py-2.5 rounded-lg bg-[#3D3830] hover:bg-[#474138] border border-white/15 text-xs font-semibold text-white transition-all hover:border-primary/50"
               >
-                <span>Programmer un audit fiduciaire</span>
+                <span>Réserver une démonstration</span>
                 <ArrowRight className="w-3.5 h-3.5 text-primary transition-transform group-hover:translate-x-1" />
               </Link>
             </div>

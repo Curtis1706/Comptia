@@ -30,23 +30,23 @@ export function PublicHeader({ className = "" }: PublicHeaderProps) {
           />
         </Link>
 
-        {/* Liens de navigation centraux (desktop) */}
+        {/* Liens de navigation centraux (desktop) : Tarifs, Fonctionnalités, Accompagnement */}
         <div className="hidden md:flex items-center gap-8">
           <Link
-            href="/#modules"
-            className="text-sm font-semibold text-white/90 hover:text-white transition-colors"
-          >
-            Fonctionnalités
-          </Link>
-          <Link
-            href="/#tarifs"
-            className="text-sm font-semibold text-white/90 hover:text-white transition-colors"
+            href="/tarifs"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors"
           >
             Tarifs
           </Link>
           <Link
-            href="/#accompagnement"
-            className="text-sm font-semibold text-white/90 hover:text-white transition-colors"
+            href="/fonctionnalites"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors"
+          >
+            Fonctionnalités
+          </Link>
+          <Link
+            href="/accompagnement"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors"
           >
             Accompagnement
           </Link>
@@ -84,23 +84,23 @@ export function PublicHeader({ className = "" }: PublicHeaderProps) {
       {mobileMenuOpen && (
         <div className="md:hidden bg-ink border-t border-white/10 px-6 py-5 flex flex-col gap-4 animate-fade-in">
           <Link
-            href="/#modules"
+            href="/tarifs"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-base font-semibold text-white/90 hover:text-white py-2 border-b border-white/10"
-          >
-            Fonctionnalités
-          </Link>
-          <Link
-            href="/#tarifs"
-            onClick={() => setMobileMenuOpen(false)}
-            className="text-base font-semibold text-white/90 hover:text-white py-2 border-b border-white/10"
+            className="text-base font-semibold text-white/90 hover:text-primary py-2 border-b border-white/10"
           >
             Tarifs
           </Link>
           <Link
-            href="/#accompagnement"
+            href="/fonctionnalites"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-base font-semibold text-white/90 hover:text-white py-2 border-b border-white/10"
+            className="text-base font-semibold text-white/90 hover:text-primary py-2 border-b border-white/10"
+          >
+            Fonctionnalités
+          </Link>
+          <Link
+            href="/accompagnement"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-base font-semibold text-white/90 hover:text-primary py-2 border-b border-white/10"
           >
             Accompagnement
           </Link>

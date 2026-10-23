@@ -2,9 +2,157 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
----
+### 2026-10-23 — Header Simplifié (Tarifs, Fonctionnalités, Accompagnement), Résolution de la Redirection vers Connexion & Pages Dédiées
 
-## Entrées du Journal
+- **Demande Utilisateur** :
+  - Dans le header, ne voir que 3 liens de navigation : **Tarifs**, **Fonctionnalités**, et **Accompagnement**.
+  - Résoudre le problème de redirection non désirée vers `/login` quand on tente d'accéder à ces pages publiques sans être connecté.
+  - S'assurer que les noms **Tarifs**, **Fonctionnalités**, **Accompagnement** ne changent pas non plus dans le footer.
+- **Actions Réalisées** :
+  - **1. Résolution de la Redirection d'Authentification ([`src/middleware.ts`](file:///e:/Comptia/src/middleware.ts))** :
+    - Diagnostic : Les routes `/tarifs`, `/fonctionnalites` et `/accompagnement` n'étaient pas déclarées dans le tableau `PUBLIC_PATHS` du middleware Next.js, ce qui forçait la redirection automatique vers `/login?callbackUrl=...` pour tout visiteur non connecté.
+    - Ajout formel de `/tarifs`, `/fonctionnalites` et `/accompagnement` dans `PUBLIC_PATHS`. L'accès public est désormais 100 % libre et fluide sans aucune demande d'authentification.
+  - **2. Simplification du Header ([`PublicHeader.tsx`](file:///e:/Comptia/src/components/layout/PublicHeader.tsx))** :
+    - En version desktop et dans le menu mobile déroulant, la navigation centrale affiche désormais strictement le trio de liens demandé : **Tarifs** (`/tarifs`), **Fonctionnalités** (`/fonctionnalites`), et **Accompagnement** (`/accompagnement`).
+  - **3. Harmonisation du Footer ([`PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx))** :
+    - Maintien des intitulés stricts **Tarifs**, **Fonctionnalités**, et **Accompagnement** dans la colonne de navigation.
+  - **4. Implémentation des Pages Publiques Dédiées** :
+    - Création de [`src/app/fonctionnalites/page.tsx`](file:///e:/Comptia/src/app/fonctionnalites/page.tsx) : Présentation riche et interactive des 6 piliers (Facturation DGI, Comptabilité SYSCOHADA, Déclarations TVA, Trésorerie MoMo & banques, Paie CNSS, Liasses fiscales & DSF) avec sélecteur d'onglets, ruban de preuves, bannière d'autorité et FAQ.
+    - Création de [`src/app/accompagnement/page.tsx`](file:///e:/Comptia/src/app/accompagnement/page.tsx) : Implémentation complète de l'architecture d'après la capture de référence Indy (hero split-screen, 4 piliers de réassurance, 3 cartes gestion société, bannière d'autorité sombre `bg-ink`, 3 cartes déclarations, preuve sociale & témoignages, appel au juste prix, showcase onglets par forme juridique, FAQ 2 colonnes, pré-footer lifestyle et formulaire de diagnostic direct).
+  - **5. Résolution de l'Erreur d'Hôte distant Next.js Image ([`next.config.ts`](file:///e:/Comptia/next.config.ts) & [`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx))** :
+    - Diagnostic : L'affichage des visuels distants (Google User Content `lh3.googleusercontent.com`) provoquait une erreur 500 sur `next/image` car le domaine n'était pas configuré dans `images.remotePatterns`.
+    - Configuration de `images.remotePatterns` dans `next.config.ts` autorisant les domaines de photos (`**.googleusercontent.com`, `lh3.googleusercontent.com`, `images.unsplash.com`, `avatars.githubusercontent.com` et jokers `**`).
+    - Ajout de la directive `unoptimized` sur les images distantes de [`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx) pour garantir un chargement direct sans crash même en cas d'indisponibilité du serveur d'optimisation.
+- **Vérifications Build & Rendu** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : compilation réussie avec code 0 (63 routes générées dont `○ /tarifs`, `○ /fonctionnalites`, `○ /accompagnement`).
+
+- **Demande Utilisateur** :
+  - Revoir les URLs du header et du footer pour qu'ils pointent vers les vraies pages dédiées au lieu des ancres `#id` (ex. tarifs pointe vers `/tarifs`, etc.).
+  - Réviser en profondeur le document markdown de la page accompagnement ([`ACCOMPAGNEMENT_SPEC.md`](file:///e:/Comptia/ACCOMPAGNEMENT_SPEC.md)) pour styliser le design et le copywriting d'après la capture fournie (landing page Indy pour SARL, SAS, ETS et indépendants).
+- **Actions Réalisées** :
+  - **1. Alignement des URLs du Header et du Footer** :
+    - [`PublicHeader.tsx`](file:///e:/Comptia/src/components/layout/PublicHeader.tsx) : Vérification des routes desktop et mobile (`/tarifs`, `/accompagnement`, `/facturation`, `/tva`, `/login`, `/demo`).
+    - [`PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx) : Remplacement de l'ensemble des ancres fictives (`/#modules`, `/#faq`, `/#conformite`) par des routes réelles et accessibles (`/comptabilite`, `/facturation`, `/tva`, `/tarifs`, `/accompagnement`, `/demo`, `/confidentialite`, `/mentions-legales`, `/cgu`).
+    - [`LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx) : Mise à jour du lien d'exploration vers `/comptabilite` au lieu de `/#modules`.
+  - **2. Refonte Complète de la Spécification Accompagnement ([`ACCOMPAGNEMENT_SPEC.md`](file:///e:/Comptia/ACCOMPAGNEMENT_SPEC.md))** :
+    - Architecture calquée fidèlement sur la capture visuelle fournie (structure Indy adaptée aux réalités béninoises) :
+      - *Hero Section Split Screen 2 Colonnes* : Titre H1 percutant (« La solution tout-en-un des SARL, SAS, ETS et Indépendants au Bénin »), 4 puces de bénéfices concrets (e-MECeF, MoMo & Banques, TVA sans calcul, bilans SYSCOHADA), double CTA (`Prendre rendez-vous` / `Découvrir les formules`) et photo valorisante d'une dirigeante en bureau.
+      - *Ruban de Réassurance Immédiate* : Note de satisfaction 4,9/5, certification DGI e-MECeF, conformité APDP, déploiement garanti 48h.
+      - *Grille 3 Cartes "Gérez facilement votre société"* : Comptabilité automatisée, visibilité directe sur les gains/marge nette, facturation mobile partout au Bénin.
+      - *Bannière d'Autorité Sombre Ink* : « Avec Ceilow, vous êtes entre de bonnes mains » avec 5 piliers humains et techniques (Réactivité < 15 min, Expertise locale, Technologie robuste, Sérénité fiscale, Proximité physique Cotonou).
+      - *Grille 3 Cartes "Vos déclarations en toute sérénité"* : Fini les calculs manuels de TVA, génération automatique des liasses fiscales SYSCOHADA, certification e-MECeF avec mode hors-ligne.
+      - *Preuve Sociale & Témoignages (Fond Sombre Ink)* : Badge 4,9/5 + 3 témoignages concrets de dirigeants (Ganhi commerce, Cadjehoun agence conseil, Port de Cotonou transit).
+      - *Appel à la Transparence Tarifaire* : Bloc épuré « Votre gestion et votre accompagnement, au juste prix » renvoyant vers `/tarifs`.
+      - *Showcase Interactif à Onglets* : Sélecteur par profil (SARL & SAS, ETS, Professions Libérales, Création d'Entreprise) couplé à une démonstration en direct du cockpit.
+      - *FAQ en 2 Colonnes Équilibrées* : 8 questions-réponses concrètes et directes sans jargon.
+      - *Bannière Pré-Footer Lifestyle* : Carte arrondie chaleureuse avec photo entrepreneur souriant et double CTA contact.
+  - **Conformité & Règles Ceilow** :
+    - 100 % tokens sémantiques purs (`primary`, `ink`, `background`, `background-secondary`, `border`, `text-muted`, `success`).
+    - Zéro code hexadécimal en dur dans les classes, zéro emoji (icônes Lucide), zéro glassmorphisme, chiffres tabulaires activés (`tabular-nums`).
+- **Vérification Build** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : compilation Next.js réussie avec code de retour 0 (61 routes statiques et dynamiques validées).
+
+- **Demande Utilisateur** :
+  - Conserver fidèlement le design HTML fourni pour la page Tarifs (layout, sélecteurs, calculatrice, comparateur, cartes de témoignages, bloc conseiller, etc.) tout en gardant nos `PublicHeader` et `PublicFooter`.
+  - Adapter rigoureusement les classes, box-shadows, couleurs et icônes aux règles Ceilow (suppression des classes Material-3, dégradés et ombres diffuses).
+  - Réviser le copywriting selon le skill `/copywriting` pour un ton empathique, calme et transparent sans impression de vente agressive.
+- **Actions Réalisées** :
+  - **1. Spécification Markdown Mise à Jour ([`TARIFS_ABONNEMENT_SPEC.md`](file:///e:/Comptia/TARIFS_ABONNEMENT_SPEC.md))** :
+    - Matrice de conversion exacte des styles Material vers les tokens Ceilow.
+    - Charte de copywriting non-vendeuse : autonomie, respect du client, transparence des prix en FCFA, essai sans carte bancaire, levée d'objections.
+  - **2. Implémentation Complète de la Route Next.js ([`src/app/tarifs/page.tsx`](file:///e:/Comptia/src/app/tarifs/page.tsx))** :
+    - Intégration de `PublicHeader` (sticky) et `PublicFooter` (sans glassmorphisme).
+    - Double système de filtre interactif : Profil juridique (`Tous`, `Indépendants`, `PME`, `Cabinets`) et Fréquence (`Mensuel` vs `Annuel - 2 mois offerts`).
+    - Grille des 3 tiers tarifaires (Plan Gratuit 0 FCFA, Plan Pro 12 500 / 15 000 FCFA contour `primary`, Plan Entreprise dès 45 000 FCFA).
+    - Bandeau de réassurance locale en 4 colonnes (MTN MoMo, Liberté totale, Facture DGI déductible, Support Cotonou).
+    - Calculatrice interactive de rentabilité avec sliders temps réel (`invoicesCount` & `hoursSpent`), estimation du temps gagné et du retour sur investissement.
+    - Grand tableau comparatif des fonctionnalités en 6 catégories sans défilement horizontal forcé.
+    - Bannière conseiller sombre `bg-ink text-white` avec équipe locale de Cotonou (Amina, Josué, Marc) et délai de réponse garanti (< 5 min).
+    - Carte de transition pour rassurer les entreprises ayant déjà un comptable (reprise d'historique 100% assurée).
+    - Section preuve sociale avec carte vedette d'Aurélie Tokpanou (Ganhi) et 3 avis d'entrepreneurs locaux.
+    - Carte pré-footer sérénité fiscale et FAQ accordéon 7 questions interactives.
+    - Bannière finale de sortie et footer.
+    - Remplacement de l'ensemble des Material Symbols par `lucide-react` et des couleurs par les tokens Ceilow (`bg-primary`, `bg-background`, `bg-background-secondary`, `border-border`, etc.).
+- **Vérification Build & Conformité** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : compilation réussie avec code 0 (génération de `○ /tarifs` en route statique optimisée).
+
+
+### 2026-10-23 — Rédaction des Spécifications & Copywriting Exhaustifs : Pages Tarifs & Accompagnement
+
+- **Demande Utilisateur** :
+  - Rédiger les documents Markdown complets de spécification, de design et de copywriting pour les pages **Tarifs & Abonnement** et **Accompagnement**, en suivant scrupuleusement les règles Ceilow et le skill `/copywriting`.
+- **Actions Réalisées** :
+  - **1. Page Tarifs & Abonnement ([`TARIFS_ABONNEMENT_SPEC.md`](file:///e:/Comptia/TARIFS_ABONNEMENT_SPEC.md))** :
+    - Architecture visuelle complète : Hero avec basculeur Mensuel / Annuel (2 mois offerts), Grille des 3 plans (Gratuit 0 FCFA, Pro 15 000 FCFA/mois recommandé, Entreprise & Cabinet dès 45 000 FCFA/mois), Rassurance moyens de paiement béninois (MTN MoMo, Moov, cartes locales), Calculatrice interactive d'économies de gestion, Tableau comparatif exhaustif à 6 modules, FAQ spécifique de 7 questions/réponses sans jargon, Bannière finale de conversion.
+    - Copywriting 100 % axé sur les bénéfices concrets, microcopy pour chaque bouton CTA (1-3 mots), levée systématique des objections, montants en chiffres tabulaires FCFA.
+  - **2. Page Accompagnement & Services Dédiés ([`ACCOMPAGNEMENT_SPEC.md`](file:///e:/Comptia/ACCOMPAGNEMENT_SPEC.md))** :
+    - Stratégie d'empathie et de rassurance face à la peur de la transition numérique et de l'e-MECeF au Bénin.
+    - 4 Piliers clés : Paramétrage fiscal, Reprise de données sans perte, Formation pratique des équipes sur le terrain (Cotonou et environs), Ligne directe avec un consultant local.
+    - 3 Formules packagées : Pack Démarrage Sérénité (75 000 FCFA), Pack Transition & Reprise Complète (190 000 FCFA), Accompagnement Grand Compte & Cabinet (Sur Devis).
+    - Méthode en 4 étapes claires, 2 cas clients réels béninois (Commerce à Ganhi, Cabinet OECCA à Cadjehoun), Formulaire de diagnostic gratuit (15 min) et FAQ dédiée.
+  - **Conformité & Règles Ceilow** :
+    - 100 % tokens sémantiques purs (`primary`, `ink`, `background`, `background-secondary`, `border`, `text-muted`, `success`).
+    - Zéro couleur hexadécimale en dur, zéro emoji (icônes Lucide avec accessibilité), zéro glassmorphisme, approche Mobile-First stricte.
+
+
+### 2026-10-23 — Refonte Copywriting Landing Page (Clarté & Bénéfices) & Éradication du Glassmorphisme Footer
+
+- **Demande Utilisateur** :
+  - Auditer et corriger en profondeur le texte de la page d'accueil (hors hero section) : élimination du jargon rébarbatif/comptable (« architecture SYSCOHADA », « liasses fiscales », « lettrage », etc.) au profit d'un copywriting axé sur les bénéfices concrets et utiles pour les entrepreneurs et dirigeants au Bénin.
+  - Revoir le nommage des liens du footer (trop techniques et abstraits).
+  - Éradiquer strictement tout effet de glassmorphisme dans le footer (fonds translucides superposés `bg-white/5`), conformément à l'article 5 des règles Ceilow.
+- **Actions Réalisées** :
+  - **1. Refonte Copywriting de la Landing Page ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - *Section 3 (Bénéfices métiers)* :
+      - Badge : « Architecture SYSCOHADA & DGI » $\rightarrow$ « Garantie Zéro Erreur ».
+      - Titre H2 : « L'ingénierie financière pensée pour le cadre réglementaire béninois » $\rightarrow$ « Gagnez 10 heures par semaine sur votre gestion au Bénin ».
+      - Sous-titre : Remplacement de l'étalage technique par la fin de la paperasse et des craintes de contrôle fiscal.
+      - Cartes :
+        - Carte 1 : « Facturez aux normes DGI en 10 secondes chrono » (accent sur le temps et la conformité e-MECeF avec QR code).
+        - Carte 2 : « Vos encaissements bancaires et MoMo réconciliés sans calcul » + badge « Payé & Classé Automatiquement » (suppression du terme anxiogène « lettré »).
+        - Carte 3 : « Votre déclaration de TVA prête avant le 10 du mois » (accent sur la fin du stress mensuel).
+    - *Section 4 (Workflow en 3 étapes concrètes)* :
+      - Badge « Cockpit en direct » $\rightarrow$ « En Pratique ».
+      - H2 : « Regardez comment votre journée devient plus simple. »
+      - Onglets d'action : 1. Facturation client | 2. Réception du paiement | 3. Impôts & Comptabilité.
+      - Puces d'étapes : Vulgarisées, concrètes, axées sur l'expérience client et l'automatisation sans saisie.
+    - *Section 7 (Bannière finale de conversion)* :
+      - H2 : « Passez moins de temps sur vos papiers, plus de temps sur vos clients. »
+      - Sous-titre : Ralliement des dirigeants et entrepreneurs béninois qui ont simplifié leur gestion.
+  - **2. Éradication du Glassmorphisme & Refonte Copywriting du Footer ([`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx))** :
+    - Suppression intégrale de tous les calques translucides `bg-white/5`, `hover:bg-white/10` et `border-white/15`.
+    - Remplacement par des fonds solides opaques issus de la palette officielle (`#3D3830`, fond secondaire sombre pur de la charte Ceilow).
+    - Refonte du texte de présentation : « La solution de facturation et de gestion tout-en-un pour les entreprises au Bénin... »
+    - Colonne 2 renommée « Fonctionnalités » avec des libellés limpides : *Comptabilité automatisée*, *Facturation certifiée DGI*, *Déclarations fiscales sans stress*, *Suivi MoMo & Banques en direct*, *Calcul automatique de la TVA*.
+    - Colonne 3 renommée « Aide & Conformité » : *Guide fiscal pour les entreprises*, *Connexion e-MECeF officielle*, *Accès pour votre comptable*, *Sécurité de vos données*, *Mises à jour réglementaires*.
+    - Bouton CTA clarifié : « Réserver une démonstration » (au lieu du pompeux « Programmer un audit fiduciaire »).
+- **Vérification Build & Conformité** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : compilation Next.js réussie avec code de retour 0.
+
+
+### 2026-10-23 — Création du Skill Universel de Copywriting & UX Writing (`copywriting`)
+
+- **Demande Utilisateur** :
+  - Créer un fichier de skill réutilisable dans n'importe quel projet, nommé `copywriting`, à partir des directives complètes de copywriting, UX writing, microcopy, persuasion et audit textuel.
+- **Actions Réalisées** :
+  - Création du fichier de skill [`e:\Comptia\.agents\skills\copywriting\SKILL.md`](file:///e:/Comptia/.agents/skills/copywriting/SKILL.md) avec frontmatter YAML standardisé (`name: copywriting`, description détaillée).
+  - Intégration de la variable d'arguments `$ARGUMENTS` pour le support interactif et via commandes slash.
+  - Structuration complète en 8 phases :
+    - Phase 1 : Compréhension du contexte & état émotionnel de l'utilisateur.
+    - Phase 2 : Principes cardinaux (Clair, Concis, Utile, Humain).
+    - Phase 3 : Règles par composant (CTA, erreurs, empty states, tooltips, onboarding, formulaires).
+    - Phase 4 : Gestion des erreurs empathique (règle des 3 temps).
+    - Phase 5 : Voix, ton et cohérence inter-écrans (typographie française rigoureuse).
+    - Phase 6 : Copywriting de conversion (frameworks AIDA et PAS).
+    - Phase 7 : 4 niveaux d'édition et relecture.
+    - Phase 8 : Tests d'utilisabilité et d'accessibilité.
+  - Formalisation des modes opératoires : CRÉATION, CORRECTION (avec tableau d'audit) et MIXTE.
+  - Définition du format de livraison standardisé (recommandation, alternatives A/B, justification).
+
 
 ### 2026-10-22 — Refonte Pleine Page & Réagencement Haut de Gamme du Footer Public
 

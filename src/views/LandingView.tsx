@@ -199,13 +199,13 @@ export default function LandingView() {
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-2xl mx-auto text-center mb-16">
                 <span className="text-xs font-bold text-ink uppercase tracking-widest bg-primary/20 px-3 py-1 rounded-full">
-                  Architecture SYSCOHADA &amp; DGI
+                  Garantie Zéro Erreur
                 </span>
                 <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink mt-3 tracking-tight">
-                  L&apos;ingénierie financière pensée pour le cadre réglementaire béninois
+                  Gagnez 10 heures par semaine sur votre gestion au Bénin
                 </h2>
                 <p className="text-text-muted mt-3 text-base leading-relaxed">
-                  Fini les doubles saisies et les risques de redressement. Vos opérations quotidiennes alimentent en continu votre grand livre et vos liasses fiscales.
+                  Fini la paperasse et la panique des contrôles fiscaux. Chaque vente et chaque dépense sont enregistrées et classées sans effort.
                 </p>
               </div>
 
@@ -217,10 +217,10 @@ export default function LandingView() {
                       <QrCode className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-xl font-bold text-ink mb-3 leading-snug">
-                      Vos factures certifiées DGI en 1 clic, zéro pénalité fiscale.
+                      Facturez aux normes DGI en 10 secondes chrono
                     </h3>
                     <p className="text-sm text-text-muted leading-relaxed">
-                      Connecté directement aux serveurs de la Direction Générale des Impôts (e-MECeF). Chaque facture émise reçoit immédiatement sa signature cryptographique, son NIM et son QR code normalisé conforme à la loi des finances.
+                      Émettez vos factures normalisées avec QR code en un clic. Vous êtes 100 % conforme à la loi des finances et à l&apos;abri de toute pénalité.
                     </p>
                   </div>
 
@@ -260,10 +260,10 @@ export default function LandingView() {
                       <ArrowUpDown className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-xl font-bold text-ink mb-3 leading-snug">
-                      Toutes vos banques et comptes Mobile Money au même endroit.
+                      Vos encaissements bancaires et MoMo réconciliés sans calcul
                     </h3>
                     <p className="text-sm text-text-muted leading-relaxed">
-                      Synchronisation fluide avec BOA Bénin, Ecobank, BIIC, NSIA, BGFI ainsi que MTN MoMo et Moov Money. L&apos;algorithme Ceilow réconcilie automatiquement les encaissements avec les factures correspondantes.
+                      Connectez vos comptes MTN MoMo, Moov Money et banques locales (BOA, Ecobank, BIIC...). Ceilow repère automatiquement qui vous a payé et pointe la bonne facture.
                     </p>
                   </div>
 
@@ -293,7 +293,7 @@ export default function LandingView() {
                     <div className="mt-2 text-center pt-1">
                       <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-success/20 border border-success/40 text-success-deep text-[11px] font-bold">
                         <Check className="w-3 h-3 stroke-[3]" />
-                        Lettré 100% Automatique
+                        Payé &amp; Classé Automatiquement
                       </span>
                     </div>
                   </div>
@@ -306,10 +306,10 @@ export default function LandingView() {
                       <PieChart className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-xl font-bold text-ink mb-3 leading-snug">
-                      La comptabilité et la TVA qui se font toutes seules.
+                      Votre déclaration de TVA prête avant le 10 du mois
                     </h3>
                     <p className="text-sm text-text-muted leading-relaxed">
-                      Chaque opération génère ses écritures au Plan Comptable Général OHADA Révisé. Votre déclaration de TVA est tenue à jour en temps réel avec le calcul exact de la TVA déductible et collectée.
+                      Plus d&apos;angoisse en fin de mois. Vos chiffres se calculent au fil de vos ventes : votre montant exact de TVA est prêt à être déposé aux impôts, sans calculatrice ni stress.
                     </p>
                   </div>
 
@@ -338,20 +338,20 @@ export default function LandingView() {
                     </div>
 
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-ink">Liasse &amp; TVA Prêtes</span>
-                      <span className="text-[11px] text-text-muted">Prêt pour téléversement DGI</span>
+                      <span className="text-xs font-bold text-ink">TVA &amp; Impôts Prêts</span>
+                      <span className="text-[11px] text-text-muted">Prêt pour dépôt DGI</span>
                       <span className="font-mono text-xs font-bold text-success-deep tabular-nums mt-0.5 flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-success-deep" /> Solde : Conforme
+                        <span className="w-2 h-2 rounded-full bg-success-deep" /> Calcul Vérifié
                       </span>
                     </div>
                   </div>
 
                   <div className="mt-4 pt-2">
                     <Link
-                      href="/#modules"
+                      href="/comptabilite"
                       className="cta-button text-xs font-bold text-ink hover:text-primary transition-colors flex items-center gap-1 min-h-[44px]"
                     >
-                      <span>Découvrir tous les modules comptables</span>
+                      <span>Voir tout ce que Ceilow automatise pour vous</span>
                       <ArrowRight className="w-4 h-4 icon-arrow" />
                     </Link>
                   </div>
@@ -365,13 +365,13 @@ export default function LandingView() {
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-2xl mx-auto text-center mb-10">
                 <span className="text-xs font-bold text-ink uppercase tracking-widest bg-primary/20 px-3 py-1 rounded-full">
-                  Cockpit en direct
+                  En Pratique
                 </span>
                 <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink tracking-tight mt-3">
-                  Voyez à quelle vitesse votre gestion se simplifie.
+                  Regardez comment votre journée devient plus simple.
                 </h2>
                 <p className="text-text-muted mt-3 text-base">
-                  Un parcours sans couture, de la vente à la clôture comptable. Observez l&apos;émission e-MECeF, le rapprochement bancaire et les écritures SYSCOHADA s&apos;exécuter en temps réel.
+                  De l&apos;envoi de la facture au pointage de l&apos;argent reçu sur votre compte : tout se fait sans aucune ressaisie manuelle.
                 </p>
               </div>
 
@@ -401,7 +401,7 @@ export default function LandingView() {
                       >
                         1
                       </span>
-                      <span className="hidden sm:inline">Création Facture</span>
+                      <span className="hidden sm:inline">1. Facturation client</span>
                     </div>
                     {/* Progress bar track pour l'autoplay */}
                     <div
@@ -428,7 +428,7 @@ export default function LandingView() {
                       >
                         2
                       </span>
-                      <span className="hidden sm:inline">Encaissement &amp; Synchro</span>
+                      <span className="hidden sm:inline">2. Réception du paiement</span>
                     </div>
                     <div
                       className="absolute bottom-0 left-0 h-1 bg-primary transition-all duration-100 ease-linear"
@@ -454,7 +454,7 @@ export default function LandingView() {
                       >
                         3
                       </span>
-                      <span className="hidden sm:inline">Écritures &amp; Déclarations</span>
+                      <span className="hidden sm:inline">3. Impôts &amp; Comptabilité</span>
                     </div>
                     <div
                       className="absolute bottom-0 left-0 h-1 bg-primary transition-all duration-100 ease-linear"
@@ -473,10 +473,10 @@ export default function LandingView() {
                           ÉTAPE 1 / 3
                         </span>
                         <h4 className="font-display text-xl font-bold text-ink">
-                          Édition assistée &amp; certification e-MECeF en temps réel
+                          Vous créez la facture, l&apos;État la valide aussitôt
                         </h4>
                         <p className="text-sm text-text-muted leading-relaxed">
-                          Sélectionnez votre client béninois avec son IFU. Le système applique automatiquement le taux de TVA (18% ou exonéré selon le CGI Bénin) et génère le numéro de facture séquentiel immuable.
+                          Entrez le nom ou l&apos;IFU de votre client. Ceilow applique le taux de TVA adéquat et intègre instantanément le visa officiel de la DGI avec son QR code conforme.
                         </p>
                         <ul className="space-y-2 text-xs text-ink font-medium">
                           <li className="flex items-center gap-2">
@@ -485,7 +485,7 @@ export default function LandingView() {
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                            <span>Signature électronique DGI horodatée</span>
+                            <span>Certification DGI e-MECeF avec QR code en direct</span>
                           </li>
                         </ul>
                       </div>
@@ -521,19 +521,19 @@ export default function LandingView() {
                           ÉTAPE 2 / 3
                         </span>
                         <h4 className="font-display text-xl font-bold text-ink">
-                          Détection automatique bancaire &amp; Mobile Money
+                          Le paiement tombe, la facture est soldée
                         </h4>
                         <p className="text-sm text-text-muted leading-relaxed">
-                          Dès que le client règle par virement bancaire ou MTN Mobile Money, la transaction est détectée et rapprochée de la facture d&apos;origine en quelques secondes.
+                          Dès que votre client paie via MTN MoMo, Moov Money ou virement bancaire, Ceilow marque la facture comme payée. Vous suivez vos encaissements en temps réel.
                         </p>
                         <ul className="space-y-2 text-xs text-ink font-medium">
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                            <span>Élimination des bordereaux manuels</span>
+                            <span>Zéro pointage manuel sur papier ou tableur</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                            <span>Alertes immédiates en cas d&apos;écart de règlement</span>
+                            <span>Notification immédiate dès réception de l&apos;argent</span>
                           </li>
                         </ul>
                       </div>
@@ -566,19 +566,19 @@ export default function LandingView() {
                           ÉTAPE 3 / 3
                         </span>
                         <h4 className="font-display text-xl font-bold text-ink">
-                          Écritures SYSCOHADA et liasse DGI prêtes
+                          Votre comptable a tout en main pour boucler
                         </h4>
                         <p className="text-sm text-text-muted leading-relaxed">
-                          L&apos;opération est automatiquement ventilée : Débit Compte 521 (Banque) ou 571 (Caisse), Crédit Compte 701 (Vente) et Crédit Compte 443 (TVA facturée). Votre balance générale reste équilibrée en permanence.
+                          Chaque vente et chaque dépense alimentent proprement votre dossier comptable. En fin de mois ou lors du bilan annuel, tous vos justificatifs sont ordonnés et conformes sans passer des nuits blanches.
                         </p>
                         <ul className="space-y-2 text-xs text-ink font-medium">
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                            <span>Export direct vers les logiciels d&apos;audit et commissaires aux comptes</span>
+                            <span>Dossier propre et prêt pour votre expert-comptable</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                            <span>Génération de l&apos;état annuel 301 et du tableau des flux</span>
+                            <span>Calcul exact de la TVA collectée et déductible</span>
                           </li>
                         </ul>
                       </div>
@@ -896,10 +896,10 @@ export default function LandingView() {
           <section className="relative w-full bg-ink text-white py-20 lg:py-24 overflow-hidden border-t border-border">
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
-                Prêt à moderniser votre gestion financière ?
+                Passez moins de temps sur vos papiers, plus de temps sur vos clients.
               </h2>
               <p className="text-base sm:text-lg text-border max-w-xl mx-auto mb-8 leading-relaxed">
-                Rejoignez les dirigeants béninois qui pilotent leur entreprise avec Ceilow.
+                Rejoignez les dirigeants et entrepreneurs béninois qui ont simplifié leur gestion avec Ceilow.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link

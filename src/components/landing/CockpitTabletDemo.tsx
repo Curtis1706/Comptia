@@ -618,7 +618,7 @@ export function CockpitTabletDemo() {
                   </div>
 
                   {/* Zone Quittance & QR Code */}
-                  <div className="qz absolute left-[370px] top-16 w-[210px] h-[262px] border border-dashed border-border rounded-lg box-border text-center relative overflow-hidden">
+                  <div className="qz absolute left-[370px] top-16 w-[210px] h-[262px] border border-dashed border-border rounded-lg box-border text-center overflow-hidden">
                     <div className="ph absolute inset-0 flex items-center justify-center text-xs text-text-muted">
                       QR fiscal DGI
                     </div>

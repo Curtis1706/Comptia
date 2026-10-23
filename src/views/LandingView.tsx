@@ -18,6 +18,7 @@ import {
   ArrowDown,
   Building2,
   BadgeCheck,
+  ChevronDown,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
@@ -61,11 +62,11 @@ export default function LandingView() {
       <main className="flex-grow">
         <div className="flex flex-col w-full">
           {/* ── SECTION 1 : HERO SOMBRE PLEINE PAGE (min-h-[calc(100vh-5rem)]) ── */}
-          <section className="relative w-full bg-ink text-white min-h-[calc(100vh-5rem)] flex flex-col justify-between pt-8 sm:pt-12 pb-16 sm:pb-24 overflow-hidden">
+          <section className="relative w-full bg-ink text-white min-h-[calc(100vh-5rem)] flex flex-col justify-between pt-12 sm:pt-16 pb-6 overflow-hidden">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center my-auto">
 
-              {/* H1 Mot pour Mot : Strictement 2 lignes sur tablette et desktop, agrandi et abaissé */}
-              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[60px] font-bold tracking-tight text-white max-w-7xl mx-auto leading-[1.2] text-center mt-4 sm:mt-8">
+              {/* H1 Mot pour Mot : Strictement 2 lignes sur tablette et desktop, agrandi et aéré */}
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[60px] font-bold tracking-tight text-white max-w-7xl mx-auto leading-[1.2] text-center">
                 <span className="block md:whitespace-nowrap">
                   Votre comptabilité, vos factures et votre TVA,
                 </span>
@@ -77,12 +78,12 @@ export default function LandingView() {
               </h1>
 
               {/* Paragraphe Sous-titre Mot pour Mot */}
-              <p className="text-base sm:text-lg text-border max-w-2xl mt-5 leading-relaxed">
+              <p className="text-base sm:text-lg text-border max-w-2xl mt-6 sm:mt-8 leading-relaxed">
                 Ceilow s&apos;occupe de vos factures, de votre comptabilité et de vos déclarations fiscales et sociales, pour que vous puissiez vous concentrer sur votre entreprise.
               </p>
 
               {/* CTAs Centrés : BOUTON PRINCIPAL JAUNE + BOUTON SECONDAIRE BLANC SOLIDE */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-7 w-full max-w-md sm:max-w-none">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 sm:mt-10 w-full max-w-md sm:max-w-none">
                 {/* CTA 1 : Primaire Jaune Ceilow */}
                 <Link
                   href="/register"
@@ -101,14 +102,34 @@ export default function LandingView() {
                   <span>Demander une démo</span>
                 </Link>
               </div>
+            </div>
 
-              {/* ── COCKPIT TABLETTE RÉALISTE AVEC DÉMO ANIMÉE 20S ── */}
-              <CockpitTabletDemo />
+            {/* ── ANIMATION DE SCROLL (INDICATEUR ÉLÉGANT BAS DE HERO) ── */}
+            <div className="relative z-10 flex flex-col items-center pb-2 select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  const nextEl = document.getElementById("reassurance");
+                  if (nextEl) {
+                    nextEl.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="group flex flex-col items-center gap-2 text-text-muted hover:text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl p-2"
+                aria-label="Défiler vers le contenu"
+              >
+                <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest uppercase opacity-70 group-hover:opacity-100 transition-opacity">
+                  Découvrir
+                </span>
+                <div className="w-5 h-9 rounded-full border-2 border-border/40 group-hover:border-primary transition-colors flex items-start justify-center p-1">
+                  <span className="w-1 h-2 rounded-full bg-primary animate-scroll-wheel" />
+                </div>
+                <ChevronDown className="w-4 h-4 text-border/60 group-hover:text-primary animate-scroll-bounce transition-colors -mt-1" />
+              </button>
             </div>
           </section>
 
           {/* ── SECTION 2 : BANDEAU DE RÉASSURANCE LOCALE (MARQUEE CONTINU) ────────── */}
-          <section className="w-full bg-background-secondary border-y border-border py-6 overflow-hidden select-none">
+          <section id="reassurance" className="w-full bg-background-secondary border-y border-border py-6 overflow-hidden select-none">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-4">
               <p className="text-text-muted font-semibold text-xs tracking-widest uppercase">
                 Des entreprises et cabinets d&apos;expertise comptable béninois pilotent leur gestion avec Ceilow
@@ -343,12 +364,20 @@ export default function LandingView() {
           <section className="w-full py-20 bg-background-secondary border-y border-border">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-2xl mx-auto text-center mb-10">
-                <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink tracking-tight">
+                <span className="text-xs font-bold text-ink uppercase tracking-widest bg-primary/20 px-3 py-1 rounded-full">
+                  Cockpit en direct
+                </span>
+                <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink tracking-tight mt-3">
                   Voyez à quelle vitesse votre gestion se simplifie.
                 </h2>
                 <p className="text-text-muted mt-3 text-base">
-                  Un parcours sans couture, de la vente à la clôture comptable.
+                  Un parcours sans couture, de la vente à la clôture comptable. Observez l&apos;émission e-MECeF, le rapprochement bancaire et les écritures SYSCOHADA s&apos;exécuter en temps réel.
                 </p>
+              </div>
+
+              {/* ── COCKPIT TABLETTE RÉALISTE AVEC DÉMO ANIMÉE 20S ── */}
+              <div className="w-full max-w-5xl mx-auto mb-14">
+                <CockpitTabletDemo />
               </div>
 
               {/* Onglets de workflow avec barres de progression individuelles */}
@@ -746,7 +775,7 @@ export default function LandingView() {
                   <div className="mt-8">
                     <Link
                       href="/register"
-                      className="cta-button w-full block text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
+                      className="cta-button w-full text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
                     >
                       Commencer gratuitement
                     </Link>
@@ -796,7 +825,7 @@ export default function LandingView() {
                   <div className="mt-8">
                     <Link
                       href="/register"
-                      className="cta-button w-full block text-center py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-ink font-bold text-sm shadow transition-all min-h-[44px] flex items-center justify-center"
+                      className="cta-button w-full text-center py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-ink font-bold text-sm shadow transition-all min-h-[44px] flex items-center justify-center"
                     >
                       Essai gratuit 14 jours
                     </Link>
@@ -840,7 +869,7 @@ export default function LandingView() {
                   <div className="mt-8">
                     <Link
                       href="/demo"
-                      className="cta-button w-full block text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
+                      className="cta-button w-full text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
                     >
                       Contacter notre équipe
                     </Link>

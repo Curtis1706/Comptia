@@ -6,6 +6,73 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 
 ## Entrées du Journal
 
+### 2026-10-22 — Refonte Pleine Page & Réagencement Haut de Gamme du Footer Public
+
+- **Demande Utilisateur** :
+  - Rendre le footer « full page » et soigner l'ordonnancement pour éliminer tout effet tassé ou désordonné.
+- **Problèmes identifiés sur la capture d'écran** :
+  - Conteneur de 1240px étriqué au milieu d'un grand écran, laissant d'immenses vides latéraux.
+  - Colonne 4 (Digiplex Agency) comprimée : numéros de téléphone coupés en deux avec des sauts de ligne inélégants (« +229 01 97 55 49 / 53 » et « +229 01 62 78 93 / 05 »).
+  - Barre inférieure décalée : copyright éclaté au milieu et liens légaux sur 2 lignes asymétriques.
+- **Actions Réalisées ([`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx))** :
+  - **1. Conteneur Pleine Largeur Aéré** : Passage à `w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 pt-20 pb-14` pour une respiration majestueuse sur tous les écrans.
+  - **2. Grille 12 Colonnes Optimisée** :
+    - `lg:col-span-4` pour Ceilow (logo, texte, badge certification DGI pulsant, support plateforme).
+    - `lg:col-span-2` pour Plateforme & Moteur.
+    - `lg:col-span-3` pour Normes & Ressources.
+    - `lg:col-span-3` pour Éditeur & Conception (Digiplex Agency).
+  - **3. Bloc Digiplex Agency & Téléphones Impeccables** :
+    - Encadré subtil `bg-white/5 border border-white/10` pour la raison sociale et le RCCM.
+    - Chaque numéro de téléphone sur sa propre ligne propre et cliquable (`+229 01 97 55 49 53` et `+229 01 62 78 93 05`), garantissant zéro césure et une lisibilité parfaite.
+    - Bouton d'audit fiduciaire aéré avec survol dynamique.
+  - **4. Barre Inférieure Rééquilibrée** :
+    - Copyright en une seule phrase fluide et ordonnée : « © 2026 Ceilow SAS. • Développé & opéré par Digiplex Agency. • Tous droits réservés. • Cotonou, République du Bénin. »
+    - Liens légaux horizontaux avec `whitespace-nowrap` pour empêcher toute coupure intempestive.
+- **Vérification Build & Typage** :
+  - Validation par `pnpm build`.
+
+### 2026-10-22 — Intégration de l'Animation de Scroll au Bas de la Hero Section (100vh)
+
+- **Demande Utilisateur** :
+  - Ajouter l'animation de scroll au bas de la hero section pleine page.
+- **Actions Réalisées** :
+  - **1. Styles Globaux ([`src/app/globals.css`](file:///e:/Comptia/src/app/globals.css))** :
+    - Définition des animations `@keyframes scrollWheel` (déplacement et fondu fluide de la roulette de souris) et `@keyframes scrollBounce` (rebond vertical subtil du groupe).
+  - **2. Vue Page d'Accueil ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Intégration au bas du premier écran 100vh d'un indicateur de scroll élégant et interactif :
+      - Libellé « Découvrir » discret en typographie soignée.
+      - Silhouette de souris épurée avec roulette animée en jaune Ceilow (`bg-primary`).
+      - Icône chevron descendante animée (`ChevronDown`).
+      - Clic avec défilement fluide automatique (`scrollIntoView({ behavior: 'smooth' })`) vers la section suivante `#reassurance`.
+- **Vérification Build & Typage** :
+  - Validation par `pnpm build` (code de retour `0`).
+
+### 2026-10-22 — Repositionnement de la Démo Cockpit Tablette dans la Section Démonstration Produit
+
+- **Demande Utilisateur** :
+  - Retirer l'animation de la hero section pour lui trouver un emplacement plus optimal où elle a un véritable impact produit.
+  - Choix validé : positionnement au cœur de la section Démonstration Produit (« Voyez à quelle vitesse votre gestion se simplifie »).
+- **Actions Réalisées** :
+  - **1. Allègement et Équilibrage de la Hero Section ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Retrait de `<CockpitTabletDemo />` du Hero : le premier écran (100vh) est désormais ultra-aéré, centré avec force et clarté sur la proposition de valeur (H1 2 lignes, sous-titre, CTAs « Souscrire » et « Demander une démo »).
+  - **2. Intégration en Pièce Maîtresse de la Section Démonstration ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Insertion de `<CockpitTabletDemo />` sur fond secondaire clair (`bg-background-secondary`), sous un badge « Cockpit en direct ».
+    - L'animation 20s (facture e-MECeF, rapprochement bancaire/MoMo, écritures SYSCOHADA) s'articule parfaitement au-dessus des 3 étapes détaillées du workflow, lui conférant un rôle de démonstrateur réel et percutant.
+- **Vérification Build & Typage** :
+  - Validation par `pnpm build` (code de retour `0`).
+
+### 2026-10-22 — Résolution des Avertissements CSS / Tailwind (IDE Diagnostics)
+
+- **Demande Utilisateur** :
+  - Résoudre les avertissements remontés par l'analyseur IDE (@[current_problems]) sur `CockpitTabletDemo.tsx` et `LandingView.tsx`.
+- **Actions Réalisées** :
+  - **1. CockpitTabletDemo ([`src/components/landing/CockpitTabletDemo.tsx`](file:///e:/Comptia/src/components/landing/CockpitTabletDemo.tsx))** :
+    - Suppression de la classe `relative` redondante sur l'élément `.qz` qui possédait déjà `absolute left-[370px] top-16` (évitant le conflit de positionnement CSS).
+  - **2. LandingView ([`src/views/LandingView.tsx`](file:///e:/Comptia/src/views/LandingView.tsx))** :
+    - Retrait de la classe `block` superflue sur les liens des 3 cartes tarifaires (Plan Starter, Plan Pro, Plan Entreprise), en conservant `flex items-center justify-center`.
+- **Vérification Build & Typage** :
+  - Validation par `pnpm build` (code de retour `0`).
+
 ### 2026-10-21 — Intégration du Logo Officiel Ceilow dans la Barre du Cockpit Démo
 
 - **Demande Utilisateur** :

@@ -9,7 +9,7 @@ interface PublicFooterProps {
 
 export function PublicFooter({ className = "" }: PublicFooterProps) {
   return (
-    <footer className={`w-full bg-ink text-white pt-20 pb-14 border-t border-white/10 ${className}`}>
+    <footer className={`w-full bg-ink text-white pt-20 pb-14 border-t border-white/10 ${className}`} suppressHydrationWarning>
       <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-20">
         {/* Grille principale 12 colonnes hautement aérée */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 pb-16 border-b border-white/10">
@@ -27,6 +27,7 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
                 width={150}
                 height={38}
                 className="h-9 w-auto"
+                style={{ width: "auto" }}
               />
             </Link>
 
@@ -204,7 +205,7 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
         </div>
 
         {/* Barre Inférieure Légale & Copyright (Full Width Propre) */}
-        <div className="pt-8 flex flex-col lg:flex-row items-center justify-between gap-5 text-xs text-white/60">
+        <div className="pt-8 flex flex-col lg:flex-row items-center justify-between gap-5 text-xs text-white/60" suppressHydrationWarning>
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-2.5 gap-y-1 text-center lg:text-left">
             <span>© 2026 Ceilow SAS.</span>
             <span className="text-white/30">•</span>

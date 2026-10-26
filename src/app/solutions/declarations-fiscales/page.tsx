@@ -121,16 +121,16 @@ export default function DeclarationsFiscalesPage() {
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Fiscalité des entreprises au Bénin
+                  Fiscalité d&apos;Entreprise &amp; Conformité DGI Bénin
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
-                  Préparez votre déclaration de TVA avant le 10 du mois sans stress
+                  Télédéclaration fiscale DGI au Bénin : TVA, TPS, AIB et DSF sans stress
                 </h1>
                 <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini les nuits blanches du 9 au soir pour rassembler les factures)
+                  (Fini la panique du 9 au soir pour rassembler et télédéclarer vos factures)
                 </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Ceilow calcule automatiquement votre TVA collectée et votre TVA déductible à chaque facture émise ou enregistrée. Vous connaissez votre solde exact plusieurs jours avant l&apos;échéance légale de la DGI.
+                  Automatisez chaque télédéclaration fiscale sur le portail e-Services de la DGI au Bénin. Ceilow calcule en temps réel votre TVA collectée et déductible, vos retenues AIB et votre TPS pour télédéclarer et payer sans risque de majoration pour retard.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -138,14 +138,14 @@ export default function DeclarationsFiscalesPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Démarrer l&apos;essai gratuit</span>
+                    <span>Automatiser mes déclarations</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
                     href="/demo"
                     className="bg-background-secondary text-ink font-bold px-7 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Voir la simulation TVA
+                    Voir la simulation
                   </Link>
                 </div>
 
@@ -470,6 +470,76 @@ export default function DeclarationsFiscalesPage() {
                   Votre comptable accède à tous les justificatifs et aux calculs détaillés en temps réel. Il vérifie les chiffres en toute sérénité avant le dépôt sur le portail de la DGI.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        <section className="py-12 bg-background border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
+                Écosystème Fiscal & Comptable
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+                Toutes les pièces de vos déclarations réunies automatiquement
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/facturation-dgi"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Facturation Normalisée DGI</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Chaque facture émise avec code QR e-MECeF alimente immédiatement la base de calcul de votre TVA collectée du mois.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la facturation certifiée
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/gestion-depenses"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Gestion des Dépenses OCR</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Scannez les factures d&apos;achat de vos fournisseurs béninois pour récupérer 100% de votre TVA déductible sans omission.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir l&apos;OCR des dépenses
+                </span>
+              </Link>
+
+              <Link
+                href="/ressources/calendrier-fiscal-benin"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Calendrier Fiscal Bénin 2026</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Vérifiez toutes vos dates limites : TVA le 10, acomptes d&apos;impôt sur les bénéfices le 10 mars et dépôt DSF le 30 avril.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Consulter les échéances DGI
+                </span>
+              </Link>
             </div>
           </div>
         </section>

@@ -104,13 +104,13 @@ export default function PmeEtIndependantsPage() {
                   Commerçants, Artisans &amp; PME du Bénin
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-6">
-                  Gérez votre entreprise sans jargon comptable et sans machine compliquée.
+                  Le logiciel de gestion pour PME et indépendants au Bénin qui simplifie votre quotidien
                 </h1>
                 <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
                   (Vous avez créé votre activité pour servir vos clients, pas pour vous battre avec des déclarations d&apos;impôts)
                 </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-8">
-                  Émettez des factures normalisées DGI depuis votre téléphone ou ordinateur, suivez vos encaissements MoMo et cartes bancaires, et confiez des comptes impeccables à votre expert-comptable en toute sérénité.
+                  Adoptez un <strong>logiciel de gestion PME au Bénin</strong> pensé pour votre réalité de terrain : facturez en direct avec QR code e-MECeF sans acheter de machine physique, suivez vos encaissements MTN et Moov Money en temps réel, et transmettez des comptes impeccables à votre comptable sans aucun jargon.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -118,7 +118,7 @@ export default function PmeEtIndependantsPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-6 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Démarrer l&apos;essai gratuit</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
@@ -132,7 +132,7 @@ export default function PmeEtIndependantsPage() {
                 <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-text-muted">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Démarrage en 10 minutes</span>
+                    <span>Démarrage en 10 minutes chrono</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
@@ -140,7 +140,7 @@ export default function PmeEtIndependantsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Support WhatsApp basé à Cotonou</span>
+                    <span>Support direct basé à Cotonou</span>
                   </div>
                 </div>
               </div>
@@ -425,6 +425,76 @@ export default function PmeEtIndependantsPage() {
           </div>
         </section>
 
+        {/* MAILLAGE INTERNE CONTEXTUEL */}
+        <section className="py-16 md:py-20 bg-background border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-12">
+              <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
+                Outils complémentaires
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+                Tout ce dont votre entreprise a besoin au même endroit
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/facturation-dgi"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <Receipt className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                  Facturation normalisée e-MECeF
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Émettez des factures conformes DGI avec QR code officiel directement depuis votre téléphone ou PC.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Découvrir la facturation <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/tresorerie-momo"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <Smartphone className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                  Suivi Mobile Money &amp; Banques
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Rapprochez automatiquement vos encaissements MTN, Moov et comptes bancaires sans pointage manuel.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Découvrir le rapprochement <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+
+              <Link
+                href="/tarifs"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <PiggyBank className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                  Tarifs transparents
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Des forfaits clairs et accessibles pour indépendants et PME, sans frais cachés ni engagement.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Consulter les tarifs <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* BANNIÈRE D'APPEL À L'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -439,7 +509,7 @@ export default function PmeEtIndependantsPage() {
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Créer mon compte</span>
+                <span>Commencer gratuitement</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link

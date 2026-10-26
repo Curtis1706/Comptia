@@ -94,7 +94,162 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - `npx tsc --noEmit` : 0 erreur de typage.
   - `pnpm build` : validation réussie avec code 0 (63 routes compilées).
 
-### 2026-10-26 — Harmonisation Visuelle Totale : Photos Réelles Locales, Animations SVG Lottie-Like & Copywriting de Conversion (/copywriting)
+### 2026-10-26 : Conception et Deploiement du Skill Complet « seo-partner »
+
+- **Demande Utilisateur** :
+  - Transformer le prompt cadre « SEO Partner » (strategie SEO, SEO local, SEO technique, 9 livrables) en un skill operationnel complet et perenne sous `.agents/skills/seo-partner/`.
+  - Prendre en compte toutes les mises a jour recentes de Google Search Console, Google Business Profile, Core Web Vitals (INP), politiques anti-spam (Helpful Content, scaled content abuse), simplifications schema.org et moteurs generatifs (AI Overviews, ChatGPT Search, Perplexity).
+- **Architecture du Skill Deployee** :
+  - **1. Point d'Entree Principal ([`SKILL.md`](file:///e:/Comptia/.agents/skills/seo-partner/SKILL.md))** :
+    - Frontmatter YAML complet avec arguments utilisateur `$ARGUMENTS`.
+    - Etape 0 de veille obligatoire avec regle de qualification des faits (Confirme officiel vs Rapporte, a verifier).
+    - Etape 1 de cadrage avec tableau de 10 questions critiques (recherche prealable dans le depot, utilisation de `ask_question`).
+    - Etape 2 de routage par mode de travail vers les 11 guides de reference.
+    - Etape 3 du framework d'execution en 9 etapes dans l'ordre de priorite technique puis contenu puis autorite.
+    - Systeme de notation ICE ((Impact + Confiance + Facilite) / 3) et regles d'arbitrage.
+    - Regles non negociables et checkliste de validation prealable a la cloture de toute tache SEO.
+  - **2. Guides de Reference Detailles ([`references/`](file:///e:/Comptia/.agents/skills/seo-partner/references/))** :
+    - [`veille-mises-a-jour.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/veille-mises-a-jour.md) : Registre officiel des evolutions 2024-2026, seuils Core Web Vitals (LCP <= 2,5s, INP <= 200ms, CLS <= 0,1), restriction des donnees structurees FAQ/HowTo, arret des Q&A et chat GBP au profit d'Ask Maps, politiques anti-spam.
+    - [`audit-technique.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/audit-technique.md) : Grille d'analyse exhaustive (exploration, indexation, rendu JS, CWV, HTTPS, URL, maillage), classification par gravite (Bloquant, Majeur, Mineur), cartographie des rapports GSC et gabarit de livrable.
+    - [`strategie-mots-cles.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/strategie-mots-cles.md) : 4 intentions de recherche, approche « volume zero » pour les marches de niche B2B en Afrique de l'Ouest (Bénin, UEMOA, SYSCOHADA), modificateurs geographiques et gabarit de keyword mapping anti-cannibalisation.
+    - [`on-page-et-contenu.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/on-page-et-contenu.md) : Regles de balisage Title et Meta description, hierarchie Hn, signaux E-E-A-T pour domaines financiers (YMYL), maillage interne contextuel, optimisation d'images et gabarit complet de brief de contenu.
+    - [`schema-donnees-structurees.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/schema-donnees-structurees.md) : Modeles JSON-LD conformes et securises (`Organization`, `SoftwareApplication`, `LocalBusiness`, `BreadcrumbList`, `BlogPosting`, `FAQPage`), fidelite au contenu visible.
+    - [`seo-local.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/seo-local.md) : Optimisation Google Business Profile, gestion des adresses au Benin (Plus Codes Google), coherence NAP, collecte d'avis par WhatsApp, reponse a 100% des avis sous 48h et gabarit de plan local.
+    - [`geo-geographique-et-generatif.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/geo-geographique-et-generatif.md) : Ciblage sous-repertoires vs ccTLD en zone UEMOA, balisage hreflang reciproque, optimisation pour moteurs generatifs (AEO/GEO : AI Overviews, ChatGPT Search, Perplexity), gestion des robots IA dans `robots.txt` et role de Bing Webmaster Tools / IndexNow.
+    - [`netlinking-autorite.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/netlinking-autorite.md) : Acquisition de liens par actifs attractifs (linkable assets tels que le calendrier fiscal), tribunes de presse economique, partenariats consulaires (CCI, OECCA), profil d'ancres naturel et politique de desaveu restreinte.
+    - [`mesure-dashboard-roi.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/mesure-dashboard-roi.md) : Configuration GSC par DNS, GA4, segmentation marque vs hors marque, structure Looker Studio, formules mathematiques de ROI SEO et de valeur equivalente Google Ads.
+    - [`roadmap-12-mois.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/roadmap-12-mois.md) : Planification strategique en 4 trimestres (T1 Fondations & Quick Wins, T2 Contenu & Cocon, T3 Autorite & Local, T4 Expansion GEO & IA) et backlog ICE.
+    - [`implementation-nextjs.md`](file:///e:/Comptia/.agents/skills/seo-partner/references/implementation-nextjs.md) : Patron de metadonnees pour Next.js App Router, contournement pour pages `"use client"` via `layout.tsx` serveur dedie, `metadataBase`, generation de `robots.ts` et `sitemap.ts`, injection JSON-LD sans XSS.
+  - **3. Outillage Automatise ([`scripts/audit-metadata.mjs`](file:///e:/Comptia/.agents/skills/seo-partner/scripts/audit-metadata.mjs))** :
+    - Script Node.js ESM autonome sans dependance externe analysant l'arborescence des routes, les composants clients, les metadonnees exportees, JSON-LD, sitemap et robots.txt.
+- **Mise en Oeuvre Immediate des Fondations Techniques SEO** :
+  - **1. Plan de Site et Robots Dynamiques** :
+    - Creation de [`src/app/sitemap.ts`](file:///e:/Comptia/src/app/sitemap.ts) listant les 19 routes publiques reelles avec priorites et frequences adaptees.
+    - Creation de [`src/app/robots.ts`](file:///e:/Comptia/src/app/robots.ts) excluant les espaces prives (`/dashboard/`, `/comptabilite/`, `/facturation/`, `/paie/`, `/tva/`, `/reporting/`, `/documents/`, `/parametres/`, `/login`, `/register`, `/api/`) et autorisant explicitement les robots IA (`OAI-SearchBot`, `PerplexityBot`). Suppression du fichier statique redondant `public/robots.txt` pour eviter tout conflit de priorite dans Next.js.
+  - **2. Configuration Racine Next.js ([`src/app/layout.tsx`](file:///e:/Comptia/src/app/layout.tsx))** :
+    - Ajout de `metadataBase: new URL('https://ceilow.com')`.
+    - Gabarit de titre dynamique `template: '%s | Ceilow'`.
+    - Balises canoniques et directives `robots` de base.
+  - **3. Deploiement de Layouts Serveurs avec Metadonnees Dediees sur 100% des Routes** :
+    - Solutions : `comptabilite-syscohada`, `facturation-dgi`, `tresorerie-momo`, `paie-cnss`, `declarations-fiscales`, `gestion-depenses`.
+    - Cibles : `pour-qui/pme-et-independants`, `pour-qui/cabinets-comptables`.
+    - Pages cles : `fonctionnalites`, `tarifs`, `accompagnement`, `contact`, `demo`.
+    - Ressources et conformite : `ressources/calendrier-fiscal-benin`, `securite-et-apdp`, `cgu`, `confidentialite`, `mentions-legales`.
+    - Espaces prives et authentification : directive `robots: { index: false, follow: false }` sur `login`, `register`, `verify-email`, `access-denied`, `dashboard`, `comptabilite`, `facturation`, `paie`, `tva`, `documents`, `reporting`, `parametres`.
+  - **4. Resultats de l'Audit Automatique ([`scripts/audit-metadata.mjs`](file:///e:/Comptia/.agents/skills/seo-partner/scripts/audit-metadata.mjs))** :
+    - 33 routes sur 33 conformes (100%).
+    - Zero erreur bloquante.
+    - Zero route orpheline de metadonnees.
+  - **5. Integration Securisee des Donnees Structurees Schema.org (JSON-LD)** :
+    - Creation du composant utilitaire securise [`src/components/seo/JsonLd.tsx`](file:///e:/Comptia/src/components/seo/JsonLd.tsx) avec neutralisation des failles XSS.
+    - `Organization` et `WebApplication` sur la page d'accueil ([`src/app/page.tsx`](file:///e:/Comptia/src/app/page.tsx)) : entite Ceilow, contact Cotonou, fonctionnalites cles et pricing en XOF.
+    - `ProfessionalService` et `BreadcrumbList` sur la page contact ([`src/app/contact/layout.tsx`](file:///e:/Comptia/src/app/contact/layout.tsx)) : coordonnees geographiques Cotonou et horaires d'ouverture.
+    - `Article` et `BreadcrumbList` sur le calendrier fiscal ([`src/app/ressources/calendrier-fiscal-benin/layout.tsx`](file:///e:/Comptia/src/app/ressources/calendrier-fiscal-benin/layout.tsx)) : auteur officiel, dates de publication et mise a jour.
+    - `BreadcrumbList` et `Service` sur les 6 pages solutions (`facturation-dgi`, `comptabilite-syscohada`, `tresorerie-momo`, `paie-cnss`, `declarations-fiscales`, `gestion-depenses`).
+    - `BreadcrumbList` sur les pages cibles (`pme-et-independants`, `cabinets-comptables`), `tarifs`, `fonctionnalites`, `accompagnement`, `demo` et `securite-et-apdp`.
+    - Mise a jour de [`scripts/audit-metadata.mjs`](file:///e:/Comptia/.agents/skills/seo-partner/scripts/audit-metadata.mjs) pour detecter automatiquement les donnees structurees dans les layouts de segments.
+  - **6. Elaboration du Livrable Strategique de Keyword Mapping ([`docs/seo/2026-10-26-keyword-mapping.md`](file:///e:/Comptia/docs/seo/2026-10-26-keyword-mapping.md))** :
+    - Cartographie complete des 19 routes publiques avec 1 requete principale unique par URL pour empecher toute cannibalisation.
+    - Identification des requetes a forte intention commerciale et reglementaire au Benin (facturation emecef, compta syscohada, paie cnss, teledeclarations dgi).
+    - Backlog de 5 futures pages piliers informationnelles (guides pratiques TVA, machine e-MECeF, calcul TPS, plan comptable PDF et bareme CNSS).
+    - Plan d'action priorise par score ICE pour optimiser la concordance H1 et le maillage interne.
+- **Verifications Build & Compilation** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - `pnpm build` : validation reussie avec code 0 (76 routes compilees avec succes, generation des routes statiques `/sitemap.xml` et `/robots.txt`).
+
+---
+
+### 2026-10-26 : Alignement SEO & Copywriting de Conversion sur les 8 Pages Solutions et Cibles
+
+- **Demande Utilisateur** :
+  - Executer la recommandation prioritaire n°1 issue du Keyword Mapping : « Aligner les balises H1, accroches et maillage interne des pages existantes sur leur mot-cle cible (Quick Win immediat) ».
+  - Utiliser obligatoirement le skill `/copywriting` pour que chaque texte soit axé conversion, utilite immediate pour le visiteur, reduction des points de friction et sans jargon intimidant.
+- **Principes d'Execution Respectes** :
+  - Intégration du mot-clé cible dans les balises H1 et dans les 100 premiers mots de manière naturelle et fluide.
+  - Accroche cursive empathique (`font-serif italic`) qui aborde le soulagement ou le problème réel de l'utilisateur.
+  - Boutons d'appel à l'action orientés verbe d'action de 1 à 3 mots (`Tester gratuitement`, `Voir la démonstration`, `Essayer la paie`, `Calculer mes déclarations`, `Numériser un reçu`, `Créer un espace cabinet`, `Commencer gratuitement`).
+  - Bloc de maillage interne contextuel sur chaque page reliant de façon pertinente vers les solutions complémentaires, les tarifs ou la prise de contact.
+  - Zéro emoji, zéro tiret cadratin (`—`), zéro couleur hors charte, respect strict des tokens sémantiques Ceilow (`globals.css`).
+- **Pages Aligneés et Optimisees** :
+  1. [`src/app/solutions/facturation-dgi/page.tsx`](file:///e:/Comptia/src/app/solutions/facturation-dgi/page.tsx) :
+     - Mot-clé cible : `facturation normalisee emecef benin`
+     - H1 : « Facturation normalisée e-MECeF au Bénin : vos factures certifiées DGI en 3 clics »
+     - Accroche : *(Fini les blocages administratifs et la peur des pénalités lors des contrôles fiscaux)*
+     - Intro : Mise en avant de l'absence de machine physique, QR code fiscal officiel, transmission client par WhatsApp ou e-mail.
+     - Maillage interne : liens vers `comptabilite-syscohada`, `tresorerie-momo` et `declarations-fiscales`.
+  2. [`src/app/solutions/comptabilite-syscohada/page.tsx`](file:///e:/Comptia/src/app/solutions/comptabilite-syscohada/page.tsx) :
+     - Mot-clé cible : `logiciel comptable syscohada`
+     - H1 : « Logiciel comptable SYSCOHADA au Bénin : tenez vos comptes en toute sérénité »
+     - Accroche : *(Gagnez des journées entières de saisie et confiez des comptes impeccables à votre expert-comptable)*
+     - Intro : Écritures automatisées dès la facturation, conformité UEMOA, préparation fluide de la liasse DSF du 30 avril.
+     - Maillage interne : liens vers `facturation-dgi`, `declarations-fiscales` et `pour-qui/cabinets-comptables`.
+  3. [`src/app/solutions/tresorerie-momo/page.tsx`](file:///e:/Comptia/src/app/solutions/tresorerie-momo/page.tsx) :
+     - Mot-clé cible : `rapprochement bancaire mobile money benin`
+     - H1 : « Rapprochement bancaire et Mobile Money au Bénin : votre trésorerie claire à tout instant »
+     - Accroche : *(Fini les relevés SMS éparpillés et les écarts de caisse introuvables)*
+     - Intro : Suivi centralisé MTN MoMo, Moov Money et comptes bancaires béninois avec lettrage automatique sans pointage manuel fastidieux.
+     - Maillage interne : liens vers `facturation-dgi`, `comptabilite-syscohada` et `gestion-depenses`.
+  4. [`src/app/solutions/paie-cnss/page.tsx`](file:///e:/Comptia/src/app/solutions/paie-cnss/page.tsx) :
+     - Mot-clé cible : `gestion paie cnss benin`
+     - H1 : « Gestion de la paie et déclarations CNSS au Bénin : bulletins conformes en quelques clics »
+     - Accroche : *(Ne passez plus vos fins de mois à recalculer les tranches d'IPTS et les cotisations sociales)*
+     - Intro : Calcul automatique des cotisations CNSS (3.6% ouvrière, 15.4% patronale), barème IPTS progressif DGI, VPS (4%) et télédéclaration e-Cotisations trimestrielle.
+     - Maillage interne : liens vers `comptabilite-syscohada`, `declarations-fiscales` et `ressources/calendrier-fiscal-benin`.
+  5. [`src/app/solutions/declarations-fiscales/page.tsx`](file:///e:/Comptia/src/app/solutions/declarations-fiscales/page.tsx) :
+     - Mot-clé cible : `teledeclaration fiscale dgi benin`
+     - H1 : « Télédéclaration fiscale DGI au Bénin : préparez et payez vos impôts sans stress »
+     - Accroche : *(Dites adieu aux pénalités de retard du 10 du mois et aux calculs de TVA anxiogènes)*
+     - Intro : Centralisation en temps réel de la TVA nette due, des précomptes AIB et des acomptes d'impôt sur les sociétés avec alertes programmées.
+     - Maillage interne : liens vers `facturation-dgi`, `gestion-depenses` et `ressources/calendrier-fiscal-benin`.
+  6. [`src/app/solutions/gestion-depenses/page.tsx`](file:///e:/Comptia/src/app/solutions/gestion-depenses/page.tsx) :
+     - Mot-clé cible : `gestion notes de frais ocr benin`
+     - H1 : « Gestion des notes de frais avec scan OCR au Bénin : numérisez et déduisez chaque reçu »
+     - Accroche : *(Fini les tickets de caisse froissés dans la boîte à gants et la TVA déductible oubliée)*
+     - Intro : Capture smartphone instantanée, reconnaissance optique des montants en FCFA, de la TVA (18%) et de l'AIB, avec archivage sécurisé conforme aux normes DGI.
+     - Maillage interne : liens vers `comptabilite-syscohada`, `tresorerie-momo` et `declarations-fiscales`.
+  7. [`src/app/pour-qui/pme-et-independants/page.tsx`](file:///e:/Comptia/src/app/pour-qui/pme-et-independants/page.tsx) :
+     - Mot-clé cible : `logiciel gestion pme benin`
+     - H1 : « Le logiciel de gestion pour PME et indépendants au Bénin qui simplifie votre quotidien »
+     - Accroche : *(Vous avez créé votre activité pour servir vos clients, pas pour vous battre avec des déclarations d'impôts)*
+     - Intro : Outil adapté au quotidien sans jargon, facturation e-MECeF en direct sans investissement matériel, encaissements MoMo et comptes partagés avec le comptable.
+     - Maillage interne : liens vers `solutions/facturation-dgi`, `solutions/tresorerie-momo` et `tarifs`.
+  8. [`src/app/pour-qui/cabinets-comptables/page.tsx`](file:///e:/Comptia/src/app/pour-qui/cabinets-comptables/page.tsx) :
+     - Mot-clé cible : `logiciel pour cabinet comptable benin`
+     - H1 : « Le logiciel pour cabinet comptable au Bénin qui fluidifie la collaboration client »
+     - Accroche : *(Concentrez vos collaborateurs sur le conseil stratégique plutôt que sur la relance de facturettes)*
+     - Intro : Portail collaboratif multi-dossiers connecté au plan SYSCOHADA révisé et à la DGI, pièces d'achats scannées et ventes certifiées sans ressaisie manuelle.
+     - Maillage interne : liens vers `solutions/comptabilite-syscohada`, `solutions/declarations-fiscales` et `contact`.
+- **Contrôles et Validations** :
+  - `grep_search` : 0 tiret cadratin (`—`), 0 emoji détecté dans le code et les balises.
+  - `node .agents/skills/seo-partner/scripts/audit-metadata.mjs` : 33/33 routes conformes (100%), sitemap et robots.txt dynamiques validés.
+  - `npx tsc --noEmit` : 0 erreur de typage TypeScript.
+  - `pnpm build` : validation réussie avec code 0 (76 routes compilées avec succès, 0 régression).
+  - Éradication des warnings console navigateur :
+    - Hydration mismatch `bis_skin_checked="1"` (injecté par les extensions navigateur type Bitdefender) neutralisé via `suppressHydrationWarning` sur `<html>` et `PublicFooter`.
+    - Warning `scroll-behavior: smooth` corrigé par l'ajout de `data-scroll-behavior="smooth"` sur `<html>` dans `src/app/layout.tsx`.
+    - Warnings de ratio d'image Next.js résolus sur `/logo/ceilow_web_jaune.svg` (`style={{ width: "auto" }}`) et `/Panneau-de-marque.svg` (`fill` responsive dans `login` et `register`).
+
+---
+
+### 2026-10-26 : Audit SEO Global Exhaustif & Feuille de Route Priorisée du « Reste à Faire »
+
+- **Demande Utilisateur** :
+  - Réaliser un audit complet de la situation SEO de Ceilow et dresser l'inventaire exhaustif de tout ce qu'il reste à accomplir.
+- **Livrable Stratégique Produit** :
+  - Rédaction et enregistrement de [`docs/seo/2026-10-26-audit-global-et-reste-a-faire.md`](file:///e:/Comptia/docs/seo/2026-10-26-audit-global-et-reste-a-faire.md).
+- **Synthèse de l'Audit (État Actuel des 9 Piliers)** :
+  1. *Technique & Indexation* : 100% conforme (`robots.ts`, `sitemap.ts`, 33/33 métadonnées déclarées, zéro erreur d'hydratation, SSG sur 19 pages publiques). Reste à faire : IndexNow API, soumission GSC dès DNS actif.
+  2. *Architecture & Maillage* : Arborescence propre et maillage contextuel 3 liens déployé sur 8 pages. Reste à faire : fil d'Ariane visuel UI (Breadcrumbs).
+  3. *Mots-Clés & Anti-Cannibalisation* : Keyword mapping finalisé (1 requête principale unique par URL).
+  4. *On-Page & Copywriting* : H1, accroches cursives et CTA 1 à 3 mots finalisés sur 8 pages clés. Reste à faire : rédaction des 5 guides pratiques piliers (e-MECeF, TVA, TPS/AIB, SYSCOHADA, CNSS).
+  5. *Données Structurées* : JSON-LD sécurisé déployé sur 100% des pages publiques clés (Organization, WebApp, ProfessionalService, Article, Service, BreadcrumbList).
+  6. *SEO Local (Cotonou)* : Reste à faire en priorité : Fiche Google Business Profile, cohérence NAP Cotonou (+229 01 62 78 93 05), protocole d'avis clients WhatsApp.
+  7. *Moteurs Génératifs (GEO / IA)* : Robots IA autorisés. Reste à faire : blocs définitionnels synthétiques (40-60 mots).
+  8. *Autorité & Netlinking* : Actif d'attraction en ligne (Calendrier fiscal 2026 téléchargeable). Reste à faire : relations presse économiques et liens consulaires (CCI, OECCA).
+  9. *Mesure & ROI* : Reste à faire : validation DNS GSC, tag GA4 avec conversions personnalisées (WhatsApp, essai, démo).
+- **Priorisation ICE** : 10 actions ordonnées par score ICE décroissant (validation GSC 9.7, fiche GBP 8.7, GA4 8.3, guides e-MECeF et TVA 8.0).
+
+---
 
 - **Demande Utilisateur** :
   - Sur chacune des pages publiques créées, intégrer de vraies images et des animations vectorielles interactives / Lottie-like de grande qualité (en prenant pour référence explicite l'animation de la tirelire cochon avec pièces qui tombent sur `/accompagnement`).

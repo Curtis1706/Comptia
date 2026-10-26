@@ -160,18 +160,18 @@ export default function ComptabiliteSyscohadaPage() {
                 {/* Repère institutionnel ancré solide */}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background-secondary border border-border text-xs font-semibold text-ink">
                   <span className="w-2 h-2 rounded-full bg-success" />
-                  <span>Système Comptable OHADA Révisé (SYSCOHADA)</span>
+                  <span>Plan Comptable Général OHADA Révisé (SYSCOHADA)</span>
                 </div>
 
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-clash text-ink leading-[1.12] tracking-tight">
-                  Une comptabilité en règle,{" "}
+                  Le logiciel comptable SYSCOHADA{" "}
                   <span className="text-ink bg-primary px-2 py-0.5 rounded-lg">
-                    sans aucune saisie manuelle
+                    sans saisie manuelle
                   </span>
                 </h1>
 
                 <p className="text-base sm:text-lg text-text-muted max-w-xl leading-relaxed">
-                  Chaque vente certifiée et chaque dépense enregistrée alimentent vos journaux comptables en temps réel. En fin d&apos;exercice, votre dossier est prêt pour votre expert-comptable sans passer des nuits blanches.
+                  Tenez votre comptabilité conforme au plan SYSCOHADA révisé au Bénin : grand livre, balance, écritures de vente et d&apos;achat automatisées, et préparation sereine de votre DSF en fin d&apos;exercice.
                 </p>
 
                 {/* Annotation cursive humaine */}
@@ -641,6 +641,76 @@ export default function ComptabiliteSyscohadaPage() {
                 </p>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        {/* ── 4 BIS. MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS ── */}
+        <section className="w-full py-12 bg-background-secondary border-b border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
+                Continuité de Gestion
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+                La comptabilité connectée à vos opérations courantes
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/facturation-dgi"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Facturation Normalisée DGI</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Émettez vos factures certifiées e-MECeF avec QR code officiel. Chaque vente alimente immédiatement le journal des ventes.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la facturation DGI
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/declarations-fiscales"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Déclarations Fiscales & DSF</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Générez votre bilan, compte de résultat et liasse DSF prêts pour le dépôt officiel auprès de la DGI Bénin.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir les déclarations fiscales
+                </span>
+              </Link>
+
+              <Link
+                href="/pour-qui/cabinets-comptables"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Espace Experts-Comptables</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Donnez un accès sécurisé à votre cabinet comptable pour réviser vos écritures, lettrer les comptes et valider vos clôtures.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir l&apos;accès cabinet
+                </span>
+              </Link>
             </div>
           </div>
         </section>

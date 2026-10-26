@@ -103,16 +103,16 @@ export default function GestionDepensesPage() {
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Gestion des achats &amp; notes de frais
+                  Achats &amp; Justificatifs de Dépenses au Bénin
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
-                  Ne perdez plus jamais un seul reçu de dépense professionnelle
+                  Gestion des notes de frais et reçus par OCR au Bénin
                 </h1>
                 <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini les tickets de caisse décolorés dans la boîte à gants ou les tiroirs du bureau)
+                  (Fini les tickets de caisse perdus ou décolorés dans les tiroirs du bureau)
                 </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Photographiez vos factures d&apos;achats et tickets de carburant depuis votre téléphone. Ceilow extrait les montants HT, la TVA déductible (18%) et l&apos;AIB sans aucune saisie manuelle.
+                  Simplifiez la gestion des notes de frais et dépenses d&apos;entreprise au Bénin grâce à la reconnaissance optique de caractères (OCR). Prenez une simple photo : Ceilow extrait le montant HT, la TVA déductible (18%) et le fournisseur en 3 secondes.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -120,7 +120,7 @@ export default function GestionDepensesPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Démarrer l&apos;essai gratuit</span>
+                    <span>Numériser mon premier reçu</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
@@ -430,6 +430,76 @@ export default function GestionDepensesPage() {
                   Le justificatif numérique reste accessible en un clic à côté de son écriture comptable. En cas de contrôle fiscal, vous présentez les preuves numériques immédiatement.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        <section className="py-12 bg-background border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
+                Traçabilité des Achats
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+                Vos justificatifs de dépenses intégrés à toute votre comptabilité
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/comptabilite-syscohada"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Comptabilité SYSCOHADA</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Chaque dépense numérisée est imputée automatiquement dans les comptes de charges de la classe 6 selon le plan révisé.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir le journal des achats
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/tresorerie-momo"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Trésorerie & Mobile Money</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Associez chaque sortie d&apos;argent MoMo pour petites fournitures ou courses au ticket de caisse correspondant.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir le contrôle de caisse
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/declarations-fiscales"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Déclarations Fiscales DGI</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Optimisez votre crédit de TVA en déduisant chaque montant de TVA 18% figurant sur vos factures fournisseurs certifiées.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la récupération de TVA
+                </span>
+              </Link>
             </div>
           </div>
         </section>

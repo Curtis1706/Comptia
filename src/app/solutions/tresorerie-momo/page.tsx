@@ -149,16 +149,16 @@ export default function TresorerieMomoPage() {
               {/* Colonne gauche : Copywriting orienté valeur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Gestion de trésorerie &amp; encaissements
+                  Trésorerie &amp; Encaissements au Bénin
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
-                  Votre solde bancaire et vos comptes Mobile Money réunis en un coup d&apos;œil
+                  Rapprochement bancaire et Mobile Money au Bénin en temps réel
                 </h1>
                 <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Adieu les vérifications manuelles sur 3 téléphones de caisse différents)
+                  (Fini les relevés SMS manuels et les écarts de caisse introuvables)
                 </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Visualisez vos encaissements MTN MoMo, Moov Money et vos comptes bancaires en direct. Rapprochez chaque encaissement avec sa facture sans calculatrice ni risque d&apos;écart de caisse.
+                  Centralisez vos comptes MTN MoMo, Moov Money et comptes bancaires sur une interface unique. Ceilow fait le rapprochement bancaire de chaque paiement reçu avec sa facture correspondante en un clic. Vous savez exactement où va chaque Franc CFA.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -166,7 +166,7 @@ export default function TresorerieMomoPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Démarrer l&apos;essai gratuit</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
@@ -552,6 +552,76 @@ export default function TresorerieMomoPage() {
                   </li>
                 </ul>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        <section className="py-12 bg-background-secondary border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
+                Continuité des Flux
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+                Votre trésorerie connectée à vos factures et à votre comptabilité
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/facturation-dgi"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Facturation Normalisée DGI</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Rapprochez chaque virement MoMo ou bancaire reçu avec sa facture certifiée e-MECeF pour solder vos créances clients.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la facturation DGI
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/comptabilite-syscohada"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Comptabilité SYSCOHADA</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Alimentez automatiquement vos comptes 52 (Banques) et 57 (Caisse / Mobile Money) selon le plan comptable révisé.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir le journal de trésorerie
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/gestion-depenses"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Gestion des Dépenses OCR</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Associez chaque sortie d&apos;argent MoMo pour achats de fournitures ou carburant à son reçu numérisé par photo.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir le contrôle des achats
+                </span>
+              </Link>
             </div>
           </div>
         </section>

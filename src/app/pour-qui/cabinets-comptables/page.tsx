@@ -115,13 +115,13 @@ export default function CabinetsComptablesPage() {
                   Espace Professionnels du Chiffre
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-6">
-                  Le portail collaboratif pour experts-comptables au Bénin.
+                  Le logiciel pour cabinet comptable au Bénin qui fluidifie la collaboration client
                 </h1>
                 <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
                   (Concentrez vos collaborateurs sur le conseil stratégique plutôt que sur la relance de facturettes)
                 </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-8">
-                  Centralisez vos entreprises clientes sur un tableau de bord unique. Récupérez les factures normalisées DGI, les relevés bancaires et Mobile Money déjà classés et pré-imputés en SYSCOHADA Révisé.
+                  Optimisez la gestion de vos dossiers avec le premier <strong>logiciel pour cabinet comptable au Bénin</strong> nativement connecté au plan SYSCOHADA révisé et à la DGI. Vos clients saisissent leurs opérations courantes certifiées e-MECeF, vous révisez et clôturez en un clin d&apos;œil sans aucune ressaisie manuelle.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -136,7 +136,7 @@ export default function CabinetsComptablesPage() {
                     href="/contact"
                     className="bg-background-secondary text-ink font-bold px-6 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Demander une présentation cabinet
+                    Demander une présentation
                   </Link>
                 </div>
 
@@ -447,6 +447,76 @@ export default function CabinetsComptablesPage() {
           </div>
         </section>
 
+        {/* MAILLAGE INTERNE CONTEXTUEL */}
+        <section className="py-16 md:py-20 bg-background border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-12">
+              <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
+                Outils pour la profession
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+                Les modules Ceilow dédiés à la tenue et à la révision
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/comptabilite-syscohada"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <FileSpreadsheet className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                  Comptabilité SYSCOHADA Révisé
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Générez vos bilans, comptes de résultat et balances à 6 colonnes conformes aux exigences UEMOA.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Découvrir la comptabilité <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/declarations-fiscales"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <FileCheck className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                  Télédéclarations DGI &amp; DSF
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Préparez la TVA mensuelle, l&apos;AIB et les liasses DSF annuelles sans risque d&apos;erreur de calcul.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Découvrir la fiscalité <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+
+              <Link
+                href="/contact"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <Building2 className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                  Partenariat Cabinet Privilégié
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Bénéficiez d&apos;un accompagnement dédié pour migrer et onboarder l&apos;ensemble de vos dossiers clients.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Contacter l&apos;équipe dédiée <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* BANNIÈRE D'APPEL À L'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -468,7 +538,7 @@ export default function CabinetsComptablesPage() {
                 href="/contact"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Planifier un échange cabinet
+                Planifier un échange
               </Link>
             </div>
           </div>

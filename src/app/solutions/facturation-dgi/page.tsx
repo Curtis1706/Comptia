@@ -137,18 +137,18 @@ export default function FacturationDgiPage() {
                 {/* Repère de conformité sobre (ancré, sans badge flottant) */}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background-secondary border border-border text-xs font-semibold text-ink">
                   <span className="w-2 h-2 rounded-full bg-success" />
-                  <span>Homologation DGI Bénin / Système e-MECeF</span>
+                  <span>Système e-MECeF DGI Bénin</span>
                 </div>
 
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-clash text-ink leading-[1.12] tracking-tight">
-                  La facturation normalisée DGI certifiée en{" "}
+                  Facturation normalisée e-MECeF au Bénin en{" "}
                   <span className="text-ink bg-primary px-2 py-0.5 rounded-lg">
                     3 secondes chrono
                   </span>
                 </h1>
 
                 <p className="text-base sm:text-lg text-text-muted max-w-xl leading-relaxed">
-                  Émettez vos factures en règle avec QR code officiel directement depuis votre téléphone ou votre ordinateur. Plus de machine physique encombrante, plus de risque d&apos;amende fiscale.
+                  Émettez chaque facture normalisée conforme aux exigences de la DGI au Bénin avec QR code certifié et signature électronique. Plus de machine physique encombrante, plus de risque d&apos;amende fiscale.
                 </p>
 
                 {/* Petite note manuscrite humaine */}
@@ -714,6 +714,76 @@ export default function FacturationDgiPage() {
                 </p>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        {/* ── 5 BIS. MAILLAGE INTERNE CONTEXTUEL VERS LES SOLUTIONS CONNECTÉES ── */}
+        <section className="w-full py-12 bg-background-secondary border-b border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
+                Écosystème Connecté
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+                Une facture émise alimente immédiatement toute votre gestion
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/comptabilite-syscohada"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Comptabilité SYSCOHADA</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Vos ventes sont automatiquement enregistrées en comptabilité générale selon le plan SYSCOHADA révisé, sans aucune ressaisie.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir le module comptable
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/tresorerie-momo"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Rapprochement Mobile Money</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Associez immédiatement vos encaissements MTN MoMo ou Moov Money aux factures émises pour un lettrage sans erreur.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la trésorerie MoMo
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/declarations-fiscales"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Déclarations Fiscales DGI</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Vos bases de TVA et retenues AIB sont calculées en temps réel pour préparer votre déclaration mensuelle à la DGI.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la téléprocédure DGI
+                </span>
+              </Link>
             </div>
           </div>
         </section>

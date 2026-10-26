@@ -73,6 +73,7 @@ function LoginForm() {
             width={120}
             height={32}
             className="h-8 w-auto dark:hidden"
+            style={{ width: "auto" }}
             priority
           />
           <Image
@@ -81,6 +82,7 @@ function LoginForm() {
             width={120}
             height={32}
             className="h-8 w-auto hidden dark:block"
+            style={{ width: "auto" }}
             priority
           />
         </Link>
@@ -261,14 +263,14 @@ export default function LoginPage() {
         </Link>
 
         {/* Panneau de marque officiel */}
-        <div className="relative w-full h-full min-h-screen flex items-center justify-center">
+        <div className="relative w-full h-full min-h-screen">
           <Image
             src="/Panneau-de-marque.svg"
             alt="Ceilow - Votre gestion financière, enfin simple"
-            width={640}
-            height={960}
+            fill
+            sizes="640px"
             priority
-            className="w-full h-full object-cover max-h-screen select-none"
+            className="object-cover select-none"
           />
         </div>
       </div>

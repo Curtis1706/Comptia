@@ -126,16 +126,16 @@ export default function PaieCnssPage() {
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Gestion des salaires &amp; déclarations sociales
+                  Salaires &amp; Cotisations Sociales au Bénin
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
-                  Éditez vos bulletins de paie et vos déclarations CNSS sans erreur
+                  Gestion de paie et déclarations CNSS au Bénin sans erreur
                 </h1>
                 <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini les erreurs de calcul manuel de l&apos;IPTS et les pénalités de retard CNSS)
+                  (Fini les formules Excel compliquées et les pénalités de retard CNSS)
                 </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Générez des fiches de paie conformes au Code du Travail du Bénin en quelques secondes. Cotisations CNSS ouvrières (3.6%), patronales (15.4%), IPTS et VPS sont calculés automatiquement à chaque période.
+                  Éditez chaque bulletin de paie conforme au Code du Travail béninois en quelques clics. Cotisations CNSS (3,6% salarié, 15,4% patronale), retenues IPTS et VPS sont calculées automatiquement pour générer vos déclarations prêtes pour la téléprocédure.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -143,7 +143,7 @@ export default function PaieCnssPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Démarrer l&apos;essai gratuit</span>
+                    <span>Générer ma première fiche</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
@@ -505,6 +505,76 @@ export default function PaieCnssPage() {
                   Chaque clôture de paie génère automatiquement les écritures aux comptes 661 (Rémunérations), 421 (Personnel), 431 (CNSS) et 447 (État IPTS). Votre comptable n&apos;a plus besoin de ressaisir chaque ligne.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        <section className="py-12 bg-background border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
+                Gestion Sociale et Fiscale Intégrée
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+                Vos salaires reliés à votre comptabilité et au calendrier fiscal
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link
+                href="/solutions/comptabilite-syscohada"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Comptabilité SYSCOHADA</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Les charges de personnel et cotisations patronales sont passées directement dans vos journaux sans intervention manuelle.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir les écritures de paie
+                </span>
+              </Link>
+
+              <Link
+                href="/solutions/declarations-fiscales"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Déclarations Fiscales DGI</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Retrouvez vos montants d&apos;IPTS et de Versement Patronal sur Salaires (VPS) prêts pour votre télépaiement mensuel.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Découvrir la téléprocédure DGI
+                </span>
+              </Link>
+
+              <Link
+                href="/ressources/calendrier-fiscal-benin"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Calendrier Social & Fiscal</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Ne ratez aucune date limite : la déclaration CNSS et le paiement de l&apos;IPTS interviennent au plus tard le 10 de chaque mois.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Consulter les échéances officielles
+                </span>
+              </Link>
             </div>
           </div>
         </section>

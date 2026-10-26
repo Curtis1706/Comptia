@@ -621,7 +621,7 @@ export default function AccompagnementPage() {
                 <div className="bg-background rounded-2xl border border-border p-5 mb-6 min-h-[250px] flex items-center justify-center">
                   <div className="w-52 bg-background-secondary rounded-xl border border-border p-3.5 space-y-2">
                     <div className="flex items-center justify-between border-b border-border pb-2">
-                      <span className="text-[11px] font-bold text-ink">Fiche de paie — Mars</span>
+                      <span className="text-[11px] font-bold text-ink">Fiche de paie : Mars</span>
                       <span className="text-[9px] font-semibold text-success-deep bg-success/20 px-1.5 py-0.5 rounded">Éditée</span>
                     </div>
                     <div className="space-y-1 text-[10px]">

@@ -253,8 +253,8 @@ export default function LoginPage() {
         {/* Logo Ceilow cliquable renvoyant vers l'accueil */}
         <Link
           href="/"
-          title="Ceilow — Retour à l'accueil"
-          aria-label="Ceilow — Retour à l'accueil"
+          title="Ceilow : Retour à l'accueil"
+          aria-label="Ceilow : Retour à l'accueil"
           className="absolute top-6 left-8 sm:top-8 sm:left-12 w-52 h-20 z-30 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <span className="sr-only">Retour à l'accueil Ceilow</span>

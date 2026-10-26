@@ -9,15 +9,15 @@ import { toast } from "sonner";
 import { SECTORS_LIST } from "@/constants/sector-modules";
 
 const OHADA_COMPANY_TYPES = [
-  { value: "SARL", label: "SARL — Société à Responsabilité Limitée" },
-  { value: "SUARL", label: "SUARL — SARL Unipersonnelle" },
-  { value: "SAS", label: "SAS — Société par Actions Simplifiée" },
-  { value: "SA", label: "SA — Société Anonyme" },
-  { value: "EI", label: "EI — Entreprise Individuelle" },
-  { value: "SNC", label: "SNC — Société en Nom Collectif" },
-  { value: "SCS", label: "SCS — Société en Commandite Simple" },
-  { value: "GIE", label: "GIE — Groupement d'Intérêt Économique" },
-  { value: "COOP", label: "COOP — Société Coopérative OHADA" },
+  { value: "SARL", label: "SARL : Société à Responsabilité Limitée" },
+  { value: "SUARL", label: "SUARL : SARL Unipersonnelle" },
+  { value: "SAS", label: "SAS : Société par Actions Simplifiée" },
+  { value: "SA", label: "SA : Société Anonyme" },
+  { value: "EI", label: "EI : Entreprise Individuelle" },
+  { value: "SNC", label: "SNC : Société en Nom Collectif" },
+  { value: "SCS", label: "SCS : Société en Commandite Simple" },
+  { value: "GIE", label: "GIE : Groupement d'Intérêt Économique" },
+  { value: "COOP", label: "COOP : Société Coopérative OHADA" },
   { value: "ASSOCIATION", label: "Association / ONG" },
 ];
 
@@ -184,8 +184,8 @@ export default function RegisterPage() {
         {/* Logo Ceilow cliquable renvoyant vers l'accueil */}
         <Link
           href="/"
-          title="Ceilow — Retour à l'accueil"
-          aria-label="Ceilow — Retour à l'accueil"
+          title="Ceilow : Retour à l'accueil"
+          aria-label="Ceilow : Retour à l'accueil"
           className="absolute top-6 left-8 sm:top-8 sm:left-12 w-52 h-20 z-30 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <span className="sr-only">Retour à l'accueil Ceilow</span>
@@ -498,7 +498,7 @@ export default function RegisterPage() {
                 {/* IFU Bénin (13 chiffres) */}
                 <div className="flex flex-col gap-2">
                   <label htmlFor="ifu" className="text-sm font-semibold text-ink">
-                    IFU (Identifiant Fiscal Unique — DGI Bénin)
+                    IFU (Identifiant Fiscal Unique : DGI Bénin)
                   </label>
                   <input
                     id="ifu"

@@ -390,10 +390,10 @@ export default function TarifsPage() {
 
                 <div>
                   <Link
-                    href="/demo"
+                    href="/pour-qui/cabinets-comptables"
                     className="w-full py-3.5 px-4 rounded-xl text-xs font-bold text-ink bg-background-secondary hover:bg-border/60 border border-border transition-colors flex items-center justify-center gap-2 min-h-[44px]"
                   >
-                    <span>Échanger avec un conseiller</span>
+                    <span>Découvrir l&apos;offre Cabinet</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <p className="text-[11px] text-center text-text-muted mt-2">
@@ -645,7 +645,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Relances automatiques par SMS &amp; Email en cas de retard</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -662,7 +662,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Synchronisation automatique MTN Mobile Money &amp; Moov</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -682,7 +682,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Rapprochement bancaire assisté en 1 clic</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -699,7 +699,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Calcul de la TVA collectée et déductible en direct</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -709,7 +709,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Tableau récapitulatif prêt pour la déclaration avant le 10</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -719,7 +719,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Piste d&apos;audit fiable et journal de contrôle horodaté</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -758,7 +758,7 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Accès invité gratuit pour votre Expert-Comptable OECCA</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -775,13 +775,13 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Fiches de paie conformes au Code du Travail béninois</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5 font-mono">Jusqu&apos;à 10</td>
                     <td className="py-3 px-4 text-center font-mono font-bold">Illimités</td>
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Calcul automatisé cotisations CNSS &amp; VPS</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
                     <td className="py-3 px-4 text-center bg-primary/5">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>
@@ -814,8 +814,8 @@ export default function TarifsPage() {
                   </tr>
                   <tr className="hover:bg-background-secondary/50 transition-colors">
                     <td className="py-3 px-6 text-ink">Déploiement et formation personnalisée sur site</td>
-                    <td className="py-3 px-4 text-center text-text-muted">—</td>
-                    <td className="py-3 px-4 text-center bg-primary/5 text-text-muted">—</td>
+                    <td className="py-3 px-4 text-center text-text-muted">-</td>
+                    <td className="py-3 px-4 text-center bg-primary/5 text-text-muted">-</td>
                     <td className="py-3 px-4 text-center">
                       <CheckCircle2 className="w-4 h-4 text-success-deep mx-auto" />
                     </td>

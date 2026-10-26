@@ -2,7 +2,49 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
-### 2026-10-23 — Intégration du Logo Officiel Ceilow (Éradication de « Ceilow Mobile ») & Suppression Totale de Tout Glassmorphisme (Tarifs, Accompagnement, Fonctionnalités)
+### 2026-10-26 : Création Exhaustive des 11 Nouvelles Pages Vitrine, Éradication du Tiret Quadratin, Harmonisation Header/Footer & Respect Intégral /copywriting
+
+- **Demande Utilisateur** :
+  - Créer et terminer l'intégralité des pages vitrine publiques manquantes identifiées dans l'arborescence sans s'arrêter à mi-chemin.
+  - Pour chaque page, choisir le modèle de design le plus approprié parmi `tarifs`, `fonctionnalites` ou `accompagnement`.
+  - BANS STRICTS : aucun badge, aucun badge flottant, aucun glassmorphisme (`backdrop-blur`), aucun emoji et AUCUN tiret quadratin `—` (em-dash) sur le site.
+  - Utiliser des SVG animés contextuels, des icônes Lucide React, des touches cursives discrètes (`font-serif italic`).
+  - Suivre scrupuleusement le skill `/copywriting` (bénéfices d'abord, verbes d'action de 1 à 3 mots, zéro jargon technique rébarbatif).
+  - Utiliser StitchMCP pour concevoir et générer les écrans en amont de chaque implémentation.
+- **Actions Réalisées** :
+  - **1. Création des 11 Nouvelles Pages Vitrine Dédiées** :
+    - `Page 1 : /solutions/facturation-dgi` (Modèle `fonctionnalites`) : Émission e-MECeF en direct, simulateur de facture avec QR code DGI, TVA 18% et AIB déductible.
+    - `Page 2 : /solutions/comptabilite-syscohada` (Modèle `accompagnement`) : 4 journaux auxiliaires (VE, AC, BQ, CA), balance générale, DSF annuelle du 30 avril.
+    - `Page 3 : /solutions/tresorerie-momo` (Modèle `fonctionnalites`) : Radar de trésorerie consolidée temps réel (BOA, Ecobank, MTN MoMo, Moov Money), rapprochement bancaire magnétique automatique en 1 clic.
+    - `Page 4 : /solutions/paie-cnss` (Modèle `fonctionnalites`) : Simulateur de bulletin de paie interactif béninois avec salaire brut, cotisation CNSS ouvrière (3.6%) et patronale (15.4%), IPTS progressif DGI, VPS (4%) et export e-Cotisations CNSS trimestriel.
+    - `Page 5 : /solutions/gestion-depenses` (Modèle `accompagnement`) : Capture photo mobile de factures fournisseurs à Cotonou avec faisceau laser OCR, extraction automatique de la TVA déductible (18%) et de l'AIB, archivage numérique à valeur probante 10 ans.
+    - `Page 6 : /solutions/declarations-fiscales` (Modèle `accompagnement`) : Échéancier DGI du 10 du mois, calcul en temps réel de la TVA collectée et déductible, gestion des crédits reportables et alertes programmées par SMS.
+    - `Page 7 : /pour-qui/cabinets-comptables` (Modèle `tarifs`) : Portail superviseur multi-dossiers pour experts-comptables OECCA Bénin, barème dégressif au nombre d'entreprises, export FEC / Sage et zéro coût pour les collaborateurs du cabinet.
+    - `Page 8 : /pour-qui/pme-et-independants` (Modèle `accompagnement`) : Démarrage en 10 minutes sans prérequis comptable, zéro machine e-MECeF physique à acheter (économie de 280 000 FCFA), hotline WhatsApp directe à Cotonou.
+    - `Page 9 : /contact` (Modèle `accompagnement`) : Formulaire de contact fonctionnel avec confirmation instantanée, boutons directs WhatsApp et téléphone, horaires d'accueil à Haie Vive / Ganhi (Cotonou) et engagement de réponse sous 2 heures ouvrables.
+    - `Page 10 : /securite-et-apdp` (Modèle `accompagnement`) : 4 piliers souverains audités (Chiffrement AES-256 / TLS 1.3, sauvegardes quotidiennes géoredondées, piste d'audit immuable OHADA, conformité Code du Numérique Loi 2017-20 Bénin et APDP).
+    - `Page 11 : /ressources/calendrier-fiscal-benin` (Modèle `accompagnement`) : Chronologie interactive des obligations fiscales et sociales 2026 (10 du mois TVA/AIB, paie fin de mois, 15 trimestriel CNSS, DSF 30 avril, IS acomptes) et téléchargement de mémo PDF officiel.
+  - **2. Éradication Totale du Tiret Quadratin (`—`)** :
+    - Remplacement de l'ensemble des tirets longs cadratins par deux-points `:`, virgules `,` ou tirets simples `-` dans toutes les pages publiques (`page.tsx`, `tarifs`, `fonctionnalites`, `accompagnement`, `login`, `register`, `mentions-legales`, `PublicFooter.tsx`).
+    - Audit grep : 0 tiret cadratin résiduel dans tout `src/app/**/*.tsx`.
+  - **3. Rééquilibrage & Maillage Complet du Footer (`PublicFooter.tsx`)** :
+    - Grille ordonnée en 4 colonnes équilibrées de 3 colonnes chacune (`lg:col-span-3`) :
+      - Colonne 1 : Présentation Ceilow, certification DGI et support.
+      - Colonne 2 : Solutions Métier (les 6 pages solutions liées).
+      - Colonne 3 : Pour qui & Ressources (Cabinets, PME, Calendrier fiscal 2026, Sécurité APDP, Accompagnement, Contact).
+      - Colonne 4 : Éditeur & Direction Technique (Digiplex Agency, RCCM, téléphones).
+    - Ligne de bas de page avec liens légaux préservés (Mentions Légales, Protection des Données APDP, CGU).
+  - **5. Déverrouillage Public dans le Middleware (`src/middleware.ts`)** :
+    - Déclaration explicite des préfixes `/solutions`, `/pour-qui`, `/contact`, `/securite-et-apdp`, `/ressources` dans `PUBLIC_PATHS`.
+    - Résolution de la redirection automatique intempestive vers `/login?callbackUrl=...` pour tout visiteur non connecté consultant les pages vitrine.
+- **Vérifications Build & Conformité** :
+  - `npx tsc --noEmit` : 0 erreur de typage.
+  - Correction des imports `CheckCircle2` (`/contact`) et `Calendar` (`/solutions/comptabilite-syscohada`).
+  - `pnpm build` : validation réussie avec code de retour 0 (74/74 routes compilées avec succès sans aucune régression).
+
+---
+
+### 2026-10-23 : Intégration du Logo Officiel Ceilow (Éradication de « Ceilow Mobile ») & Suppression Totale de Tout Glassmorphisme (Tarifs, Accompagnement, Fonctionnalités)
 
 - **Demande Utilisateur** :
   - Supprimer impérativement le texte et le picto générique « Ceilow Mobile » dans le smartphone mockup pour intégrer le véritable logo officiel Ceilow ([`public/logo/ceilow_web_sombre.svg`](file:///e:/Comptia/public/logo/ceilow_web_sombre.svg)).
@@ -51,6 +93,47 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
 - **Vérifications Build & Rendu** :
   - `npx tsc --noEmit` : 0 erreur de typage.
   - `pnpm build` : validation réussie avec code 0 (63 routes compilées).
+
+### 2026-10-26 — Harmonisation Visuelle Totale : Photos Réelles Locales, Animations SVG Lottie-Like & Copywriting de Conversion (/copywriting)
+
+- **Demande Utilisateur** :
+  - Sur chacune des pages publiques créées, intégrer de vraies images et des animations vectorielles interactives / Lottie-like de grande qualité (en prenant pour référence explicite l'animation de la tirelire cochon avec pièces qui tombent sur `/accompagnement`).
+  - Auditer et optimiser le copywriting de chacune de ces pages selon le skill `/copywriting` : clarté absolue, utilité directe, zéro mot incompréhensible pour le visiteur, orienté bénéfice et conversion immédiate.
+  - Résoudre les liens du footer qui redirigeaient vers la page de connexion pour les visiteurs non authentifiés.
+  - Interdictions strictes réitérées : zéro badge flottant, zéro glassmorphisme, zéro emoji, et interdiction formelle du tiret cadratin `—` sur l'ensemble du site.
+- **Actions Techniques & Graphiques Réalisées** :
+  - **1. Déblocage du Middleware d'Authentification ([`src/middleware.ts`](file:///e:/Comptia/src/middleware.ts))** :
+    - Ajout des préfixes publics `/solutions`, `/pour-qui`, `/contact`, `/securite-et-apdp`, `/ressources` dans `PUBLIC_PATHS`.
+    - Les visiteurs accèdent librement à l'ensemble des pages de présentation, démos et simulateurs sans être redirigés vers `/login`.
+  - **2. Intégration Systématique de Vraies Photos Haute Définition dans `public/images/`** :
+    - `/images/commercante-cotonou.jpg` : Entrepreneure commerçante à Cotonou avec sa tablette en boutique (utilisée sur `/solutions/facturation-dgi` et `/pour-qui/pme-et-independants`).
+    - `/images/expert-comptable-benin.jpg` : Expert-comptable dans un cabinet moderne à Cotonou (utilisée sur `/pour-qui/cabinets-comptables`, `/solutions/declarations-fiscales` et `/ressources/calendrier-fiscal-benin`).
+    - `/images/finance-manager.jpg` : Directeur administratif et financier analysant la trésorerie (utilisée sur `/solutions/tresorerie-momo`).
+    - `/images/collaboration-comptable.jpg` : Dirigeant et expert-comptable en réunion sur le grand livre (utilisée sur `/solutions/comptabilite-syscohada`).
+    - `/images/conseillere-cotonou.jpg` : Gestionnaire des ressources humaines gérant la paie (utilisée sur `/solutions/paie-cnss`).
+    - `/images/dirigeante-benin.jpg` : Dirigeante scannant ses justificatifs d'achat (utilisée sur `/solutions/gestion-depenses`).
+    - `/images/equipe-support-cotonou.jpg` : Équipe de support client et de supervision technique à Cotonou (utilisée sur `/contact` et `/securite-et-apdp`).
+  - **3. Création d'Animations Vectorielles Pures SVG Lottie-Like (60fps @keyframes sans dépendance)** :
+    - *Facturation DGI* : Terminal fiscal e-MECeF avec ticket de caisse qui glisse, QR code certifié, tamponnage animé "CERTIFIÉ DGI" et étincelles dorées.
+    - *Trésorerie MoMo* : Smartphone envoyant des flux Mobile Money, pièces dorées FCFA en lévitation plongeant dans un coffre-fort animé avec rouage de sécurité.
+    - *Comptabilité SYSCOHADA* : Balance comptable à deux plateaux Débit/Crédit oscillant en équilibre parfait avec sceau "0 F" et scintillement.
+    - *Paie & CNSS* : Calculatrice RH animée affichant le salaire brut, bulletin de salaire officiel qui sort avec déductions CNSS 3.6% et net à payer en surbrillance.
+    - *Gestion des Dépenses* : Smartphone avec viseur de caméra et faisceau laser animé balayant un reçu d'achat, extrayant automatiquement la TVA 18% et le total.
+    - *Déclarations Fiscales* : Calendrier fiscal mettant en pulsation la case du 10 du mois, cloche d'alerte qui tinte et enveloppe DGI s'envolant vers le serveur fiscal.
+    - *Sécurité & APDP* : Grand bouclier protecteur avec cadenas rotatif animé, empreinte sécurisée et sceau vert menthe officiel "APDP BÉNIN".
+    - *Calendrier Fiscal Bénin* : Horloge/boussole fiscale avec aiguille rotative continue illuminant les 4 trimestres légaux (30 avril, 15 juillet, 15 octobre, 15 janvier).
+    - *Pour Qui / Cabinets* : Mallette d'audit avec dossiers clients qui défilent et sceau OECCA Bénin animé.
+    - *Pour Qui / PME* : Terminal TPE fiscal avec ticket normalisé et QR code.
+    - *Contact* : Smartphone avec bulle WhatsApp pulsante, avion en papier qui s'envole, canal WhatsApp officiel configuré sur le numéro unique choisi `+229 01 97 55 49 53`, suppression des mentions d'appel téléphonique et ancre vers le formulaire direct.
+  - **4. Audit & Alignement Copywriting (/copywriting)** :
+    - Élimination de tout jargon abstrait ou inutile.
+    - Remplacement systématique par des bénéfices tangibles (économie de 280 000 FCFA vs machine physique e-MECeF, zéro retard de TVA, réconciliation bancaire en 1 clic).
+    - Boutons d'action clairs et courts (1 à 3 mots, action-first).
+    - Vérification grep rigoureuse : 0 tiret cadratin `—` présent dans le code source de toutes les pages concernées.
+- **Résultats de Validation** :
+  - `PUBLIC_PATHS` opérationnel sur `src/middleware.ts`.
+  - 100% des 11 pages enrichies en photos réelles et animations SVG Lottie-like.
+  - Zéro erreur de build ou de typage.
 
 ---
 
@@ -1959,6 +2042,30 @@ Ce document trace l'historique continu des actions, décisions techniques et ori
   - **Validation technique (Règle 18)** :
     - `npx tsc --noEmit` : **0 erreur**.
     - `pnpm build` : **0 erreur** (54 pages compilées avec succès).
+- **Audit Stratégique d'Arborescence & Décompte des Pages Vitrine** :
+  - **Constat** : Plusieurs boutons et liens des pages publiques (Footer, `/fonctionnalites`, `/`) renvoyaient vers des routes de l'application interne protégée (`/facturation`, `/comptabilite`, `/paie`, `/documents`, `/tva`), provoquant une rupture d'expérience pour les visiteurs non connectés.
+  - **Décisions & Décompte** :
+    - 10 pages existantes conservées (Accueil, Tarifs, Fonctionnalités, Accompagnement, Démo, CGU, Confidentialité, Mentions légales, Login, Register).
+    - 11 nouvelles pages à créer :
+      - 6 pages Solutions Métiers : `/solutions/facturation-dgi`, `/solutions/comptabilite-syscohada`, `/solutions/tresorerie-momo`, `/solutions/paie-cnss`, `/solutions/gestion-depenses`, `/solutions/declarations-fiscales`.
+      - 2 pages Segments Clients : `/pour-qui/cabinets-comptables`, `/pour-qui/pme-et-independants`.
+      - 3 pages Confiance & Ressources : `/contact`, `/securite-et-apdp`, `/ressources/calendrier-fiscal-benin`.
+  - **Livrable** : Document complet rédigé dans [PLAN_ARBORESCENCE_ET_PAGES_VITRINE.md](file:///e:/Comptia/PLAN_ARBORESCENCE_ET_PAGES_VITRINE.md) respectant le skill copywriting et les règles Ceilow (zéro emoji, typographie française soignée, aucun hexadécimal en dur).
+- **Création Page Vitrine Solutions Facturation DGI (`/solutions/facturation-dgi`)** :
+  - **Modèle de référence sélectionné** : `fonctionnalites` (hero split-screen, maquette interactive, timeline 3 étapes, section autorité sombre).
+  - **Respect strict des contraintes** :
+    - Zéro badge flottant (toutes les métadonnées et états sont ancrés fermement dans le flux).
+    - Zéro glassmorphisme (fonds solides purs `#FFFFFF`, `#F5F4F2`, `#332E29`).
+    - Zéro caractère tiret cadratin (`—` strictement absent du fichier).
+    - Zéro emoji.
+    - SVG animés légers (faisceau laser de contrôle QR code, pulsations douces).
+    - Touche manuscrite / cursive sobre pour les annotations d'accessibilité.
+  - **Mise à jour des liens** :
+    - [src/components/layout/PublicFooter.tsx](file:///e:/Comptia/src/components/layout/PublicFooter.tsx) : lien « Facturation DGI » redirigé vers `/solutions/facturation-dgi`.
+    - [src/app/fonctionnalites/page.tsx](file:///e:/Comptia/src/app/fonctionnalites/page.tsx) : lien « Explorer la facturation » redirigé vers `/solutions/facturation-dgi`.
+  - **Validation technique** : `npx tsc --noEmit` : **0 erreur**.
+
+
 
 
 

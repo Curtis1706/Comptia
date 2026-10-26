@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Ceilow — Comptabilité, TVA et Facturation automatisées au Bénin",
+  title: "Ceilow : Comptabilité, TVA et Facturation automatisées au Bénin",
   description:
     "Factures certifiées e-MECeF, déclarations TVA, rapprochement bancaire et comptabilité automatisée pour PME et indépendants au Bénin.",
 };

@@ -348,7 +348,7 @@ export default function LandingView() {
 
                   <div className="mt-4 pt-2">
                     <Link
-                      href="/comptabilite"
+                      href="/solutions/comptabilite-syscohada"
                       className="cta-button text-xs font-bold text-ink hover:text-primary transition-colors flex items-center gap-1 min-h-[44px]"
                     >
                       <span>Voir tout ce que Ceilow automatise pour vous</span>
@@ -868,10 +868,10 @@ export default function LandingView() {
 
                   <div className="mt-8">
                     <Link
-                      href="/demo"
+                      href="/pour-qui/cabinets-comptables"
                       className="cta-button w-full text-center py-3 rounded-xl bg-background-secondary hover:bg-border/60 text-ink font-semibold text-xs transition-colors min-h-[44px] flex items-center justify-center border border-border"
                     >
-                      Contacter notre équipe
+                      Découvrir l&apos;offre Cabinet
                     </Link>
                   </div>
                 </div>

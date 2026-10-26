@@ -218,7 +218,7 @@ export default function MentionsLegalesPage() {
                 L'éditeur s'efforce de fournir des informations exactes et à jour, sans garantir l'absence totale d'erreurs ou d'omissions techniques ou réglementaires.
               </p>
               <p className="text-base text-text-muted leading-relaxed">
-                Les informations publiées sur le site sont données à titre indicatif et ne constituent pas en elles-mêmes un conseil comptable, fiscal ou juridique personnalisé. Pour tout arbitrage comptable ou fiscal engageant, l'assistance d'un professionnel agréé (inscrit à l'Ordre des Experts-Comptables et Comptables Agréés du Bénin — OECCA-Bénin) est recommandée.
+                Les informations publiées sur le site sont données à titre indicatif et ne constituent pas en elles-mêmes un conseil comptable, fiscal ou juridique personnalisé. Pour tout arbitrage comptable ou fiscal engageant, l'assistance d'un professionnel agréé (inscrit à l'Ordre des Experts-Comptables et Comptables Agréés du Bénin, OECCA-Bénin) est recommandée.
               </p>
             </section>
 

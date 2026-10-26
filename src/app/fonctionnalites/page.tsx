@@ -957,7 +957,7 @@ export default function FonctionnalitesPage() {
 
                 <div className="pt-1 flex items-center gap-2 text-text-muted text-xs">
                   <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                  <span>Essai de 14 jours sans engagement — Aucune carte bancaire requise</span>
+                  <span>Essai de 14 jours sans engagement. Aucune carte bancaire requise</span>
                 </div>
               </div>
 
@@ -1004,7 +1004,7 @@ export default function FonctionnalitesPage() {
                   </p>
                 </div>
                 <Link
-                  href="/facturation"
+                  href="/solutions/facturation-dgi"
                   className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   <span>Explorer la facturation</span>
@@ -1024,7 +1024,7 @@ export default function FonctionnalitesPage() {
                   </p>
                 </div>
                 <Link
-                  href="/comptabilite"
+                  href="/solutions/tresorerie-momo"
                   className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   <span>Explorer la trésorerie</span>
@@ -1044,7 +1044,7 @@ export default function FonctionnalitesPage() {
                   </p>
                 </div>
                 <Link
-                  href="/paie"
+                  href="/solutions/paie-cnss"
                   className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   <span>Explorer la paie</span>
@@ -1064,7 +1064,7 @@ export default function FonctionnalitesPage() {
                   </p>
                 </div>
                 <Link
-                  href="/documents"
+                  href="/solutions/gestion-depenses"
                   className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   <span>Explorer les achats</span>
@@ -1084,7 +1084,7 @@ export default function FonctionnalitesPage() {
                   </p>
                 </div>
                 <Link
-                  href="/tva"
+                  href="/solutions/declarations-fiscales"
                   className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   <span>Explorer la fiscalité</span>
@@ -1104,7 +1104,7 @@ export default function FonctionnalitesPage() {
                   </p>
                 </div>
                 <Link
-                  href="/comptabilite"
+                  href="/solutions/comptabilite-syscohada"
                   className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   <span>Explorer la comptabilité</span>

@@ -14,8 +14,8 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
         {/* Grille principale 12 colonnes hautement aérée */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 pb-16 border-b border-white/10">
           
-          {/* Colonne 1 : Ceilow, Mission & Conformité (4 colonnes) */}
-          <div className="lg:col-span-4 flex flex-col items-start gap-5">
+          {/* Colonne 1 : Ceilow, Mission & Conformité (3 colonnes) */}
+          <div className="lg:col-span-3 flex flex-col items-start gap-5">
             <Link
               href="/"
               className="inline-block transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
@@ -23,7 +23,7 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             >
               <Image
                 src="/logo/ceilow_web_jaune.svg"
-                alt="Ceilow - Facturation et Gestion d'Entreprise au Bénin"
+                alt="Ceilow : Facturation et Gestion d'Entreprise au Bénin"
                 width={150}
                 height={38}
                 className="h-9 w-auto"
@@ -34,7 +34,7 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
               La solution de facturation et de gestion tout-en-un pour les entreprises au Bénin. Facturez aux normes DGI, suivez vos paiements et automatisez votre comptabilité en toute sérénité.
             </p>
 
-            {/* Badge officiel de certification DGI (fond opaque sobre sans glassmorphisme) */}
+            {/* Certification DGI */}
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#3D3830] border border-white/10 text-xs font-medium text-white/90">
               <span className="w-2 h-2 rounded-full bg-success animate-pulse shrink-0" />
               <span>Certifié conforme DGI &amp; DGI-Bénin</span>
@@ -55,69 +55,79 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             </div>
           </div>
 
-          {/* Colonne 2 : Navigation Principale & Fonctionnalités (2 colonnes) */}
-          <div className="lg:col-span-2 flex flex-col items-start gap-4">
+          {/* Colonne 2 : Solutions Métier (3 colonnes) */}
+          <div className="lg:col-span-3 flex flex-col items-start gap-4">
             <span className="text-xs uppercase tracking-wider font-bold text-white/90 border-b border-white/10 pb-2 w-full">
-              Navigation
+              Solutions Métier
             </span>
             <ul className="flex flex-col gap-3 text-sm text-white/75">
               <li>
-                <Link href="/tarifs" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Tarifs
+                <Link href="/solutions/facturation-dgi" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Facturation DGI &amp; e-MECeF
                 </Link>
               </li>
               <li>
-                <Link href="/fonctionnalites" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Fonctionnalités
+                <Link href="/solutions/comptabilite-syscohada" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Comptabilité SYSCOHADA
                 </Link>
               </li>
               <li>
-                <Link href="/accompagnement" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Accompagnement
+                <Link href="/solutions/tresorerie-momo" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Trésorerie &amp; Mobile Money
                 </Link>
               </li>
               <li>
-                <Link href="/facturation" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Facturation DGI
+                <Link href="/solutions/paie-cnss" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Paie &amp; Cotisations CNSS
                 </Link>
               </li>
               <li>
-                <Link href="/comptabilite" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Comptabilité &amp; TVA
+                <Link href="/solutions/gestion-depenses" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Dépenses &amp; Reçus Scannés
+                </Link>
+              </li>
+              <li>
+                <Link href="/solutions/declarations-fiscales" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Déclarations Fiscales &amp; TVA
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Colonne 3 : Aide & Conformité (3 colonnes) */}
+          {/* Colonne 3 : Pour qui & Ressources (3 colonnes) */}
           <div className="lg:col-span-3 flex flex-col items-start gap-4">
             <span className="text-xs uppercase tracking-wider font-bold text-white/90 border-b border-white/10 pb-2 w-full">
-              Aide &amp; Conformité
+              Pour qui &amp; Ressources
             </span>
             <ul className="flex flex-col gap-3 text-sm text-white/75">
               <li>
-                <Link href="/demo" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Démonstration interactive
+                <Link href="/pour-qui/cabinets-comptables" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Cabinets &amp; Experts-comptables
                 </Link>
               </li>
               <li>
-                <Link href="/confidentialite" className="hover:text-primary transition-colors inline-block leading-snug">
+                <Link href="/pour-qui/pme-et-independants" className="hover:text-primary transition-colors inline-block leading-snug">
+                  PME &amp; Indépendants
+                </Link>
+              </li>
+              <li>
+                <Link href="/ressources/calendrier-fiscal-benin" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Calendrier Fiscal Bénin 2026
+                </Link>
+              </li>
+              <li>
+                <Link href="/securite-et-apdp" className="hover:text-primary transition-colors inline-block leading-snug">
                   Sécurité &amp; Conformité APDP
                 </Link>
               </li>
               <li>
-                <Link href="/mentions-legales" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Mentions Légales &amp; RCCM
-                </Link>
-              </li>
-              <li>
-                <Link href="/cgu" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Conditions Générales de Service
-                </Link>
-              </li>
-              <li>
                 <Link href="/accompagnement" className="hover:text-primary transition-colors inline-block leading-snug">
-                  Assistance locale Cotonou
+                  Accompagnement à Cotonou
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Contact &amp; Assistance directe
                 </Link>
               </li>
             </ul>

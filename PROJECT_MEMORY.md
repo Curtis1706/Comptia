@@ -2,6 +2,27 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-10 : Réécriture `/copywriting` et Complétude de `public/llms.txt`
+
+- **Constat** : L'introduction initiale de `public/llms.txt` était trop administrative (mention légale Digiplex / RCCM en tête) et empilait des sigles comptables/fiscaux sans expliciter les bénéfices utilisateur ; plusieurs éléments clés manquaient (`/`, `/register`, détail des 3 formules tarifaires, paiement Mobile Money, banques locales supportées, délai de reprise 48h, adresse Avenue Jean-Paul II et horaires Cotonou, FAQ synthétique).
+- **Action effectuée** : Refonte complète de `public/llms.txt` selon `/copywriting` et `/seo-partner` avec proposition de valeur orientée bénéfices en tête, sections structurées (pourquoi choisir Ceilow, tarifs en FCFA, catalogue complet incluant `/` et `/register`, réponses rapides pour les IA, contact physique à Cotonou et informations légales en pied de fichier).
+
+### 2026-11-10 : Correctifs SEO/GEO Techniques & Schema.org (Audit SEOmator, Sans Édition Copywriting)
+
+- **Contexte & Décisions Utilisateur** :
+  - Suite à l'analyse de l'audit SEOmator GEO (`76/100`) et au test HTTP en direct montrant que Vercel redirigeait `ceilow.com` (`308`) vers `www.ceilow.com`, l'utilisateur a validé : conserver **`https://ceilow.com`** (sans `www`) comme domaine canonique principal (à basculer côté Vercel), n'inclure **aucun `sameAs` social** tant qu'aucun profil officiel actif n'est relié, et appliquer uniquement les **correctifs techniques et Schema.org** sans modifier les textes visibles des pages.
+- **Modifications effectuées** :
+  - `src/components/seo/JsonLd.tsx` : émission d'une balise `<script type="application/ld+json">` distincte par schéma lorsque `data` est un tableau (résout l'ignorance des schémas sur `/`, `/contact`, `/solutions/*` et `/ressources/*`).
+  - `src/lib/seo-schemas.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/ressources/page.tsx` : ajout global de `Organization` (sans `sameAs` inactif) et `WebSite` (`SearchAction` vers `/ressources?q={search_term_string}` avec support URL `?q=` côté `/ressources`), et suppression du doublon `Organization` / `sameAs` LinkedIn dans `src/app/page.tsx`.
+  - Layouts Schema (`src/app/ressources/calendrier-fiscal-benin/layout.tsx`, `tarifs/layout.tsx`, `accompagnement/layout.tsx`, `contact/layout.tsx`, `securite-et-apdp/layout.tsx`, `pour-qui/*/layout.tsx`, `solutions/*/layout.tsx`, `cgu/layout.tsx`, `confidentialite/layout.tsx`, `mentions-legales/layout.tsx`) : ajout des `FAQPage` correspondant mot pour mot aux FAQ visibles, `HowTo` (4 étapes DGI) sur `src/app/ressources/guide-tva-benin/layout.tsx` et `BreadcrumbList` sur les pages légales.
+  - `src/app/demo/page.tsx` et `src/app/login/page.tsx` : isolation de `useSearchParams()` dans `DemoSubmittedSync` / `LoginQuerySync` (`<Suspense fallback={null}>`) afin que les `<h1>` (`Voyez Ceilow en action`, `Content de vous revoir`) et les formulaires soient rendus directement en SSR.
+  - `public/llms.txt` : création du fichier Markdown `llms.txt` valide pour les moteurs IA.
+  - `next.config.ts` et `src/middleware.ts` : ajout des en-têtes HTTP de sécurité (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `X-DNS-Prefetch-Control`, `Content-Type` UTF-8 pour `/llms.txt`) et exclusion de `txt`/`xml` dans `matcher`.
+  - Bing IndexNow : création de la clé `public/c7e10b8a9f2d4e31a6b58d7f0c9e4a12.txt` et du script `scripts/submit-indexnow.mjs`.
+  - Documentation persistée dans `docs/seo/2026-11-10-correctifs-geo-techniques-schema.md`.
+- **Vérification** : `npx tsc --noEmit` (code `0`), `pnpm build` (code `0`, `82/82` pages statiques générées), présence confirmée des `<h1>` et JSON-LD dans `.next/server/app/demo.html` et `.next/server/app/login.html`, et exécution de `node .agents/skills/seo-partner/scripts/audit-metadata.mjs`.
+- **Reste à faire côté infrastructure** : basculer `ceilow.com` en domaine principal dans Vercel (`www` -> apex `308`), soumettre `https://ceilow.com/sitemap.xml` dans Google Search Console, valider Bing Webmaster Tools puis lancer `node scripts/submit-indexnow.mjs` après déploiement.
+
 ### 2026-11-10 : Correction du Routage 404, `robots.txt` et `sitemap.xml` dans `src/middleware.ts`
 
 - **Cause identifiée** : Dans `src/middleware.ts`, la logique précédente utilisait une liste blanche `PUBLIC_PATHS` et redirigeait vers `/login?callbackUrl=...` toute URL absente de cette liste, ce qui interceptait les URL inexistantes (avant le rendu de `src/app/not-found.tsx`) ainsi que `/robots.txt` et `/sitemap.xml`.

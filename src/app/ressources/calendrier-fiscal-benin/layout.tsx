@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { buildFaqSchema } from "@/lib/seo-schemas";
 
 export const metadata: Metadata = {
   title: "Calendrier Fiscal Bénin 2026 : Dates DGI et CNSS",
@@ -80,10 +81,25 @@ const breadcrumbSchema = {
   ],
 };
 
+const faqSchema = buildFaqSchema([
+  {
+    q: "Que se passe-t-il si le 10 du mois tombe un week-end ou un jour férié au Bénin ?",
+    a: "Lorsque la date limite tombe un samedi, un dimanche ou un jour férié officiel au Bénin, elle est reportée automatiquement au premier jour ouvrable suivant.",
+  },
+  {
+    q: "Comment Ceilow m'évite-t-il d'oublier une date limite ?",
+    a: "Votre tableau de bord affiche en permanence les prochaines échéances de votre entreprise. Des alertes vous préviennent plusieurs jours à l'avance pour préparer vos chiffres sans stress.",
+  },
+  {
+    q: "Les dates sont-elles identiques si je suis au régime TPS ?",
+    a: "Non. Si votre entreprise est au régime de la Taxe Professionnelle Synthétique (TPS), vous réglez un premier acompte le 10 février, déposez votre déclaration annuelle et le solde au plus tard le 30 avril, puis versez un second acompte le 10 juin. Ceilow adapte vos rappels à votre régime.",
+  },
+]);
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <JsonLd data={[articleSchema, breadcrumbSchema]} />
+      <JsonLd data={[articleSchema, breadcrumbSchema, faqSchema]} />
       {children}
     </>
   );

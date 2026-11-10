@@ -119,10 +119,45 @@ const faqSchema = {
   ],
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Les 4 étapes pour déclarer votre TVA avant le 10 du mois au Bénin",
+  description:
+    "La déclaration couvre toutes vos factures du mois précédent sur le portail e-Services de la DGI au Bénin.",
+  inLanguage: "fr-BJ",
+  step: [
+    {
+      "@type": "HowToStep",
+      position: 1,
+      name: "Prendre vos factures d'achat en photo (Du 1er au 3 du mois)",
+      text: "Rassemblez vos reçus et factures fournisseurs normalisées du mois passé. En les prenant simplement en photo sur Ceilow, les montants de TVA déductible sont ajoutés sans recopier à la main.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 2,
+      name: "Vérifier le total ventes et achats (Avant le 6 du mois)",
+      text: "Contrôlez que toutes vos ventes e-MECeF et vos avoirs du mois correspondent aux chiffres de votre dossier, puis retirez votre éventuel crédit de TVA du mois précédent.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 3,
+      name: "Saisir sur le site e-Services DGI (Entre le 7 et le 9 du mois)",
+      text: "Connectez-vous à votre espace sur eservices.impots.bj avec votre numéro IFU, reportez les montants préparés et validez la déclaration mensuelle en ligne.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 4,
+      name: "Régler le montant dû et garder le reçu (Au plus tard le 10 du mois)",
+      text: "Effectuez votre paiement avant le 10 (si le 10 tombe un week-end ou un jour férié, la limite est reportée au premier jour travaillé suivant) et archivez la quittance.",
+    },
+  ],
+};
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <JsonLd data={[articleSchema, breadcrumbSchema, faqSchema]} />
+      <JsonLd data={[articleSchema, breadcrumbSchema, faqSchema, howToSchema]} />
       {children}
     </>
   );

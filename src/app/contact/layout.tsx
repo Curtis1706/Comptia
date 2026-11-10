@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { buildFaqSchema } from "@/lib/seo-schemas";
 
 export const metadata: Metadata = {
   title: "Contactez l'Équipe Ceilow à Cotonou : WhatsApp",
@@ -69,10 +70,25 @@ const breadcrumbSchema = {
   ],
 };
 
+const faqSchema = buildFaqSchema([
+  {
+    q: "Dans quel délai l'équipe Ceilow répond-elle aux demandes ?",
+    a: "Du lundi au vendredi, de 8h00 à 18h30 (heure de Cotonou), notre équipe vous répond par WhatsApp ou e-mail sous 2 heures ouvrables maximum.",
+  },
+  {
+    q: "Proposez-vous des démonstrations dans nos bureaux à Cotonou ?",
+    a: "Oui. Pour les entreprises et cabinets situés à Cotonou, Calavi et Porto-Novo, un conseiller peut se déplacer dans vos locaux pour une démonstration sur vos cas réels.",
+  },
+  {
+    q: "Pouvez-vous nous aider à paramétrer notre compte au départ ?",
+    a: "Oui. Un conseiller dédié vous aide étape par étape à créer votre dossier, connecter votre entreprise à la DGI et importer vos clients et articles.",
+  },
+]);
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <JsonLd data={[localBusinessSchema, breadcrumbSchema]} />
+      <JsonLd data={[localBusinessSchema, breadcrumbSchema, faqSchema]} />
       {children}
     </>
   );

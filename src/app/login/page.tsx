@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -8,11 +8,40 @@ import Image from "next/image";
 import { ArrowLeft, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-function LoginForm() {
+interface LoginQueryState {
+  callbackUrl: string;
+  errorParam: string | null;
+  registered: string | null;
+}
+
+function LoginQuerySync({
+  onSync,
+}: {
+  onSync: (state: LoginQueryState) => void;
+}) {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const errorParam = searchParams.get("error");
   const registered = searchParams.get("registered");
+
+  useEffect(() => {
+    onSync({ callbackUrl, errorParam, registered });
+  }, [callbackUrl, errorParam, registered, onSync]);
+
+  return null;
+}
+
+function LoginForm() {
+  const [{ callbackUrl, errorParam, registered }, setQueryState] =
+    useState<LoginQueryState>({
+      callbackUrl: "/dashboard",
+      errorParam: null,
+      registered: null,
+    });
+
+  const handleQuerySync = useCallback((state: LoginQueryState) => {
+    setQueryState(state);
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -64,6 +93,9 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-[420px] flex flex-col">
+      <Suspense fallback={null}>
+        <LoginQuerySync onSync={handleQuerySync} />
+      </Suspense>
       {/* En-tête mobile (Logo & retour) */}
       <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-border">
         <Link href="/" className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
@@ -279,16 +311,7 @@ export default function LoginPage() {
       <div className="flex-1 min-h-screen flex flex-col justify-between items-center px-6 py-8 sm:px-12 sm:py-12 lg:px-16 lg:py-16">
         {/* Espace supérieur flexible */}
         <div className="w-full flex-1 flex items-center justify-center">
-          <Suspense
-            fallback={
-              <div className="flex flex-col items-center justify-center gap-3 p-8">
-                <Loader2 className="w-8 h-8 animate-spin text-ink" />
-                <p className="text-sm text-text-muted">Chargement de la page...</p>
-              </div>
-            }
-          >
-            <LoginForm />
-          </Suspense>
+          <LoginForm />
         </div>
       </div>
     </main>

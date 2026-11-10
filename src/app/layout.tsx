@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { GoogleAnalytics } from "@/components/seo/GoogleAnalytics";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/seo-schemas";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -64,6 +66,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
+        <JsonLd data={[organizationSchema, websiteSchema]} />
         <GoogleAnalytics />
       </body>
     </html>

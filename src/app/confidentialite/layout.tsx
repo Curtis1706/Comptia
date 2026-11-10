@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { SITE_URL, buildBreadcrumbSchema } from "@/lib/seo-schemas";
 
 export const metadata: Metadata = {
   title: "Politique de Confidentialité et Protection des Données",
@@ -13,6 +15,16 @@ export const metadata: Metadata = {
   },
 };
 
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Accueil", item: SITE_URL },
+  { name: "Politique de Confidentialité", item: `${SITE_URL}/confidentialite` },
+]);
+
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <JsonLd data={breadcrumbSchema} />
+      {children}
+    </>
+  );
 }

@@ -10,36 +10,21 @@ export const metadata: Metadata = {
     "Factures certifiées e-MECeF, déclarations TVA, rapprochement bancaire et comptabilité automatisée pour PME et indépendants au Bénin.",
 };
 
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": "https://ceilow.com/#organization",
-  name: "Ceilow",
-  url: "https://ceilow.com",
-  logo: "https://ceilow.com/logo/picto_ceilow_web_jaune.svg",
-  description:
-    "Plateforme SaaS de gestion financière et comptable pour entreprises et professionnels au Bénin : facturation certifiée e-MECeF, comptabilité SYSCOHADA et suivi de trésorerie Mobile Money.",
-  email: "contact@ceilow.com",
-  telephone: "+2290197554953",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Cotonou",
-    addressRegion: "Littoral",
-    addressCountry: "BJ",
-  },
-  sameAs: ["https://www.linkedin.com/company/ceilow"],
-};
-
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "@id": "https://ceilow.com/#webapp",
   name: "Ceilow",
+  url: "https://ceilow.com",
   applicationCategory: "BusinessApplication",
   operatingSystem: "All modern web browsers",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
+  publisher: {
+    "@id": "https://ceilow.com/#organization",
+  },
   offers: {
     "@type": "Offer",
+    price: "15000",
     priceCurrency: "XOF",
     availability: "https://schema.org/InStock",
   },
@@ -61,7 +46,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <JsonLd data={[organizationSchema, webAppSchema]} />
+      <JsonLd data={webAppSchema} />
       <LandingView />
     </>
   );

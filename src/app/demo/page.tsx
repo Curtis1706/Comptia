@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, Suspense } from "react";
+import React, { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -18,9 +18,30 @@ const TEAM_SIZES = [
   { value: "50+", label: "Plus de 50 personnes" },
 ];
 
-function DemoContent() {
+function DemoSubmittedSync({
+  onInitialSubmitted,
+}: {
+  onInitialSubmitted: () => void;
+}) {
   const searchParams = useSearchParams();
-  const initialSubmitted = searchParams.get("submitted") === "true";
+  const submittedParam = searchParams.get("submitted") === "true";
+
+  useEffect(() => {
+    if (submittedParam) {
+      onInitialSubmitted();
+    }
+  }, [submittedParam, onInitialSubmitted]);
+
+  return null;
+}
+
+function DemoContent() {
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleInitialSubmitted = useCallback(() => {
+    setSubmitted(true);
+  }, []);
 
   const [formData, setFormData] = useState({
     prenom: "",
@@ -34,8 +55,6 @@ function DemoContent() {
     acceptContact: false,
   });
 
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(initialSubmitted);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // États des listes déroulantes personnalisées animées
@@ -170,6 +189,9 @@ function DemoContent() {
 
   return (
     <div className="min-h-screen w-full bg-background-secondary text-ink flex flex-col items-center">
+      <Suspense fallback={null}>
+        <DemoSubmittedSync onInitialSubmitted={handleInitialSubmitted} />
+      </Suspense>
       {/* ── EN-TÊTE SOMBRE (Hero Header) ── */}
       <header className="w-full bg-ink text-white pb-16 lg:pb-20">
         <PublicHeader />
@@ -629,15 +651,5 @@ function DemoContent() {
 }
 
 export default function DemoPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen w-full bg-ink flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      }
-    >
-      <DemoContent />
-    </Suspense>
-  );
+  return <DemoContent />;
 }

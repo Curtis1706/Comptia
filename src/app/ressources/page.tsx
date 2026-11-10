@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -190,6 +190,13 @@ function ResourceGridCard({ post }: { post: ResourceArticle }) {
 export default function RessourcesHubPage() {
   const [activeTheme, setActiveTheme] = useState<ResourceTheme>("tous");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, []);
 
   const isDefaultView = activeTheme === "tous" && searchQuery.trim() === "";
 

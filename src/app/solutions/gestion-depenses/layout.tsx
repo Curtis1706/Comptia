@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { buildFaqSchema } from "@/lib/seo-schemas";
 
 export const metadata: Metadata = {
   title: "Gestion des Dépenses et Reçus Scannés au Bénin",
@@ -59,10 +60,29 @@ const serviceSchema = {
     "Capture photo de reçus et factures fournisseurs avec lecture automatique des montants en FCFA, extraction de TVA et archivage légal 10 ans.",
 };
 
+const faqSchema = buildFaqSchema([
+  {
+    q: "Une photo de reçu sur téléphone est-elle valable lors d'un contrôle au Bénin ?",
+    a: "Oui, si elle reste parfaitement lisible, datée et sans retouche. Ceilow conserve votre photo originale avec sa date d'enregistrement pendant la durée légale de 10 ans.",
+  },
+  {
+    q: "Comment Ceilow retrouve-t-il la TVA déductible et l'AIB ?",
+    a: "La lecture automatique repère la TVA (18 %) et les retenues AIB (1 %, 3 % ou 5 %) imprimées sur la facture du fournisseur. Ces montants alimentent aussitôt votre préparation TVA du mois.",
+  },
+  {
+    q: "Mes salariés en déplacement peuvent-ils envoyer leurs reçus ?",
+    a: "Oui, vos collaborateurs prennent en photo leurs reçus de carburant, repas ou transport depuis leur téléphone. Vous validez la dépense avant son passage en comptabilité.",
+  },
+  {
+    q: "Que faire si un ticket papier est froissé ou un peu effacé ?",
+    a: "Ceilow surligne les informations incertaines pour que vous puissiez vérifier et corriger un chiffre en un clic avant de valider.",
+  },
+]);
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <JsonLd data={[breadcrumbSchema, serviceSchema]} />
+      <JsonLd data={[breadcrumbSchema, serviceSchema, faqSchema]} />
       {children}
     </>
   );

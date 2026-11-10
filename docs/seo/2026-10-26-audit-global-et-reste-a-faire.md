@@ -80,8 +80,8 @@ URL de référence : https://ceilow.com
 
 | Point de contrôle | Statut actuel | Détail des réalisations | Ce qu'il reste à faire | Priorité |
 |---|---|---|---|---|
-| Fiche Google Business Profile | **À faire** | Fiche non configurée / non revendiquée officiellement. | Créer et valider la fiche GBP Ceilow à Cotonou avec catégorie `Éditeur de logiciels`, horaires, photos et services. | Très Haute |
-| Cohérence NAP | **À faire** | Adresse et téléphone fixés sur le site, mais non harmonisés sur les annuaires extérieurs. | Déployer le NAP strict (Nom, Adresse avec Plus Code, Tél +229 01 97 55 49 53, email contact@ceilow.com) sur Go Africa Online, Pages Jaunes Bénin, etc. | Haute |
+| Fiche Google Business Profile | **Prête (kit livré)** | Kit complet GBP rédigé dans `docs/seo/2026-11-10-gbp-cotonou-et-telemetrie-ga4.md` (catégorie, 662 car., services, plan photos/avis). | Compléter le Plus Code exact + adresse précise sur Google Maps et soumettre la vidéo de validation. | Très Haute |
+| Cohérence NAP | **Terminé sur le site** | Nom `Ceilow` (éditeur `Digiplex Agency - RCCM RB/PNO/26 B 7147`), téléphone unique `+229 01 97 55 49 53`, e-mail `contact@ceilow.com` et horaires `08h00 - 18h30` harmonisés sur footer, `/contact`, pages légales et JSON-LD. | Reporter ce même NAP sur les annuaires béninois (CCI Bénin, Go Africa Online) après validation GBP. | Moyenne |
 | Stratégie d'Avis Clients | **À faire** | Aucun avis client public sur Google Maps. | Mettre en place la procédure de demande d'avis par lien WhatsApp après chaque onboarding réussi, avec réponse sous 48h. | Haute |
 
 ---
@@ -109,7 +109,7 @@ URL de référence : https://ceilow.com
 | Point de contrôle | Statut actuel | Détail des réalisations | Ce qu'il reste à faire | Priorité |
 |---|---|---|---|---|
 | Google Search Console | **À faire** | Propriété DNS non validée (en attente de déploiement DNS). | Valider la propriété du domaine via enregistrement DNS TXT et soumettre le sitemap. | Très Haute |
-| Google Analytics 4 | **À faire** | Événements de conversion non configurés. | Mettre en place le tag GA4 avec mesure des conversions : clics WhatsApp, inscriptions essai, réservations démo. | Très Haute |
+| Google Analytics 4 | **Code prêt (en attente ID `G-...`)** | Architecture Consent Mode v2 APDP (`src/lib/analytics.ts`, `src/components/seo/GoogleAnalytics.tsx`) et événements `sign_up`, `generate_lead`, `whatsapp_click`, `phone_click`, `file_download` branchés. | Renseigner `NEXT_PUBLIC_GA_MEASUREMENT_ID` dans `.env` et activer les Événements Clés dans l'interface GA4. | Très Haute |
 | Dashboard Looker Studio | **À faire** | Non créé. | Bâtir le tableau de bord de suivi mensuel (trafic organique, clics de marque vs hors-marque, conversion leads). | Moyenne |
 
 ---
@@ -121,8 +121,8 @@ La formule du score ICE est calculée ainsi : **(Impact + Confiance + Facilité)
 | # | Action concrète | Pilier | Impact (I) | Confiance (C) | Facilité (E) | Score ICE | Responsable | Échéance |
 |---|---|---|---|---|---|---|---|---|
 | **1** | **Valider Google Search Console & soumettre le Sitemap XML** | Mesure | 10 | 10 | 9 | **9.7** | Technique / DNS | Dès mise en ligne du domaine |
-| **2** | **Créer et optimiser la fiche Google Business Profile (Cotonou)** | Local | 9 | 9 | 8 | **8.7** | Marketing / Dir. | Semaine 1 |
-| **3** | **Configurer le tracking des conversions dans Google Analytics 4** | Mesure | 9 | 9 | 7 | **8.3** | Développeur | Semaine 1 |
+| **2** | **Créer et optimiser la fiche Google Business Profile (Cotonou)** | Local | 9 | 9 | 8 | **Kit livré (validation manuelle requise)** | Marketing / Dir. | Semaine 1 |
+| **3** | **Configurer le tracking des conversions dans Google Analytics 4** | Mesure | 9 | 9 | 7 | **Code livré (renseigner ID `G-...`)** | Développeur | Semaine 1 |
 | **4** | **Rédiger et publier le Guide Pratique e-MECeF Bénin 2026** | Contenu | 8 | 9 | 7 | **Terminé (2026-11-10)** | Copywriting / SEO | Publié |
 | **5** | **Rédiger et publier le Guide TVA & Déductions au Bénin** | Contenu | 8 | 9 | 7 | **Terminé (2026-11-10)** | Copywriting / SEO | Publié |
 | **6** | **Déployer le protocole de collecte d'avis clients WhatsApp** | Local | 8 | 8 | 8 | **8.0** | Support / Vente | Semaine 3 |

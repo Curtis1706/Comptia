@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { trackEvent } from "@/lib/analytics";
 
 export default function AccompagnementPage() {
   const [activeTab, setActiveTab] = useState<"compta" | "facturation" | "compte" | "bilan">("compta");
@@ -48,6 +49,10 @@ export default function AccompagnementPage() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    trackEvent("generate_lead", {
+      lead_source: "accompagnement_form",
+      subject: formData.need,
+    });
     setSubmitted(true);
   };
 

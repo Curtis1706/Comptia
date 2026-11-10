@@ -21,9 +21,12 @@ const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   "@id": "https://ceilow.com/#localbusiness",
-  name: "Ceilow Bénin",
+  name: "Ceilow",
+  description:
+    "Logiciel de comptabilité SYSCOHADA, facturation normalisée e-MECeF DGI et paie CNSS au Bénin, édité par Digiplex Agency (RCCM RB/PNO/26 B 7147).",
   image: "https://ceilow.com/images/equipe-support-cotonou.jpg",
   telephone: "+2290197554953",
+  email: "contact@ceilow.com",
   url: "https://ceilow.com/contact",
   address: {
     "@type": "PostalAddress",
@@ -40,8 +43,8 @@ const localBusinessSchema = {
     {
       "@type": "OpeningHoursSpecification",
       dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "08:30",
-      closes: "18:00",
+      opens: "08:00",
+      closes: "18:30",
     },
   ],
   priceRange: "$$",

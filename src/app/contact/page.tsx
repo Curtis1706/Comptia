@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { trackEvent } from "@/lib/analytics";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -41,6 +42,10 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
+      trackEvent("generate_lead", {
+        lead_source: "contact_form",
+        subject: formData.sujet,
+      });
       setIsSubmitting(false);
       setSubmitted(true);
     }, 1200);

@@ -169,10 +169,10 @@ export default function MentionsLegalesPage() {
                 1. Éditeur du site
               </h3>
               <p className="text-base text-text-muted leading-relaxed">
-                Le site Ceilow est édité par <strong className="text-ink font-semibold">Ceilow Technologies SAS</strong>, société par actions simplifiée au capital de 10 000 000 FCFA, immatriculée au Registre du commerce et du crédit mobilier (RCCM) de Cotonou sous le numéro <span className="tabular-nums font-mono text-ink">RB/COT/24 B 38920</span>, Identifiant Fiscal Unique (IFU) n° <span className="tabular-nums font-mono text-ink">0202415896321</span>.
+                La plateforme Ceilow est développée et éditée par <strong className="text-ink font-semibold">Digiplex Agency</strong>, immatriculée au Registre du commerce et du crédit mobilier (RCCM) sous le numéro <span className="tabular-nums font-mono text-ink">RB/PNO/26 B 7147</span>.
               </p>
               <p className="text-base text-text-muted leading-relaxed">
-                Siège social : Quartier Haie Vive, Cotonou, République du Bénin. Contact : <a href="mailto:contact@ceilow.bj" className="text-ink underline hover:text-primary transition-colors">contact@ceilow.bj</a> · <span className="tabular-nums">+229 01 97 00 00 00</span>.
+                Siège social : Cotonou, République du Bénin. Contact : <a href="mailto:contact@ceilow.com" className="text-ink underline hover:text-primary transition-colors">contact@ceilow.com</a> · <a href="tel:+2290197554953" className="tabular-nums text-ink underline hover:text-primary transition-colors">+229 01 97 55 49 53</a>.
               </p>
             </section>
 
@@ -182,7 +182,7 @@ export default function MentionsLegalesPage() {
                 2. Directeur de la publication
               </h3>
               <p className="text-base text-text-muted leading-relaxed">
-                Le directeur de la publication est le représentant légal de Ceilow Technologies SAS.
+                Le directeur de la publication est le représentant légal de Digiplex Agency, éditeur de Ceilow.
               </p>
             </section>
 
@@ -202,7 +202,7 @@ export default function MentionsLegalesPage() {
                 4. Propriété intellectuelle
               </h3>
               <p className="text-base text-text-muted leading-relaxed">
-                Les marques, logos, textes, images, éléments graphiques, chartes ergonomiques et logiciels présents sur le site sont la propriété exclusive de Ceilow Technologies SAS ou de ses partenaires et sont protégés par les législations nationales et internationales relatives à la propriété intellectuelle.
+                Les marques, logos, textes, images, éléments graphiques, chartes ergonomiques et logiciels présents sur le site sont la propriété exclusive de Digiplex Agency (éditeur de Ceilow) ou de ses partenaires et sont protégés par les législations nationales et internationales relatives à la propriété intellectuelle.
               </p>
               <p className="text-base text-text-muted leading-relaxed">
                 Toute reproduction, représentation, modification ou utilisation totale ou partielle sans autorisation écrite préalable est strictement interdite.

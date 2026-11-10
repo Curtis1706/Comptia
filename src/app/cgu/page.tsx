@@ -171,7 +171,7 @@ export default function CGUPage() {
                 1. Objet
               </h3>
               <p className="text-base text-text-muted leading-relaxed">
-                Les présentes conditions générales d'utilisation (CGU) encadrent l'accès et l'utilisation du service Ceilow, édité par <strong className="text-ink font-semibold">Ceilow Technologies SAS</strong>. En créant un compte, vous les acceptez.
+                Les présentes conditions générales d'utilisation (CGU) encadrent l'accès et l'utilisation du service Ceilow, édité par <strong className="text-ink font-semibold">Digiplex Agency</strong> (RCCM RB/PNO/26 B 7147). En créant un compte, vous les acceptez.
               </p>
             </section>
 

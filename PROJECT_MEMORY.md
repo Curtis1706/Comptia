@@ -2,6 +2,34 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-10 : Kit SEO Local Google Business Profile (Cotonou), Harmonisation NAP & Architecture GA4 + Consent Mode v2
+
+- **Demande Utilisateur** :
+  - Exécuter les priorités ICE #2 (Fiche Google Business Profile Map Pack Cotonou) et #3 (Plan de télémétrie GA4 & suivi des conversions) via `/seo-partner`.
+- **Décisions Validées avec l'Utilisateur (`ask_question`)** :
+  - Identité NAP unique : `Ceilow` (édité par `Digiplex Agency - RCCM RB/PNO/26 B 7147`), téléphone unique `+229 01 97 55 49 53`, e-mail `contact@ceilow.com`, horaires `08h00 - 18h30` du lundi au vendredi.
+  - Adresse physique / Plus Code Google : emplacement exact laissé avec marqueur `[À compléter avant publication]` dans le kit GBP pour ne jamais inventer de repère sur Google Maps.
+  - GA4 : déploiement complet de l'infrastructure Consent Mode v2 APDP + suivi des conversions piloté par la variable d'environnement `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+- **Réalisations Code & Documentation** :
+  - **Harmonisation NAP & Schema.org** :
+    - [`src/app/contact/layout.tsx`](file:///e:/Comptia/src/app/contact/layout.tsx) : alignement du schéma `ProfessionalService` (`name: "Ceilow"`, `08:00 - 18:30`, `contact@ceilow.com`, description Digiplex Agency).
+    - [`src/app/mentions-legales/page.tsx`](file:///e:/Comptia/src/app/mentions-legales/page.tsx), [`src/app/confidentialite/page.tsx`](file:///e:/Comptia/src/app/confidentialite/page.tsx), [`src/app/cgu/page.tsx`](file:///e:/Comptia/src/app/cgu/page.tsx) : remplacement des anciens libellés (`Ceilow Technologies SAS`, `contact@ceilow.bj`, `+229 01 97 00 00 00`) par `Digiplex Agency (RCCM RB/PNO/26 B 7147)`, `contact@ceilow.com` et `+229 01 97 55 49 53`.
+  - **Infrastructure GA4 & Consent Mode v2 APDP** :
+    - [`src/lib/analytics.ts`](file:///e:/Comptia/src/lib/analytics.ts) : validation stricte de `NEXT_PUBLIC_GA_MEASUREMENT_ID` (`^G-[A-Z0-9]+$`), helpers typés `trackEvent`, `trackPageView`, `saveConsentChoice`, `readStoredConsent`, `updateGtagConsent` sans données personnelles.
+    - [`src/components/seo/GoogleAnalytics.tsx`](file:///e:/Comptia/src/components/seo/GoogleAnalytics.tsx) (monté dans [`src/app/layout.tsx`](file:///e:/Comptia/src/app/layout.tsx)) : scripts Google Consent Mode v2 par défaut en `denied`, bandeau sobre APDP (`Tout accepter` / `Refuser`), suivi des pages App Router sous `<Suspense>` et écoute globale des clics `wa.me/` (`whatsapp_click`) et `tel:` (`phone_click`).
+    - Branchement des événements réels : `sign_up` dans [`src/app/register/page.tsx`](file:///e:/Comptia/src/app/register/page.tsx), `generate_lead` dans [`src/app/demo/page.tsx`](file:///e:/Comptia/src/app/demo/page.tsx), [`src/app/contact/page.tsx`](file:///e:/Comptia/src/app/contact/page.tsx) et [`src/app/accompagnement/page.tsx`](file:///e:/Comptia/src/app/accompagnement/page.tsx), `file_download` dans [`src/app/ressources/plan-comptable-syscohada-pdf/page.tsx`](file:///e:/Comptia/src/app/ressources/plan-comptable-syscohada-pdf/page.tsx) et [`src/app/ressources/calendrier-fiscal-benin/page.tsx`](file:///e:/Comptia/src/app/ressources/calendrier-fiscal-benin/page.tsx).
+  - **Livrables Documentation SEO** :
+    - [`docs/seo/2026-11-10-gbp-cotonou-et-telemetrie-ga4.md`](file:///e:/Comptia/docs/seo/2026-11-10-gbp-cotonou-et-telemetrie-ga4.md) : kit GBP complet (catégories, description 662 car., catalogue services/tarifs, checklist vidéo/photos, protocole avis WhatsApp) et plan GA4 + Search Console + Looker Studio.
+    - [`docs/seo/2026-10-26-audit-global-et-reste-a-faire.md`](file:///e:/Comptia/docs/seo/2026-10-26-audit-global-et-reste-a-faire.md) : mise à jour de l'avancement des actions #2 et #3.
+- **Vérifications Effectuées (Règle 18)** :
+  - `npx tsc --noEmit` : code 0 (zéro erreur TypeScript).
+  - `pnpm build` : code 0 (`81/81` routes compilées et générées sans erreur).
+- **Reste à Faire Côté Exploitation** :
+  - Compléter le Plus Code Google exact devant les locaux à Cotonou et valider la fiche sur business.google.com.
+  - Ajouter `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...` dans `.env` en production puis activer les événements clés dans l'interface GA4.
+
+---
+
 ### 2026-11-10 : Achèvement du Cocon Sémantique (3 Derniers Guides Piliers : TPS, SYSCOHADA & CNSS Bénin)
 
 - **Demande Utilisateur** :

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { trackEvent } from "@/lib/analytics";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -230,6 +231,11 @@ export default function PlanComptableSyscohadaPdfPage() {
     if (typeof window !== "undefined") {
       window.print();
     }
+    trackEvent("file_download", {
+      file_name: "plan-comptable-syscohada-benin",
+      file_extension: "pdf_print",
+      page_path: "/ressources/plan-comptable-syscohada-pdf",
+    });
     setExportMessage("Fenêtre d'impression ouverte : choisissez « Enregistrer au format PDF ».");
     setTimeout(() => setExportMessage(null), 4000);
   };
@@ -251,6 +257,11 @@ export default function PlanComptableSyscohadaPdfPage() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
+    trackEvent("file_download", {
+      file_name: "plan-comptable-syscohada-benin",
+      file_extension: "csv",
+      page_path: "/ressources/plan-comptable-syscohada-pdf",
+    });
     setExportMessage(`Export CSV téléchargé (${filteredAccounts.length} comptes).`);
     setTimeout(() => setExportMessage(null), 4000);
   };

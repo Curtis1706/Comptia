@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { trackEvent } from "@/lib/analytics";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -102,6 +103,11 @@ export default function CalendrierFiscalBeninPage() {
     if (typeof window !== "undefined") {
       window.print();
     }
+    trackEvent("file_download", {
+      file_name: "calendrier-fiscal-benin-2026",
+      file_extension: "pdf_print",
+      page_path: "/ressources/calendrier-fiscal-benin",
+    });
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 3500);
   };

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { SECTORS_LIST } from "@/constants/sector-modules";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { trackEvent } from "@/lib/analytics";
 
 const TEAM_SIZES = [
   { value: "1-5", label: "1 à 5 personnes" },
@@ -146,6 +147,11 @@ function DemoContent() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 800));
+      trackEvent("generate_lead", {
+        lead_source: "demo_form",
+        company_sector: formData.secteur,
+        team_size: formData.tailleEquipe,
+      });
       setSubmitted(true);
       toast.success("Demande de démonstration envoyée avec succès !");
       window.scrollTo({ top: 0, behavior: "smooth" });

@@ -171,7 +171,7 @@ export default function ConfidentialitePage() {
                 1. Responsable du traitement
               </h3>
               <p className="text-base text-text-muted leading-relaxed">
-                Les données personnelles collectées via le site et l'application Ceilow sont traitées par <strong className="text-ink font-semibold">Ceilow Technologies SAS</strong>, Quartier Haie Vive, Cotonou, Bénin. Contact pour toute question : <a href="mailto:dpo@ceilow.bj" className="text-ink underline hover:text-primary transition-colors">dpo@ceilow.bj</a> · <a href="mailto:contact@ceilow.bj" className="text-ink underline hover:text-primary transition-colors">contact@ceilow.bj</a>.
+                Les données personnelles collectées via le site et l'application Ceilow sont traitées par <strong className="text-ink font-semibold">Digiplex Agency</strong> (éditeur de Ceilow, RCCM RB/PNO/26 B 7147), Cotonou, République du Bénin. Contact pour toute question : <a href="mailto:contact@ceilow.com" className="text-ink underline hover:text-primary transition-colors">contact@ceilow.com</a> · <a href="tel:+2290197554953" className="tabular-nums text-ink underline hover:text-primary transition-colors">+229 01 97 55 49 53</a>.
               </p>
             </section>
 
@@ -251,7 +251,7 @@ export default function ConfidentialitePage() {
                 Conformément à la réglementation applicable, vous pouvez demander l'accès à vos données, leur rectification, leur effacement, vous opposer à un traitement ou demander la limitation ou la portabilité lorsque la loi le prévoit.
               </p>
               <p className="text-base text-text-muted leading-relaxed">
-                Pour exercer vos droits, écrivez à <a href="mailto:dpo@ceilow.bj" className="text-ink underline hover:text-primary transition-colors">dpo@ceilow.bj</a>. Nous pouvons vous demander un justificatif d'identité afin de prévenir toute tentative d'accès non autorisé.
+                Pour exercer vos droits, écrivez à <a href="mailto:contact@ceilow.com" className="text-ink underline hover:text-primary transition-colors">contact@ceilow.com</a>. Nous pouvons vous demander un justificatif d'identité afin de prévenir toute tentative d'accès non autorisé.
               </p>
             </section>
 

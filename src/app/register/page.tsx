@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ArrowLeft, Eye, EyeOff, Loader2, Check, AlertCircle, Building2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { SECTORS_LIST } from "@/constants/sector-modules";
+import { trackEvent } from "@/lib/analytics";
 
 const OHADA_COMPANY_TYPES = [
   { value: "SARL", label: "SARL : Société à Responsabilité Limitée" },
@@ -167,6 +168,11 @@ export default function RegisterPage() {
           toast.error(result.error || "Une erreur est survenue lors de la création de votre compte.");
         }
       } else {
+        trackEvent("sign_up", {
+          method: "email",
+          company_type: formData.companyType,
+          company_sector: formData.companySector,
+        });
         toast.success("Compte créé et plan comptable SYSCOHADA initialisé !");
         router.push("/login?registered=true");
       }

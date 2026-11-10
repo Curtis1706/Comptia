@@ -35,7 +35,7 @@ export function PublicHeader({ className = "" }: PublicHeaderProps) {
         </div>
 
         {/* Liens de navigation exactement au milieu (desktop) */}
-        <div className="hidden md:flex items-center gap-8 lg:gap-10 absolute left-1/2 -translate-x-1/2">
+        <div className="hidden md:flex items-center gap-5 lg:gap-8 xl:gap-10 absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
           <Link
             href="/tarifs"
             className="text-sm font-semibold text-white/90 hover:text-primary transition-colors py-2"
@@ -47,6 +47,12 @@ export function PublicHeader({ className = "" }: PublicHeaderProps) {
             className="text-sm font-semibold text-white/90 hover:text-primary transition-colors py-2"
           >
             Fonctionnalités
+          </Link>
+          <Link
+            href="/ressources"
+            className="text-sm font-semibold text-white/90 hover:text-primary transition-colors py-2"
+          >
+            Ressources
           </Link>
           <Link
             href="/accompagnement"
@@ -100,6 +106,13 @@ export function PublicHeader({ className = "" }: PublicHeaderProps) {
             className="text-base font-semibold text-white/90 hover:text-primary py-2 border-b border-white/10"
           >
             Fonctionnalités
+          </Link>
+          <Link
+            href="/ressources"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-base font-semibold text-white/90 hover:text-primary py-2 border-b border-white/10"
+          >
+            Ressources
           </Link>
           <Link
             href="/accompagnement"

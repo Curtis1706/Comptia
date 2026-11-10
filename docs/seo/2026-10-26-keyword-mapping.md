@@ -2,7 +2,7 @@
 
 Date : 2026-10-26
 Auteur : Partenaire SEO
-Perimetre : Ensemble des 24 routes publiques de la plateforme Ceilow (dont les 5 guides piliers du cocon semantique)
+Perimetre : Ensemble des 25 routes publiques de la plateforme Ceilow (dont le hub /ressources et les 5 guides piliers)
 Statut : Valide pour execution
 
 ---
@@ -41,6 +41,7 @@ Chaque page possede une requete principale unique. Deux URLs ne doivent jamais v
 | `/accompagnement` | formation comptable et support ceilow cotonou | assistance logiciel dgi cotonou, integration logiciel comptable benin | Commerciale | 3 | Existante |
 | `/contact` | contact ceilow cotonou | numero telephone ceilow benin, support client ceilow whatsapp, agence ceilow cotonou | Navigationnelle / Trans | 4 | Existante |
 | `/demo` | demonstration logiciel ceilow | tester logiciel comptabilite dgi gratuit, presentation ceilow en direct | Transactionnelle | 5 | Existante |
+| `/ressources` | ressources comptabilite fiscalite benin | guides pratiques dgi benin, simulateur tva tps cnss, articles gestion entreprise benin | Informationnelle / Hub | 4 | Existante (Mise en ligne 2026-11-10) |
 | `/ressources/calendrier-fiscal-benin` | calendrier fiscal benin 2026 | echeances dgi benin, dates limites declaration tva tps, calendrier fiscal impots cotonou | Informationnelle | 4 | Existante |
 | `/ressources/guide-facturation-emecef-benin` | guide facture normalisee emecef benin | machine emecef fonctionnement, groupes taxation a b c d e f, taux aib facture, verification qr code dgi | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |
 | `/ressources/guide-tva-benin` | guide declaration tva benin | taux tva 18 benin, seuil 50 millions fcfa tps reel, tva deductible facture normalisee, echeance 10 du mois | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |

@@ -26,7 +26,7 @@ URL de référence : https://ceilow.com
 | Point de contrôle | Statut actuel | Détail des réalisations | Ce qu'il reste à faire | Priorité |
 |---|---|---|---|---|
 | Fichier `robots.txt` | **Terminé** | Généré dynamiquement via `src/app/robots.ts`. Exclut les espaces privés (`/dashboard/`, `/api/`, etc.) et autorise explicitement les robots IA (`OAI-SearchBot`, `PerplexityBot`). | Néant (surveiller les logs d'exploration). | Faible |
-| Sitemap XML | **Terminé** | Généré via `src/app/sitemap.ts` sur 24 routes publiques réelles (dont les 5 guides piliers) avec dates de mise à jour et priorités. | Soumettre l'URL dans Google Search Console lors du branchement DNS. | Haute |
+| Sitemap XML | **Terminé** | Généré via `src/app/sitemap.ts` sur 25 routes publiques réelles (dont `/ressources` et les 5 guides piliers) avec dates de mise à jour et priorités. | Soumettre l'URL dans Google Search Console lors du branchement DNS. | Haute |
 | Balisage Canonical | **Terminé** | Canoniques absolues déclarées sur 100% des routes dans les layouts serveurs. | Néant. | Faible |
 | Balises Meta Robots | **Terminé** | Directive `robots: { index: false, follow: false }` stricte sur l'ensemble des routes privées et de connexion. | Néant. | Faible |
 | Protection des pages privées | **Terminé** | Middleware configuré avec `PUBLIC_PATHS` évitant toute redirection parasite d'un robot public vers `/login`. | Néant. | Faible |

@@ -69,7 +69,7 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 2,
       name: "Ressources",
-      item: "https://ceilow.com/ressources/calendrier-fiscal-benin",
+      item: "https://ceilow.com/ressources",
     },
     {
       "@type": "ListItem",

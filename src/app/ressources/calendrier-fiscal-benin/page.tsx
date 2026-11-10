@@ -183,7 +183,7 @@ export default function CalendrierFiscalBeninPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/ressources/guide-facturation-emecef-benin">
+                  <BreadcrumbLink href="/ressources">
                     Ressources
                   </BreadcrumbLink>
                 </BreadcrumbItem>

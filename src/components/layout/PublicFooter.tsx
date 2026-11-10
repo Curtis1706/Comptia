@@ -112,6 +112,11 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href="/ressources" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Toutes les ressources
+                </Link>
+              </li>
+              <li>
                 <Link href="/ressources/calendrier-fiscal-benin" className="hover:text-primary transition-colors inline-block leading-snug">
                   Calendrier Fiscal Bénin 2026
                 </Link>

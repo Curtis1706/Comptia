@@ -153,7 +153,7 @@ export default function GuideTvaBeninPage() {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link href="/ressources/calendrier-fiscal-benin">Ressources Fiscales</Link>
+                    <Link href="/ressources">Ressources Fiscales</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />

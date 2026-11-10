@@ -2,6 +2,12 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-10 : Correction du Routage 404, `robots.txt` et `sitemap.xml` dans `src/middleware.ts`
+
+- **Cause identifiée** : Dans `src/middleware.ts`, la logique précédente utilisait une liste blanche `PUBLIC_PATHS` et redirigeait vers `/login?callbackUrl=...` toute URL absente de cette liste, ce qui interceptait les URL inexistantes (avant le rendu de `src/app/not-found.tsx`) ainsi que `/robots.txt` et `/sitemap.xml`.
+- **Action effectuée** : Remplacement de `PUBLIC_PATHS` dans `src/middleware.ts` par une protection ciblée sur `PROTECTED_APP_PREFIXES` (dérivé de `PAGE_ROUTE_MODULES` + `"/parametres"`, vérifié par segment via `isPathMatch`) et `isProtectedApi` (`/api/` hors `/api/auth`). Toute route hors préfixe protégé passe désormais via `NextResponse.next()`, permettant d'afficher directement la page 404 sur les URL inconnues et de servir `/robots.txt` et `/sitemap.xml` sans authentification, tout en conservant la redirection `/login` sur les pages applicatives privées et le statut `401` sur les API protégées.
+- **Vérification** : `npx tsc --noEmit` validé (code de sortie `0`) et `pnpm build` validé (code de sortie `0`, `82/82` pages statiques générées).
+
 ### 2026-11-10 : Création de la Page 404 Globe Ceilow, du Hub `/ressources` et des 6 Visuels Nanobanana
 
 - **Demande Utilisateur** :

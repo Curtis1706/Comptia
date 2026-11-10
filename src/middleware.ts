@@ -7,32 +7,6 @@ import {
   hasAccess,
 } from "@/lib/permissions";
 
-const PUBLIC_PATHS = [
-  "/",
-  "/login",
-  "/register",
-  "/demo",
-  "/tarifs",
-  "/fonctionnalites",
-  "/accompagnement",
-  "/solutions",
-  "/pour-qui",
-  "/contact",
-  "/securite-et-apdp",
-  "/ressources",
-  "/verify-email",
-  "/mentions-legales",
-  "/confidentialite",
-  "/cgu",
-  "/landing",
-  "/access-denied",
-  "/api/auth",
-  "/_next",
-  "/favicon.ico",
-  "/logo",
-  "/images",
-];
-
 const PAGE_ROUTE_MODULES: { prefix: string; module: Module }[] = [
   { prefix: "/dashboard", module: "dashboard" },
   { prefix: "/facturation", module: "invoices" },
@@ -46,15 +20,26 @@ const PAGE_ROUTE_MODULES: { prefix: string; module: Module }[] = [
   { prefix: "/cabinet", module: "cabinet_management" },
 ];
 
+const PROTECTED_APP_PREFIXES = [
+  ...PAGE_ROUTE_MODULES.map((r) => r.prefix),
+  "/parametres",
+];
+
+function isPathMatch(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // 1. Allow public paths
-  const isPublic = PUBLIC_PATHS.some((p) =>
-    p === "/" ? pathname === "/" : pathname.startsWith(p)
+  const isProtectedApi =
+    pathname.startsWith("/api/") && !pathname.startsWith("/api/auth");
+
+  const isProtectedPage = PROTECTED_APP_PREFIXES.some((prefix) =>
+    isPathMatch(pathname, prefix)
   );
 
-  // 2. Validate JWT token
+  // 1. Validate JWT token
   let token = await getToken({
     req,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
@@ -89,18 +74,21 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  if (isPublic) return NextResponse.next();
+  // 2. Allow public routes, robots.txt, sitemap.xml, and unknown URLs (so Next.js serves /not-found with HTTP 404)
+  if (!isProtectedApi && !isProtectedPage) {
+    return NextResponse.next();
+  }
 
   // Unauthenticated API requests → 401
-  if (!token && pathname.startsWith("/api/")) {
+  if (!token && isProtectedApi) {
     return NextResponse.json(
-      { success: false, error: "Non authentifié" },
+      { success: false, data: null, error: "Non authentifié" },
       { status: 401 }
     );
   }
 
-  // Unauthenticated page requests → redirect to login
-  if (!token) {
+  // Unauthenticated protected page requests → redirect to login
+  if (!token && isProtectedPage) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);

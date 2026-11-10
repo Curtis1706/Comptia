@@ -2,6 +2,31 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-10 : Création de la Page 404 Globe Ceilow, du Hub `/ressources` et des 6 Visuels Nanobanana
+
+- **Demande Utilisateur** :
+  - Adapter une page 404 inspirée du modèle `cosmic-404` avec globe rotatif pour toutes les routes introuvables.
+  - Créer la page hub `/ressources` regroupant tous les articles et guides, ajouter son lien dans le header et le footer, générer 6 illustrations dédiées via `image-generator` (Nanobanana) et respecter strictement les règles Ceilow, `/seo-partner` et `/copywriting`.
+- **Décisions & Adaptations Règles Ceilow** :
+  - **Page 404 (`src/components/ui/ceilow-globe.tsx`, `src/views/NotFound.tsx`, `src/app/not-found.tsx`)** :
+    - Création d'un globe 3D matriciel sur `<canvas>` (`CeilowGlobe`) centré sur Cotonou / Bénin aux couleurs sémantiques (`#332E29`, `#F5F4F2`, `#FFD946`) sans dépendance `cobe` externe ni erreur WebGL, compatible `prefers-reduced-motion`.
+    - Mise en page `4 [Globe] 4` via `framer-motion` (`MotionConfig reducedMotion="user"`), textes `/copywriting` en français clair (« Cette page est introuvable »), zéro `console.error`, header + footer inclus et 4 raccourcis utiles.
+    - Métadonnées `robots: { index: false, follow: true }` ajoutées sur `src/app/not-found.tsx`.
+  - **Hub `/ressources` (`src/app/ressources/layout.tsx`, `src/app/ressources/page.tsx`)** :
+    - Adaptation du gabarit asymétrique (carte vedette 7/12 + 2 guides empilés 5/12 + grille 3 colonnes `ResourceGridCard`) sans aucun élément banni (suppression du glassmorphisme `backdrop-blur`, des dégradés sur image, des badges flottants, des faux compteurs de vues et des notes en étoiles).
+    - Génération de 6 visuels 3:2 via `image-generator` (Nanobanana) placés dans `public/images/ressources/` (`guide-emecef-benin.jpg`, `guide-tva-benin.jpg`, `calendrier-fiscal-benin.jpg`, `calcul-tps-benin.jpg`, `plan-syscohada-benin.jpg`, `bareme-cnss-benin.jpg`).
+    - Recherche instantanée + filtres thématiques (`Tous les guides`, `Facturation DGI`, `TVA, TPS & Échéances`, `Comptabilité SYSCOHADA`, `Paie & CNSS`) avec état vide réinitialisable.
+    - SEO & JSON-LD : `CollectionPage`, `ItemList` (6 guides) et `BreadcrumbList`, requête unique `ressources comptabilite fiscalite benin`.
+  - **Navigation & Hiérarchie Breadcrumb** :
+    - Lien `Ressources` (`/ressources`) ajouté dans [`src/components/layout/PublicHeader.tsx`](file:///e:/Comptia/src/components/layout/PublicHeader.tsx) (desktop + mobile) et `Toutes les ressources` dans [`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx).
+    - Mise à jour de [`src/app/sitemap.ts`](file:///e:/Comptia/src/app/sitemap.ts) (25 routes publiques) et réorientation du 2e cran « Ressources » des 6 guides (`layout.tsx` JSON-LD + `page.tsx`) vers `/ressources`.
+    - Documentation SEO mise à jour (`docs/seo/2026-10-26-keyword-mapping.md`, `docs/seo/2026-10-26-audit-global-et-reste-a-faire.md`).
+- **Vérifications Effectuées (Règle 18)** :
+  - `npx tsc --noEmit` : code 0 (zéro erreur TypeScript).
+  - `pnpm build` : code 0 (`82/82` pages compilées et générées, dont `/ressources` et `/_not-found` prérendues en statique).
+
+---
+
 ### 2026-11-10 : Kit SEO Local Google Business Profile (Cotonou), Harmonisation NAP & Architecture GA4 + Consent Mode v2
 
 - **Demande Utilisateur** :

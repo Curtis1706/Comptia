@@ -2,6 +2,18 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-10 : Blocage d'Indexation `X-Robots-Tag` sur `*.vercel.app` (`next.config.ts`)
+
+- **Constat** : `https://studio-comptia.vercel.app/` répondait en `HTTP/1.1 200 OK` sans redirection ni directive `noindex`, apparaissant dans les pages d'origine Search Console comme copie du site principal `ceilow.com`.
+- **Action effectuée** : Ajout dans `next.config.ts` (`async headers()`) d'une règle conditionnelle (`has: [{ type: "host", value: "^.+\\.vercel\\.app$" }]`) appliquant `X-Robots-Tag: noindex, nofollow, noarchive` sur toutes les routes (`/(.*)`), afin de garder l'URL `.vercel.app` utilisable pour les tests tout en empêchant son indexation.
+- **Vérification** : `npx tsc --noEmit` (code `0`) et `pnpm build` (code `0`, `82/82` pages statiques générées).
+
+### 2026-11-10 : Correctif Timeout IndexNow (`scripts/submit-indexnow.mjs`) et Soumission `200`
+
+- **Cause identifiée** : `https://api.indexnow.org/indexnow` expirait (`UND_ERR_CONNECT_TIMEOUT`), et `autoSelectFamily` de Node.js provoquait un `fetch failed` lors de la bascule IPv6/IPv4 vers `https://www.bing.com/indexnow`.
+- **Action effectuée** : Mise à jour de `scripts/submit-indexnow.mjs` avec `dns.setDefaultResultOrder("ipv4first")`, `net.setDefaultAutoSelectFamily(false)`, timeout explicite (`AbortSignal.timeout(15000)`), passage prioritaire sur `https://www.bing.com/indexnow` et repli vers `https://api.indexnow.org/indexnow`.
+- **Vérification** : Exécution directe de `node scripts/submit-indexnow.mjs` réussie via `https://www.bing.com/indexnow` (`Statut HTTP : 200`, code de sortie `0`) pour les 26 URLs publiques de `ceilow.com`.
+
 ### 2026-11-10 : Réécriture `/copywriting` et Complétude de `public/llms.txt`
 
 - **Constat** : L'introduction initiale de `public/llms.txt` était trop administrative (mention légale Digiplex / RCCM en tête) et empilait des sigles comptables/fiscaux sans expliciter les bénéfices utilisateur ; plusieurs éléments clés manquaient (`/`, `/register`, détail des 3 formules tarifaires, paiement Mobile Money, banques locales supportées, délai de reprise 48h, adresse Avenue Jean-Paul II et horaires Cotonou, FAQ synthétique).

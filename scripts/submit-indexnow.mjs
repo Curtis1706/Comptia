@@ -6,9 +6,19 @@
  * est configuré comme domaine principal sans redirection sur Vercel.
  */
 
+import dns from "node:dns";
+import net from "node:net";
+
+dns.setDefaultResultOrder("ipv4first");
+net.setDefaultAutoSelectFamily(false);
+
 const HOST = "ceilow.com";
 const KEY = "c7e10b8a9f2d4e31a6b58d7f0c9e4a12";
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
+const INDEXNOW_ENDPOINTS = [
+  "https://www.bing.com/indexnow",
+  "https://api.indexnow.org/indexnow",
+];
 
 const URL_LIST = [
   `https://${HOST}/`,
@@ -49,23 +59,38 @@ async function submitIndexNow() {
 
   console.log(`Envoi IndexNow pour ${URL_LIST.length} URLs sur ${HOST}...`);
 
-  const response = await fetch("https://api.indexnow.org/indexnow", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-    },
-    body: JSON.stringify(payload),
-  });
+  for (const endpoint of INDEXNOW_ENDPOINTS) {
+    try {
+      console.log(`Tentative via ${endpoint}...`);
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000),
+      });
 
-  const text = await response.text();
-  console.log(`Statut HTTP : ${response.status} ${response.statusText}`);
-  if (text) {
-    console.log(`Réponse : ${text}`);
+      const text = await response.text();
+      console.log(`Statut HTTP : ${response.status} ${response.statusText}`);
+      if (text) {
+        console.log(`Réponse : ${text}`);
+      }
+
+      if (response.ok) {
+        return;
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const cause =
+        err instanceof Error && "cause" in err && err.cause
+          ? ` (${String(err.cause)})`
+          : "";
+      console.warn(`Échec sur ${endpoint} (${msg}${cause}), passage au suivant...`);
+    }
   }
 
-  if (!response.ok) {
-    process.exitCode = 1;
-  }
+  process.exitCode = 1;
 }
 
 submitIndexNow().catch((err) => {

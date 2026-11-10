@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Déclarations Fiscales DGI : TVA, TPS, AIB et DSF au Bénin",
+  title: "Déclarations Fiscales DGI et TVA au Bénin Sans Stress",
   description:
-    "Préparez et télétransmettez vos déclarations fiscales béninoises sans risque d'erreur : pré-remplissage TVA, calcul TPS, retenues AIB et liasse fiscale DSF.",
+    "Préparez votre TVA mensuelle, votre TPS et vos impôts DGI en temps réel pour déclarer avant le 10 du mois sans majoration de retard. Testez Ceilow.",
   alternates: {
     canonical: "/solutions/declarations-fiscales",
   },
   openGraph: {
-    title: "Déclarations Fiscales DGI : TVA, TPS, AIB et DSF au Bénin | Ceilow",
+    title: "Déclarations Fiscales DGI et TVA Sans Stress au Bénin | Ceilow",
     description:
-      "Automatisation des déclarations fiscales et conformité DGI pour entreprises au Bénin.",
+      "Votre déclaration de TVA et vos bordereaux DGI prêts plusieurs jours avant la date limite du 10 du mois.",
     url: "https://ceilow.com/solutions/declarations-fiscales",
     type: "website",
   },
@@ -45,7 +45,7 @@ const breadcrumbSchema = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Déclarations Fiscales et Télétransmissions DGI",
+  name: "Préparation des Déclarations Fiscales DGI",
   provider: {
     "@type": "Organization",
     name: "Ceilow",
@@ -56,7 +56,7 @@ const serviceSchema = {
     name: "Benin",
   },
   description:
-    "Préparation automatisée des déclarations périodiques (TVA, TPS, AIB) et de la déclaration statistique et fiscale (DSF) pour la DGI Bénin.",
+    "Calcul en continu de la TVA due, des acomptes AIB, de la TPS et des états annuels DSF avec alertes avant chaque échéance DGI.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -2,6 +2,82 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-10 : Achèvement du Cocon Sémantique (3 Derniers Guides Piliers : TPS, SYSCOHADA & CNSS Bénin)
+
+- **Demande Utilisateur** :
+  - Concevoir et coder les 3 derniers guides piliers du cocon sémantique (`/ressources/calcul-tps-benin-guide`, `/ressources/plan-comptable-syscohada-pdf`, `/ressources/bareme-cotisations-cnss-benin`) selon les frameworks `/seo-partner` et `/copywriting` et toutes les règles strictes Ceilow.
+- **Décisions & Vérifications Réglementaires Bénin 2026** :
+  - **TPS Bénin (`calcul-tps-benin-guide`)** : vérification sur les sources officielles DGI (`finances.bj` / CGI Bénin) : taux unique `5 %` du CA annuel pour les entreprises individuelles <= 50 M FCFA (minimum de perception `10 000 FCFA` + prélèvement ORTB `4 000 FCFA`), exclusion des sociétés (SARL, SAS), échéances officielles `10 février` (1er acompte), `30 avril` (déclaration et solde), `10 juin` (2e acompte), et facturation e-MECeF sous Groupe E (`0 %` TVA).
+  - **Plan Comptable SYSCOHADA (`plan-comptable-syscohada-pdf`)** : répertoire interactif des 8 classes basé sur les comptes du projet (`prisma/seed.ts`), filtrable par classe et recherche instantanée, avec vrai téléchargement CSV UTF-8 BOM pour Excel (`Exporter en CSV`) et impression PDF native (`Imprimer / PDF`, zéro faux téléchargement).
+  - **Barème CNSS Bénin (`bareme-cotisations-cnss-benin`)** : vérification des dispositions officielles (`cnss.bj`, `cleiss.fr`, CGI Bénin) : `9 %` prestations familiales (dont 0,2 % maternité), `6,4 %` vieillesse employeur + `3,6 %` vieillesse salarié, `1 % à 4 %` risques professionnels, soit `16,4 % à 19,4 %` employeur et `3,6 %` salarié sur 100 % du salaire brut sans plafond (art. 22) ; barème mensuel ITS en vigueur (`0 % / 10 % / 15 % / 19 % / 30 %` sur brut arrondi) et VPS (`4 %` général, `2 %` enseignement privé) ; simulateur salaire net et coût total employeur.
+  - **Conformité UI & Copywriting** : français clair sans jargon non expliqué, CTA de 1 à 3 mots, zéro glassmorphisme, zéro badge flottant/pill cosmétique, tokens sémantiques stricts, `font-display`, `<Breadcrumb>`, `prefers-reduced-motion: reduce`, tableaux empilés en cartes sous `lg`, schémas JSON-LD (`Article`, `BreadcrumbList`, `FAQPage`) alignés 100 % avec les FAQ affichées.
+- **Fichiers Créés & Mis à Jour** :
+  - Guides Piliers 3, 4 et 5 (6 fichiers) : [`src/app/ressources/calcul-tps-benin-guide/layout.tsx`](file:///e:/Comptia/src/app/ressources/calcul-tps-benin-guide/layout.tsx) & [`page.tsx`](file:///e:/Comptia/src/app/ressources/calcul-tps-benin-guide/page.tsx), [`src/app/ressources/plan-comptable-syscohada-pdf/layout.tsx`](file:///e:/Comptia/src/app/ressources/plan-comptable-syscohada-pdf/layout.tsx) & [`page.tsx`](file:///e:/Comptia/src/app/ressources/plan-comptable-syscohada-pdf/page.tsx), [`src/app/ressources/bareme-cotisations-cnss-benin/layout.tsx`](file:///e:/Comptia/src/app/ressources/bareme-cotisations-cnss-benin/layout.tsx) & [`page.tsx`](file:///e:/Comptia/src/app/ressources/bareme-cotisations-cnss-benin/page.tsx).
+  - Maillage interne bidirectionnel & Indexation : [`src/app/sitemap.ts`](file:///e:/Comptia/src/app/sitemap.ts) (24 routes publiques), [`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx), [`src/app/ressources/calendrier-fiscal-benin/page.tsx`](file:///e:/Comptia/src/app/ressources/calendrier-fiscal-benin/page.tsx) (harmonisation FAQ TPS `10 févr. / 30 avr. / 10 juin` et liens vers les 5 guides), [`src/app/pour-qui/pme-et-independants/page.tsx`](file:///e:/Comptia/src/app/pour-qui/pme-et-independants/page.tsx), [`src/app/solutions/comptabilite-syscohada/page.tsx`](file:///e:/Comptia/src/app/solutions/comptabilite-syscohada/page.tsx), [`src/app/solutions/paie-cnss/page.tsx`](file:///e:/Comptia/src/app/solutions/paie-cnss/page.tsx).
+  - Documentation SEO : [`docs/seo/2026-10-26-keyword-mapping.md`](file:///e:/Comptia/docs/seo/2026-10-26-keyword-mapping.md) & [`docs/seo/2026-10-26-audit-global-et-reste-a-faire.md`](file:///e:/Comptia/docs/seo/2026-10-26-audit-global-et-reste-a-faire.md) (cocon sémantique 5/5 terminé).
+- **Vérifications Effectuées (Règle 18)** :
+  - `npx tsc --noEmit` : code 0 (zéro erreur TypeScript).
+  - `pnpm build` : code 0 (`81/81` pages générées, dont les 5 guides piliers prérendus en statique).
+- **Reste à Faire** :
+  - Déployer le kit SEO Local (Google Business Profile Cotonou, collecte d'avis WhatsApp) et configurer Google Search Console / GA4 lors de la mise en ligne DNS.
+
+---
+
+### 2026-11-10 : Audit et Refonte Copywriting, Conformité Règles Ceilow & Véracité Métier sur les Pages Vitrine et Layouts SEO
+
+- **Demande Utilisateur** :
+  - Auditer et réécrire l'ensemble des textes (layouts SEO, pages ressources, solutions, cibles, tarifs, fonctionnalités, accompagnement, contact, sécurité) selon le skill `/copywriting` (français courant compréhensible sans formation comptable, bénéfice utilisateur avant technique, CTA de 1 à 3 mots, zéro métrique inventée) et les règles strictes Ceilow (zéro glassmorphisme, zéro badge/pill cosmétique, zéro badge flottant sur image/carte, zéro hex en dur, zéro emoji, zéro tiret cadratin).
+- **Décisions & Corrections Transverses** :
+  - **Tokens sémantiques** ([`src/app/globals.css`](file:///e:/Comptia/src/app/globals.css), [`tailwind.config.ts`](file:///e:/Comptia/tailwind.config.ts), [`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx)) : ajout des tokens `--ink-surface` et `--ink-border` (`bg-ink-surface`, `border-ink-border`) et remplacement de tous les hex en dur (`#3D3830`, `#474138`, `#991b1b` remplacé par `text-error`).
+  - **Typographie & Motion** : correction de `font-clash` (inexistante dans Tailwind) vers `font-display`, contraste texte actif (`text-ink/80` sur fond jaune, `group-hover:underline` sur fond clair) et ajout de `prefers-reduced-motion: reduce` sur toutes les animations CSS/SVG.
+  - **Sobriété visuelle, Navigation & Accessibilité** : suppression des badges flottants, pastilles `rounded-full` et encadrés verts décoratifs (`bg-success`) ; ajout du fil d'Ariane `<Breadcrumb>` sur les pages à 2 niveaux ; boutons accordéon en `<button aria-expanded>` et zones tactiles >= 44px ; `<label htmlFor>` systématiques ; tableaux comparatifs sur `/tarifs` empilés en cartes sous `md`.
+  - **Honnêteté produit & Exactitude fiscale Bénin / SYSCOHADA** :
+    - Suppression des chiffres non vérifiés (`50+ entreprises`, `4.9 / 5`, `Gain de 6h/semaine`, temps de réponse `< 5 min` / `15 min`, faux avis clients, promesse `SLA 99.9%` et mention de co-conception/accréditation OECCA). Conversion des sections témoignages en scénarios et cas d'usage concrets au Bénin.
+    - Correction des boutons inactifs ou simulés (téléchargements PDF factices convertis en impression réelle `window.print()` sur `/ressources/calendrier-fiscal-benin` et `/solutions/paie-cnss`, boutons d'aperçu inertes reliés à `/demo` ou aux modules réels, onglets de filtrage de `/tarifs` branchés sur les cartes).
+    - Corrections réglementaires : compte banque SYSCOHADA `521` (au lieu de `512`), échéances CNSS (`le 15` trimestriel pour moins de 20 salariés ou `le 10` mensuel dès 20 salariés, majoration `1,50 %`), SMIG cohérent (`52 000 F`) et harmonisation de la remise Cabinet jusqu'à `50 %` dans la FAQ.
+    - Harmonisation des coordonnées officielles (`+229 01 97 55 49 53` et `contact@ceilow.com`) dans `contact/page.tsx`, `accompagnement/page.tsx` et [`docs/seo/2026-10-26-audit-global-et-reste-a-faire.md`](file:///e:/Comptia/docs/seo/2026-10-26-audit-global-et-reste-a-faire.md).
+- **Fichiers Mis à Jour** :
+  - Socle & Footer : `src/app/globals.css`, `tailwind.config.ts`, `src/components/layout/PublicFooter.tsx`.
+  - Layouts SEO (13 fichiers) : `ressources/calendrier-fiscal-benin`, `ressources/guide-facturation-emecef-benin`, `ressources/guide-tva-benin`, `solutions/facturation-dgi`, `solutions/comptabilite-syscohada`, `solutions/tresorerie-momo`, `solutions/paie-cnss`, `solutions/declarations-fiscales`, `solutions/gestion-depenses`, `contact`, `pour-qui/cabinets-comptables`, `fonctionnalites`, `securite-et-apdp`.
+  - Pages Vitrine (16 fichiers) : `ressources/guide-facturation-emecef-benin`, `ressources/guide-tva-benin`, `ressources/calendrier-fiscal-benin`, `solutions/facturation-dgi`, `solutions/comptabilite-syscohada` (incluant l'import manquant de `Calendar`), `solutions/tresorerie-momo`, `solutions/paie-cnss`, `solutions/declarations-fiscales`, `solutions/gestion-depenses`, `pour-qui/pme-et-independants`, `pour-qui/cabinets-comptables`, `contact`, `securite-et-apdp`, `tarifs`, `fonctionnalites`, `accompagnement`.
+- **Vérifications Effectuées (Règle 18)** :
+  - `npx tsc --noEmit` : code 0 (zéro erreur TypeScript).
+  - `pnpm build` : code 0 (compilation Turbopack réussie et 78/78 pages générées sans erreur bloquante).
+
+---
+
+### 2026-11-10 : Création des 2 Premiers Guides Piliers du Cocon Sémantique (`/ressources/guide-facturation-emecef-benin` et `/ressources/guide-tva-benin`)
+
+- **Demande Utilisateur** :
+  - Concevoir et coder les deux premiers guides pratiques du cocon sémantique Ceilow (`/ressources/guide-facturation-emecef-benin` et `/ressources/guide-tva-benin`) en combinant le framework `/seo-partner` et le skill `/copywriting` pédagogique orienté conversion vers l'essai Ceilow.
+- **Décisions & Conformité** :
+  - Vérification préalable des dispositions fiscales béninoises (DGI e-MECeF, groupes A à F, taux AIB 1 % / 5 %, taux TVA 18 %, seuil des 50 millions FCFA, règle de permanence de 3 ans, échéance du 10 du mois) et alignement strict avec la logique réelle du dépôt (`src/lib/mecef.ts`, `src/lib/mecef-mapping.ts`, comptes SYSCOHADA `4431`, `4452`, `4441`).
+  - Anti-cannibalisation garantie : intentions purement informationnelles et pédagogiques distinctes des pages transactionnelles `/solutions/facturation-dgi` et `/solutions/declarations-fiscales`.
+  - Respect intégral de la charte Ceilow : tokens sémantiques exclusivement (`globals.css`, zéro hex en dur dans Tailwind, zéro emoji, zéro tiret cadratin, zéro badge flottant, zéro glassmorphisme, `prefers-reduced-motion` sur les animations SVG, tableaux transformés en cartes empilées sous `lg`, fil d'Ariane visuel `<Breadcrumb>`, CTA 1 à 3 mots).
+- **Fichiers Créés et Mis à Jour** :
+  1. [`src/app/ressources/guide-facturation-emecef-benin/layout.tsx`](file:///e:/Comptia/src/app/ressources/guide-facturation-emecef-benin/layout.tsx) & [`page.tsx`](file:///e:/Comptia/src/app/ressources/guide-facturation-emecef-benin/page.tsx) :
+     - Title (54 car. avec suffixe) : `Facture Normalisée e-MECeF Bénin : Guide 2026 | Ceilow`
+     - Meta description (155 car.) + JSON-LD (`Article`, `BreadcrumbList`, `FAQPage`).
+     - Sections clés : bloc définitionnel AEO/GEO (50 mots), SVG animé d'inspection QR e-MECeF, sélecteur d'obligation par statut (Réel / TPS Groupe E / Indépendant), anatomie interactive d'une facture DGI cliquable en 4 zones, tableau responsive des 6 groupes (A à F) et taux AIB, procédures d'avoir (FA) et vérification, FAQ et ponts vers l'essai Ceilow.
+  2. [`src/app/ressources/guide-tva-benin/layout.tsx`](file:///e:/Comptia/src/app/ressources/guide-tva-benin/layout.tsx) & [`page.tsx`](file:///e:/Comptia/src/app/ressources/guide-tva-benin/page.tsx) :
+     - Title (54 car. avec suffixe) : `Déclaration TVA au Bénin : Guide Complet 2026 | Ceilow`
+     - Meta description (159 car.) + JSON-LD (`Article`, `BreadcrumbList`, `FAQPage`).
+     - Sections clés : bloc définitionnel AEO/GEO, testeur interactif du seuil 50 M FCFA (Entreprise individuelle vs Société), SVG animé balance `4431` vs `4452`, tableau responsive des mécanismes SYSCOHADA, simulateur mensuel interactif TVA nette à payer vs crédit de TVA reportable, les 4 conditions de déductibilité e-MECeF, procédure en 4 étapes avant le 10 du mois, FAQ et ponts vers Ceilow.
+  3. **Intégration et Maillage Interne Anti-Orphelines** :
+     - Ajout des 2 routes dans [`src/app/sitemap.ts`](file:///e:/Comptia/src/app/sitemap.ts) (21 routes publiques).
+     - Liens ajoutés dans [`src/components/layout/PublicFooter.tsx`](file:///e:/Comptia/src/components/layout/PublicFooter.tsx), [`src/app/ressources/calendrier-fiscal-benin/page.tsx`](file:///e:/Comptia/src/app/ressources/calendrier-fiscal-benin/page.tsx), [`src/app/solutions/facturation-dgi/page.tsx`](file:///e:/Comptia/src/app/solutions/facturation-dgi/page.tsx) et [`src/app/solutions/declarations-fiscales/page.tsx`](file:///e:/Comptia/src/app/solutions/declarations-fiscales/page.tsx).
+  4. **Documentation SEO** :
+     - Mise à jour de [`docs/seo/2026-10-26-keyword-mapping.md`](file:///e:/Comptia/docs/seo/2026-10-26-keyword-mapping.md) et [`docs/seo/2026-10-26-audit-global-et-reste-a-faire.md`](file:///e:/Comptia/docs/seo/2026-10-26-audit-global-et-reste-a-faire.md).
+- **Vérifications Effectuées** :
+  - `node .agents/skills/seo-partner/scripts/audit-metadata.mjs` : **35/35 routes OK** (JSON-LD détecté sur les 2 guides, 0 erreur).
+  - Scan CSS/caractères interdits sur `src/app/ressources/` : **0 tiret cadratin, 0 hex en dur, 0 glassmorphisme**.
+  - `npx tsc --noEmit` : **code 0** (zéro erreur TypeScript).
+  - `pnpm build` : **code 0** (78 pages générées, `/ressources/guide-facturation-emecef-benin` et `/ressources/guide-tva-benin` prérendues en statique).
+- **Reste à Faire** :
+  - Produire les 3 guides piliers restants (`calcul-tps-benin-guide`, `plan-comptable-syscohada-pdf`, `bareme-cotisations-cnss-benin`), ou déployer le kit SEO Local Google Business Profile Cotonou.
+
+---
+
 ### 2026-10-26 : Création Exhaustive des 11 Nouvelles Pages Vitrine, Éradication du Tiret Quadratin, Harmonisation Header/Footer & Respect Intégral /copywriting
 
 - **Demande Utilisateur** :

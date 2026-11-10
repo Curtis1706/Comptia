@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Toutes les Fonctionnalités : Facturation, Compta, Fiscalité et RH",
+  title: "Fonctionnalités Ceilow : Factures DGI, Compta et Paie",
   description:
-    "Découvrez l'ensemble des modules Ceilow : machine e-MECeF virtuelle, tenue SYSCOHADA, télétransmission DGI, paie CNSS, OCR dépenses et trésorerie MoMo.",
+    "Découvrez tous les outils Ceilow : factures certifiées e-MECeF sans boîtier, comptes à jour, préparation TVA, paie CNSS, reçus scannés et suivi MoMo.",
   alternates: {
     canonical: "/fonctionnalites",
   },
   openGraph: {
-    title: "Toutes les Fonctionnalités de Ceilow | Gestion Financière Bénin",
+    title: "Fonctionnalités Ceilow : Gestion d'Entreprise au Bénin | Ceilow",
     description:
-      "Tous les outils indispensables pour gérer votre entreprise béninoise au même endroit.",
+      "Facturation DGI, suivi Mobile Money, fiches de paie et comptabilité sur une seule interface claire.",
     url: "https://ceilow.com/fonctionnalites",
     type: "website",
   },

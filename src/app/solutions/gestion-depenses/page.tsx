@@ -7,22 +7,21 @@ import {
   Scan,
   ArrowRight,
   Check,
-  CheckCircle2,
   Camera,
-  FileText,
-  Archive,
   Receipt,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
-  Sparkles,
-  Search,
-  ShieldCheck,
-  Smartphone,
-  Eye,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function GestionDepensesPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -44,26 +43,26 @@ export default function GestionDepensesPage() {
 
   const faqs = [
     {
-      q: "Une photo de reçu sur smartphone a-t-elle une valeur probante en cas de contrôle fiscal au Bénin ?",
-      a: "Oui, à condition qu'elle soit lisible, horodatée et conservée dans son intégrité. Ceilow archive l'image originale avec son empreinte numérique unique durant la durée légale de 10 ans prescrite par l'OHADA et le Code Général des Impôts du Bénin.",
+      q: "Une photo de reçu sur téléphone est-elle valable lors d'un contrôle au Bénin ?",
+      a: "Oui, si elle reste parfaitement lisible, datée et sans retouche. Ceilow conserve votre photo originale avec sa date d'enregistrement pendant la durée légale de 10 ans.",
     },
     {
-      q: "Comment Ceilow extrait-il la TVA déductible et l'AIB ?",
-      a: "La reconnaissance intelligente isole les mentions de TVA (18%) et de précompte AIB (1%, 3% ou 5%) présentes sur le reçu du fournisseur. Ces montants sont immédiatement classés dans votre tableau de déclaration mensuelle.",
+      q: "Comment Ceilow retrouve-t-il la TVA déductible et l'AIB ?",
+      a: "La lecture automatique repère la TVA (18 %) et les retenues AIB (1 %, 3 % ou 5 %) imprimées sur la facture du fournisseur. Ces montants alimentent aussitôt votre préparation TVA du mois.",
     },
     {
-      q: "Les salariés en déplacement peuvent-ils transmettre leurs notes de frais directement ?",
-      a: "Oui, vos collaborateurs peuvent photographier leurs frais de mission ou de carburant depuis leur téléphone. Le gérant valide la dépense avant qu'elle ne soit intégrée aux comptes de l'entreprise.",
+      q: "Mes salariés en déplacement peuvent-ils envoyer leurs reçus ?",
+      a: "Oui, vos collaborateurs prennent en photo leurs reçus de carburant, repas ou transport depuis leur téléphone. Vous validez la dépense avant son passage en comptabilité.",
     },
     {
-      q: "Que faire si un reçu papier est froissé ou partiellement effacé ?",
-      a: "Ceilow met en évidence les champs incertains pour une validation en un clic. Vous pouvez corriger ou compléter manuellement n'importe quelle information avant la validation définitive de l'écriture.",
+      q: "Que faire si un ticket papier est froissé ou un peu effacé ?",
+      a: "Ceilow surligne les informations incertaines pour que vous puissiez vérifier et corriger un chiffre en un clic avant de valider.",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col font-sans selection:bg-primary selection:text-ink">
-      {/* ── STYLE DÉDIÉ POUR ANIMATION SVG LOTTIE-LIKE SCAN DE DÉPENSES ── */}
+      {/* STYLE DÉDIÉ ANIMATION SCAN DE DÉPENSES */}
       <style jsx global>{`
         @keyframes scanLaser {
           0% { transform: translateY(15px); opacity: 0.3; }
@@ -90,6 +89,13 @@ export default function GestionDepensesPage() {
           fill: #FFD946; stroke: #332E29; stroke-width: 1;
           animation: sparkleScanPop 3s ease-in-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) {
+          .laser-sweep-anim,
+          .receipt-anim,
+          .sparkle-scan {
+            animation: none;
+          }
+        }
       `}</style>
 
       <PublicHeader />
@@ -98,21 +104,34 @@ export default function GestionDepensesPage() {
         {/* HERO SECTION SPLIT SCREEN */}
         <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 border-b border-border bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/fonctionnalites">Fonctionnalités</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Gestion des dépenses</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Achats &amp; Justificatifs de Dépenses au Bénin
+                  Achats &amp; reçus de dépenses au Bénin
                 </span>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
-                  Gestion des notes de frais et reçus par OCR au Bénin
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-display">
+                  Gestion des notes de frais et reçus par photo au Bénin
                 </h1>
-                <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini les tickets de caisse perdus ou décolorés dans les tiroirs du bureau)
-                </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Simplifiez la gestion des notes de frais et dépenses d&apos;entreprise au Bénin grâce à la reconnaissance optique de caractères (OCR). Prenez une simple photo : Ceilow extrait le montant HT, la TVA déductible (18%) et le fournisseur en 3 secondes.
+                  Ne perdez plus vos tickets papier au fond d&apos;un sac. Prenez vos factures fournisseurs en photo : Ceilow lit automatiquement le nom du commerçant, le montant HT et la TVA déductible (18 %) par reconnaissance optique (OCR).
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -120,29 +139,29 @@ export default function GestionDepensesPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Numériser mon premier reçu</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
                     href="/demo"
                     className="bg-background-secondary text-ink font-bold px-7 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Tester la numérisation
+                    Voir la démo
                   </Link>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-text-muted">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Scan mobile instantané</span>
+                    <span>Photo simple depuis votre mobile</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Extraction TVA 18% &amp; AIB</span>
+                    <span>Calcul TVA 18 % &amp; AIB</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Archivage numérique 10 ans</span>
+                    <span>Archivage conservé 10 ans</span>
                   </div>
                 </div>
               </div>
@@ -150,21 +169,23 @@ export default function GestionDepensesPage() {
               {/* Colonne droite : Photo réelle Dirigeante Entreprise Cotonou */}
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-xs">
-                  <Image
-                    src="/images/dirigeante-benin.jpg"
-                    alt="Dirigeante d'entreprise à Cotonou numérisant ses justificatifs de dépenses"
-                    width={600}
-                    height={440}
-                    className="w-full h-[360px] sm:h-[420px] object-cover"
-                    priority
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/dirigeante-benin.jpg"
+                      alt="Dirigeante d'entreprise à Cotonou numérisant ses justificatifs de dépenses"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <div className="flex items-center justify-between text-xs font-bold text-ink mb-1">
-                      <span>Justificatif numérisé avec succès</span>
-                      <span className="text-success-deep font-semibold">TVA 18% isolée</span>
+                      <span>Reçu enregistré et classé</span>
+                      <span className="text-success-deep font-semibold">TVA 18 % lue</span>
                     </div>
                     <p className="text-[11px] text-text-muted">
-                      Pièce originale archivée avec valeur probante légale de 10 ans.
+                      Photo d&apos;origine conservée pendant la durée légale de 10 ans.
                     </p>
                   </div>
                 </div>
@@ -224,11 +245,11 @@ export default function GestionDepensesPage() {
               </svg>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink tracking-tight">
-              Une simple photo et le justificatif est comptabilisé
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
+              Une photo et votre reçu est déjà classé
             </h2>
             <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              La reconnaissance intelligente identifie le fournisseur, la date, le montant HT et la TVA déductible sans aucune frappe au clavier.
+              La lecture automatique relève le fournisseur, la date, le montant hors taxes et la TVA déductible sans rien retaper.
             </p>
           </div>
         </section>
@@ -240,11 +261,11 @@ export default function GestionDepensesPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Démonstrateur interactif
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
-                Voyez comment Ceilow lit une facturette de bureau à Cotonou
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-3">
+                Voyez comment Ceilow lit un ticket d&apos;achat à Cotonou
               </h2>
               <p className="text-sm sm:text-base text-text-muted max-w-2xl">
-                Cliquez sur &quot;Lancer la numérisation&quot; pour simuler la prise de photo et l&apos;analyse automatique des lignes fiscales.
+                Cliquez sur &laquo; Scanner ce ticket &raquo; pour tester la lecture automatique des lignes et de la TVA.
               </p>
             </div>
 
@@ -279,7 +300,7 @@ export default function GestionDepensesPage() {
                     <span className="tabular-nums">40 000 FCFA</span>
                   </div>
                   <div className="flex justify-between text-ink">
-                    <span>TVA 18%</span>
+                    <span>TVA 18 %</span>
                     <span className="tabular-nums">7 200 FCFA</span>
                   </div>
                   <div className="flex justify-between text-ink font-bold text-sm pt-1">
@@ -291,9 +312,9 @@ export default function GestionDepensesPage() {
                 {/* ANIMATION DU FAISCEAU LASER */}
                 {isScanning && (
                   <div className="absolute inset-0 bg-primary/10 flex items-center justify-center pointer-events-none">
-                    <div className="w-full h-1 bg-primary absolute top-1/2 -translate-y-1/2 animate-pulse shadow-md" />
+                    <div className="w-full h-1 bg-primary absolute top-1/2 -translate-y-1/2" />
                     <span className="bg-ink text-background text-xs font-bold px-3 py-1.5 rounded-lg z-10">
-                      Analyse OCR des lignes...
+                      Lecture du ticket en cours...
                     </span>
                   </div>
                 )}
@@ -303,30 +324,30 @@ export default function GestionDepensesPage() {
                     type="button"
                     onClick={lancerScan}
                     disabled={isScanning}
-                    className="w-full bg-primary text-ink font-bold text-xs py-3 px-4 rounded-xl hover:opacity-95 transition-all flex items-center justify-center gap-2 min-h-[44px]"
+                    className="w-full bg-primary text-ink font-bold text-xs py-3 px-4 rounded-xl hover:opacity-95 transition-all flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
                   >
                     <Camera className="w-4 h-4" />
-                    <span>{isScanning ? "Lecture en cours..." : "Lancer la numérisation du reçu"}</span>
+                    <span>{isScanning ? "Lecture en cours..." : "Scanner ce ticket"}</span>
                   </button>
                 </div>
               </div>
 
               {/* RÉSULTAT DE L'EXTRACTION AUTOMATIQUE (DROITE) */}
               <div className="lg:col-span-7 bg-background p-6 sm:p-8 rounded-2xl border border-border">
-                <div className="flex items-center justify-between pb-6 mb-6 border-b border-border">
+                <div className="flex items-center justify-between pb-6 mb-6 border-b border-border gap-3">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted block">
-                      Données extraites par Ceilow
+                      Données lues par Ceilow
                     </span>
                     <h3 className="text-base font-bold text-ink">
-                      {scannedResult ? "Facture d'achat reconnue" : "En attente de numérisation"}
+                      {scannedResult ? "Facture d'achat reconnue" : "En attente du scan"}
                     </h3>
                   </div>
                   {scannedResult && (
-                    <div className="bg-background-secondary border border-border px-3 py-1.5 rounded-lg text-xs font-bold text-ink flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-ink" />
-                      <span>Extraction certifiée</span>
-                    </div>
+                    <span className="text-xs font-bold text-success-deep flex items-center gap-1.5 shrink-0">
+                      <Check className="w-4 h-4" />
+                      <span>Lecture prête</span>
+                    </span>
                   )}
                 </div>
 
@@ -342,10 +363,10 @@ export default function GestionDepensesPage() {
                       </div>
                       <div className="p-4 rounded-xl bg-background-secondary border border-border">
                         <span className="text-[11px] font-bold uppercase text-text-muted block mb-1">
-                          Compte SYSCOHADA affecté
+                          Catégorie SYSCOHADA
                         </span>
                         <span className="text-sm font-bold text-ink">605100 Fournitures de bureau</span>
-                        <span className="text-xs text-text-muted block mt-0.5">Affectation automatique</span>
+                        <span className="text-xs text-text-muted block mt-0.5">Classement automatique</span>
                       </div>
                     </div>
 
@@ -355,7 +376,7 @@ export default function GestionDepensesPage() {
                         <span className="text-ink font-bold tabular-nums">40 000 FCFA</span>
                       </div>
                       <div className="flex justify-between items-center text-text-muted">
-                        <span className="font-sans">TVA Déductible (18%)</span>
+                        <span className="font-sans">TVA récupérable (18 %)</span>
                         <span className="text-ink font-bold tabular-nums">7 200 FCFA</span>
                       </div>
                       <div className="flex justify-between items-center pt-2 border-t border-border text-sm font-bold text-ink">
@@ -366,14 +387,14 @@ export default function GestionDepensesPage() {
 
                     <div className="p-4 rounded-xl bg-primary/20 border border-primary text-xs text-ink flex items-center gap-2">
                       <Check className="w-4 h-4 text-ink shrink-0" />
-                      <span>Cette TVA de 7 200 FCFA est automatiquement ajoutée à vos crédits déductibles pour votre déclaration du 10 du mois.</span>
+                      <span>Cette TVA de 7 200 FCFA s&apos;ajoute automatiquement à votre TVA déductible pour le 10 du mois.</span>
                     </div>
                   </div>
                 ) : (
                   <div className="p-10 text-center text-text-muted bg-background-secondary rounded-xl border border-border">
                     <Scan className="w-8 h-8 mx-auto mb-3 text-text-muted" />
                     <p className="text-sm">
-                      Cliquez sur le bouton à gauche pour lancer la simulation d&apos;extraction OCR.
+                      Cliquez sur &laquo; Scanner ce ticket &raquo; à gauche pour tester la lecture automatique.
                     </p>
                   </div>
                 )}
@@ -382,67 +403,67 @@ export default function GestionDepensesPage() {
           </div>
         </section>
 
-        {/* 3 ÉTAPES CLAIRES DU PROCESSUS GUIDÉ */}
+        {/* 3 ÉTAPES CLAIRES */}
         <section className="py-16 md:py-24 bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-16">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
-                Processus en 3 temps
+                En 3 étapes simples
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-                Comment vos reçus deviennent des écritures comptables
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
+                Comment vos reçus entrent dans votre comptabilité
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-background-secondary p-8 rounded-2xl border border-border">
                 <div className="text-xs font-mono font-bold text-text-muted mb-4">
-                  01. CAPTURE
+                  01. PHOTOGRAPHIE
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Prenez la facturette en photo
+                  Prenez le ticket en photo
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Depuis votre smartphone au restaurant, à la station-service ou chez votre fournisseur. Aucun téléchargement d&apos;application lourde requis, tout s&apos;effectue dans votre navigateur sécurisé.
+                  Avec votre téléphone au restaurant, à la station-service ou en boutique. Aucune installation lourde, tout passe par votre navigateur.
                 </p>
               </div>
 
               <div className="bg-background-secondary p-8 rounded-2xl border border-border">
                 <div className="text-xs font-mono font-bold text-text-muted mb-4">
-                  02. CLASSIFICATION
+                  02. LECTURE
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Ceilow lit, classe et isole la TVA
+                  Ceilow lit et classe la dépense
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Notre moteur de reconnaissance détecte l&apos;IFU du commerçant, la date, le montant exact et la TVA récupérable. L&apos;écriture d&apos;achat est immédiatement pré-remplie.
+                  L&apos;outil repère le numéro IFU du vendeur, la date, le total et la TVA à récupérer. Il vous propose l&apos;écriture prête à valider.
                 </p>
               </div>
 
               <div className="bg-background-secondary p-8 rounded-2xl border border-border">
                 <div className="text-xs font-mono font-bold text-text-muted mb-4">
-                  03. ARCHIVAGE LÉGAL
+                  03. ARCHIVAGE
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Le document est scellé 10 ans
+                  Le justificatif est gardé 10 ans
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Le justificatif numérique reste accessible en un clic à côté de son écriture comptable. En cas de contrôle fiscal, vous présentez les preuves numériques immédiatement.
+                  L&apos;image reste attachée à sa ligne comptable pendant la durée légale de 10 ans. Vous la retrouvez en un clic lors d&apos;un contrôle.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        {/* MAILLAGE INTERNE CONTEXTUEL */}
         <section className="py-12 bg-background border-t border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-8">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Traçabilité des Achats
+                Suite complète
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
-                Vos justificatifs de dépenses intégrés à toute votre comptabilité
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink mt-1">
+                Vos justificatifs reliés à toute votre comptabilité
               </h2>
             </div>
 
@@ -452,16 +473,16 @@ export default function GestionDepensesPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
                     <span>Comptabilité SYSCOHADA</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Chaque dépense numérisée est imputée automatiquement dans les comptes de charges de la classe 6 selon le plan révisé.
+                    Chaque dépense validée est rangée dans la bonne catégorie de charges du plan OHADA révisé.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir le journal des achats
+                  Voir la comptabilité
                 </span>
               </Link>
 
@@ -470,16 +491,16 @@ export default function GestionDepensesPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Trésorerie & Mobile Money</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Trésorerie &amp; Mobile Money</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Associez chaque sortie d&apos;argent MoMo pour petites fournitures ou courses au ticket de caisse correspondant.
+                    Reliez chaque paiement MoMo pour fournitures ou carburant à son ticket photographié.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir le contrôle de caisse
+                  Voir la trésorerie
                 </span>
               </Link>
 
@@ -488,16 +509,16 @@ export default function GestionDepensesPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Déclarations Fiscales DGI</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Déclarations fiscales DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Optimisez votre crédit de TVA en déduisant chaque montant de TVA 18% figurant sur vos factures fournisseurs certifiées.
+                    Déduisez automatiquement chaque montant de TVA (18 %) présent sur vos factures fournisseurs normalisées.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la récupération de TVA
+                  Voir les déclarations
                 </span>
               </Link>
             </div>
@@ -511,7 +532,7 @@ export default function GestionDepensesPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Questions fréquentes
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout comprendre sur la gestion des dépenses
               </h2>
             </div>
@@ -527,7 +548,8 @@ export default function GestionDepensesPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors"
+                      aria-expanded={isOpen}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{faq.q}</span>
                       {isOpen ? (
@@ -551,25 +573,25 @@ export default function GestionDepensesPage() {
         {/* BANNIÈRE D'APPEL À L'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 text-background">
-              Dites adieu aux factures égarées dès maintenant.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display tracking-tight mb-4 text-background">
+              Fini les factures égarées dès maintenant.
             </h2>
             <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto mb-8">
-              Numérisez et déduisez 100% de votre TVA légalement avec Ceilow. Essai gratuit de 14 jours, sans engagement.
+              Numérisez vos reçus et récupérez votre TVA déductible avec Ceilow. Essai gratuit de 14 jours, sans engagement.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Créer mon compte</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Tester la démo en ligne
+                Voir la démo
               </Link>
             </div>
           </div>

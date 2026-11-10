@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Contactez l'Équipe Ceilow à Cotonou : WhatsApp et Formulaire",
+  title: "Contactez l'Équipe Ceilow à Cotonou : WhatsApp",
   description:
-    "Échangez directement avec nos conseillers basés à Cotonou via WhatsApp (+229 01 97 55 49 53) ou via notre formulaire pour une démonstration personnalisée.",
+    "Une question sur vos factures DGI ou nos tarifs ? Écrivez directement à notre équipe basée à Cotonou sur WhatsApp (+229 01 97 55 49 53) ou par message.",
   alternates: {
     canonical: "/contact",
   },

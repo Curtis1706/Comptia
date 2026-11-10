@@ -4,25 +4,26 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Briefcase,
   ArrowRight,
   Check,
-  CheckCircle2,
-  Clock,
   PiggyBank,
   PhoneCall,
   Smartphone,
   ShieldCheck,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
   Receipt,
-  Store,
-  Layers,
-  Sparkles,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function PmeEtIndependantsPage() {
   const [nbFactures, setNbFactures] = useState<number>(35);
@@ -38,27 +39,27 @@ export default function PmeEtIndependantsPage() {
 
   const faqs = [
     {
-      q: "Ai-je besoin de connaissances en comptabilité pour utiliser Ceilow ?",
-      a: "Non, aucune. Ceilow a été spécialement pensé pour les entrepreneurs, commerçants et consultants qui ne maîtrisent pas le jargon comptable. Vous créez vos devis et factures en français simple, et l'outil traduit automatiquement chaque action en écritures conformes pour votre bilan.",
+      q: "Ai-je besoin de savoir compter ou de connaître la comptabilité pour utiliser Ceilow ?",
+      a: "Non, aucune connaissance comptable n'est demandée. Ceilow est pensé pour les commerçants, prestataires et dirigeants de PME : vous faites vos devis et factures en français clair, et la comptabilité se met à jour toute seule.",
     },
     {
       q: "Dois-je acheter une machine physique e-MECeF en plus de Ceilow ?",
-      a: "Non, c'est l'un des grands avantages de Ceilow. Notre plateforme est directement connectée à l'API de la Direction Générale des Impôts (DGI). Toutes vos factures reçoivent leur QR code et signature officielle sans investissement dans du matériel encombrant.",
+      a: "Non. Notre plateforme est reliée directement aux serveurs officiels de la DGI. Vos factures reçoivent leur QR code et leur signature officielle sans acheter de matériel coûteux.",
     },
     {
-      q: "Puis-je facturer depuis mon smartphone lorsque je suis en clientèle ou sur un chantier ?",
-      a: "Oui, Ceilow est 100% accessible depuis n'importe quel smartphone. Vous éditez votre facture, la normalisez auprès de la DGI et l'envoyez au client par WhatsApp ou e-mail en moins de deux minutes chrono.",
+      q: "Puis-je facturer depuis mon téléphone quand je suis chez un client ?",
+      a: "Oui. Ceilow fonctionne sur n'importe quel smartphone connecté à Internet. Vous créez la facture, elle est certifiée par la DGI et vous l'envoyez par WhatsApp ou e-mail en quelques clics.",
     },
     {
       q: "Que se passe-t-il si j'ai une question ou si je suis bloqué ?",
-      a: "Notre équipe de support client est basée physiquement à Cotonou. Vous pouvez nous joindre directement par téléphone ou via WhatsApp pendant les heures ouvrables pour une réponse rapide et humaine.",
+      a: "Notre équipe d'assistance est basée à Cotonou. Vous nous contactez directement par téléphone ou WhatsApp pour obtenir une réponse rapide.",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col font-sans selection:bg-primary selection:text-ink">
       <style jsx>{`
-        /* Animation vectorielle Lottie-like : Caisse & reçu certifié DGI */
+        /* Animation vectorielle : Caisse & reçu certifié DGI */
         .receipt-bounce {
           animation: print-receipt 3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
           transform-origin: 120px 80px;
@@ -89,28 +90,44 @@ export default function PmeEtIndependantsPage() {
           65% { transform: scale(1) rotate(90deg); opacity: 1; }
           80%, 100% { transform: scale(0) rotate(180deg); opacity: 0; }
         }
+        @media (prefers-reduced-motion: reduce) {
+          .receipt-bounce,
+          .stamp-check,
+          .sparkle-star {
+            animation: none;
+          }
+        }
       `}</style>
 
       <PublicHeader />
 
       <main className="flex-1 w-full">
-        {/* HERO SECTION EN SPLIT SCREEN AVEC VRAIE PHOTO ENTREPRENEURE BÉNINOISE */}
+        {/* HERO SECTION EN SPLIT SCREEN AVEC PHOTO LOCALE */}
         <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 border-b border-border bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>PME &amp; indépendants</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               {/* COLONNE GAUCHE : TEXTE & VALEUR DIRECTE */}
               <div className="lg:col-span-7">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Commerçants, Artisans &amp; PME du Bénin
+                  Commerçants, artisans &amp; PME du Bénin
                 </span>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-6">
-                  Le logiciel de gestion pour PME et indépendants au Bénin qui simplifie votre quotidien
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-display tracking-tight text-ink leading-tight mb-6">
+                  Le logiciel de gestion pour PME et indépendants au Bénin
                 </h1>
-                <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Vous avez créé votre activité pour servir vos clients, pas pour vous battre avec des déclarations d&apos;impôts)
-                </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-8">
-                  Adoptez un <strong>logiciel de gestion PME au Bénin</strong> pensé pour votre réalité de terrain : facturez en direct avec QR code e-MECeF sans acheter de machine physique, suivez vos encaissements MTN et Moov Money en temps réel, et transmettez des comptes impeccables à votre comptable sans aucun jargon.
+                  Passez moins de temps sur la paperasse et plus de temps avec vos clients. Avec Ceilow, vous facturez en direct avec QR code e-MECeF sans acheter de machine, vous suivez vos paiements MTN et Moov Money et vous préparez des comptes clairs pour votre comptable.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -125,43 +142,45 @@ export default function PmeEtIndependantsPage() {
                     href="/demo"
                     className="bg-background-secondary text-ink font-bold px-6 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Voir la démonstration
+                    Voir la démo
                   </Link>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-text-muted">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Démarrage en 10 minutes chrono</span>
+                    <span>Prise en main rapide</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Zéro machine physique à acheter</span>
+                    <span>Sans boîtier à acheter</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Support direct basé à Cotonou</span>
+                    <span>Support basé à Cotonou</span>
                   </div>
                 </div>
               </div>
 
-              {/* COLONNE DROITE : VRAIE PHOTO ENTREPRENEURE COMMERCE COTONOU */}
+              {/* COLONNE DROITE : PHOTO LOCALE */}
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-md">
-                  <Image
-                    src="/images/commercante-cotonou.jpg"
-                    alt="Entrepreneure souriante dans sa boutique à Cotonou au Bénin"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-cover"
-                    priority
-                  />
-                  <div className="p-4 bg-background border-t border-border flex items-center justify-between">
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/commercante-cotonou.jpg"
+                      alt="Entrepreneure souriante dans sa boutique à Cotonou au Bénin"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
+                  <div className="p-4 bg-background border-t border-border flex items-center justify-between gap-2">
                     <div>
-                      <span className="text-xs font-bold text-ink block">Clarisse Houngbo</span>
-                      <span className="text-[11px] text-text-muted">Boutique &amp; Décoration, Haie Vive</span>
+                      <span className="text-xs font-bold text-ink block">Boutique &amp; commerce</span>
+                      <span className="text-[11px] text-text-muted">Haie Vive, Cotonou (illustration)</span>
                     </div>
-                    <span className="text-xs font-bold font-mono text-ink bg-background-secondary px-2.5 py-1 rounded-md border border-border">
+                    <span className="text-xs font-bold font-mono text-ink shrink-0">
                       Facturation mobile
                     </span>
                   </div>
@@ -210,11 +229,11 @@ export default function PmeEtIndependantsPage() {
               </svg>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
-              Une facture certifiée DGI en 3 clics chrono
+            <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-3">
+              Une facture certifiée DGI en quelques clics
             </h2>
             <p className="text-base text-text-muted max-w-xl mx-auto mb-6">
-              Ouvrez Ceilow sur votre smartphone, renseignez le client et le montant, validez : le QR code fiscal officiel de la DGI s&apos;appose instantanément sans matériel coûteux.
+              Ouvrez Ceilow sur votre téléphone, choisissez le client et le montant, validez : le QR code officiel de la DGI s&apos;ajoute aussitôt sans aucun boîtier coûteux.
             </p>
           </div>
         </section>
@@ -224,13 +243,13 @@ export default function PmeEtIndependantsPage() {
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
-                Bénéfices réels
+                Simulateur de gain
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
-                Mesurez le temps et l&apos;argent que vous récupérez chaque mois
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-3">
+                Estimez le temps et l&apos;argent économisés chaque mois
               </h2>
               <p className="text-sm sm:text-base text-text-muted max-w-2xl">
-                Ajustez votre volume moyen de factures clients pour constater l&apos;impact direct sur votre quotidien d&apos;entrepreneur.
+                Indiquez votre nombre moyen de factures mensuelles pour voir ce que Ceilow vous fait gagner.
               </p>
             </div>
 
@@ -243,15 +262,16 @@ export default function PmeEtIndependantsPage() {
                 </h3>
 
                 <div className="mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-bold text-text-muted uppercase tracking-wider">
-                      Factures clients émanant de votre activité
+                  <div className="flex justify-between items-center mb-2 gap-2">
+                    <label htmlFor="nb-factures-range" className="text-xs font-bold text-text-muted uppercase tracking-wider">
+                      Factures clients par mois
                     </label>
                     <span className="text-2xl font-bold font-mono text-ink tabular-nums">
                       {nbFactures} factures
                     </span>
                   </div>
                   <input
+                    id="nb-factures-range"
                     type="range"
                     min="5"
                     max="150"
@@ -269,15 +289,15 @@ export default function PmeEtIndependantsPage() {
 
                 <div className="space-y-4 pt-6 border-t border-border">
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-ink shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-success-deep shrink-0 mt-0.5" />
                     <span className="text-xs text-text-muted">
-                      Normalisation instantanée sans attendre les recharges de rouleaux thermiques.
+                      Certification immédiate sans attente ni panne de papier thermique.
                     </span>
                   </div>
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-ink shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-success-deep shrink-0 mt-0.5" />
                     <span className="text-xs text-text-muted">
-                      Envoi direct en PDF avec QR code DGI par WhatsApp au client.
+                      Envoi direct du PDF avec QR code DGI au client par WhatsApp.
                     </span>
                   </div>
                 </div>
@@ -287,34 +307,34 @@ export default function PmeEtIndependantsPage() {
               <div className="lg:col-span-6 bg-background p-6 sm:p-8 rounded-2xl border border-border">
                 <div className="pb-6 mb-6 border-b border-border">
                   <span className="text-xs font-bold uppercase tracking-wider text-text-muted block">
-                    Économies constatées
+                    Estimation sur votre activité
                   </span>
                   <h4 className="text-xl font-bold text-ink">
-                    Ce que vous évitez en passant à Ceilow
+                    Ce que vous évitez avec Ceilow
                   </h4>
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  <div className="p-4 rounded-xl bg-background-secondary border border-border flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-background-secondary border border-border flex items-center justify-between gap-3">
                     <div>
                       <span className="text-xs font-bold uppercase text-text-muted block">
-                        Temps administratif épargné
+                        Temps estimé récupéré
                       </span>
-                      <span className="text-xs text-text-muted">Fini les saisies du soir et week-end</span>
+                      <span className="text-xs text-text-muted">Moins de saisies le soir et le week-end</span>
                     </div>
-                    <span className="text-2xl font-bold font-mono text-ink tabular-nums">
-                      +{heuresEconomisees}h / mois
+                    <span className="text-2xl font-bold font-mono text-ink tabular-nums shrink-0">
+                      ~{heuresEconomisees}h / mois
                     </span>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-background-secondary border border-border flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-background-secondary border border-border flex items-center justify-between gap-3">
                     <div>
                       <span className="text-xs font-bold uppercase text-text-muted block">
-                        Économie matérielle immédiate
+                        Économie sur l&apos;achat du boîtier
                       </span>
-                      <span className="text-xs text-text-muted">Prix d&apos;une machine physique e-MECeF</span>
+                      <span className="text-xs text-text-muted">Coût moyen d&apos;une machine e-MECeF</span>
                     </div>
-                    <span className="text-xl font-bold font-mono text-ink tabular-nums">
+                    <span className="text-xl font-bold font-mono text-ink tabular-nums shrink-0">
                       {new Intl.NumberFormat("fr-FR").format(coutMachinePhysique)} FCFA
                     </span>
                   </div>
@@ -322,7 +342,7 @@ export default function PmeEtIndependantsPage() {
 
                 <div className="p-4 rounded-xl bg-primary/20 border border-primary text-xs text-ink flex items-center gap-2">
                   <Check className="w-4 h-4 text-ink shrink-0" />
-                  <span>Votre téléphone portable suffit : aucun frais de maintenance ni de technicien sur place.</span>
+                  <span>Votre téléphone suffit : aucun matériel spécial ni technicien à payer.</span>
                 </div>
               </div>
             </div>
@@ -336,8 +356,8 @@ export default function PmeEtIndependantsPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Confort de gestion
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-                Trois piliers pour gérer votre PME en toute quiétude
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
+                Trois avantages pensés pour votre quotidien
               </h2>
             </div>
 
@@ -347,10 +367,10 @@ export default function PmeEtIndependantsPage() {
                   <Smartphone className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Facturation mobile en direct
+                  Facturation rapide sur mobile
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Générez un devis ou une facture normalisée en moins de deux minutes chrono. Transmettez le justificatif par WhatsApp ou e-mail à votre client avant même de quitter son bureau.
+                  Créez un devis ou une facture DGI en moins de deux minutes. Envoyez le document par WhatsApp ou e-mail avant même de quitter votre client.
                 </p>
               </div>
 
@@ -359,10 +379,10 @@ export default function PmeEtIndependantsPage() {
                   <ShieldCheck className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Protection contre les pénalités DGI
+                  Protection contre les amendes DGI
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Chaque facture est certifiée en temps réel avec son QR code officiel. Vous n&apos;avez plus peur des contrôles inopinés ni des amendes pour défaut de normalisation des recettes.
+                  Chaque vente est certifiée sur le moment avec son QR code DGI. Vous travaillez sereinement lors des contrôles fiscaux.
                 </p>
               </div>
 
@@ -371,10 +391,10 @@ export default function PmeEtIndependantsPage() {
                   <PhoneCall className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Support direct à Cotonou
+                  Équipe d&apos;aide basée à Cotonou
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Pas de chatbot impersonnel ni de plateforme téléphonique à l&apos;autre bout du monde. Notre équipe est joignable par téléphone et WhatsApp pour vous débloquer rapidement.
+                  Pas de robot automatique : vous appelez ou écrivez sur WhatsApp à une vraie équipe au Bénin pour vous guider rapidement.
                 </p>
               </div>
             </div>
@@ -388,7 +408,7 @@ export default function PmeEtIndependantsPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Questions fréquentes
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout savoir pour les PME et indépendants
               </h2>
             </div>
@@ -404,7 +424,8 @@ export default function PmeEtIndependantsPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors"
+                      aria-expanded={isOpen}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{faq.q}</span>
                       {isOpen ? (
@@ -432,12 +453,12 @@ export default function PmeEtIndependantsPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Outils complémentaires
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout ce dont votre entreprise a besoin au même endroit
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
                 href="/solutions/facturation-dgi"
                 className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
@@ -445,14 +466,14 @@ export default function PmeEtIndependantsPage() {
                 <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
                   <Receipt className="w-5 h-5 text-ink" />
                 </div>
-                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:underline transition-colors">
                   Facturation normalisée e-MECeF
                 </h3>
                 <p className="text-xs text-text-muted leading-relaxed mb-4">
-                  Émettez des factures conformes DGI avec QR code officiel directement depuis votre téléphone ou PC.
+                  Émettez des factures DGI avec QR code officiel directement depuis votre téléphone ou ordinateur.
                 </p>
                 <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  Découvrir la facturation <ArrowRight className="w-3.5 h-3.5" />
+                  Voir la facturation <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
 
@@ -463,14 +484,32 @@ export default function PmeEtIndependantsPage() {
                 <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
                   <Smartphone className="w-5 h-5 text-ink" />
                 </div>
-                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:underline transition-colors">
                   Suivi Mobile Money &amp; Banques
                 </h3>
                 <p className="text-xs text-text-muted leading-relaxed mb-4">
-                  Rapprochez automatiquement vos encaissements MTN, Moov et comptes bancaires sans pointage manuel.
+                  Reliez vos paiements MTN, Moov et virements bancaires à vos factures sans calcul à la main.
                 </p>
                 <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  Découvrir le rapprochement <ArrowRight className="w-3.5 h-3.5" />
+                  Voir la trésorerie <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+
+              <Link
+                href="/ressources/calcul-tps-benin-guide"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
+                  <ShieldCheck className="w-5 h-5 text-ink" />
+                </div>
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:underline transition-colors">
+                  Guide Calcul TPS (5 %)
+                </h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-4">
+                  Estimez votre Taxe Professionnelle Synthétique, vérifiez le seuil 50 M FCFA et vos acomptes.
+                </p>
+                <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Lire le guide <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
 
@@ -481,14 +520,14 @@ export default function PmeEtIndependantsPage() {
                 <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center mb-4 group-hover:bg-primary transition-colors">
                   <PiggyBank className="w-5 h-5 text-ink" />
                 </div>
-                <h3 className="text-base font-bold text-ink mb-2 group-hover:text-primary transition-colors">
+                <h3 className="text-base font-bold text-ink mb-2 group-hover:underline transition-colors">
                   Tarifs transparents
                 </h3>
                 <p className="text-xs text-text-muted leading-relaxed mb-4">
-                  Des forfaits clairs et accessibles pour indépendants et PME, sans frais cachés ni engagement.
+                  Des formules claires et accessibles en FCFA pour indépendants et PME, sans engagement.
                 </p>
                 <span className="text-xs font-bold text-ink inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  Consulter les tarifs <ArrowRight className="w-3.5 h-3.5" />
+                  Voir les tarifs <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
             </div>
@@ -498,25 +537,25 @@ export default function PmeEtIndependantsPage() {
         {/* BANNIÈRE D'APPEL À L'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 text-background">
-              Simplifiez la vie de votre entreprise dès aujourd&apos;hui.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display tracking-tight mb-4 text-background">
+              Simplifiez la gestion de votre entreprise dès aujourd&apos;hui.
             </h2>
             <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto mb-8">
-              Démarrez gratuitement en 3 minutes sans carte bancaire ni engagement.
+              Essayez Ceilow gratuitement pendant 14 jours sans carte bancaire ni engagement.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Commencer gratuitement</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Tester la démo en ligne
+                Voir la démo
               </Link>
             </div>
           </div>

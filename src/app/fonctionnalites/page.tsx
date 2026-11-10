@@ -5,32 +5,23 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Check,
-  Download,
   Receipt,
   Landmark,
   ShieldCheck,
   Headphones,
   Sparkles,
-  Clock,
   ArrowRight,
-  FileText,
   Wallet,
   Building2,
   PlayCircle,
   TrendingUp,
-  Star,
   ChevronDown,
   ChevronUp,
-  Smartphone,
   Calendar,
   Zap,
-  Award,
-  CheckCircle2,
   Layers,
   Search,
   Scan,
-  Send,
-  CreditCard,
   UserCheck,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
@@ -112,62 +103,66 @@ export default function FonctionnalitesPage() {
             stroke-dasharray: 6 6;
             animation: streamDashFlow 1.6s linear infinite;
           }
+          @media (prefers-reduced-motion: reduce) {
+            .laser-beam,
+            .pulse-wave,
+            .float-gentle,
+            .spin-slow,
+            .spin-reverse,
+            .drop-coin-1,
+            .drop-coin-2,
+            .spark-glow,
+            .stream-flow {
+              animation: none;
+            }
+          }
         `}</style>
 
-        {/* ── 1. SECTION HERO SPLIT-SCREEN ── */}
+        {/* 1. SECTION HERO SPLIT-SCREEN */}
         <section className="w-full py-16 lg:py-24 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-              {/* Colonne gauche : Copie & Proposition de valeur orientée bénéfices */}
+              {/* Colonne gauche */}
               <div className="lg:col-span-7 flex flex-col items-start space-y-6">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-clash text-ink leading-[1.12] tracking-tight">
-                  La paie et les factures de votre société,{" "}
-                  <span className="text-primary underline decoration-primary decoration-4 underline-offset-6">
-                    enfin ultra-simples
-                  </span>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-display text-ink leading-[1.12] tracking-tight">
+                  La paie et les factures de votre société, enfin simples
                 </h1>
 
                 <p className="text-base sm:text-lg text-text-muted max-w-xl leading-relaxed">
-                  Éditez vos fiches de paie conformes et vos factures normalisées DGI en deux minutes chrono. Sans tableau Excel compliqué, sans risque d&apos;erreur.
+                  Créez vos fiches de paie conformes et vos factures certifiées DGI en deux minutes. Fini les tableaux Excel compliqués et les erreurs de calcul.
                 </p>
 
-                {/* Checklist des bénéfices (sans badges superflus) */}
+                {/* Checklist des bénéfices */}
                 <div className="flex flex-col space-y-3.5 pt-1 w-full">
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-ink flex items-center justify-center font-bold">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
                       Fiches de paie et cotisations CNSS calculées automatiquement
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-ink flex items-center justify-center font-bold">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Factures certifiées DGI avec QR code officiel en 3 secondes
+                      Factures officielles e-MECeF avec QR code DGI sans boîtier physique
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success text-ink flex items-center justify-center font-bold">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Accessible sur smartphone, tablette et ordinateur partout au Bénin
+                      Accessible sur téléphone, tablette et ordinateur partout au Bénin
                     </span>
                   </div>
                 </div>
 
-                {/* Double CTA d'action directe */}
+                {/* Double CTA */}
                 <div className="flex flex-wrap items-center gap-4 pt-3">
                   <Link
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl shadow-xs transition-all min-h-[48px]"
                   >
-                    <span>Essayer gratuitement</span>
+                    <span>Tester gratuitement</span>
                   </Link>
 
                   <Link
@@ -175,31 +170,26 @@ export default function FonctionnalitesPage() {
                     className="inline-flex items-center justify-center border border-border bg-background hover:bg-background-secondary text-ink font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl transition-all min-h-[48px]"
                   >
                     <PlayCircle className="w-4 h-4 mr-2 text-ink" />
-                    <span>Voir la démonstration</span>
+                    <span>Voir la démo</span>
                   </Link>
                 </div>
 
                 <p className="text-xs text-text-muted flex items-center gap-2 pt-1">
-                  <ShieldCheck className="w-4 h-4 text-ink" />
-                  <span>14 jours d&apos;essai sans engagement • Sans carte bancaire requise</span>
+                  <ShieldCheck className="w-4 h-4 text-ink shrink-0" />
+                  <span>14 jours d&apos;essai sans engagement - Sans carte bancaire</span>
                 </p>
               </div>
 
-              {/* Colonne droite : Mockup Smartphone & SVG ANIMÉ STRATÉGIQUE N°1 (Générateur e-MECeF QR certifié) */}
+              {/* Colonne droite : Aperçu Mobile e-MECeF */}
               <div className="lg:col-span-5 relative flex justify-center items-center py-4">
-                {/* ── SVG ANIMÉ STRATÉGIQUE N°1 : SCANNER VECTORIEL e-MECeF / RADAR DE CERTIFICATION ── */}
                 <div className="relative z-10 w-full max-w-[340px]">
-                  {/* Smartphone Frame épuré */}
                   <div className="bg-ink p-3 rounded-[2.5rem] shadow-xs border-2 border-border relative">
-                    {/* Top Speaker / Camera Notch */}
                     <div className="w-24 h-4 bg-ink mx-auto rounded-full mb-3 flex items-center justify-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#3D3830]" />
-                      <div className="w-8 h-1.5 rounded-full bg-[#3D3830]" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-ink-surface" />
+                      <div className="w-8 h-1.5 rounded-full bg-ink-surface" />
                     </div>
 
-                    {/* Écran intérieur blanc */}
                     <div className="bg-background rounded-[2rem] p-4 flex flex-col space-y-4 overflow-hidden border border-border">
-                      {/* Entête d'écran avec LOGO OFFICIEL CEILOW (Plus de Ceilow Mobile) */}
                       <div className="flex items-center justify-between border-b border-border pb-3">
                         <div className="flex items-center">
                           <Image
@@ -207,16 +197,16 @@ export default function FonctionnalitesPage() {
                             alt="Ceilow"
                             width={90}
                             height={24}
-                            className="h-5 w-auto"
+                            style={{ width: "auto" }}
+                            className="h-5"
                             priority
                           />
                         </div>
                         <span className="text-[11px] text-text-muted font-medium font-mono">
-                          Direction Générale
+                          Exemple d&apos;interface
                         </span>
                       </div>
 
-                      {/* Sélecteur d'onglets smartphone */}
                       <div className="flex items-center bg-background-secondary p-1 rounded-lg text-center text-xs">
                         <div className="flex-1 py-1 bg-background text-ink rounded shadow-xs font-semibold">
                           Fiche de paie
@@ -229,45 +219,40 @@ export default function FonctionnalitesPage() {
                         </div>
                       </div>
 
-                      {/* CARTE DYNAMIQUE AVEC SVG ANIMÉ DU SCANNER e-MECeF */}
                       <div className="bg-background-secondary border border-border rounded-xl p-4 relative group">
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between gap-2">
                           <div>
-                            <div className="text-xs font-semibold text-ink flex items-center gap-1 bg-success px-2 py-0.5 rounded">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-ink" />
-                              <span>Validé CNSS / DGI</span>
+                            <div className="text-xs font-semibold text-success-deep flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Conforme CNSS / DGI</span>
                             </div>
                             <div className="text-base font-bold text-ink mt-2">Mars 2026</div>
-                            <div className="text-xs text-text-muted">Alain T. • Gérant</div>
+                            <div className="text-xs text-text-muted">Exemple - Direction Générale</div>
                           </div>
-                          <div className="w-9 h-9 rounded-full bg-primary text-ink flex items-center justify-center shadow-xs">
+                          <div className="w-9 h-9 rounded-xl bg-primary text-ink flex items-center justify-center shadow-xs shrink-0">
                             <Receipt className="w-4 h-4" />
                           </div>
                         </div>
 
-                        {/* Breakdown salarial clair */}
                         <div className="my-3 py-2 border-y border-border space-y-1.5 text-xs font-mono">
                           <div className="flex justify-between text-text-muted">
-                            <span>Rémunération brute :</span>
-                            <span className="text-ink font-medium">850 000 FCFA</span>
+                            <span>Salaire brut :</span>
+                            <span className="text-ink font-medium tabular-nums">850 000 FCFA</span>
                           </div>
                           <div className="flex justify-between text-text-muted">
                             <span>Cotisations &amp; IPTS :</span>
-                            <span className="text-error font-medium">- 121 500 FCFA</span>
+                            <span className="text-error font-medium tabular-nums">- 106 000 FCFA</span>
                           </div>
                           <div className="flex justify-between text-sm font-bold text-ink pt-1 border-t border-border">
-                            <span>Net à percevoir :</span>
-                            <span className="text-ink font-bold tabular-nums">728 500 FCFA</span>
+                            <span>Net à payer :</span>
+                            <span className="text-ink font-bold tabular-nums">744 000 FCFA</span>
                           </div>
                         </div>
 
-                        {/* SVG Interactif Cadré : Faisceau Laser & QR Code DGI */}
                         <div className="relative w-full h-16 rounded-lg bg-background border border-border flex items-center justify-between px-3 overflow-hidden">
-                          {/* Ligne Laser Animée */}
                           <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary laser-beam pointer-events-none" />
 
                           <div className="flex items-center gap-2.5 z-10">
-                            {/* QR Code vectoriel */}
                             <svg className="w-10 h-10 text-ink" viewBox="0 0 32 32" fill="none">
                               <rect x="2" y="2" width="10" height="10" rx="1" stroke="currentColor" strokeWidth="2" />
                               <rect x="5" y="5" width="4" height="4" fill="currentColor" />
@@ -282,30 +267,23 @@ export default function FonctionnalitesPage() {
                             </svg>
                             <div>
                               <div className="text-[11px] font-bold text-ink leading-tight">Certifié e-MECeF</div>
-                              <div className="text-[10px] text-text-muted font-mono">DGI-BJ-2026-9812</div>
+                              <div className="text-[10px] text-text-muted font-mono">QR code officiel DGI</div>
                             </div>
                           </div>
 
-                          {/* Sceau tournant discret */}
-                          <div className="w-8 h-8 rounded-full border border-border bg-primary text-ink flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg border border-border bg-primary text-ink flex items-center justify-center flex-shrink-0">
                             <Check className="w-4 h-4 text-ink stroke-[3]" />
                           </div>
                         </div>
 
-                        {/* Bouton d'action intérieur smartphone */}
-                        <div className="mt-3 w-full bg-ink text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center gap-2">
-                          <Download className="w-3.5 h-3.5" />
-                          <span>Télécharger le bulletin PDF</span>
+                        <div className="mt-3 text-center text-[11px] text-text-muted font-semibold">
+                          Bulletin PDF prêt à imprimer ou partager
                         </div>
                       </div>
 
-                      {/* Indicateur de synchronisation fiscale */}
-                      <div className="bg-background-secondary p-2.5 rounded-lg border border-border flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-success" />
-                          <span className="text-xs text-ink font-medium">Télédéclaration DGI / CNSS</span>
-                        </div>
-                        <span className="font-mono text-[11px] font-bold text-ink bg-success px-2 py-0.5 rounded">Synchronisé</span>
+                      <div className="bg-background-secondary p-2.5 rounded-lg border border-border flex items-center justify-between text-xs">
+                        <span className="text-ink font-medium">Suivi DGI / CNSS</span>
+                        <span className="font-mono text-[11px] font-bold text-success-deep">Prêt</span>
                       </div>
                     </div>
                   </div>
@@ -315,131 +293,119 @@ export default function FonctionnalitesPage() {
           </div>
         </section>
 
-        {/* ── 2. SECTION RUBAN DE RÉASSURANCE IMMÉDIATE (4 Colonnes Cadrées) ── */}
+        {/* 2. RUBAN DE RÉASSURANCE */}
         <section className="w-full bg-background-secondary border-b border-border py-8">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border">
-              {/* Colonne 1 */}
               <div className="flex items-start gap-3.5 pt-4 sm:pt-0 sm:px-4">
                 <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center flex-shrink-0 border border-border">
                   <Building2 className="w-5 h-5 text-ink" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-ink font-mono">50+ entreprises</div>
-                  <p className="text-xs text-text-muted">SARL, SAS, ETS et indépendants actifs au Bénin</p>
+                  <div className="text-lg font-bold text-ink font-mono">Tout statut</div>
+                  <p className="text-xs text-text-muted">SARL, SAS, ETS et indépendants au Bénin</p>
                 </div>
               </div>
 
-              {/* Colonne 2 */}
               <div className="flex items-start gap-3.5 pt-4 sm:pt-0 sm:px-4">
                 <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center flex-shrink-0 border border-border">
                   <Scan className="w-5 h-5 text-ink" />
                 </div>
                 <div>
                   <div className="text-lg font-bold text-ink font-mono">Facturation DGI</div>
-                  <p className="text-xs text-text-muted">QR code e-MECeF officiel conforme à 100%</p>
+                  <p className="text-xs text-text-muted">QR code e-MECeF officiel sans boîtier</p>
                 </div>
               </div>
 
-              {/* Colonne 3 */}
               <div className="flex items-start gap-3.5 pt-4 sm:pt-0 sm:px-4">
                 <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center flex-shrink-0 border border-border">
                   <Wallet className="w-5 h-5 text-ink" />
                 </div>
                 <div>
                   <div className="text-lg font-bold text-ink font-mono">Banques &amp; MoMo</div>
-                  <p className="text-xs text-text-muted">MTN MoMo, Moov Money et banques connectées</p>
+                  <p className="text-xs text-text-muted">MTN MoMo, Moov Money et banques locales</p>
                 </div>
               </div>
 
-              {/* Colonne 4 */}
               <div className="flex items-start gap-3.5 pt-4 sm:pt-0 sm:px-4">
                 <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center flex-shrink-0 border border-border">
                   <Headphones className="w-5 h-5 text-ink" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-ink font-mono">Support à Cotonou</div>
-                  <p className="text-xs text-text-muted">Accompagnement humain et démarrage en 48h</p>
+                  <div className="text-lg font-bold text-ink font-mono">Support Cotonou</div>
+                  <p className="text-xs text-text-muted">Accompagnement humain au démarrage</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 3. SECTION GRAND SHOWCASE INTERACTIF : FICHES DE PAIE & ÉQUIPE ── */}
+        {/* 3. SHOWCASE FICHES DE PAIE */}
         <section className="w-full py-16 lg:py-24 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Titre & Sous-titre de la section */}
             <div className="text-center max-w-3xl mx-auto mb-14">
-              <h2 className="text-3xl sm:text-4xl font-bold font-clash text-ink tracking-tight mb-3">
-                Éditez vos fiches de paie en un clin d&apos;œil
+              <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink tracking-tight mb-3">
+                Éditez vos fiches de paie en quelques clics
               </h2>
               <p className="text-base sm:text-lg text-text-muted leading-relaxed">
-                La paie de vos collaborateurs et de vos dirigeants n&apos;a jamais été aussi limpide. Vos cotisations sociales sont exactes au franc CFA près.
+                La paie de votre équipe devient simple et claire. Cotisations CNSS, IPTS et VPS sont calculés au franc CFA près.
               </p>
             </div>
 
-            {/* Grille 2 Colonnes */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-              {/* Colonne gauche : Maquette Cartes Empilées & SVG ANIMÉ STRATÉGIQUE N°2 (Moteur Salarial & Pièces qui tombent) */}
               <div className="lg:col-span-6 flex flex-col items-center relative">
                 <div className="w-full max-w-md relative">
-                  {/* Carte active au premier plan (Mois : Mars 2026) */}
                   <div className="w-full bg-background rounded-2xl p-6 border-2 border-primary shadow-xs relative z-10">
-                    <div className="flex items-center justify-between pb-4 border-b border-border">
+                    <div className="flex items-center justify-between pb-4 border-b border-border gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-ink">
-                          AT
+                        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-bold text-ink shrink-0">
+                          EX
                         </div>
                         <div>
-                          <h4 className="text-base font-bold text-ink">Alain T. (Directeur Général)</h4>
-                          <span className="text-xs text-text-muted">SARL Innov Bénin • Cotonou</span>
+                          <h4 className="text-base font-bold text-ink">Exemple de bulletin</h4>
+                          <span className="text-xs text-text-muted">Barème Bénin • Mars 2026</span>
                         </div>
                       </div>
-                      <span className="text-xs font-semibold text-success-deep flex items-center gap-1 bg-success/20 px-2.5 py-1 rounded">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" /> CNSS Prêt
+                      <span className="text-xs font-semibold text-success-deep flex items-center gap-1 shrink-0">
+                        <Check className="w-3.5 h-3.5" /> CNSS prête
                       </span>
                     </div>
 
-                    {/* Lignes du décompte */}
                     <div className="py-4 space-y-2.5 text-xs font-mono border-b border-border">
                       <div className="flex justify-between text-text-muted">
-                        <span>Salaire brut conventionnel</span>
-                        <span className="font-medium text-ink">850 000 FCFA</span>
+                        <span>Salaire brut</span>
+                        <span className="font-medium text-ink tabular-nums">850 000 FCFA</span>
                       </div>
                       <div className="flex justify-between text-text-muted">
-                        <span>Retenue IPTS (Barème Bénin)</span>
-                        <span className="text-error font-medium">- 75 400 FCFA</span>
+                        <span>Retenue IPTS (DGI)</span>
+                        <span className="text-error font-medium tabular-nums">- 75 400 FCFA</span>
                       </div>
                       <div className="flex justify-between text-text-muted">
-                        <span>Cotisation CNSS salarié (3,6%)</span>
-                        <span className="text-error font-medium">- 30 600 FCFA</span>
+                        <span>CNSS salarié (3,6 %)</span>
+                        <span className="text-error font-medium tabular-nums">- 30 600 FCFA</span>
                       </div>
                       <div className="flex justify-between text-text-muted">
-                        <span>VPS patronale (4%) calculée</span>
-                        <span className="text-ink font-medium">34 000 FCFA</span>
+                        <span>VPS employeur (4 %)</span>
+                        <span className="text-ink font-medium tabular-nums">34 000 FCFA</span>
                       </div>
                     </div>
 
-                    {/* Résultat Net Total */}
-                    <div className="pt-4 flex items-center justify-between">
+                    <div className="pt-4 flex items-center justify-between gap-2">
                       <div>
-                        <div className="text-[11px] uppercase tracking-wider text-text-muted">Net à virer</div>
+                        <div className="text-[11px] uppercase tracking-wider text-text-muted">Net à payer</div>
                         <div className="text-xl font-bold text-ink font-mono tabular-nums">744 000 FCFA</div>
                       </div>
-                      <button
-                        type="button"
-                        className="bg-primary hover:bg-primary-hover text-ink text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 transition-all"
+                      <Link
+                        href="/solutions/paie-cnss"
+                        className="bg-primary hover:bg-primary-hover text-ink text-xs px-4 py-2.5 rounded-lg font-bold inline-flex items-center gap-1.5 transition-all min-h-[44px]"
                       >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Télécharger</span>
-                      </button>
+                        <span>Simuler la paie</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
                     </div>
 
-                    {/* ── SVG ANIMÉ STRATÉGIQUE N°2 : ENGRENAGES SOCIAUX & PIÈCES D'ÉCONOMIE EN MOUVEMENT ── */}
                     <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {/* Roues dentées animées */}
                         <svg className="w-8 h-8 text-ink" viewBox="0 0 36 36" fill="none">
                           <g className="spin-slow" transform="translate(14, 14)">
                             <circle cx="0" cy="0" r="8" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2" />
@@ -450,10 +416,9 @@ export default function FonctionnalitesPage() {
                             <circle cx="0" cy="0" r="2" fill="#332E29" />
                           </g>
                         </svg>
-                        <span className="text-[11px] text-text-muted font-mono">Barème CNSS &amp; IPTS 2026 à jour</span>
+                        <span className="text-[11px] text-text-muted font-mono">Barème CNSS &amp; IPTS à jour</span>
                       </div>
 
-                      {/* Pièces qui tombent dans la réserve */}
                       <svg className="w-16 h-8" viewBox="0 0 60 30" fill="none">
                         <g className="drop-coin-1">
                           <circle cx="20" cy="18" r="5" fill="#FFD946" stroke="#332E29" strokeWidth="1" />
@@ -466,7 +431,6 @@ export default function FonctionnalitesPage() {
                     </div>
                   </div>
 
-                  {/* Carte d'autorité équipe réelle à Cotonou */}
                   <div className="mt-6 flex items-center gap-4 p-3.5 bg-background-secondary rounded-xl border border-border">
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-border flex-shrink-0">
                       <Image
@@ -478,127 +442,135 @@ export default function FonctionnalitesPage() {
                       />
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm font-bold text-ink">Conçu avec des experts-comptables de l&apos;OECCA-Bénin</p>
-                      <p className="text-xs text-text-muted">Paramétré selon le Code du Travail et les barèmes fiscaux béninois</p>
+                      <p className="text-xs sm:text-sm font-bold text-ink">Conçu pour la réglementation du Bénin</p>
+                      <p className="text-xs text-text-muted">Code du Travail béninois, CNSS et plan SYSCOHADA révisé</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Colonne droite : Accordéon Interactif 3 étapes */}
+              {/* Accordéon 3 étapes */}
               <div className="lg:col-span-6 flex flex-col space-y-4">
-                {/* Étape 1 */}
                 <div
-                  onClick={() => setActiveStep(1)}
-                  className={`border rounded-2xl p-6 transition-all cursor-pointer ${
+                  className={`border rounded-2xl p-6 transition-all ${
                     activeStep === 1
                       ? "border-primary bg-background shadow-xs"
                       : "border-border bg-background-secondary hover:bg-background"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(1)}
+                    aria-expanded={activeStep === 1}
+                    className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
+                  >
                     <div className="flex items-center gap-3">
                       <span
-                        className={`w-7 h-7 rounded-full font-bold font-mono text-xs flex items-center justify-center ${
+                        className={`w-7 h-7 rounded-lg font-bold font-mono text-xs flex items-center justify-center shrink-0 ${
                           activeStep === 1 ? "bg-primary text-ink" : "bg-border text-text-muted"
                         }`}
                       >
                         1
                       </span>
                       <h3 className="text-base sm:text-lg font-bold text-ink">
-                        Générez votre fiche de paie en 2 minutes
+                        Créez votre fiche de paie en 2 minutes
                       </h3>
                     </div>
                     {activeStep === 1 ? (
-                      <ChevronUp className="w-5 h-5 text-ink" />
+                      <ChevronUp className="w-5 h-5 text-ink shrink-0" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-text-muted" />
+                      <ChevronDown className="w-5 h-5 text-text-muted shrink-0" />
                     )}
-                  </div>
+                  </button>
                   {activeStep === 1 && (
                     <div className="mt-3 pl-10 text-text-muted text-sm leading-relaxed">
-                      Renseignez le salaire brut ou le net souhaité. Ceilow applique automatiquement les barèmes de l&apos;IPTS, de la CNSS et de la VPS en vigueur au Bénin. Vos bulletins sont prêts sans aucun calcul manuel.
+                      Indiquez le salaire brut. Ceilow applique automatiquement les taux d&apos;IPTS, de CNSS et de VPS en vigueur au Bénin sans calcul manuel.
                     </div>
                   )}
                 </div>
 
-                {/* Étape 2 */}
                 <div
-                  onClick={() => setActiveStep(2)}
-                  className={`border rounded-2xl p-6 transition-all cursor-pointer ${
+                  className={`border rounded-2xl p-6 transition-all ${
                     activeStep === 2
                       ? "border-primary bg-background shadow-xs"
                       : "border-border bg-background-secondary hover:bg-background"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(2)}
+                    aria-expanded={activeStep === 2}
+                    className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
+                  >
                     <div className="flex items-center gap-3">
                       <span
-                        className={`w-7 h-7 rounded-full font-bold font-mono text-xs flex items-center justify-center ${
+                        className={`w-7 h-7 rounded-lg font-bold font-mono text-xs flex items-center justify-center shrink-0 ${
                           activeStep === 2 ? "bg-primary text-ink" : "bg-border text-text-muted"
                         }`}
                       >
                         2
                       </span>
                       <h3 className="text-base sm:text-lg font-bold text-ink">
-                        Déclarez à la CNSS sans ressaisie
+                        Déclarez à la CNSS sans tout recopier
                       </h3>
                     </div>
                     {activeStep === 2 ? (
-                      <ChevronUp className="w-5 h-5 text-ink" />
+                      <ChevronUp className="w-5 h-5 text-ink shrink-0" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-text-muted" />
+                      <ChevronDown className="w-5 h-5 text-text-muted shrink-0" />
                     )}
-                  </div>
+                  </button>
                   {activeStep === 2 && (
                     <div className="mt-3 pl-10 text-text-muted text-sm leading-relaxed">
-                      En fin de mois, téléchargez l&apos;état récapitulatif prêt pour votre télédéclaration trimestrielle CNSS. Fini les tableaux croisés et les risques de redressement pour erreur de formule.
+                      Préparez en un clic la liste nominative pour votre déclaration CNSS (trimestrielle sous 20 salariés, mensuelle dès 20 salariés), sans erreur de formule.
                     </div>
                   )}
                 </div>
 
-                {/* Étape 3 */}
                 <div
-                  onClick={() => setActiveStep(3)}
-                  className={`border rounded-2xl p-6 transition-all cursor-pointer ${
+                  className={`border rounded-2xl p-6 transition-all ${
                     activeStep === 3
                       ? "border-primary bg-background shadow-xs"
                       : "border-border bg-background-secondary hover:bg-background"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(3)}
+                    aria-expanded={activeStep === 3}
+                    className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
+                  >
                     <div className="flex items-center gap-3">
                       <span
-                        className={`w-7 h-7 rounded-full font-bold font-mono text-xs flex items-center justify-center ${
+                        className={`w-7 h-7 rounded-lg font-bold font-mono text-xs flex items-center justify-center shrink-0 ${
                           activeStep === 3 ? "bg-primary text-ink" : "bg-border text-text-muted"
                         }`}
                       >
                         3
                       </span>
                       <h3 className="text-base sm:text-lg font-bold text-ink">
-                        Vos bulletins archivés et accessibles partout
+                        Bulletins archivés et accessibles partout
                       </h3>
                     </div>
                     {activeStep === 3 ? (
-                      <ChevronUp className="w-5 h-5 text-ink" />
+                      <ChevronUp className="w-5 h-5 text-ink shrink-0" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-text-muted" />
+                      <ChevronDown className="w-5 h-5 text-text-muted shrink-0" />
                     )}
-                  </div>
+                  </button>
                   {activeStep === 3 && (
                     <div className="mt-3 pl-10 text-text-muted text-sm leading-relaxed">
-                      Chaque collaborateur reçoit son bulletin sécurisé au format PDF. Vos archives restent stockées en toute confidentialité, consultables en un clic lors d&apos;un contrôle ou d&apos;un audit.
+                      Chaque employé reçoit sa fiche au format PDF. Vos archives restent conservées et prêtes pour tout contrôle.
                     </div>
                   )}
                 </div>
 
-                {/* Bouton d'action de la section */}
                 <div className="pt-2">
                   <Link
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl shadow-xs transition-all min-h-[48px]"
                   >
-                    <span>Créer ma première fiche de paie</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
@@ -607,109 +579,97 @@ export default function FonctionnalitesPage() {
           </div>
         </section>
 
-        {/* ── 4. SECTION BANNIÈRE D'AUTORITÉ SOMBRE (Fond Ink) ── */}
+        {/* 4. BANNIÈRE D'AUTORITÉ SOMBRE */}
         <section className="w-full bg-ink text-white py-20 border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-            {/* Titre & Sous-titre */}
             <div className="text-center max-w-2xl mb-14">
-              <h2 className="text-3xl sm:text-4xl font-bold font-clash text-white tracking-tight mb-3">
+              <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight mb-3">
                 Avec Ceilow, votre gestion est entre de bonnes mains
               </h2>
               <p className="text-base text-white/70">
-                Une technologie moderne pensée pour les réalités juridiques, comptables et fiscales du Bénin.
+                Un outil moderne adapté aux règles fiscales, sociales et comptables du Bénin.
               </p>
             </div>
 
-            {/* 5 Piliers Vectoriels épurés */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 w-full">
-              {/* Pilier 1 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
-                  <Zap className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-2xl border border-ink-border bg-ink-surface flex items-center justify-center mb-4 text-primary">
+                  <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Intuitif</h3>
+                <h3 className="text-base font-bold text-white mb-2">Simple</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Prise en main immédiate en moins de 10 minutes, sans formation préalable.
+                  Prise en main rapide sans avoir besoin d&apos;une formation longue.
                 </p>
               </div>
 
-              {/* Pilier 2 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
-                  <Headphones className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-2xl border border-ink-border bg-ink-surface flex items-center justify-center mb-4 text-primary">
+                  <Headphones className="w-6 h-6" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">Disponible</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Une équipe d&apos;assistance basée à Cotonou joignable directement par appel et WhatsApp.
+                  Une équipe à Cotonou joignable par téléphone et WhatsApp.
                 </p>
               </div>
 
-              {/* Pilier 3 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
-                  <Sparkles className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-2xl border border-ink-border bg-ink-surface flex items-center justify-center mb-4 text-primary">
+                  <Sparkles className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Tout compris</h3>
+                <h3 className="text-base font-bold text-white mb-2">Complet</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Factures certifiées, suivi Mobile Money, déclarations d&apos;impôts et paie sur un seul compte.
+                  Factures DGI, trésorerie MoMo, impôts et paie au même endroit.
                 </p>
               </div>
 
-              {/* Pilier 4 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-primary">
-                  <Search className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-2xl border border-ink-border bg-ink-surface flex items-center justify-center mb-4 text-primary">
+                  <Search className="w-6 h-6" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">Transparent</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Des tarifs clairs en Francs CFA, sans frais cachés ni engagement de durée.
+                  Tarifs clairs en Francs CFA, sans frais cachés ni engagement.
                 </p>
               </div>
 
-              {/* Pilier 5 */}
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-16 h-16 rounded-full border border-[#474138] bg-[#3D3830] flex items-center justify-center mb-4 text-success">
-                  <ShieldCheck className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-2xl border border-ink-border bg-ink-surface flex items-center justify-center mb-4 text-success">
+                  <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">100% Conforme</h3>
+                <h3 className="text-base font-bold text-white mb-2">Conforme</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Alignement strict avec la Direction Générale des Impôts (DGI) et la CNSS Bénin.
+                  Aligné sur les règles de la DGI, de la CNSS Bénin et du SYSCOHADA.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 5. SECTION SPLIT-CALLOUT : TRÉSORERIE & COMPTABILITÉ AU JUSTE PRIX ── */}
+        {/* 5. TRÉSORERIE & COMPTABILITÉ */}
         <section className="w-full py-16 lg:py-24 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-background-secondary border border-border rounded-3xl p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              {/* Colonne gauche : Copie de valeur & CTA */}
               <div className="lg:col-span-6 flex flex-col items-start space-y-4">
-                <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight">
+                <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight">
                   Votre trésorerie et vos comptes au juste prix
                 </h2>
 
                 <p className="text-sm sm:text-base text-text-muted leading-relaxed">
-                  Suivez vos recettes réelles, vos dépenses engagées et votre marge en temps réel. Rapprochez vos comptes MoMo et vos relevés bancaires en quelques secondes sans être comptable.
+                  Suivez vos entrées d&apos;argent, vos dépenses et votre résultat en direct. Reliez vos comptes MoMo et vos relevés bancaires en quelques secondes sans être comptable.
                 </p>
 
                 <div className="space-y-3 pt-2 w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-ink font-bold text-xs">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-xs sm:text-sm text-ink font-medium">
                       Solde unifié banques (BOA, Ecobank, BIIC...) + MTN &amp; Moov Money
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-ink font-bold text-xs">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-xs sm:text-sm text-ink font-medium">
-                      Alertes intelligentes avant chaque échéance de déclaration fiscale
+                      Alertes automatiques avant chaque échéance de déclaration fiscale
                     </span>
                   </div>
                 </div>
@@ -719,57 +679,50 @@ export default function FonctionnalitesPage() {
                     href="/tarifs"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm px-7 py-3.5 rounded-xl transition-all shadow-xs min-h-[48px]"
                   >
-                    <span>Découvrir nos tarifs clairs</span>
+                    <span>Voir les tarifs</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
               </div>
 
-              {/* Colonne droite : Tableau de bord & SVG ANIMÉ STRATÉGIQUE N°3 (Radar des Flux MoMo & Barres de Trésorerie) */}
               <div className="lg:col-span-6 bg-background p-6 rounded-2xl border border-border shadow-xs">
-                <div className="flex items-center justify-between pb-4 border-b border-border">
+                <div className="flex items-center justify-between pb-4 border-b border-border gap-2">
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-text-muted">Évolution des Encaissements</span>
+                    <span className="text-xs uppercase tracking-wider text-text-muted">Exemple de suivi mensuel</span>
                     <div className="text-2xl font-bold text-ink font-mono tabular-nums">4 850 000 FCFA</div>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-ink bg-success px-2.5 py-1 rounded">
-                    <TrendingUp className="w-3.5 h-3.5" /> +18% ce mois
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-success-deep shrink-0">
+                    <TrendingUp className="w-3.5 h-3.5" /> Trésorerie suivie
                   </span>
                 </div>
 
-                {/* ── SVG ANIMÉ STRATÉGIQUE N°3 : RADAR DE FLUX ENCAISSEMENTS MOMO / BANQUES ── */}
                 <div className="py-4 border-b border-border">
                   <div className="relative w-full h-24 bg-background-secondary rounded-xl border border-border flex items-center justify-between px-4 overflow-hidden">
-                    {/* Onde radar pulsante en arrière-plan */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 100">
                       <circle cx="200" cy="50" r="18" fill="none" stroke="#FFD946" strokeWidth="2" className="pulse-wave" />
                       <circle cx="200" cy="50" r="36" fill="none" stroke="#FFD946" strokeWidth="1" opacity="0.4" />
-                      {/* Lignes de flux en pointillés animés */}
                       <path d="M 60 50 L 180 50" stroke="#FFD946" strokeWidth="2" className="stream-flow" />
                       <path d="M 340 50 L 220 50" stroke="#332E29" strokeWidth="2" className="stream-flow" />
                     </svg>
 
-                    {/* Source 1 : Mobile Money */}
                     <div className="flex items-center gap-2 z-10">
                       <div className="w-8 h-8 rounded-lg bg-primary text-ink flex items-center justify-center font-bold text-xs border border-border shadow-xs">
                         MoMo
                       </div>
                       <div>
                         <div className="text-xs font-bold text-ink">MTN &amp; Moov</div>
-                        <div className="text-[10px] text-text-muted font-mono">72% des flux</div>
+                        <div className="text-[10px] text-text-muted font-mono">Encaissements</div>
                       </div>
                     </div>
 
-                    {/* Hub Central Ceilow */}
-                    <div className="w-10 h-10 rounded-full bg-ink text-white flex items-center justify-center z-10 shadow-xs border-2 border-primary">
+                    <div className="w-10 h-10 rounded-xl bg-ink text-white flex items-center justify-center z-10 shadow-xs border border-primary">
                       <Wallet className="w-4 h-4 text-primary" />
                     </div>
 
-                    {/* Source 2 : Banques */}
                     <div className="flex items-center gap-2 z-10">
                       <div>
                         <div className="text-xs font-bold text-ink text-right">Banques</div>
-                        <div className="text-[10px] text-text-muted font-mono text-right">28% virements</div>
+                        <div className="text-[10px] text-text-muted font-mono text-right">Virements</div>
                       </div>
                       <div className="w-8 h-8 rounded-lg bg-background text-ink flex items-center justify-center font-bold text-xs border border-border shadow-xs">
                         <Landmark className="w-4 h-4 text-ink" />
@@ -778,35 +731,28 @@ export default function FonctionnalitesPage() {
                   </div>
                 </div>
 
-                {/* Graphique à barres verticales mensuelles */}
                 <div className="pt-5 pb-2">
                   <div className="flex items-end justify-between h-36 px-2 gap-3">
-                    {/* Oct */}
                     <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full bg-ink rounded-t-sm transition-all" style={{ height: "45%" }} />
                       <span className="text-xs text-text-muted font-mono">Oct</span>
                     </div>
-                    {/* Nov */}
                     <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full bg-primary rounded-t-sm transition-all" style={{ height: "60%" }} />
                       <span className="text-xs text-text-muted font-mono">Nov</span>
                     </div>
-                    {/* Déc */}
                     <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full bg-ink rounded-t-sm transition-all" style={{ height: "85%" }} />
                       <span className="text-xs text-text-muted font-mono">Déc</span>
                     </div>
-                    {/* Jan */}
                     <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full bg-primary rounded-t-sm transition-all" style={{ height: "70%" }} />
                       <span className="text-xs text-text-muted font-mono">Jan</span>
                     </div>
-                    {/* Fév */}
                     <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full bg-ink rounded-t-sm transition-all" style={{ height: "78%" }} />
                       <span className="text-xs text-text-muted font-mono">Fév</span>
                     </div>
-                    {/* Mar (En cours) */}
                     <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full bg-primary rounded-t-sm shadow-xs" style={{ height: "95%" }} />
                       <span className="text-xs font-bold text-ink font-mono">Mar</span>
@@ -814,18 +760,17 @@ export default function FonctionnalitesPage() {
                   </div>
                 </div>
 
-                {/* Légende du graphique & Statut du rapprochement */}
                 <div className="pt-3 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1.5 text-ink font-medium">
-                      <span className="w-3 h-3 rounded-xs bg-primary" /> 72% MoMo
+                      <span className="w-3 h-3 rounded-xs bg-primary" /> Mobile Money
                     </span>
                     <span className="flex items-center gap-1.5 text-text-muted">
-                      <span className="w-3 h-3 rounded-xs bg-ink" /> 28% Virements
+                      <span className="w-3 h-3 rounded-xs bg-ink" /> Virements bancaires
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-ink font-semibold bg-success px-2.5 py-1 rounded">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-ink" />
+                  <div className="flex items-center gap-1.5 text-success-deep font-semibold">
+                    <Check className="w-3.5 h-3.5" />
                     <span>Rapprochement à jour</span>
                   </div>
                 </div>
@@ -834,10 +779,9 @@ export default function FonctionnalitesPage() {
           </div>
         </section>
 
-        {/* ── 6. SECTION PREUVE SOCIALE & TÉMOIGNAGES DIRIGEANTS (Fond Ink) ── */}
+        {/* 6. CAS D'USAGE AU BÉNIN (Fond Ink) */}
         <section className="w-full bg-ink text-white py-20 border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-            {/* Picto calendrier SVG sans badge superflu */}
             <div className="mb-4">
               <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" viewBox="0 0 64 64">
                 <rect height="42" rx="4" width="48" x="8" y="14" />
@@ -849,94 +793,73 @@ export default function FonctionnalitesPage() {
               </svg>
             </div>
 
-            {/* Titre & Sous-titre */}
-            <h2 className="text-3xl sm:text-4xl font-bold font-clash text-white tracking-tight text-center mb-3">
-              Plus de 50 entreprises nous font confiance au quotidien
+            <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight text-center mb-3">
+              Conçu pour le quotidien des entreprises au Bénin
             </h2>
             <p className="text-base text-white/70 text-center max-w-2xl mb-12">
-              Des dirigeants de SARL, SAS, agences et commerces racontent leur passage à Ceilow.
+              Trois situations courantes où Ceilow supprime la paperasse et vous fait gagner du temps.
             </p>
 
-            {/* 3 Cartes Témoignages */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-              {/* Carte 1 */}
               <div className="bg-background text-ink p-7 rounded-2xl flex flex-col justify-between shadow-xs border border-border">
                 <div>
-                  <div className="flex items-center gap-1 text-primary mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-text-muted italic leading-relaxed mb-6">
-                    « La génération des factures DGI était un cauchemar au quotidien avec nos anciens logiciels lents. Avec Ceilow, le QR code sort en 3 secondes. Mes clients reçoivent leurs factures immédiatement sur WhatsApp ou par e-mail. »
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-3">
+                    Prestations &amp; conseil B2B
+                  </span>
+                  <p className="text-sm text-text-muted leading-relaxed mb-6">
+                    Créez une facture certifiée e-MECeF depuis votre téléphone ou ordinateur, récupérez le QR code DGI et envoyez-la au client par WhatsApp ou e-mail sans boîtier physique.
                   </p>
                 </div>
-                <div className="pt-4 border-t border-border flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-bold text-ink">Alain T.</div>
-                    <div className="text-xs text-text-muted">Conseil &amp; Services • SASU, Cotonou</div>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                <div className="pt-4 border-t border-border text-xs font-bold text-ink flex items-center justify-between">
+                  <span>Zéro machine à acheter</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
                 </div>
               </div>
 
-              {/* Carte 2 */}
               <div className="bg-background text-ink p-7 rounded-2xl flex flex-col justify-between shadow-xs border border-border">
                 <div>
-                  <div className="flex items-center gap-1 text-primary mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-text-muted italic leading-relaxed mb-6">
-                    « Nous avons connecté nos comptes MTN MoMo pro et notre compte bancaire. Toutes les recettes de nos boutiques sont automatiquement classées. En fin de mois, le point de TVA est prêt sans aucune nuit blanche. »
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-3">
+                    Commerce &amp; distribution
+                  </span>
+                  <p className="text-sm text-text-muted leading-relaxed mb-6">
+                    Regroupez vos paiements MTN MoMo, Moov Money et comptes bancaires au même endroit. En fin de mois, vos chiffres de TVA sont déjà calculés sans stress.
                   </p>
                 </div>
-                <div className="pt-4 border-t border-border flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-bold text-ink">Gaspard D.</div>
-                    <div className="text-xs text-text-muted">Négoce &amp; Distribution • SARL, Ganhi</div>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                <div className="pt-4 border-t border-border text-xs font-bold text-ink flex items-center justify-between">
+                  <span>Préparation TVA du 10</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
                 </div>
               </div>
 
-              {/* Carte 3 */}
               <div className="bg-background text-ink p-7 rounded-2xl flex flex-col justify-between shadow-xs border border-border">
                 <div>
-                  <div className="flex items-center gap-1 text-primary mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-text-muted italic leading-relaxed mb-6">
-                    « Je n&apos;ai aucune formation comptable. Ceilow m&apos;a permis d&apos;éditer les fiches de paie de mes 4 collaborateurs et d&apos;être parfaitement en règle avec la CNSS sans faire appel à un cabinet externe coûteux. »
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-3">
+                    Entreprises avec salariés
+                  </span>
+                  <p className="text-sm text-text-muted leading-relaxed mb-6">
+                    Calculez les bulletins de paie avec cotisations CNSS, IPTS et VPS en quelques clics et préparez l&apos;export pour le portail e-Cotisations CNSS.
                   </p>
                 </div>
-                <div className="pt-4 border-t border-border flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-bold text-ink">Charles B.</div>
-                    <div className="text-xs text-text-muted">Agence Digitale • ETS, Abomey-Calavi</div>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
+                <div className="pt-4 border-t border-border text-xs font-bold text-ink flex items-center justify-between">
+                  <span>Paie &amp; CNSS simplifiées</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 7. SECTION BANNIÈRE PRÉ-FOOTER LIFESTYLE (Chaleureuse & Sans Badge Flottant) ── */}
+        {/* 7. BANNIÈRE PRÉ-FOOTER */}
         <section className="w-full py-16 lg:py-24 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-background-secondary border border-border rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 items-center">
-              {/* Colonne gauche : Copie & CTAs (7 colonnes) */}
               <div className="lg:col-span-7 p-8 lg:p-14 flex flex-col items-start space-y-5">
-                <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight">
-                  Prêt à reprendre le contrôle de votre gestion ?
+                <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight">
+                  Prêt à simplifier votre gestion ?
                 </h2>
 
                 <p className="text-base text-text-muted max-w-lg leading-relaxed">
-                  Rejoignez plus de 50 entrepreneurs béninois qui gagnent du temps chaque jour sur leurs factures, leur paie et leurs déclarations.
+                  Gagnez du temps chaque jour sur vos factures DGI, vos fiches de paie et vos déclarations mensuelles.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -944,26 +867,25 @@ export default function FonctionnalitesPage() {
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl shadow-xs transition-all min-h-[48px]"
                   >
-                    <span>Démarrer gratuitement</span>
+                    <span>Tester gratuitement</span>
                   </Link>
 
                   <Link
                     href="/accompagnement"
                     className="inline-flex items-center justify-center border border-border bg-background hover:bg-background-secondary text-ink font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl transition-all min-h-[48px]"
                   >
-                    <span>Réserver un échange</span>
+                    <span>Être accompagné</span>
                   </Link>
                 </div>
 
                 <div className="pt-1 flex items-center gap-2 text-text-muted text-xs">
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                  <span>Essai de 14 jours sans engagement. Aucune carte bancaire requise</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
+                  <span>Essai de 14 jours sans engagement - Aucune carte bancaire requise</span>
                 </div>
               </div>
 
-              {/* Colonne droite : Photo lifestyle soignée sans badges superflus (5 colonnes) */}
               <div className="lg:col-span-5 h-full relative min-h-[320px] flex items-center justify-center p-6 lg:p-8">
-                <div className="relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden border border-border">
+                <div className="relative aspect-[3/2] w-full rounded-2xl overflow-hidden border border-border">
                   <Image
                     src="/images/collaboration-comptable.jpg"
                     alt="Entrepreneur béninois pilotant sa gestion d'entreprise sur Ceilow"
@@ -977,42 +899,38 @@ export default function FonctionnalitesPage() {
           </div>
         </section>
 
-        {/* ── 8. SECTION GRILLE DES 6 PILIERS FONCTIONNELS ── */}
+        {/* 8. GRILLE DES 6 OUTILS FONCTIONNELS */}
         <section className="w-full py-16 lg:py-24 bg-background-secondary">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* En-tête de la grille */}
             <div className="text-center max-w-3xl mx-auto mb-14">
-              <h2 className="text-3xl sm:text-4xl font-bold font-clash text-ink tracking-tight mb-3">
-                Tout ce dont vous avez besoin pour piloter votre entreprise
+              <h2 className="text-3xl sm:text-4xl font-bold font-display text-ink tracking-tight mb-3">
+                Tout ce dont vous avez besoin pour gérer votre entreprise
               </h2>
               <p className="text-base text-text-muted leading-relaxed">
-                Chaque module a été forgé pour éliminer les frictions administratives rencontrées par les PME au Bénin.
+                Chaque outil supprime les pertes de temps et la double saisie pour les PME au Bénin.
               </p>
             </div>
 
-            {/* Grille des 6 Cartes Piliers */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Pilier 1 : Facturation certifiée */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Receipt className="w-6 h-6 text-ink" />
                   </div>
-                  <h3 className="text-lg font-bold text-ink mb-2">Facturation certifiée</h3>
+                  <h3 className="text-lg font-bold text-ink mb-2">Facturation certifiée DGI</h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Devis, acomptes, factures d&apos;avoir et factures de vente avec QR code officiel e-MECeF généré instantanément.
+                    Devis, acomptes, avoirs et factures de vente avec QR code officiel e-MECeF créé en direct.
                   </p>
                 </div>
                 <Link
                   href="/solutions/facturation-dgi"
-                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 group-hover:underline transition-all"
                 >
-                  <span>Explorer la facturation</span>
-                  <ArrowRight className="w-4 h-4 text-primary" />
+                  <span>Voir la facturation</span>
+                  <ArrowRight className="w-4 h-4 text-ink" />
                 </Link>
               </div>
 
-              {/* Pilier 2 : Trésorerie & Mobile Money */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
@@ -1020,95 +938,91 @@ export default function FonctionnalitesPage() {
                   </div>
                   <h3 className="text-lg font-bold text-ink mb-2">Trésorerie &amp; Mobile Money</h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Suivi en direct de vos comptes MTN MoMo, Moov Money et comptes bancaires. Rapprochement automatique des encaissements.
+                    Suivi en direct de vos comptes MTN MoMo, Moov Money et comptes bancaires. Rapprochement guidé des paiements.
                   </p>
                 </div>
                 <Link
                   href="/solutions/tresorerie-momo"
-                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 group-hover:underline transition-all"
                 >
-                  <span>Explorer la trésorerie</span>
-                  <ArrowRight className="w-4 h-4 text-primary" />
+                  <span>Voir la trésorerie</span>
+                  <ArrowRight className="w-4 h-4 text-ink" />
                 </Link>
               </div>
 
-              {/* Pilier 3 : Paie & Déclarations sociales */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <UserCheck className="w-6 h-6 text-ink" />
                   </div>
-                  <h3 className="text-lg font-bold text-ink mb-2">Paie &amp; Déclarations sociales</h3>
+                  <h3 className="text-lg font-bold text-ink mb-2">Paie &amp; déclarations CNSS</h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Édition des bulletins de paie de l&apos;équipe, décompte IPTS, cotisations CNSS et VPS en stricte conformité avec le code du travail.
+                    Création des bulletins de paie, calcul IPTS, cotisations CNSS et VPS conformes au Code du Travail béninois.
                   </p>
                 </div>
                 <Link
                   href="/solutions/paie-cnss"
-                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 group-hover:underline transition-all"
                 >
-                  <span>Explorer la paie</span>
-                  <ArrowRight className="w-4 h-4 text-primary" />
+                  <span>Voir la paie</span>
+                  <ArrowRight className="w-4 h-4 text-ink" />
                 </Link>
               </div>
 
-              {/* Pilier 4 : Dépenses & Reçus scannés */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Scan className="w-6 h-6 text-ink" />
                   </div>
-                  <h3 className="text-lg font-bold text-ink mb-2">Dépenses &amp; Reçus scannés</h3>
+                  <h3 className="text-lg font-bold text-ink mb-2">Dépenses &amp; reçus par photo</h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Prenez en photo vos factures d&apos;achats depuis votre smartphone. Les montants et taxes sont extraits sans ressaisie manuelle.
+                    Prenez vos factures d&apos;achats en photo depuis votre téléphone : montants et TVA sont lus sans saisie manuelle.
                   </p>
                 </div>
                 <Link
                   href="/solutions/gestion-depenses"
-                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 group-hover:underline transition-all"
                 >
-                  <span>Explorer les achats</span>
-                  <ArrowRight className="w-4 h-4 text-primary" />
+                  <span>Voir les dépenses</span>
+                  <ArrowRight className="w-4 h-4 text-ink" />
                 </Link>
               </div>
 
-              {/* Pilier 5 : Déclarations fiscales à l'avance */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Calendar className="w-6 h-6 text-ink" />
                   </div>
-                  <h3 className="text-lg font-bold text-ink mb-2">Déclarations fiscales à l&apos;avance</h3>
+                  <h3 className="text-lg font-bold text-ink mb-2">Déclarations DGI préparées</h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Calcul automatisé de votre TVA brute et déductible. Alertes programmées avant le 10 de chaque mois pour éviter les pénalités.
+                    Calcul automatique de votre TVA facturée et déductible. Alertes avant le 10 du mois pour éviter les majorations.
                   </p>
                 </div>
                 <Link
                   href="/solutions/declarations-fiscales"
-                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 group-hover:underline transition-all"
                 >
-                  <span>Explorer la fiscalité</span>
-                  <ArrowRight className="w-4 h-4 text-primary" />
+                  <span>Voir la fiscalité</span>
+                  <ArrowRight className="w-4 h-4 text-ink" />
                 </Link>
               </div>
 
-              {/* Pilier 6 : Clôture annuelle sans panique */}
               <div className="bg-background p-7 rounded-2xl border border-border hover:border-primary transition-all flex flex-col justify-between group shadow-xs">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-background-secondary text-ink flex items-center justify-center mb-5 border border-border">
                     <Layers className="w-6 h-6 text-ink" />
                   </div>
-                  <h3 className="text-lg font-bold text-ink mb-2">Clôture annuelle sans panique</h3>
+                  <h3 className="text-lg font-bold text-ink mb-2">Comptabilité SYSCOHADA</h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Comptes de résultat, balance générale et états financiers prêts pour votre expert-comptable ou vos partenaires financiers.
+                    Comptes de résultat, balance et écritures prêts pour votre expert-comptable ou vos demandes bancaires.
                   </p>
                 </div>
                 <Link
                   href="/solutions/comptabilite-syscohada"
-                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                  className="text-sm text-ink font-bold inline-flex items-center gap-1 group-hover:gap-2 group-hover:underline transition-all"
                 >
-                  <span>Explorer la comptabilité</span>
-                  <ArrowRight className="w-4 h-4 text-primary" />
+                  <span>Voir la comptabilité</span>
+                  <ArrowRight className="w-4 h-4 text-ink" />
                 </Link>
               </div>
             </div>

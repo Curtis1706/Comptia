@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Gestion des Dépenses, Notes de Frais et OCR Factures au Bénin",
+  title: "Gestion des Dépenses et Reçus Scannés au Bénin",
   description:
-    "Numérisez vos reçus et factures d'achat par OCR. Rapprochement automatique avec vos sorties de caisse et imputation comptable SYSCOHADA immédiate.",
+    "Prenez vos reçus et factures fournisseurs en photo : Ceilow lit les montants, récupère votre TVA déductible et archive vos preuves d'achat 10 ans.",
   alternates: {
     canonical: "/solutions/gestion-depenses",
   },
   openGraph: {
-    title: "Gestion des Dépenses, Notes de Frais et OCR Factures au Bénin | Ceilow",
+    title: "Gestion des Dépenses et Reçus Scannés au Bénin | Ceilow",
     description:
-      "Numérisation OCR et contrôle des achats d'entreprise au Bénin avec imputation comptable automatique.",
+      "Fini les tickets perdus : photographiez vos achats pour récupérer 100 % de votre TVA déductible.",
     url: "https://ceilow.com/solutions/gestion-depenses",
     type: "website",
   },
@@ -45,7 +45,7 @@ const breadcrumbSchema = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Gestion des Dépenses et OCR Achats",
+  name: "Numérisation des Factures d'Achat et Notes de Frais",
   provider: {
     "@type": "Organization",
     name: "Ceilow",
@@ -56,7 +56,7 @@ const serviceSchema = {
     name: "Benin",
   },
   description:
-    "Numérisation intelligente des justificatifs de dépenses, reconnaissance optique de caractères (OCR) et écriture comptable d'achat immédiate.",
+    "Capture photo de reçus et factures fournisseurs avec lecture automatique des montants en FCFA, extraction de TVA et archivage légal 10 ans.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

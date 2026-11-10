@@ -4,26 +4,26 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Wallet,
   ArrowRight,
   Check,
-  CheckCircle2,
   RefreshCw,
   TrendingUp,
-  ShieldCheck,
   Smartphone,
   Building2,
-  AlertCircle,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
-  CreditCard,
-  Layers,
   ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function TresorerieMomoPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -87,17 +87,17 @@ export default function TresorerieMomoPage() {
     },
     {
       q: "Que se passe-t-il en cas de paiement partiel ou avec frais déduits ?",
-      a: "Ceilow détecte automatiquement les écarts fréquents liés aux frais d'opérateur Mobile Money (1% à 2%) et vous propose d'imputer immédiatement la différence sur le compte de charges adéquat (compte 631 frais financiers) sans bloquer le lettrage de la facture.",
+      a: "Ceilow repère automatiquement les écarts liés aux frais Mobile Money (1 % à 2 %) et vous propose de les enregistrer directement en frais bancaires (compte 631) sans bloquer le suivi de la facture.",
     },
     {
-      q: "Mon expert-comptable peut-il exporter ces rapprochements ?",
-      a: "Oui, à tout instant. Les écritures de trésorerie réconciliées sont automatiquement générées dans le journal de banque et de caisse SYSCOHADA, prêtes pour l'export FEC ou l'audit légal.",
+      q: "Mon comptable peut-il exporter ces rapprochements ?",
+      a: "Oui, à tout moment. Vos encaissements validés s'enregistrent automatiquement dans vos journaux de banque et de caisse SYSCOHADA, prêts pour l'export ou le bilan annuel.",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col font-sans selection:bg-primary selection:text-ink">
-      {/* ── STYLE DÉDIÉ POUR ANIMATION SVG LOTTIE-LIKE TRÉSORERIE & MOMO ── */}
+      {/* STYLE DÉDIÉ POUR ANIMATION TRÉSORERIE & MOMO */}
       <style jsx global>{`
         @keyframes floatCoinMomo {
           0% { transform: translateY(-40px) scale(0.6) rotate(-15deg); opacity: 0; }
@@ -136,6 +136,14 @@ export default function TresorerieMomoPage() {
           fill: #FFD946; stroke: #332E29; stroke-width: 1;
           animation: sparklePop 3s ease-in-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) {
+          .coin-momo-anim,
+          .safe-anim,
+          .phone-anim,
+          .sparkle-momo {
+            animation: none;
+          }
+        }
       `}</style>
 
       <PublicHeader />
@@ -144,21 +152,34 @@ export default function TresorerieMomoPage() {
         {/* HERO SECTION SPLIT SCREEN */}
         <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 border-b border-border bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/fonctionnalites">Fonctionnalités</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Trésorerie &amp; Mobile Money</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Copywriting orienté valeur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Trésorerie &amp; Encaissements au Bénin
+                  Trésorerie &amp; encaissements au Bénin
                 </span>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-display">
                   Rapprochement bancaire et Mobile Money au Bénin en temps réel
                 </h1>
-                <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini les relevés SMS manuels et les écarts de caisse introuvables)
-                </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Centralisez vos comptes MTN MoMo, Moov Money et comptes bancaires sur une interface unique. Ceilow fait le rapprochement bancaire de chaque paiement reçu avec sa facture correspondante en un clic. Vous savez exactement où va chaque Franc CFA.
+                  Regroupez vos comptes MTN MoMo, Moov Money et vos comptes bancaires au même endroit. En un clic, associez chaque paiement reçu à sa facture client et gardez une trésorerie sans erreur.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -173,7 +194,7 @@ export default function TresorerieMomoPage() {
                     href="/demo"
                     className="bg-background-secondary text-ink font-bold px-7 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Voir la démonstration
+                    Voir la démo
                   </Link>
                 </div>
 
@@ -188,7 +209,7 @@ export default function TresorerieMomoPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Rapprochement assisté</span>
+                    <span>Pointage guidé</span>
                   </div>
                 </div>
               </div>
@@ -196,14 +217,16 @@ export default function TresorerieMomoPage() {
               {/* Colonne droite : Photo réelle Gestionnaire Financier à Cotonou */}
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-xs">
-                  <Image
-                    src="/images/finance-manager.jpg"
-                    alt="Directeur administratif et financier analysant la trésorerie d'entreprise à Cotonou"
-                    width={600}
-                    height={440}
-                    className="w-full h-[360px] sm:h-[420px] object-cover"
-                    priority
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/finance-manager.jpg"
+                      alt="Directeur administratif et financier analysant la trésorerie d'entreprise à Cotonou"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <div className="flex items-center justify-between text-xs font-bold text-ink mb-1">
                       <span>Trésorerie consolidée en temps réel</span>
@@ -274,27 +297,27 @@ export default function TresorerieMomoPage() {
               </svg>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink tracking-tight">
-              Chaque franc encaissé est rangé et protégé
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
+              Chaque franc encaissé est rangé et retrouvé
             </h2>
             <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              Les règlements MoMo, Moov et virements bancaires se réconcilient avec vos factures sans perte d&apos;information ni oubli.
+              Vos règlements MoMo, Moov et virements bancaires sont reliés à vos factures sans erreur ni oubli.
             </p>
           </div>
         </section>
 
-        {/* SECTION INTERACTIVE : RADAR MULTI-COMPTES & RAPPROCHEMENT MAGNÉTIQUE */}
+        {/* SECTION INTERACTIVE : RADAR MULTI-COMPTES & RAPPROCHEMENT */}
         <section className="py-16 md:py-20 bg-background-secondary border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Simulateur en direct
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-3">
                 Essayez le rapprochement bancaire et Mobile Money en direct
               </h2>
               <p className="text-sm sm:text-base text-text-muted max-w-2xl">
-                Ceilow compare les références de paiement et les montants reçus avec vos factures impayées. Cliquez sur &quot;Rapprocher&quot; pour constater la réconciliation instantanée.
+                Ceilow compare les références et montants reçus avec vos factures en attente de paiement. Cliquez sur &quot;Rapprocher&quot; pour valider le lien.
               </p>
             </div>
 
@@ -370,10 +393,10 @@ export default function TresorerieMomoPage() {
                 <button
                   type="button"
                   onClick={rapprocherTout}
-                  className="bg-ink text-background font-bold text-xs px-4 py-2.5 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 min-h-[40px]"
+                  className="bg-ink text-background font-bold text-xs px-4 py-2.5 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5 text-primary" />
-                  <span>Tout rapprocher en 1 clic</span>
+                  <span>Tout rapprocher</span>
                 </button>
               </div>
 
@@ -392,7 +415,7 @@ export default function TresorerieMomoPage() {
                         )}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-bold text-ink">{tx.source}</span>
                           <span className="text-xs text-text-muted font-mono">{tx.reference}</span>
                         </div>
@@ -408,20 +431,20 @@ export default function TresorerieMomoPage() {
                           {tx.montant}
                         </span>
                         <span className="text-[11px] text-text-muted">
-                          Indice confiance : {tx.score}
+                          Correspondance : {tx.score}
                         </span>
                       </div>
 
                       {tx.statut === "rapproche" ? (
-                        <div className="px-3 py-2 rounded-lg bg-background border border-border text-xs font-bold text-ink flex items-center gap-1.5 min-h-[36px]">
-                          <CheckCircle2 className="w-4 h-4 text-ink" />
-                          <span>Réconcilié</span>
+                        <div className="px-3 py-2 rounded-lg bg-background border border-border text-xs font-bold text-ink flex items-center gap-1.5 min-h-[44px]">
+                          <Check className="w-4 h-4 text-success-deep shrink-0" />
+                          <span>Rapproché</span>
                         </div>
                       ) : (
                         <button
                           type="button"
                           onClick={() => rapprocherTransaction(tx.id)}
-                          className="bg-primary text-ink text-xs font-bold px-3 py-2 rounded-lg hover:opacity-90 transition-all min-h-[36px] flex items-center gap-1"
+                          className="bg-primary text-ink text-xs font-bold px-4 py-2 rounded-lg hover:opacity-90 transition-all min-h-[44px] flex items-center gap-1 cursor-pointer"
                         >
                           <span>Rapprocher</span>
                         </button>
@@ -432,8 +455,8 @@ export default function TresorerieMomoPage() {
               </div>
 
               <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-text-muted gap-2">
-                <span>Écriture automatique passée au compte 512 (Banque) ou 571 (Caisse MoMo) et lettrage compte 411.</span>
-                <span className="font-mono text-ink font-bold">100% conforme SYSCOHADA</span>
+                <span>Écriture passée au compte 521 (Banque) ou 571 (Caisse / MoMo) et règlement de la facture client (compte 411).</span>
+                <span className="font-mono text-ink font-bold">Conforme SYSCOHADA</span>
               </div>
             </div>
           </div>
@@ -531,24 +554,24 @@ export default function TresorerieMomoPage() {
               <div className="bg-background p-8 rounded-2xl border-2 border-primary">
                 <div className="text-xs uppercase font-bold text-ink tracking-wider mb-4 pb-3 border-b border-border flex items-center justify-between">
                   <span>Avec Ceilow Trésorerie</span>
-                  <span className="font-mono text-xs text-text-muted">Gain de 6h par semaine</span>
+                  <span className="font-mono text-xs text-text-muted">Automatique</span>
                 </div>
                 <ul className="space-y-4 text-sm text-ink">
                   <li className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-ink shrink-0 mt-0.5" />
-                    <span>Agrégation claire des soldes banques, MTN MoMo et Moov Money en temps réel.</span>
+                    <span>Vue claire de vos soldes banques, MTN MoMo et Moov Money au même endroit.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-ink shrink-0 mt-0.5" />
-                    <span>Rapprochement assisté en un clic reliant transaction et facture client.</span>
+                    <span>Rapprochement guidé en un clic entre chaque paiement et sa facture client.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-ink shrink-0 mt-0.5" />
-                    <span>Comptabilisation automatique des commissions opérateurs dans les bons comptes.</span>
+                    <span>Enregistrement automatique des frais opérateurs dans les bons comptes.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-ink shrink-0 mt-0.5" />
-                    <span>État de rapprochement et journaux de trésorerie toujours à jour pour le comptable.</span>
+                    <span>État de rapprochement et journaux de trésorerie prêts pour votre comptable.</span>
                   </li>
                 </ul>
               </div>
@@ -556,15 +579,15 @@ export default function TresorerieMomoPage() {
           </div>
         </section>
 
-        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        {/* MAILLAGE INTERNE CONTEXTUEL */}
         <section className="py-12 bg-background-secondary border-t border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-8">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Continuité des Flux
+                Suite complète
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
-                Votre trésorerie connectée à vos factures et à votre comptabilité
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink mt-1">
+                Votre trésorerie reliée à vos factures et à votre comptabilité
               </h2>
             </div>
 
@@ -574,16 +597,16 @@ export default function TresorerieMomoPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Facturation Normalisée DGI</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Facturation normalisée DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Rapprochez chaque virement MoMo ou bancaire reçu avec sa facture certifiée e-MECeF pour solder vos créances clients.
+                    Reliez chaque paiement MoMo ou virement à sa facture e-MECeF pour suivre vos factures payées et impayées.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la facturation DGI
+                  Voir la facturation
                 </span>
               </Link>
 
@@ -592,16 +615,16 @@ export default function TresorerieMomoPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
                     <span>Comptabilité SYSCOHADA</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Alimentez automatiquement vos comptes 52 (Banques) et 57 (Caisse / Mobile Money) selon le plan comptable révisé.
+                    Vos comptes 521 (Banques) et 571 (Caisse / Mobile Money) se mettent à jour automatiquement selon le plan révisé.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir le journal de trésorerie
+                  Voir la comptabilité
                 </span>
               </Link>
 
@@ -610,16 +633,16 @@ export default function TresorerieMomoPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Gestion des Dépenses OCR</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Gestion des dépenses</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Associez chaque sortie d&apos;argent MoMo pour achats de fournitures ou carburant à son reçu numérisé par photo.
+                    Associez chaque paiement MoMo pour fournitures ou carburant à la photo du reçu correspondant.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir le contrôle des achats
+                  Voir les dépenses
                 </span>
               </Link>
             </div>
@@ -633,7 +656,7 @@ export default function TresorerieMomoPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Questions fréquentes
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout comprendre sur la trésorerie et le Mobile Money
               </h2>
             </div>
@@ -649,7 +672,8 @@ export default function TresorerieMomoPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors"
+                      aria-expanded={isOpen}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{faq.q}</span>
                       {isOpen ? (
@@ -673,25 +697,25 @@ export default function TresorerieMomoPage() {
         {/* BANNIÈRE D'APPEL À L'ACTION FINALE */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 text-background">
-              Reprenez le contrôle total de vos liquidités dès aujourd&apos;hui.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display tracking-tight mb-4 text-background">
+              Gardez une vision claire de votre trésorerie dès aujourd&apos;hui.
             </h2>
             <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto mb-8">
-              Activez la réconciliation bancaire et Mobile Money sur Ceilow. Testez gratuitement pendant 14 jours, sans engagement.
+              Activez le suivi bancaire et Mobile Money sur Ceilow. Testez gratuitement pendant 14 jours, sans engagement.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Créer mon compte</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Tester la démo en ligne
+                Voir la démo
               </Link>
             </div>
           </div>

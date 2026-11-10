@@ -35,10 +35,10 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
               La solution de facturation et de gestion tout-en-un pour les entreprises au Bénin. Facturez aux normes DGI, suivez vos paiements et automatisez votre comptabilité en toute sérénité.
             </p>
 
-            {/* Certification DGI */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#3D3830] border border-white/10 text-xs font-medium text-white/90">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse shrink-0" />
-              <span>Certifié conforme DGI &amp; DGI-Bénin</span>
+            {/* Conformité officielle sans badge cosmétique */}
+            <div className="flex items-center gap-2 text-xs font-medium text-white/85">
+              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+              <span>Certifié conforme DGI Bénin e-MECeF</span>
             </div>
 
             {/* Support plateforme Ceilow */}
@@ -117,6 +117,31 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href="/ressources/guide-facturation-emecef-benin" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Guide Facturation e-MECeF
+                </Link>
+              </li>
+              <li>
+                <Link href="/ressources/guide-tva-benin" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Guide TVA Bénin (18 %)
+                </Link>
+              </li>
+              <li>
+                <Link href="/ressources/calcul-tps-benin-guide" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Guide Calcul TPS Bénin (5 %)
+                </Link>
+              </li>
+              <li>
+                <Link href="/ressources/plan-comptable-syscohada-pdf" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Plan Comptable SYSCOHADA
+                </Link>
+              </li>
+              <li>
+                <Link href="/ressources/bareme-cotisations-cnss-benin" className="hover:text-primary transition-colors inline-block leading-snug">
+                  Barème Cotisations CNSS Bénin
+                </Link>
+              </li>
+              <li>
                 <Link href="/securite-et-apdp" className="hover:text-primary transition-colors inline-block leading-snug">
                   Sécurité &amp; Conformité APDP
                 </Link>
@@ -141,8 +166,8 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
             </span>
 
             <div className="flex flex-col gap-3 w-full text-xs text-white/80">
-              {/* Raison sociale & RCCM (fond opaque solide sombre #3D3830) */}
-              <div className="p-3 rounded-lg bg-[#3D3830] border border-white/10 flex flex-col gap-1">
+              {/* Raison sociale & RCCM (tokens sémantiques) */}
+              <div className="p-3 rounded-lg bg-ink-surface border border-ink-border flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-primary shrink-0" />
                   <span className="text-sm font-bold text-white">Digiplex Agency</span>
@@ -191,13 +216,13 @@ export function PublicFooter({ className = "" }: PublicFooterProps) {
               </div>
             </div>
 
-            {/* Bouton CTA Démo (fond opaque sobre solide sans glassmorphisme) */}
+            {/* Bouton CTA Démo */}
             <div className="pt-2 w-full">
               <Link
                 href="/demo"
-                className="group inline-flex items-center justify-between w-full px-4 py-2.5 rounded-lg bg-[#3D3830] hover:bg-[#474138] border border-white/15 text-xs font-semibold text-white transition-all hover:border-primary/50"
+                className="group inline-flex items-center justify-between w-full px-4 py-2.5 rounded-lg bg-ink-surface hover:bg-ink-border border border-ink-border text-xs font-semibold text-white transition-all hover:border-primary/50"
               >
-                <span>Réserver une démonstration</span>
+                <span>Voir la démo</span>
                 <ArrowRight className="w-3.5 h-3.5 text-primary transition-transform group-hover:translate-x-1" />
               </Link>
             </div>

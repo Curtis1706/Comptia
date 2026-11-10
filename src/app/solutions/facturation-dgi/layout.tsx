@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Facturation Normalisée DGI e-MECeF au Bénin",
+  title: "Facturation Normalisée e-MECeF au Bénin Sans Machine",
   description:
-    "Émettez vos factures normalisées avec code QR et signature électronique e-MECeF en temps réel. Solution certifiée conforme aux exigences de la DGI Bénin.",
+    "Créez vos factures officielles avec QR code DGI en 3 secondes depuis votre téléphone ou ordinateur. Sans machine physique à acheter. Essayez gratuitement Ceilow.",
   alternates: {
     canonical: "/solutions/facturation-dgi",
   },
   openGraph: {
-    title: "Facturation Normalisée DGI e-MECeF au Bénin | Ceilow",
+    title: "Facturation Normalisée e-MECeF Sans Machine au Bénin | Ceilow",
     description:
-      "Factures certifiées DGI conformes et immédiates pour PME et indépendants au Bénin.",
+      "Émettez des factures officielles avec QR code DGI depuis votre mobile ou navigateur web en toute conformité.",
     url: "https://ceilow.com/solutions/facturation-dgi",
     type: "website",
   },
@@ -45,7 +45,7 @@ const breadcrumbSchema = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Facturation Normalisée DGI e-MECeF",
+  name: "Facturation Normalisée e-MECeF Sans Machine Physique",
   provider: {
     "@type": "Organization",
     name: "Ceilow",
@@ -56,7 +56,7 @@ const serviceSchema = {
     name: "Benin",
   },
   description:
-    "Module d'émission et de normalisation instantanée des factures d'entreprise avec l'API e-MECeF de la Direction Générale des Impôts du Bénin.",
+    "Émission directe de factures normalisées avec QR code et signature officielle DGI e-MECeF depuis votre navigateur ou téléphone.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

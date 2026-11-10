@@ -4,14 +4,14 @@ import { JsonLd } from "@/components/seo/JsonLd";
 export const metadata: Metadata = {
   title: "Sécurité des Données et Conformité APDP au Bénin",
   description:
-    "Découvrez notre architecture de sécurité : chiffrement bancaire TLS/AES-256, sauvegardes quotidiennes redondantes et stricte conformité avec l'APDP Bénin.",
+    "Vos chiffres d'entreprise protégés chaque jour : chiffrement sécurisé, copies automatiques et respect strict de la loi béninoise sur les données (APDP).",
   alternates: {
     canonical: "/securite-et-apdp",
   },
   openGraph: {
     title: "Sécurité des Données et Conformité APDP au Bénin | Ceilow",
     description:
-      "Vos données comptables et financières protégées selon les plus hauts standards de sécurité.",
+      "Vos factures et comptes restent votre propriété exclusive, chiffrés et sauvegardés automatiquement.",
     url: "https://ceilow.com/securite-et-apdp",
     type: "website",
   },

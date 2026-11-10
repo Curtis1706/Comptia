@@ -25,6 +25,8 @@
     /* Ceilow Ink (brun foncé) */
     --ink: 30 11% 18%; /* #332E29 */
     --ink-foreground: 0 0% 100%;
+    --ink-surface: 37 12% 21%; /* #3D3830 */
+    --ink-border: 37 12% 25%; /* #474138 */
 
     /* Ceilow Brand Yellow (#FFD946) */
     --primary: 48 100% 64%;
@@ -99,6 +101,8 @@
 
     --ink: 0 0% 100%;
     --ink-foreground: 30 11% 18%;
+    --ink-surface: 37 12% 21%;
+    --ink-border: 37 12% 25%;
 
     --primary: 48 100% 64%; /* #FFD946 */
     --primary-foreground: 30 11% 18%;

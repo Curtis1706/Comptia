@@ -8,7 +8,6 @@ import {
   Check,
   ShieldCheck,
   ArrowRight,
-  Download,
   FileText,
   PieChart,
   Layers,
@@ -17,11 +16,18 @@ import {
   Scale,
   Building2,
   Users,
-  CheckCircle2,
   Calendar,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function ComptabiliteSyscohadaPage() {
   const [activeJournal, setActiveJournal] = useState<"ventes" | "achats" | "banque" | "caisse">("ventes");
@@ -147,67 +153,76 @@ export default function ComptabiliteSyscohadaPage() {
             fill: #FFD946; stroke: #332E29; stroke-width: 1;
             animation: popScaleSparkle 4.5s ease-in-out infinite;
           }
+          @media (prefers-reduced-motion: reduce) {
+            .balance-beam,
+            .plate-left-anim,
+            .plate-right-anim,
+            .sparkle-scale {
+              animation: none;
+            }
+          }
         `}</style>
 
-        {/* ── 1. HERO SECTION SPLIT SCREEN (Inspiré du modèle Accompagnement) ── */}
+        {/* 1. HERO SECTION SPLIT SCREEN */}
         <section className="w-full py-14 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/fonctionnalites">Fonctionnalités</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Comptabilité SYSCOHADA</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Promesse de valeur & Copywriting */}
               <div className="lg:col-span-7 flex flex-col items-start space-y-6">
                 
-                {/* Repère institutionnel ancré solide */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background-secondary border border-border text-xs font-semibold text-ink">
-                  <span className="w-2 h-2 rounded-full bg-success" />
-                  <span>Plan Comptable Général OHADA Révisé (SYSCOHADA)</span>
-                </div>
+                <span className="text-xs uppercase tracking-widest font-bold text-text-muted">
+                  Plan comptable OHADA révisé (SYSCOHADA)
+                </span>
 
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-clash text-ink leading-[1.12] tracking-tight">
-                  Le logiciel comptable SYSCOHADA{" "}
-                  <span className="text-ink bg-primary px-2 py-0.5 rounded-lg">
-                    sans saisie manuelle
-                  </span>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-display text-ink leading-[1.12] tracking-tight">
+                  Le logiciel comptable SYSCOHADA sans saisie manuelle
                 </h1>
 
                 <p className="text-base sm:text-lg text-text-muted max-w-xl leading-relaxed">
-                  Tenez votre comptabilité conforme au plan SYSCOHADA révisé au Bénin : grand livre, balance, écritures de vente et d&apos;achat automatisées, et préparation sereine de votre DSF en fin d&apos;exercice.
+                  Tenez votre comptabilité au Bénin sans tout recopier à la main : grand livre, balance, écritures de ventes et d&apos;achats créés automatiquement pour préparer sereinement votre bilan annuel.
                 </p>
 
-                {/* Annotation cursive humaine */}
-                <div className="flex items-center gap-2 text-sm text-text-muted">
-                  <span className="font-serif italic text-ink font-semibold">
-                    Clarté garantie :
-                  </span>
-                  <span>vous comprenez enfin où va votre argent, sans être comptable.</span>
-                </div>
+                <p className="text-sm text-text-muted">
+                  <span className="font-semibold text-ink">Lisible pour tous :</span> vous suivez vos chiffres et vos marges sans avoir besoin d&apos;être comptable.
+                </p>
 
-                {/* 3 Garanties directes ancrées */}
+                {/* 3 Garanties directes */}
                 <div className="flex flex-col space-y-3 pt-1 w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-success text-ink flex items-center justify-center font-bold text-xs shrink-0">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Les 4 journaux auxiliaires (Ventes, Achats, Banque, Caisse) alimentés en direct
+                      Journaux des ventes, achats, banque et caisse mis à jour en direct
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-success text-ink flex items-center justify-center font-bold text-xs shrink-0">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Balance générale à 6 colonnes et compte de résultat mis à jour à chaque opération
+                      Balance générale et résultat net actualisés après chaque opération
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-success text-ink flex items-center justify-center font-bold text-xs shrink-0">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Espace invité gratuit et exports universels pour votre cabinet comptable
+                      Accès gratuit et exports propres pour votre comptable
                     </span>
                   </div>
                 </div>
@@ -218,7 +233,7 @@ export default function ComptabiliteSyscohadaPage() {
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl transition-all shadow-xs min-h-[48px]"
                   >
-                    <span>Découvrir la comptabilité</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
 
@@ -226,13 +241,13 @@ export default function ComptabiliteSyscohadaPage() {
                     href="/demo"
                     className="inline-flex items-center justify-center border border-border bg-background hover:bg-background-secondary text-ink font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl transition-all min-h-[48px]"
                   >
-                    <span>Voir une démonstration</span>
+                    <span>Voir la démo</span>
                   </Link>
                 </div>
 
                 <div className="text-xs text-text-muted flex items-center gap-2 pt-1">
-                  <ShieldCheck className="w-4 h-4 text-success-deep" />
-                  <span>Conforme aux normes de l&apos;Ordre des Experts-Comptables du Bénin (OECCA)</span>
+                  <ShieldCheck className="w-4 h-4 text-success-deep shrink-0" />
+                  <span>Conforme aux normes SYSCOHADA révisées (zone UEMOA / Bénin)</span>
                 </div>
               </div>
 
@@ -243,13 +258,13 @@ export default function ComptabiliteSyscohadaPage() {
                   {/* Sélecteur de journal interactif */}
                   <div>
                     <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
-                      Sélectionnez un journal auxiliaire
+                      Sélectionnez un journal comptable
                     </div>
                     <div className="grid grid-cols-4 gap-1 p-1 bg-background-secondary rounded-xl border border-border text-xs font-semibold">
                       <button
                         type="button"
                         onClick={() => setActiveJournal("ventes")}
-                        className={`py-2 rounded-lg transition-colors cursor-pointer ${
+                        className={`min-h-[44px] py-2 rounded-lg transition-colors cursor-pointer ${
                           activeJournal === "ventes" ? "bg-background text-ink shadow-xs" : "text-text-muted hover:text-ink"
                         }`}
                       >
@@ -258,7 +273,7 @@ export default function ComptabiliteSyscohadaPage() {
                       <button
                         type="button"
                         onClick={() => setActiveJournal("achats")}
-                        className={`py-2 rounded-lg transition-colors cursor-pointer ${
+                        className={`min-h-[44px] py-2 rounded-lg transition-colors cursor-pointer ${
                           activeJournal === "achats" ? "bg-background text-ink shadow-xs" : "text-text-muted hover:text-ink"
                         }`}
                       >
@@ -267,7 +282,7 @@ export default function ComptabiliteSyscohadaPage() {
                       <button
                         type="button"
                         onClick={() => setActiveJournal("banque")}
-                        className={`py-2 rounded-lg transition-colors cursor-pointer ${
+                        className={`min-h-[44px] py-2 rounded-lg transition-colors cursor-pointer ${
                           activeJournal === "banque" ? "bg-background text-ink shadow-xs" : "text-text-muted hover:text-ink"
                         }`}
                       >
@@ -276,7 +291,7 @@ export default function ComptabiliteSyscohadaPage() {
                       <button
                         type="button"
                         onClick={() => setActiveJournal("caisse")}
-                        className={`py-2 rounded-lg transition-colors cursor-pointer ${
+                        className={`min-h-[44px] py-2 rounded-lg transition-colors cursor-pointer ${
                           activeJournal === "caisse" ? "bg-background text-ink shadow-xs" : "text-text-muted hover:text-ink"
                         }`}
                       >
@@ -302,7 +317,7 @@ export default function ComptabiliteSyscohadaPage() {
 
                       {journalsData[activeJournal].entries.map((item, idx) => (
                         <div key={idx} className="grid grid-cols-12 text-ink text-[11px] items-center">
-                          <span className="col-span-3 font-bold text-primary-deep">{item.compte}</span>
+                          <span className="col-span-3 font-bold text-ink">{item.compte}</span>
                           <span className="col-span-5 truncate text-text-muted">{item.libelle}</span>
                           <span className="col-span-2 text-right tabular-nums">
                             {item.debit !== "0" ? item.debit : ""}
@@ -328,16 +343,16 @@ export default function ComptabiliteSyscohadaPage() {
                   <div className="p-3.5 bg-background rounded-xl border border-border text-xs text-text-muted space-y-1">
                     <div className="font-semibold text-ink flex items-center gap-1.5">
                       <Scale className="w-3.5 h-3.5 text-primary balance-icon" />
-                      <span>Principe de la partie double respecté</span>
+                      <span>Équilibre débit et crédit automatique</span>
                     </div>
                     <p className="leading-relaxed">
                       {journalsData[activeJournal].explication}
                     </p>
                   </div>
 
-                  {/* Statut comptable solide ancré */}
-                  <div className="p-2.5 rounded-lg bg-success text-ink font-bold text-xs flex items-center justify-center gap-2">
-                    <Check className="w-4 h-4 stroke-[3]" />
+                  {/* Statut comptable sobre */}
+                  <div className="p-2.5 rounded-lg bg-background-secondary border border-border text-ink font-semibold text-xs flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4 text-success-deep stroke-[2.5] shrink-0" />
                     <span>Conformité SYSCOHADA validée sans calcul manuel</span>
                   </div>
 
@@ -450,27 +465,27 @@ export default function ComptabiliteSyscohadaPage() {
               </svg>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink tracking-tight">
-              L&apos;équilibre comptable strict, sans calcul manuel
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
+              Des comptes équilibrés, sans calcul manuel
             </h2>
             <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              Chaque mouvement respecte le principe de la partie double SYSCOHADA. Votre balance générale est équilibrée en permanence.
+              Chaque mouvement équilibre automatiquement les débits et les crédits selon le plan SYSCOHADA. Votre balance reste juste en permanence.
             </p>
           </div>
         </section>
 
-        {/* ── 3. LES 3 GRANDES SIMPLIFICATIONS COMPTABLES (Modèle Accompagnement) ── */}
+        {/* 3. LES 3 GRANDES SIMPLIFICATIONS COMPTABLES */}
         <section className="w-full py-16 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center mb-14">
-              <span className="text-xs font-bold text-ink uppercase tracking-wider bg-primary/20 px-3 py-1 rounded-full">
-                Sérénité de gestion
+              <span className="text-xs uppercase tracking-widest font-bold text-text-muted">
+                Gestion simplifiée
               </span>
-              <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight mt-3">
-                Vous gérez vos affaires, Ceilow tient vos comptes
+              <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight mt-3">
+                Vous gérez vos ventes, Ceilow tient vos comptes
               </h2>
               <p className="text-sm sm:text-base text-text-muted mt-2 leading-relaxed">
-                Voici concrètement comment Ceilow transforme les contraintes comptables en une mécanique automatique fluide.
+                Découvrez comment Ceilow transforme vos factures et reçus quotidiens en comptabilité propre et prête pour votre comptable.
               </p>
             </div>
 
@@ -482,16 +497,16 @@ export default function ComptabiliteSyscohadaPage() {
                   <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-ink mb-5">
                     <Layers className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold font-clash text-ink mb-2">
-                    Les 4 journaux auxiliaires automatiques
+                  <h3 className="text-lg font-bold font-display text-ink mb-2">
+                    4 journaux comptables tenus automatiquement
                   </h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Chaque facture émise part au journal des ventes, chaque achat au journal des achats, et chaque mouvement bancaire au journal de trésorerie. Zéro ressaisie en fin de mois.
+                    Chaque facture part au journal des ventes, chaque achat au journal des achats, et chaque mouvement bancaire au journal de trésorerie. Zéro ressaisie en fin de mois.
                   </p>
                 </div>
                 <div className="p-3 bg-background rounded-xl border border-border text-xs text-ink font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                  <span>Journaux des ventes, achats, banque et caisse</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
+                  <span>Ventes, achats, banque et caisse reliés</span>
                 </div>
               </div>
 
@@ -501,16 +516,16 @@ export default function ComptabiliteSyscohadaPage() {
                   <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-ink mb-5">
                     <PieChart className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold font-clash text-ink mb-2">
+                  <h3 className="text-lg font-bold font-display text-ink mb-2">
                     Votre résultat net visible en direct
                   </h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Ne devinez plus si vous gagnez ou perdez de l&apos;argent. Ceilow calcule votre chiffre d&apos;affaires hors taxes, vos charges consommées et votre bénéfice d&apos;exploitation au jour le jour.
+                    Ne devinez plus si votre activité dégage du bénéfice. Ceilow suit votre chiffre d&apos;affaires hors taxes, vos dépenses et votre résultat au jour le jour.
                   </p>
                 </div>
                 <div className="p-3 bg-background rounded-xl border border-border text-xs text-ink font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                  <span>Compte de résultat et balance générale en 1 clic</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
+                  <span>Compte de résultat et balance en 1 clic</span>
                 </div>
               </div>
 
@@ -520,16 +535,16 @@ export default function ComptabiliteSyscohadaPage() {
                   <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-ink mb-5">
                     <Users className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold font-clash text-ink mb-2">
-                    Un pont direct avec votre expert-comptable
+                  <h3 className="text-lg font-bold font-display text-ink mb-2">
+                    Un lien direct avec votre comptable
                   </h3>
                   <p className="text-sm text-text-muted leading-relaxed mb-6">
-                    Votre expert-comptable accède gratuitement à votre dossier pour pointer les pièces et récupérer des exports propres (format Excel, CSV ou FEC) compatibles avec ses outils habituels.
+                    Votre expert-comptable accède gratuitement à votre dossier pour vérifier vos pièces et exporter les données aux formats Excel, CSV ou FEC.
                   </p>
                 </div>
                 <div className="p-3 bg-background rounded-xl border border-border text-xs text-ink font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-success-deep" />
-                  <span>Exports certifiés Sage, SARI et logiciels confrères</span>
+                  <Check className="w-4 h-4 text-success-deep shrink-0" />
+                  <span>Exports compatibles Sage et logiciels de cabinet</span>
                 </div>
               </div>
 
@@ -537,49 +552,51 @@ export default function ComptabiliteSyscohadaPage() {
           </div>
         </section>
 
-        {/* ── 3B. SECTION PHOTO : COLLABORATION COMPTABLE EN TOUTE CONFIANCE ── */}
+        {/* 3B. SECTION PHOTO : COLLABORATION COMPTABLE */}
         <section className="w-full py-16 bg-background-secondary border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background shadow-xs">
-                  <Image
-                    src="/images/collaboration-comptable.jpg"
-                    alt="Dirigeant et expert-comptable travaillant sur le grand livre SYSCOHADA à Cotonou"
-                    width={600}
-                    height={440}
-                    className="w-full h-[360px] sm:h-[420px] object-cover"
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/collaboration-comptable.jpg"
+                      alt="Dirigeant et expert-comptable travaillant sur le grand livre SYSCOHADA à Cotonou"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <p className="text-xs font-semibold text-ink">
-                      « Mon expert-comptable se connecte directement à mon compte. Fini les classeurs à lui déposer à la fin du mois. »
+                      &laquo; Mon comptable se connecte directement à mon dossier. Fini les classeurs à lui déposer en fin de mois. &raquo;
                     </p>
                     <p className="text-[11px] text-text-muted mt-1">
-                      Marc E., Directeur général, Société de distribution alimentaire à Ganhi
+                      Témoignage illustratif - Distribution alimentaire à Ganhi, Cotonou
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="lg:col-span-7 flex flex-col items-start space-y-4">
-                <span className="text-xs uppercase tracking-wider font-bold text-ink bg-primary/20 px-3 py-1 rounded-full">
-                  Accès cabinet 100% gratuit
+                <span className="text-xs uppercase tracking-widest font-bold text-text-muted">
+                  Accès cabinet inclus gratuitement
                 </span>
-                <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight">
-                  Une relation simple et productive avec votre expert-comptable
+                <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight">
+                  Travaillez main dans la main avec votre expert-comptable
                 </h2>
                 <p className="text-sm sm:text-base text-text-muted leading-relaxed">
-                  Invitez votre expert-comptable ou votre auditeur externe en un clic. Il consulte vos journaux, vérifie les imputations, télécharge les pièces justificatives associées et génère ses écritures de révision sans vous déranger.
+                  Donnez accès à votre cabinet comptable en un clic. Il consulte vos journaux, télécharge vos justificatifs et prépare la révision annuelle sans vous faire perdre de temps.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-2">
                   <div className="p-3.5 rounded-xl bg-background border border-border">
                     <div className="font-bold text-ink text-sm">Exports universels</div>
-                    <p className="text-xs text-text-muted mt-1">Formats Sage, Excel et FEC SYSCOHADA compatibles avec tous les logiciels du marché.</p>
+                    <p className="text-xs text-text-muted mt-1">Formats Sage, Excel et FEC SYSCOHADA compatibles avec tous les outils de cabinet.</p>
                   </div>
                   <div className="p-3.5 rounded-xl bg-background border border-border">
-                    <div className="font-bold text-ink text-sm">Piste d&apos;audit vérifiable</div>
-                    <p className="text-xs text-text-muted mt-1">Chaque saisie et modification est enregistrée avec la date, l&apos;heure et l&apos;auteur.</p>
+                    <div className="font-bold text-ink text-sm">Historique vérifiable</div>
+                    <p className="text-xs text-text-muted mt-1">Chaque saisie ou modification garde sa date, son heure et le nom de l&apos;auteur.</p>
                   </div>
                 </div>
 
@@ -588,7 +605,7 @@ export default function ComptabiliteSyscohadaPage() {
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-xs min-h-[44px]"
                   >
-                    <span>Créer un compte en 2 minutes</span>
+                    <span>Créer un compte</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
@@ -597,47 +614,47 @@ export default function ComptabiliteSyscohadaPage() {
           </div>
         </section>
 
-        {/* ── 4. SECTION AUTORITÉ SOMBRE : LA CONFORMITÉ SANS COMPROMIS ── */}
+        {/* 4. SECTION AUTORITÉ SOMBRE */}
         <section className="w-full bg-ink text-white py-16 lg:py-20 border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-2xl sm:text-4xl font-bold font-clash text-white tracking-tight">
-                La rigueur comptable au service de votre crédibilité
+              <h2 className="text-2xl sm:text-4xl font-bold font-display text-white tracking-tight">
+                Des comptes solides pour convaincre banques et partenaires
               </h2>
               <p className="text-sm sm:text-base text-white/70 mt-2">
-                Présentez des chiffres irréprochables à vos banquiers, actionnaires et partenaires financiers.
+                Présentez des états financiers clairs et fiables à tout moment de l&apos;année.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              <div className="bg-[#3D3830] border border-[#474138] p-6 rounded-2xl space-y-3">
+              <div className="bg-ink-surface border border-ink-border p-6 rounded-2xl space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary text-ink flex items-center justify-center font-bold">
                   <FileText className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Liasse fiscale DSF prête</h3>
+                <h3 className="text-base font-bold text-white">Bilan &amp; liasse DSF prêts</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Bilan actif, bilan passif, compte de résultat et notes annexes générés aux normes pour le dépôt officiel avant le 30 avril.
+                  Bilan actif, passif, compte de résultat et annexes générés au format demandé pour votre dépôt annuel du 30 avril.
                 </p>
               </div>
 
-              <div className="bg-[#3D3830] border border-[#474138] p-6 rounded-2xl space-y-3">
+              <div className="bg-ink-surface border border-ink-border p-6 rounded-2xl space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary text-ink flex items-center justify-center font-bold">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Contrôle anti-fraude</h3>
+                <h3 className="text-base font-bold text-white">Contrôle des justificatifs</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Chaque écriture enregistrée dispose de son numéro de pièce justificative rattaché et d&apos;un journal des modifications infalsifiable.
+                  Chaque écriture est reliée à sa facture ou son reçu scanné, avec un journal des modifications verrouillé.
                 </p>
               </div>
 
-              <div className="bg-[#3D3830] border border-[#474138] p-6 rounded-2xl space-y-3">
+              <div className="bg-ink-surface border border-ink-border p-6 rounded-2xl space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary text-ink flex items-center justify-center font-bold">
                   <Building2 className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Crédibilité bancaire</h3>
+                <h3 className="text-base font-bold text-white">Dossiers bancaires rapides</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Obtenez vos financements plus rapidement en fournissant des balances et comptes d&apos;exploitation certifiés et lisibles aux banques locales.
+                  Exportez en quelques secondes votre balance et vos comptes de résultat propres lorsque vous demandez un crédit.
                 </p>
               </div>
 
@@ -645,34 +662,34 @@ export default function ComptabiliteSyscohadaPage() {
           </div>
         </section>
 
-        {/* ── 4 BIS. MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS ── */}
+        {/* 4 BIS. MAILLAGE INTERNE CONTEXTUEL */}
         <section className="w-full py-12 bg-background-secondary border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-8">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Continuité de Gestion
+                Suite complète
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
-                La comptabilité connectée à vos opérations courantes
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink mt-1">
+                La comptabilité reliée à toute votre gestion
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
                 href="/solutions/facturation-dgi"
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Facturation Normalisée DGI</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Facturation normalisée DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Émettez vos factures certifiées e-MECeF avec QR code officiel. Chaque vente alimente immédiatement le journal des ventes.
+                    Créez vos factures e-MECeF avec QR code officiel. Chaque vente s&apos;inscrit aussitôt dans vos comptes.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la facturation DGI
+                  Voir la facturation
                 </span>
               </Link>
 
@@ -681,16 +698,16 @@ export default function ComptabiliteSyscohadaPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Déclarations Fiscales & DSF</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Déclarations fiscales DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Générez votre bilan, compte de résultat et liasse DSF prêts pour le dépôt officiel auprès de la DGI Bénin.
+                    Préparez votre TVA mensuelle, vos impôts et votre bilan annuel prêts pour le dépôt à la DGI Bénin.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir les déclarations fiscales
+                  Voir les déclarations
                 </span>
               </Link>
 
@@ -699,30 +716,48 @@ export default function ComptabiliteSyscohadaPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Espace Experts-Comptables</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Espace cabinets comptables</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Donnez un accès sécurisé à votre cabinet comptable pour réviser vos écritures, lettrer les comptes et valider vos clôtures.
+                    Invitez votre cabinet pour réviser vos écritures, pointer vos règlements et clôturer votre exercice.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir l&apos;accès cabinet
+                  Voir l&apos;espace cabinet
+                </span>
+              </Link>
+
+              <Link
+                href="/ressources/plan-comptable-syscohada-pdf"
+                className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Plan comptable SYSCOHADA</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Consultez, recherchez et imprimez la liste complète des comptes (classes 1 à 8) adaptée au Bénin.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Consulter le plan
                 </span>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* ── 5. FAQ SPÉCIALISÉE COMPTABILITÉ & SYSCOHADA ── */}
+        {/* 5. FAQ SPÉCIALISÉE COMPTABILITÉ & SYSCOHADA */}
         <section className="w-full py-16 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Réponses Claires
+                Réponses claires
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold font-clash text-ink mt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink mt-2">
                 Questions fréquentes sur la comptabilité SYSCOHADA
               </h2>
             </div>
@@ -738,7 +773,8 @@ export default function ComptabiliteSyscohadaPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full px-5 py-4 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-ink hover:bg-background-secondary/60 transition-colors cursor-pointer"
+                      aria-expanded={isOpen}
+                      className="w-full px-5 py-4 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-ink hover:bg-background-secondary/60 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{item.q}</span>
                       <ChevronDown
@@ -759,19 +795,19 @@ export default function ComptabiliteSyscohadaPage() {
           </div>
         </section>
 
-        {/* ── 6. BANNIÈRE DE CONVERSION FINALE ── */}
+        {/* 6. BANNIÈRE DE CONVERSION FINALE */}
         <section className="w-full bg-ink text-white py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
             <div className="w-12 h-12 rounded-xl bg-primary text-ink flex items-center justify-center mb-4 font-bold shadow-xs">
               <BookOpen className="w-6 h-6" />
             </div>
 
-            <h2 className="text-2xl sm:text-4xl font-bold font-clash text-white mb-3 tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-bold font-display text-white mb-3 tracking-tight">
               Prenez le contrôle de vos comptes dès aujourd&apos;hui
             </h2>
 
             <p className="text-sm sm:text-base text-white/75 max-w-xl mb-8 leading-relaxed">
-              Testez Ceilow sans engagement. Vos premières écritures se génèrent automatiquement dès votre première facture.
+              Testez Ceilow sans engagement. Vos écritures comptables s&apos;enregistrent dès votre première facture.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
@@ -779,20 +815,20 @@ export default function ComptabiliteSyscohadaPage() {
                 href="/register"
                 className="w-full sm:w-auto px-8 py-3.5 bg-primary text-ink text-sm font-bold rounded-xl shadow-xs hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 min-h-[48px]"
               >
-                <span>Créer mon compte</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
-                className="w-full sm:w-auto px-8 py-3.5 bg-[#3D3830] text-white border border-[#474138] text-sm font-bold rounded-xl hover:bg-[#474138] transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+                className="w-full sm:w-auto px-8 py-3.5 bg-ink-surface text-white border border-ink-border text-sm font-bold rounded-xl hover:bg-ink-border transition-colors flex items-center justify-center gap-2 min-h-[48px]"
               >
-                <span>Planifier une démonstration</span>
+                <span>Voir la démo</span>
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-white/60 text-xs mt-6 pt-4 border-t border-[#474138]">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-white/60 text-xs mt-6 pt-4 border-t border-ink-border">
               <span>14 jours offerts sans carte bancaire</span>
-              <span>Annulation en un clic</span>
+              <span>Sans engagement</span>
               <span>Équipe disponible à Cotonou</span>
             </div>
           </div>

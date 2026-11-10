@@ -2,7 +2,7 @@
 
 Date : 2026-10-26
 Auteur : Partenaire SEO
-Perimetre : Ensemble des 19 routes publiques de la plateforme Ceilow et futures pages ressources
+Perimetre : Ensemble des 24 routes publiques de la plateforme Ceilow (dont les 5 guides piliers du cocon semantique)
 Statut : Valide pour execution
 
 ---
@@ -42,6 +42,11 @@ Chaque page possede une requete principale unique. Deux URLs ne doivent jamais v
 | `/contact` | contact ceilow cotonou | numero telephone ceilow benin, support client ceilow whatsapp, agence ceilow cotonou | Navigationnelle / Trans | 4 | Existante |
 | `/demo` | demonstration logiciel ceilow | tester logiciel comptabilite dgi gratuit, presentation ceilow en direct | Transactionnelle | 5 | Existante |
 | `/ressources/calendrier-fiscal-benin` | calendrier fiscal benin 2026 | echeances dgi benin, dates limites declaration tva tps, calendrier fiscal impots cotonou | Informationnelle | 4 | Existante |
+| `/ressources/guide-facturation-emecef-benin` | guide facture normalisee emecef benin | machine emecef fonctionnement, groupes taxation a b c d e f, taux aib facture, verification qr code dgi | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |
+| `/ressources/guide-tva-benin` | guide declaration tva benin | taux tva 18 benin, seuil 50 millions fcfa tps reel, tva deductible facture normalisee, echeance 10 du mois | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |
+| `/ressources/calcul-tps-benin-guide` | calcul tps benin | taxe professionnelle synthetique benin, taux tps 5 pourcent, minimum perception 10000 fcfa, acomptes 10 fevrier 10 juin | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |
+| `/ressources/plan-comptable-syscohada-pdf` | plan comptable syscohada liste comptes | plan comptable syscohada revise benin, classes 1 a 8 syscohada, comptes mobile money 585, export csv pdf | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |
+| `/ressources/bareme-cotisations-cnss-benin` | cotisations cnss benin taux employeur employe | bareme cnss benin 2026, taux patronal 16 4 a 19 4, its benin tranches, vps 4 pourcent | Informationnelle | 4 | Existante (Mise en ligne 2026-11-10) |
 | `/securite-et-apdp` | securite donnees conformite apdp benin | protection donnees bancaires benin, conformite apdp logiciel saas, hebergement donnees fiscales | Commerciale / Confiance | 3 | Existante |
 | `/cgu` | conditions generales utilisation ceilow | cgu plateforme ceilow benin | Informationnelle | 1 | Existante |
 | `/confidentialite` | politique de confidentialite ceilow | traitement donnees personnelles apdp ceilow | Informationnelle | 1 | Existante |
@@ -49,17 +54,17 @@ Chaque page possede une requete principale unique. Deux URLs ne doivent jamais v
 
 ---
 
-## 4. Opportunites de Nouvelles Pages Piliers et Clusters (A Creer)
+## 4. Opportunites de Nouvelles Pages Piliers et Clusters (Suivi)
 
-Pour asseoir l'autorite thematique de Ceilow sur les requetes informationnelles a haute conversion, voici le programme des pages ressources prioritaires a developper au cours des prochains mois :
+Pour asseoir l'autorite thematique de Ceilow sur les requetes informationnelles a haute conversion, voici l'avancement des 5 guides piliers prioritaires :
 
-| URL Future Recommandee | Requete Principale | Intention | Rôle dans l'Entonnoir de Conversion | Page Solution Liee |
+| URL Cible | Requete Principale | Statut | Rôle dans l'Entonnoir de Conversion | Page Solution Liee |
 |---|---|---|---|---|
-| `/ressources/guide-declaration-tva-benin` | declaration tva benin guide | Informationnelle | Expliquer le calcul, les taux (18%) et les echeances pour inciter a l'automatisation | `/solutions/declarations-fiscales` |
-| `/ressources/comment-fonctionne-machine-emecef` | machine emecef dgi fonctionnement | Informationnelle | Lever les doutes techniques des commercants sur la facturation normalisee | `/solutions/facturation-dgi` |
-| `/ressources/calcul-tps-benin-guide` | calcul tps benin | Informationnelle | Guide detaille sur la Taxe Professionnelle Synthetique pour les petites entreprises | `/pour-qui/pme-et-independants` |
-| `/ressources/plan-comptable-syscohada-pdf` | plan comptable syscohada liste comptes | Informationnelle | Telechargement gratuit de la nomenclature SYSCOHADA (aimant a prospects comptables) | `/solutions/comptabilite-syscohada` |
-| `/ressources/bareme-cotisations-cnss-benin` | cotisations cnss benin taux employeur employe | Informationnelle | Tableau officiel des taux CNSS (charges patronales et salariales) pour directeurs RH | `/solutions/paie-cnss` |
+| `/ressources/guide-tva-benin` | guide declaration tva benin | **Publiée (2026-11-10)** | Expliquer le seuil 50M, le taux (18%) et l'échéance du 10 avec simulateur | `/solutions/declarations-fiscales` |
+| `/ressources/guide-facturation-emecef-benin` | guide facture normalisee emecef benin | **Publiée (2026-11-10)** | Lever les doutes sur l'e-MECeF, les groupes A-F, l'AIB et les avoirs FA | `/solutions/facturation-dgi` |
+| `/ressources/calcul-tps-benin-guide` | calcul tps benin | **Publiée (2026-11-10)** | Guide complet sur la Taxe Professionnelle Synthétique (5 %, seuil 50 M, simulateur, dates 10 févr. / 30 avr. / 10 juin) | `/pour-qui/pme-et-independants` |
+| `/ressources/plan-comptable-syscohada-pdf` | plan comptable syscohada liste comptes | **Publiée (2026-11-10)** | Nomenclature SYSCOHADA révisée interactive (classes 1 à 8, recherche, export CSV et impression PDF) | `/solutions/comptabilite-syscohada` |
+| `/ressources/bareme-cotisations-cnss-benin` | cotisations cnss benin taux employeur employe | **Publiée (2026-11-10)** | Barème CNSS 2026 (16,4 % à 19,4 % / 3,6 % sans plafond), ITS, VPS 4 % et simulateur brut/net | `/solutions/paie-cnss` |
 
 ---
 

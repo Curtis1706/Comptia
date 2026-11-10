@@ -38,6 +38,8 @@ export default {
         ink: {
           DEFAULT: "hsl(var(--ink))",
           foreground: "hsl(var(--ink-foreground))",
+          surface: "hsl(var(--ink-surface))",
+          border: "hsl(var(--ink-border))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",

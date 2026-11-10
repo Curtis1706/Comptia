@@ -4,23 +4,26 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Calendar,
   Clock,
   ArrowRight,
   Check,
-  CheckCircle2,
-  Download,
+  Printer,
   AlertTriangle,
-  FileText,
   ShieldCheck,
   Building2,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
-  Filter,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function CalendrierFiscalBeninPage() {
   const [filterType, setFilterType] = useState<"tous" | "mensuel" | "trimestriel" | "annuel">("tous");
@@ -30,63 +33,63 @@ export default function CalendrierFiscalBeninPage() {
   const echeances = [
     {
       id: "ech-1",
-      titre: "Télédéclaration et paiement TVA & AIB",
+      titre: "Déclaration et paiement TVA & AIB",
       organisme: "DGI Bénin",
       frequence: "mensuel",
-      dateLimite: "10 de chaque mois",
+      dateLimite: "Le 10 de chaque mois",
       description:
-        "Déclaration obligatoire du chiffre d'affaires, de la TVA collectée (18%), de la TVA déductible sur achats normalisés et versement des retenues AIB opérées sur tiers.",
-      penalite: "Majoration de 10% minimum en cas de retard",
+        "Déclaration de votre chiffre d'affaires du mois, de la TVA encaissée (18 %), de la TVA récupérable sur vos achats avec facture e-MECeF et des retenues AIB.",
+      penalite: "Majoration de retard appliquée dès le lendemain de l'échéance",
     },
     {
       id: "ech-2",
-      titre: "Établissement des bulletins de paie & clôture salaires",
-      organisme: "Entreprise / Salariés",
+      titre: "Calcul de la paie et retenue IPTS",
+      organisme: "Entreprise / DGI",
       frequence: "mensuel",
-      dateLimite: "Dernier jour ouvré du mois",
+      dateLimite: "Fin de mois (paiement IPTS le 10)",
       description:
-        "Calcul des cotisations ouvrières (3.6%), retenue à la source IPTS barème progressif et émission des fiches de paie conformes au Code du Travail.",
-      penalite: "Litiges prud'homaux et indemnités de retard",
+        "Calcul des cotisations CNSS salarié (3,6 %) et de l'impôt IPTS sur salaire, édition des fiches de paie et versement de l'IPTS le 10 du mois suivant.",
+      penalite: "Majorations de retard sur l'impôt et litiges salariés",
     },
     {
       id: "ech-3",
-      titre: "Déclaration trimestrielle e-Cotisations CNSS",
+      titre: "Déclaration e-Cotisations CNSS",
       organisme: "CNSS Bénin",
       frequence: "trimestriel",
-      dateLimite: "15 Avril, 15 Juillet, 15 Octobre, 15 Janvier",
+      dateLimite: "15 janv., 15 avr., 15 juil., 15 oct. (< 20 salariés) | le 10 (20+)",
       description:
-        "Dépôt de l'état nominatif des salaires bruts versés au cours du trimestre échu et versement des cotisations patronales (15.4%) et salariales (3.6%).",
-      penalite: "Pénalité de retard de 10% puis 1% par mois de retard",
+        "Envoi de la liste des salaires versés et paiement des cotisations (15,4 % employeur et 3,6 % salarié) : par trimestre sous 20 salariés, ou chaque mois dès 20 salariés.",
+      penalite: "Majoration de retard de 1,50 % par mois ou fraction de mois",
     },
     {
       id: "ech-4",
-      titre: "Acomptes provisionnels d'Impôt sur les Sociétés (IS)",
+      titre: "Avances d'impôt sur les sociétés (IS)",
       organisme: "DGI Bénin",
       frequence: "trimestriel",
-      dateLimite: "10 Juin, 10 Septembre, 10 Décembre",
+      dateLimite: "10 juin, 10 septembre, 10 décembre",
       description:
-        "Versement des acomptes obligatoires calculés sur le bénéfice de l'exercice précédent pour les personnes morales assujetties au régime réel.",
-      penalite: "Intérêts de retard fiscaux légaux",
+        "Versement des avances trimestrielles calculées sur le bénéfice de l'année précédente pour les entreprises imposées au régime réel.",
+      penalite: "Intérêts de retard appliqués par la DGI",
     },
     {
       id: "ech-5",
-      titre: "Déclaration annuelle récapitulative des salaires & honoraires",
+      titre: "Récapitulatif annuel des salaires et honoraires",
       organisme: "DGI Bénin",
       frequence: "annuel",
-      dateLimite: "31 Janvier de chaque année",
+      dateLimite: "31 janvier de chaque année",
       description:
-        "Transmission du tableau récapitulatif annuel de l'ensemble des rémunérations, commissions et honoraires versés au cours de l'exercice civil écoulé.",
-      penalite: "Amende forfaitaire par omission",
+        "Envoi à la DGI du tableau annuel regroupant tous les salaires, commissions et honoraires versés durant l'année civile précédente.",
+      penalite: "Amende en cas d'oubli ou de dépôt tardif",
     },
     {
       id: "ech-6",
-      titre: "Dépôt des états financiers annuels (Liasse DSF)",
+      titre: "Dépôt des comptes annuels (Bilan & DSF)",
       organisme: "DGI & Tribunal de Commerce",
       frequence: "annuel",
-      dateLimite: "30 Avril au plus tard",
+      dateLimite: "30 avril au plus tard",
       description:
-        "Dépôt obligatoire de la Déclaration Statistique et Fiscale (DSF), bilan, compte de résultat et notes annexes conformes au Système Comptable OHADA (SYSCOHADA Révisé).",
-      penalite: "Sanctions pécuniaires lourdes et taxation d'office",
+        "Remise officielle de votre bilan comptable, compte de résultat et annexes conformes au plan comptable OHADA (SYSCOHADA révisé).",
+      penalite: "Amendes lourdes et évaluation d'office par l'administration",
     },
   ];
 
@@ -95,7 +98,10 @@ export default function CalendrierFiscalBeninPage() {
       ? echeances
       : echeances.filter((ech) => ech.frequence === filterType);
 
-  const handleSimulateDownload = () => {
+  const handlePrintMemo = () => {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 3500);
   };
@@ -106,22 +112,22 @@ export default function CalendrierFiscalBeninPage() {
 
   const faqs = [
     {
-      q: "Que se passe-t-il si le 10 du mois tombe un samedi, un dimanche ou un jour férié au Bénin ?",
-      a: "Conformément aux règles fiscales de procédure, lorsque la date limite de déclaration ou de paiement coïncide avec un jour non ouvrable (week-end ou fête légale au Bénin), l'échéance est automatiquement prorogée jusqu'au premier jour ouvrable qui suit.",
+      q: "Que se passe-t-il si le 10 du mois tombe un week-end ou un jour férié au Bénin ?",
+      a: "Lorsque la date limite tombe un samedi, un dimanche ou un jour férié officiel au Bénin, elle est reportée automatiquement au premier jour ouvrable suivant.",
     },
     {
-      q: "Comment Ceilow m'aide-t-il à ne manquer aucune de ces échéances ?",
-      a: "Ceilow intègre un tableau de bord fiscal avec calendrier dynamique. Dès le début de chaque période, des notifications visuelles et des rappels programmés vous alertent plusieurs jours à l'avance afin de valider vos déclarations en toute sérénité.",
+      q: "Comment Ceilow m'évite-t-il d'oublier une date limite ?",
+      a: "Votre tableau de bord affiche en permanence les prochaines échéances de votre entreprise. Des alertes vous préviennent plusieurs jours à l'avance pour préparer vos chiffres sans stress.",
     },
     {
-      q: "Le calendrier fiscal est-il identique pour les entreprises au régime du TPS (Taxe Professionnelle Synthétique) ?",
-      a: "Pour les très petites entreprises assujetties à la TPS, le calendrier de paiement suit des échéances spécifiques par trimestre (10 mars, 10 juin, 10 septembre, 10 décembre). Ceilow adapte automatiquement les rappels fiscaux selon le régime juridique de votre société.",
+      q: "Les dates sont-elles identiques si je suis au régime TPS ?",
+      a: "Non. Si votre entreprise est au régime de la Taxe Professionnelle Synthétique (TPS), vous réglez un premier acompte le 10 février, déposez votre déclaration annuelle et le solde au plus tard le 30 avril, puis versez un second acompte le 10 juin. Ceilow adapte vos rappels à votre régime.",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col font-sans selection:bg-primary selection:text-ink">
-      {/* ── STYLE DÉDIÉ POUR ANIMATION SVG LOTTIE-LIKE HORLOGE FISCALE & TRIMESTRES ── */}
+      {/* STYLE DÉDIÉ ANIMATION HORLOGE FISCALE */}
       <style jsx global>{`
         @keyframes needleSpin {
           0% { transform: rotate(0deg); }
@@ -149,6 +155,13 @@ export default function CalendrierFiscalBeninPage() {
           fill: #FFD946; stroke: #332E29; stroke-width: 1;
           animation: sparkleCalPop 4s ease-in-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) {
+          .clock-needle-anim,
+          .clock-body-anim,
+          .sparkle-cal {
+            animation: none;
+          }
+        }
       `}</style>
 
       <PublicHeader />
@@ -157,59 +170,74 @@ export default function CalendrierFiscalBeninPage() {
         {/* HERO SECTION SPLIT SCREEN */}
         <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 border-b border-border bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/ressources/guide-facturation-emecef-benin">
+                    Ressources
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Calendrier fiscal 2026</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Guide Fiscal Pratique 2026
+                  Guide fiscal pratique 2026
                 </span>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
-                  Le calendrier fiscal et social des entreprises au Bénin
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-display">
+                  Calendrier fiscal Bénin 2026 : toutes vos échéances DGI et CNSS
                 </h1>
-                <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Toutes les dates limites officielles de la DGI et de la CNSS réunies en un seul endroit)
-                </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Anticipez vos déclarations de TVA du 10 du mois, vos cotisations CNSS trimestrielles et la liasse DSF du 30 avril. Téléchargez le mémo officiel récapitulatif pour votre direction administrative et financière.
+                  Anticipez chaque échéance importante : TVA du 10 du mois, cotisations CNSS et dépôt des comptes annuels au 30 avril. Consultez les dates officielles ou imprimez ce mémo pour votre équipe.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
                   <button
                     type="button"
-                    onClick={handleSimulateDownload}
+                    onClick={handlePrintMemo}
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Télécharger le mémo fiscal PDF</span>
+                    <Printer className="w-4 h-4" />
+                    <span>Imprimer le mémo</span>
                   </button>
                   <Link
                     href="/register"
                     className="bg-background-secondary text-ink font-bold px-7 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Automatiser avec Ceilow
+                    Tester gratuitement
                   </Link>
                 </div>
 
                 {downloadSuccess && (
                   <div className="mt-4 p-3 rounded-xl bg-background-secondary border border-border text-xs text-ink flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink shrink-0" />
-                    <span>Le calendrier officiel Bénin 2026 a été téléchargé avec succès.</span>
+                    <span>Fenêtre d&apos;impression ouverte pour enregistrer ou imprimer ce mémo.</span>
                   </div>
                 )}
 
                 <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-text-muted">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>100% conforme DGI Bénin</span>
+                    <span>Conforme DGI Bénin</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Échéances CNSS &amp; e-Cotisations</span>
+                    <span>Échéances CNSS &amp; IPTS incluses</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Mise à jour Loi de Finances 2026</span>
+                    <span>À jour Loi de Finances 2026</span>
                   </div>
                 </div>
               </div>
@@ -217,14 +245,16 @@ export default function CalendrierFiscalBeninPage() {
               {/* Colonne droite : Photo réelle Expert-Comptable planning */}
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-xs">
-                  <Image
-                    src="/images/expert-comptable-benin.jpg"
-                    alt="Expert-comptable béninois planifiant les clôtures fiscales de l'exercice à Cotonou"
-                    width={600}
-                    height={440}
-                    className="w-full h-[360px] sm:h-[420px] object-cover"
-                    priority
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/expert-comptable-benin.jpg"
+                      alt="Expert-comptable béninois planifiant les clôtures fiscales de l'exercice à Cotonou"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <div className="flex items-center justify-between text-xs font-bold text-ink mb-1">
                       <span>Planning fiscal et social 2026</span>
@@ -299,11 +329,11 @@ export default function CalendrierFiscalBeninPage() {
               </svg>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
               Toutes les échéances de l&apos;année fiscale maîtrisées
             </h2>
             <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              Des déclarations mensuelles de TVA aux clôtures annuelles DSF, votre calendrier vous protège des majorations et pénalités.
+              Des déclarations mensuelles de TVA aux comptes annuels du 30 avril, votre calendrier vous protège des majorations et pénalités.
             </p>
           </div>
         </section>
@@ -316,11 +346,11 @@ export default function CalendrierFiscalBeninPage() {
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                   Agenda officiel
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-2">
+                <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-2">
                   Chronologie des déclarations légales
                 </h2>
                 <p className="text-sm text-text-muted max-w-xl">
-                  Filtrez les obligations fiscales et sociales selon leur périodicité pour planifier les clôtures de votre entreprise.
+                  Filtrez les échéances par rythme pour organiser vos déclarations à l&apos;avance.
                 </p>
               </div>
 
@@ -329,7 +359,7 @@ export default function CalendrierFiscalBeninPage() {
                 <button
                   type="button"
                   onClick={() => setFilterType("tous")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl border transition-all ${
+                  className={`text-xs font-bold min-h-[44px] px-4 py-2 rounded-xl border transition-all cursor-pointer ${
                     filterType === "tous"
                       ? "bg-ink text-background border-ink"
                       : "bg-background text-ink border-border hover:border-ink"
@@ -340,7 +370,7 @@ export default function CalendrierFiscalBeninPage() {
                 <button
                   type="button"
                   onClick={() => setFilterType("mensuel")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl border transition-all ${
+                  className={`text-xs font-bold min-h-[44px] px-4 py-2 rounded-xl border transition-all cursor-pointer ${
                     filterType === "mensuel"
                       ? "bg-ink text-background border-ink"
                       : "bg-background text-ink border-border hover:border-ink"
@@ -351,7 +381,7 @@ export default function CalendrierFiscalBeninPage() {
                 <button
                   type="button"
                   onClick={() => setFilterType("trimestriel")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl border transition-all ${
+                  className={`text-xs font-bold min-h-[44px] px-4 py-2 rounded-xl border transition-all cursor-pointer ${
                     filterType === "trimestriel"
                       ? "bg-ink text-background border-ink"
                       : "bg-background text-ink border-border hover:border-ink"
@@ -362,13 +392,13 @@ export default function CalendrierFiscalBeninPage() {
                 <button
                   type="button"
                   onClick={() => setFilterType("annuel")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl border transition-all ${
+                  className={`text-xs font-bold min-h-[44px] px-4 py-2 rounded-xl border transition-all cursor-pointer ${
                     filterType === "annuel"
                       ? "bg-ink text-background border-ink"
                       : "bg-background text-ink border-border hover:border-ink"
                   }`}
                 >
-                  Annuel (Liasse DSF 30 Avril)
+                  Annuel (Bilan 30 Avril)
                 </button>
               </div>
             </div>
@@ -382,11 +412,11 @@ export default function CalendrierFiscalBeninPage() {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className="text-xs font-bold uppercase tracking-wider text-text-muted">
                           {ech.organisme}
                         </span>
-                        <span className="text-xs text-text-muted font-mono">
+                        <span className="text-xs text-text-muted font-mono tabular-nums">
                           - Échéance : {ech.dateLimite}
                         </span>
                       </div>
@@ -395,21 +425,21 @@ export default function CalendrierFiscalBeninPage() {
                       </h3>
                     </div>
 
-                    <div className="bg-background-secondary border border-border px-3 py-1.5 rounded-lg text-xs font-bold text-ink shrink-0 self-start">
-                      {ech.frequence.toUpperCase()}
-                    </div>
+                    <span className="text-xs font-bold uppercase tracking-widest text-text-muted shrink-0 self-start">
+                      {ech.frequence}
+                    </span>
                   </div>
 
                   <p className="text-sm text-text-muted leading-relaxed mb-4">
                     {ech.description}
                   </p>
 
-                  <div className="pt-4 border-t border-border flex items-center justify-between text-xs text-text-muted">
+                  <div className="pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-text-muted">
                     <span className="flex items-center gap-1.5 text-ink font-bold">
-                      <AlertTriangle className="w-3.5 h-3.5 text-ink" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-ink shrink-0" />
                       <span>{ech.penalite}</span>
                     </span>
-                    <span className="text-text-muted">Géré automatiquement par Ceilow</span>
+                    <span className="text-text-muted">Rappel automatique dans Ceilow</span>
                   </div>
                 </div>
               ))}
@@ -422,10 +452,10 @@ export default function CalendrierFiscalBeninPage() {
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-16">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
-                Méthode de travail
+                Méthode simple
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-                Trois règles d&apos;or pour une gestion fiscale sans stress
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
+                Trois habitudes pour aborder chaque mois sans stress
               </h2>
             </div>
 
@@ -435,10 +465,10 @@ export default function CalendrierFiscalBeninPage() {
                   <Clock className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Traiter les pièces au fil de l&apos;eau
+                  Enregistrer vos reçus dès l&apos;achat
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Numérisez chaque reçu et émettez chaque facture au moment de l&apos;opération. En évitant l&apos;accumulation en fin de mois, votre déclaration du 10 est prête en 3 minutes au lieu de deux jours entiers.
+                  Photographiez chaque ticket et créez vos factures au moment de la vente. Vous évitez de tout chercher en fin de mois et préparez le 10 du mois en quelques minutes.
                 </p>
               </div>
 
@@ -447,10 +477,10 @@ export default function CalendrierFiscalBeninPage() {
                   <ShieldCheck className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Exiger des factures d&apos;achat normalisées
+                  Demander des factures officielles à vos fournisseurs
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Seules les factures comportant les mentions e-MECeF et l&apos;IFU du commerçant ouvrent droit à la déduction de la TVA au Bénin. Vérifiez systématiquement la présence du QR code de vos fournisseurs.
+                  Seules les factures d&apos;achat avec code QR e-MECeF et numéro IFU permettent de récupérer votre TVA. Pensez à vérifier ce code à chaque règlement.
                 </p>
               </div>
 
@@ -459,10 +489,10 @@ export default function CalendrierFiscalBeninPage() {
                   <Building2 className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Partager l&apos;accès avec votre expert-comptable
+                  Donner un accès à votre comptable
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Permettez à votre conseil comptable d&apos;auditer les chiffres en continu sur Ceilow. Vous évitez les ajustements de dernière minute la veille du dépôt de la liasse DSF le 30 avril.
+                  Votre comptable suit vos chiffres directement sur Ceilow tout au long de l&apos;année. Le bilan du 30 avril se boucle sans mauvaise surprise de dernière minute.
                 </p>
               </div>
             </div>
@@ -476,7 +506,7 @@ export default function CalendrierFiscalBeninPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Questions fréquentes
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout comprendre sur le calendrier fiscal béninois
               </h2>
             </div>
@@ -492,7 +522,8 @@ export default function CalendrierFiscalBeninPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors"
+                      aria-expanded={isOpen}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{faq.q}</span>
                       {isOpen ? (
@@ -513,28 +544,119 @@ export default function CalendrierFiscalBeninPage() {
           </div>
         </section>
 
+        {/* GUIDES PRATIQUES RESSOURCES */}
+        <section className="py-14 bg-background border-t border-border">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-1">
+                Ressources complémentaires
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
+                Approfondissez chaque règle DGI étape par étape
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Link
+                href="/ressources/guide-facturation-emecef-benin"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all flex items-center justify-between gap-4"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-ink group-hover:underline mb-1">
+                    Guide de la facture normalisée e-MECeF au Bénin
+                  </h3>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Groupes A à F, taux AIB (1 % / 5 %), avoirs FA et facturation sans boîtier physique.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-ink shrink-0 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/ressources/guide-tva-benin"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all flex items-center justify-between gap-4"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-ink group-hover:underline mb-1">
+                    Guide de la déclaration TVA au Bénin (18 %)
+                  </h3>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Seuil des 50 millions FCFA, TVA facturée vs récupérable, crédit reportable et dépôt du 10.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-ink shrink-0 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/ressources/calcul-tps-benin-guide"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all flex items-center justify-between gap-4"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-ink group-hover:underline mb-1">
+                    Guide de calcul de la TPS au Bénin (5 %)
+                  </h3>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Seuil 50 M FCFA, minimum 10 000 FCFA, acomptes du 10 février / 10 juin et solde du 30 avril.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-ink shrink-0 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/ressources/plan-comptable-syscohada-pdf"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all flex items-center justify-between gap-4"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-ink group-hover:underline mb-1">
+                    Plan comptable SYSCOHADA révisé (PDF / CSV)
+                  </h3>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Liste des classes 1 à 8, recherche par numéro, comptes TVA, CNSS et Mobile Money 585.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-ink shrink-0 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/ressources/bareme-cotisations-cnss-benin"
+                className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all flex items-center justify-between gap-4"
+              >
+                <div>
+                  <h3 className="text-base font-bold text-ink group-hover:underline mb-1">
+                    Barème des cotisations CNSS Bénin 2026
+                  </h3>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Taux employeur (16,4 % à 19,4 %), part salarié (3,6 %), barème ITS, VPS 4 % et simulateur.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-ink shrink-0 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* BANNIÈRE D'APPEL À L'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 text-background">
-              Ne ratez plus jamais une échéance fiscale béninoise.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display tracking-tight mb-4 text-background">
+              Ne ratez plus jamais une date limite DGI ou CNSS.
             </h2>
             <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto mb-8">
-              Activez Ceilow pour votre entreprise et laissez la plateforme calculer vos déclarations en amont.
+              Activez Ceilow pour votre entreprise et préparez vos déclarations à l&apos;avance en toute tranquillité.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Créer mon compte</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Tester la démo en ligne
+                Voir la démo
               </Link>
             </div>
           </div>

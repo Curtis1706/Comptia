@@ -9,9 +9,9 @@ export const metadata: Metadata = {
     canonical: "/pour-qui/cabinets-comptables",
   },
   openGraph: {
-    title: "Plateforme Collaborative pour Cabinets d'Expertise Comptable au Bénin | Ceilow",
+    title: "Portail Collaboratif pour Cabinets Comptables au Bénin | Ceilow",
     description:
-      "Gagnez jusqu'à 40% de temps sur la tenue et la révision des dossiers clients au Bénin.",
+      "Supprimez la ressaisie manuelle sur vos dossiers clients et recevez leurs pièces et factures déjà classées en SYSCOHADA.",
     url: "https://ceilow.com/pour-qui/cabinets-comptables",
     type: "website",
   },

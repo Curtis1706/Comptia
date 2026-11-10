@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Rapprochement Bancaire et Trésorerie Mobile Money Bénin",
+  title: "Rapprochement Bancaire et Mobile Money au Bénin",
   description:
-    "Suivez vos encaissements MTN MoMo, Moov Money et flux bancaires en temps réel. Rapprochement automatique avec vos factures de vente et écritures comptables.",
+    "Suivez vos paiements MTN MoMo, Moov Money et comptes bancaires au même endroit : chaque encaissement est associé à sa facture sans pointage manuel.",
   alternates: {
     canonical: "/solutions/tresorerie-momo",
   },
   openGraph: {
-    title: "Rapprochement Bancaire et Trésorerie Mobile Money Bénin | Ceilow",
+    title: "Rapprochement Bancaire et Trésorerie Mobile Money | Ceilow",
     description:
-      "Rapprochez vos comptes MTN MoMo, Moov Money et comptes bancaires automatiquement au Bénin.",
+      "Sachez exactement combien il vous reste sur vos comptes MoMo, Moov et banques sans écart de caisse.",
     url: "https://ceilow.com/solutions/tresorerie-momo",
     type: "website",
   },
@@ -45,7 +45,7 @@ const breadcrumbSchema = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Rapprochement Bancaire et Mobile Money",
+  name: "Suivi de Trésorerie Banques et Mobile Money",
   provider: {
     "@type": "Organization",
     name: "Ceilow",
@@ -56,7 +56,7 @@ const serviceSchema = {
     name: "Benin",
   },
   description:
-    "Intégration directe des relevés MTN MoMo, Moov Money et bancaires pour un lettrage et un suivi de trésorerie en temps réel.",
+    "Suivi en temps réel des paiements MTN MoMo, Moov Money et comptes bancaires avec association automatique aux factures clients.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

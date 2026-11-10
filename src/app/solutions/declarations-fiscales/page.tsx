@@ -7,21 +7,24 @@ import {
   Calendar,
   ArrowRight,
   Check,
-  CheckCircle2,
-  AlertTriangle,
   Clock,
   FileCheck,
-  Download,
   ShieldCheck,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
   Percent,
-  Calculator,
   Bell,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function DeclarationsFiscalesPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -50,26 +53,26 @@ export default function DeclarationsFiscalesPage() {
 
   const faqs = [
     {
-      q: "À quelle date précise doit-on déclarer et payer la TVA au Bénin ?",
-      a: "La télédéclaration et le télépaiement de la TVA doivent être effectués au plus tard le 10 de chaque mois pour les opérations réalisées au cours du mois précédent auprès des services de la Direction Générale des Impôts (DGI).",
+      q: "À quelle date doit-on déclarer et payer la TVA au Bénin ?",
+      a: "La déclaration et le paiement de la TVA se font au plus tard le 10 de chaque mois pour toutes les opérations du mois précédent sur le portail de la DGI.",
     },
     {
-      q: "Comment Ceilow gère-t-il les acomptes d'AIB (Acompte sur Impôt Assis sur le Bénéfice) ?",
-      a: "Ceilow sépare automatiquement les retenues AIB subies (déductibles de votre impôt sur les sociétés ou IBS) et les retenues AIB opérées pour le compte de tiers (à reverser à la DGI le 10 du mois). Le bordereau de versement est pré-rempli.",
+      q: "Comment Ceilow gère-t-il l'AIB (retenue à la source) ?",
+      a: "Ceilow sépare automatiquement les montants d'AIB retenus par vos clients (que vous déduirez de votre impôt sur les bénéfices) et les retenues AIB prélevées sur vos prestataires (à reverser à la DGI le 10 du mois).",
     },
     {
-      q: "Que se passe-t-il si mon entreprise est en crédit de TVA ?",
-      a: "Si votre TVA déductible sur achats dépasse la TVA collectée sur vos ventes, Ceilow enregistre le crédit de TVA et le reporte automatiquement sur le mois suivant, réduisant votre impôt futur sans risque d'oubli.",
+      q: "Que se passe-t-il si ma TVA sur achats dépasse ma TVA sur ventes ?",
+      a: "Ce surplus forme un crédit de TVA. Ceilow le reporte automatiquement sur le mois suivant pour réduire votre prochain paiement sans calcul manuel.",
     },
     {
-      q: "Mon comptable peut-il valider les montants avant que j'effectue le paiement ?",
-      a: "Absolument. Vous pouvez accorder un accès direct à votre expert-comptable ou lui envoyer un état de synthèse complet en un clic afin qu'il vérifie la cohérence avant la validation finale sur le portail de la DGI.",
+      q: "Mon comptable peut-il vérifier les montants avant que je paie ?",
+      a: "Oui. Donnez-lui accès à votre dossier ou envoyez-lui le tableau récapitulatif en un clic pour qu'il valide vos chiffres avant votre dépôt sur le portail de la DGI.",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col font-sans selection:bg-primary selection:text-ink">
-      {/* ── STYLE DÉDIÉ POUR ANIMATION SVG LOTTIE-LIKE CALENDRIER FISCAL & DGI ── */}
+      {/* STYLE DÉDIÉ ANIMATION CALENDRIER DGI */}
       <style jsx global>{`
         @keyframes bellTinkle {
           0%, 75%, 100% { transform: rotate(0); }
@@ -108,6 +111,14 @@ export default function DeclarationsFiscalesPage() {
           fill: #FFD946; stroke: #332E29; stroke-width: 1;
           animation: sparkleFiscPop 3.2s ease-in-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) {
+          .bell-anim,
+          .cal-date-anim,
+          .envelope-anim,
+          .sparkle-fisc {
+            animation: none;
+          }
+        }
       `}</style>
 
       <PublicHeader />
@@ -116,21 +127,34 @@ export default function DeclarationsFiscalesPage() {
         {/* HERO SECTION SPLIT SCREEN */}
         <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 border-b border-border bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/fonctionnalites">Fonctionnalités</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Déclarations fiscales DGI</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Fiscalité d&apos;Entreprise &amp; Conformité DGI Bénin
+                  Fiscalité d&apos;entreprise &amp; conformité DGI Bénin
                 </span>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-display">
                   Télédéclaration fiscale DGI au Bénin : TVA, TPS, AIB et DSF sans stress
                 </h1>
-                <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini la panique du 9 au soir pour rassembler et télédéclarer vos factures)
-                </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Automatisez chaque télédéclaration fiscale sur le portail e-Services de la DGI au Bénin. Ceilow calcule en temps réel votre TVA collectée et déductible, vos retenues AIB et votre TPS pour télédéclarer et payer sans risque de majoration pour retard.
+                  Préparez facilement vos déclarations sur le portail e-Services de la DGI au Bénin. Ceilow calcule au fil du mois votre TVA facturée, votre TVA sur achats, vos retenues AIB et votre TPS pour déclarer à temps sans pénalité.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -138,14 +162,14 @@ export default function DeclarationsFiscalesPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Automatiser mes déclarations</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
                     href="/demo"
                     className="bg-background-secondary text-ink font-bold px-7 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Voir la simulation
+                    Voir la démo
                   </Link>
                 </div>
 
@@ -156,11 +180,11 @@ export default function DeclarationsFiscalesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Gestion des acomptes AIB</span>
+                    <span>Suivi des retenues AIB</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Alertes préventives par SMS</span>
+                    <span>Rappels avant chaque échéance</span>
                   </div>
                 </div>
               </div>
@@ -168,21 +192,23 @@ export default function DeclarationsFiscalesPage() {
               {/* Colonne droite : Photo réelle Fiscaliste à Cotonou */}
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-xs">
-                  <Image
-                    src="/images/expert-comptable-benin.jpg"
-                    alt="Spécialiste fiscal et expert-comptable vérifiant une déclaration fiscale à Cotonou"
-                    width={600}
-                    height={440}
-                    className="w-full h-[360px] sm:h-[420px] object-cover"
-                    priority
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/expert-comptable-benin.jpg"
+                      alt="Spécialiste fiscal et expert-comptable vérifiant une déclaration fiscale à Cotonou"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <div className="flex items-center justify-between text-xs font-bold text-ink mb-1">
                       <span>Déclaration TVA du mois prête</span>
-                      <span className="text-success-deep font-semibold">Zéro pénalité</span>
+                      <span className="text-success-deep font-semibold">À jour DGI</span>
                     </div>
                     <p className="text-[11px] text-text-muted">
-                      Bordereau pré-rempli pour le télépaiement officiel sur le portail DGI.
+                      Récapitulatif prêt à reporter sur le portail officiel de la DGI.
                     </p>
                   </div>
                 </div>
@@ -245,11 +271,11 @@ export default function DeclarationsFiscalesPage() {
               </svg>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink tracking-tight">
-              Une déclaration prête 5 jours avant l&apos;échéance
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
+              Vos chiffres prêts avant le 10 du mois
             </h2>
             <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              Ceilow vous notifie dès que vos calculs de TVA sont bouclés, vous évitant toute pénalité de majoration de retard de la DGI.
+              Ceilow prépare votre calcul de TVA dès la fin du mois et vous prévient à l&apos;avance pour éviter toute pénalité de retard.
             </p>
           </div>
         </section>
@@ -261,36 +287,37 @@ export default function DeclarationsFiscalesPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Simulateur en direct
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-3">
                 Calculez votre TVA nette pour l&apos;échéance du 10
               </h2>
               <p className="text-sm sm:text-base text-text-muted max-w-2xl">
-                Ajustez vos volumes de facturation et d&apos;achats du mois pour voir le montant net exact dû à la DGI ou votre crédit de TVA.
+                Faites varier vos ventes et achats du mois pour voir le montant à reverser à la DGI ou votre crédit de TVA à reporter.
               </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* ENTRÉES DU SIMULATEUR (GAUCHE) */}
               <div className="lg:col-span-5 bg-background p-6 sm:p-8 rounded-2xl border border-border">
-                <div className="flex items-center justify-between pb-4 mb-6 border-b border-border">
+                <div className="flex items-center justify-between pb-4 mb-6 border-b border-border gap-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                    Période en cours : Mars 2026
+                    Période : Mars 2026
                   </span>
                   <span className="text-xs font-mono font-bold text-ink flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-ink" />
-                    <span>Échéance : 10 Avril 2026</span>
+                    <span>Échéance : 10 avril 2026</span>
                   </span>
                 </div>
 
                 <div className="space-y-6">
                   <div>
-                    <label className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">
+                    <label htmlFor="ventes-ttc-range" className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">
                       Ventes TTC facturées dans le mois
                     </label>
                     <div className="text-xl font-bold font-mono tabular-nums text-ink mb-2">
                       {formatFcfa(ventesTTC)}
                     </div>
                     <input
+                      id="ventes-ttc-range"
                       type="range"
                       min="1000000"
                       max="30000000"
@@ -302,13 +329,14 @@ export default function DeclarationsFiscalesPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">
-                      Achats &amp; Dépenses TTC avec facture normalisée
+                    <label htmlFor="achats-ttc-range" className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">
+                      Achats &amp; dépenses TTC avec facture e-MECeF
                     </label>
                     <div className="text-xl font-bold font-mono tabular-nums text-ink mb-2">
                       {formatFcfa(achatsTTC)}
                     </div>
                     <input
+                      id="achats-ttc-range"
                       type="range"
                       min="500000"
                       max="20000000"
@@ -323,7 +351,7 @@ export default function DeclarationsFiscalesPage() {
                 <div className="mt-8 pt-6 border-t border-border">
                   <div className="flex items-center gap-2 text-xs text-text-muted">
                     <Bell className="w-4 h-4 text-ink shrink-0" />
-                    <span>Rappel automatique activé le 1er, 5 et 8 du mois sur votre téléphone.</span>
+                    <span>Rappel automatique envoyé avant l&apos;échéance du 10 du mois.</span>
                   </div>
                 </div>
               </div>
@@ -333,7 +361,7 @@ export default function DeclarationsFiscalesPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-border gap-4">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted block">
-                      État fiscal récapitulatif DGI
+                      Synthèse TVA DGI
                     </span>
                     <h3 className="text-base font-bold text-ink">
                       Déclaration mensuelle de TVA
@@ -342,28 +370,28 @@ export default function DeclarationsFiscalesPage() {
                   <button
                     type="button"
                     onClick={handleSimulateDeclaration}
-                    className="bg-background-secondary text-ink font-bold text-xs px-4 py-2 rounded-xl border border-border hover:border-ink transition-all flex items-center justify-center gap-2 min-h-[40px]"
+                    className="bg-background-secondary text-ink font-bold text-xs px-4 py-2 rounded-xl border border-border hover:border-ink transition-all flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
                   >
                     <FileCheck className="w-3.5 h-3.5 text-ink" />
-                    <span>Générer le bordereau DGI</span>
+                    <span>Voir le bordereau</span>
                   </button>
                 </div>
 
                 {isGenerated && (
                   <div className="mb-4 p-3 rounded-xl bg-background-secondary border border-border text-xs text-ink flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink shrink-0" />
-                    <span>Bordereau fiscal prêt à être télé-déposé sur le guichet de la DGI Bénin.</span>
+                    <span>Récapitulatif prêt à reporter sur le portail de la DGI Bénin.</span>
                   </div>
                 )}
 
                 <div className="space-y-4 font-mono text-xs">
                   <div className="p-4 rounded-xl bg-background-secondary border border-border space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-sans text-text-muted">TVA Collectée sur ventes (18%)</span>
+                      <span className="font-sans text-text-muted">TVA facturée sur vos ventes (18 %)</span>
                       <span className="text-ink font-bold tabular-nums">{formatFcfa(tvaCollectee)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-sans text-text-muted">TVA Déductible sur achats (18%)</span>
+                      <span className="font-sans text-text-muted">TVA récupérable sur vos achats (18 %)</span>
                       <span className="text-ink font-bold tabular-nums">- {formatFcfa(tvaDeductible)}</span>
                     </div>
                   </div>
@@ -372,10 +400,10 @@ export default function DeclarationsFiscalesPage() {
                     <div className="p-5 rounded-xl bg-primary/20 border border-primary flex justify-between items-center">
                       <div>
                         <span className="font-sans text-xs uppercase font-bold text-ink block">
-                          TVA nette due à payer le 10
+                          TVA nette à payer le 10
                         </span>
                         <span className="font-sans text-[11px] text-text-muted">
-                          Paiement par virement bancaire ou Mobile Money DGI
+                          Paiement sur e-Services DGI (virement ou Mobile Money)
                         </span>
                       </div>
                       <span className="text-lg font-bold text-ink tabular-nums">
@@ -386,10 +414,10 @@ export default function DeclarationsFiscalesPage() {
                     <div className="p-5 rounded-xl bg-background-secondary border border-border flex justify-between items-center">
                       <div>
                         <span className="font-sans text-xs uppercase font-bold text-ink block">
-                          Crédit de TVA reportable
+                          Crédit de TVA reporté
                         </span>
                         <span className="font-sans text-[11px] text-text-muted">
-                          Aucun paiement dû ce mois-ci, report automatique
+                          Rien à payer ce mois-ci, crédit déduit du mois suivant
                         </span>
                       </div>
                       <span className="text-lg font-bold text-ink tabular-nums">
@@ -400,20 +428,20 @@ export default function DeclarationsFiscalesPage() {
 
                   <div className="p-4 rounded-xl bg-background-secondary border border-border space-y-2">
                     <div className="font-sans text-[11px] uppercase font-bold text-text-muted pb-1 border-b border-border">
-                      Rappels légaux DGI Bénin
+                      Rappels DGI Bénin
                     </div>
                     <div className="flex justify-between items-center text-text-muted">
-                      <span className="font-sans">Télédéclaration sur e-Services DGI</span>
+                      <span className="font-sans">Déclaration sur e-Services DGI</span>
                       <span className="font-bold text-ink">Obligatoire</span>
                     </div>
                     <div className="flex justify-between items-center text-text-muted">
-                      <span className="font-sans">Pénalité pour déclaration tardive</span>
-                      <span className="font-bold text-ink">Majoration de 10% minimum</span>
+                      <span className="font-sans">Déclaration en retard</span>
+                      <span className="font-bold text-ink">Majorations et intérêts légaux</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-text-muted">
+                <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-text-muted">
                   <span>Conforme au Code Général des Impôts du Bénin</span>
                   <span className="font-bold text-ink">SYSCOHADA Compte 4441</span>
                 </div>
@@ -429,8 +457,8 @@ export default function DeclarationsFiscalesPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Tranquillité d&apos;esprit
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-                Trois garanties pour votre conformité fiscale
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
+                Trois garanties pour déclarer sans stress
               </h2>
             </div>
 
@@ -440,10 +468,10 @@ export default function DeclarationsFiscalesPage() {
                   <Calendar className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Zéro pénalité pour dépôt en retard
+                  Zéro pénalité pour dépôt tardif
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Ceilow vous notifie dès les premiers jours du mois en affichant l&apos;état précis de votre déclaration. Vous disposez de plusieurs jours pour valider et régler sans urgence.
+                  Ceilow prépare votre synthèse dès les premiers jours du mois et vous avertit avant la date limite du 10.
                 </p>
               </div>
 
@@ -452,10 +480,10 @@ export default function DeclarationsFiscalesPage() {
                   <Percent className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Récupération intégrale de la TVA sur achats
+                  Récupération complète de la TVA sur achats
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Chaque facture fournisseur scannée et normalisée est automatiquement prise en compte dans votre TVA déductible. Vous ne laissez plus d&apos;argent sur la table faute de suivi.
+                  Chaque facture fournisseur normalisée enregistrée est déduite automatiquement de votre TVA à payer. Vous ne perdez plus d&apos;argent par oubli.
                 </p>
               </div>
 
@@ -464,24 +492,24 @@ export default function DeclarationsFiscalesPage() {
                   <ShieldCheck className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Collaboration fluide avec votre expert-comptable
+                  Vérification rapide avec votre comptable
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Votre comptable accède à tous les justificatifs et aux calculs détaillés en temps réel. Il vérifie les chiffres en toute sérénité avant le dépôt sur le portail de la DGI.
+                  Votre comptable accède à tous vos justificatifs et vérifie chaque total avec vous avant la validation sur le portail DGI.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        {/* MAILLAGE INTERNE CONTEXTUEL */}
         <section className="py-12 bg-background border-t border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-8">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Écosystème Fiscal & Comptable
+                Suite complète
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink mt-1">
                 Toutes les pièces de vos déclarations réunies automatiquement
               </h2>
             </div>
@@ -492,16 +520,16 @@ export default function DeclarationsFiscalesPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Facturation Normalisée DGI</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Facturation normalisée DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Chaque facture émise avec code QR e-MECeF alimente immédiatement la base de calcul de votre TVA collectée du mois.
+                    Chaque facture e-MECeF créée met immédiatement à jour votre montant de TVA facturée pour le mois.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la facturation certifiée
+                  Voir la facturation
                 </span>
               </Link>
 
@@ -510,16 +538,16 @@ export default function DeclarationsFiscalesPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Gestion des Dépenses OCR</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Gestion des dépenses</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Scannez les factures d&apos;achat de vos fournisseurs béninois pour récupérer 100% de votre TVA déductible sans omission.
+                    Photographiez vos factures fournisseurs pour isoler et récupérer 100 % de votre TVA déductible sans oubli.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir l&apos;OCR des dépenses
+                  Voir les dépenses
                 </span>
               </Link>
 
@@ -528,17 +556,35 @@ export default function DeclarationsFiscalesPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Calendrier Fiscal Bénin 2026</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Calendrier fiscal Bénin 2026</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Vérifiez toutes vos dates limites : TVA le 10, acomptes d&apos;impôt sur les bénéfices le 10 mars et dépôt DSF le 30 avril.
+                    Consultez toutes vos dates limites : TVA le 10 du mois, avances IS (juin, sept., déc.) et dépôt du bilan le 30 avril.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Consulter les échéances DGI
+                  Voir le calendrier
                 </span>
+              </Link>
+            </div>
+
+            <div className="mt-6 p-5 rounded-xl bg-background-secondary border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-text-muted block">
+                  Guide fiscal pas à pas
+                </span>
+                <p className="text-sm font-semibold text-ink mt-0.5">
+                  Vérifier le seuil des 50 millions FCFA, les conditions de TVA déductible et le calcul mensuel
+                </p>
+              </div>
+              <Link
+                href="/ressources/guide-tva-benin"
+                className="inline-flex items-center gap-2 text-xs font-bold text-ink bg-background border border-border hover:border-ink px-4 py-2.5 rounded-lg transition-colors shrink-0 min-h-[44px]"
+              >
+                <span>Lire le guide TVA</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
@@ -551,7 +597,7 @@ export default function DeclarationsFiscalesPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Questions fréquentes
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout comprendre sur la TVA et la fiscalité DGI
               </h2>
             </div>
@@ -567,7 +613,8 @@ export default function DeclarationsFiscalesPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors"
+                      aria-expanded={isOpen}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{faq.q}</span>
                       {isOpen ? (
@@ -591,25 +638,25 @@ export default function DeclarationsFiscalesPage() {
         {/* BANNIÈRE D'APPEL À L'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 text-background">
-              Anticipez votre prochaine déclaration DGI avec Ceilow.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display tracking-tight mb-4 text-background">
+              Préparez votre prochaine déclaration DGI dès aujourd&apos;hui.
             </h2>
             <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto mb-8">
-              Démarrez votre essai gratuit de 14 jours et préparez votre prochain 10 du mois sans la moindre inquiétude.
+              Essayez Ceilow gratuitement pendant 14 jours et abordez chaque 10 du mois l&apos;esprit libre.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Créer mon compte</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Tester la démo en ligne
+                Voir la démo
               </Link>
             </div>
           </div>

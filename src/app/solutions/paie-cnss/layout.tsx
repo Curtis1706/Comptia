@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Gestion de Paie et Déclaration CNSS au Bénin",
+  title: "Gestion de Paie et Déclarations CNSS au Bénin",
   description:
-    "Générez vos bulletins de paie conformes au Code du Travail béninois, calculez l'IPTS, la VPS et télétransmettez vos bordereaux de cotisations CNSS.",
+    "Préparez vos fiches de paie conformes au Bénin en quelques minutes : salaires nets, retenues fiscales et cotisations CNSS calculés sans erreur Excel.",
   alternates: {
     canonical: "/solutions/paie-cnss",
   },
   openGraph: {
-    title: "Gestion de Paie et Déclaration CNSS au Bénin | Ceilow",
+    title: "Gestion de Paie et Déclarations CNSS au Bénin | Ceilow",
     description:
-      "Fiches de paie, calcul IPTS/VPS et déclarations CNSS automatisées pour entreprises au Bénin.",
+      "Fiches de paie conformes, calcul des charges sociales et préparation CNSS en quelques clics pour vos salariés.",
     url: "https://ceilow.com/solutions/paie-cnss",
     type: "website",
   },
@@ -45,7 +45,7 @@ const breadcrumbSchema = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Gestion de Paie et Télétransmissions CNSS",
+  name: "Gestion de Paie et Déclarations CNSS Bénin",
   provider: {
     "@type": "Organization",
     name: "Ceilow",
@@ -56,7 +56,7 @@ const serviceSchema = {
     name: "Benin",
   },
   description:
-    "Édition de fiches de paie conformes à la législation béninoise, calcul automatique des charges sociales et téléprocédure CNSS.",
+    "Édition de fiches de paie conformes à la loi béninoise, calcul automatique des retenues fiscales IPTS/VPS et exports prêts pour la CNSS.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

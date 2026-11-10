@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Logiciel Comptable SYSCOHADA Révisé au Bénin",
+  title: "Logiciel Comptable SYSCOHADA Automatisé au Bénin",
   description:
-    "Tenez votre comptabilité conforme au plan SYSCOHADA révisé : grand livre, balance, écritures automatisées et génération de la DSF sans ressaisie.",
+    "Gardez vos comptes à jour selon les normes OHADA sans rien saisir à la main : ventes, achats et relevés préparent automatiquement votre bilan annuel.",
   alternates: {
     canonical: "/solutions/comptabilite-syscohada",
   },
   openGraph: {
-    title: "Logiciel Comptable SYSCOHADA Révisé au Bénin | Ceilow",
+    title: "Logiciel Comptable SYSCOHADA Automatisé au Bénin | Ceilow",
     description:
-      "Automatisez votre comptabilité d'entreprise selon les normes SYSCOHADA et UEMOA au Bénin.",
+      "Pilotez votre comptabilité d'entreprise au Bénin et préparez votre bilan du 30 avril sans ressaisie.",
     url: "https://ceilow.com/solutions/comptabilite-syscohada",
     type: "website",
   },
@@ -45,7 +45,7 @@ const breadcrumbSchema = {
 const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Comptabilité SYSCOHADA Révisé",
+  name: "Comptabilité Automatisée SYSCOHADA Révisé",
   provider: {
     "@type": "Organization",
     name: "Ceilow",
@@ -56,7 +56,7 @@ const serviceSchema = {
     name: "Benin",
   },
   description:
-    "Tenue comptable automatisée conforme au plan comptable général OHADA/SYSCOHADA révisé et préparation de la Déclaration Statistique et Fiscale (DSF).",
+    "Tenue comptable automatique conforme au plan SYSCOHADA révisé avec accès gratuit pour votre expert-comptable et préparation de la DSF.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

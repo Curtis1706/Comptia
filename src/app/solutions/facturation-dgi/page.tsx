@@ -9,21 +9,24 @@ import {
   ShieldCheck,
   Search,
   ArrowRight,
-  Download,
-  Send,
   FileText,
-  CheckCircle2,
   Building2,
-  Calendar,
   Sparkles,
   ChevronDown,
   ChevronUp,
   Clock,
   Lock,
-  Copy,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function FacturationDgiPage() {
   const [activeStep, setActiveStep] = useState<number>(1);
@@ -31,7 +34,6 @@ export default function FacturationDgiPage() {
   const [searchIfu, setSearchIfu] = useState("32018104928174");
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(true);
-  const [copiedCode, setCopiedCode] = useState(false);
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex((prev) => (prev === index ? null : index));
@@ -46,36 +48,30 @@ export default function FacturationDgiPage() {
     }, 450);
   };
 
-  const copySignature = () => {
-    navigator.clipboard.writeText("DGI-eMECeF-A7B9-C3D4-E5F6");
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
-
   const faqItems = [
     {
       q: "Qu'est-ce qu'une facture normalisée e-MECeF au Bénin ?",
-      a: "C'est une facture légale comportant obligatoirement des éléments de sécurité délivrés par la Direction Générale des Impôts (DGI) : un QR code scannable, un numéro machine (NIM), des compteurs fiscaux et une signature électronique infalsifiable. Elle prouve que votre vente est déclarée en temps réel aux impôts.",
+      a: "C'est une facture officielle contenant les éléments de sécurité délivrés par la Direction Générale des Impôts (DGI) : un QR code vérifiable, un numéro d'identification (NIM), des compteurs fiscaux et une signature électronique. Elle prouve que la vente est bien déclarée.",
     },
     {
       q: "Ai-je besoin d'acheter une machine physique e-MECeF ?",
-      a: "Non. Ceilow remplace totalement les machines physiques coûteuses et encombrantes. Notre plateforme est directement connectée aux serveurs de la DGI par voie logicielle certifiée. Vous facturez depuis votre téléphone ou votre ordinateur, sans aucun matériel supplémentaire.",
+      a: "Non. Ceilow remplace les boîtiers physiques coûteux. La plateforme est reliée directement aux serveurs e-MECeF de la DGI. Vous créez vos factures depuis votre téléphone ou votre ordinateur, sans aucun matériel à acheter.",
     },
     {
       q: "Que risque mon entreprise si j'émets une facture non normalisée ?",
-      a: "Le Code Général des Impôts prévoit de lourdes sanctions financières pouvant atteindre jusqu'à 10 000 000 FCFA d'amende forfaitaire par infraction, ainsi que le rejet de vos charges par l'administration fiscale lors des contrôles. Avec Ceilow, chaque facture est certifiée dès sa création.",
+      a: "Le Code Général des Impôts prévoit de lourdes amendes financières en cas d'infraction, ainsi que le rejet de la TVA déductible pour vos clients lors d'un contrôle. Avec Ceilow, chaque facture est certifiée dès sa création.",
     },
     {
-      q: "Combien de temps prend la génération du QR code officiel ?",
-      a: "Moins de 2 secondes. Dès que vous cliquez sur le bouton de validation, Ceilow transmet les données au serveur de la DGI et intègre immédiatement le QR code certifié sur votre document.",
+      q: "Combien de temps prend la création du QR code officiel ?",
+      a: "Quelques secondes seulement. Dès que vous validez la facture, Ceilow envoie les données à la DGI et ajoute automatiquement le QR code officiel sur votre document.",
     },
     {
       q: "Puis-je annuler ou corriger une facture déjà certifiée ?",
-      a: "Oui, en toute conformité. Conformément aux règles de la DGI, une facture certifiée ne peut pas être effacée. Ceilow génère automatiquement une facture d'avoir normalisée portant référence à la facture d'origine, régularisant ainsi votre situation fiscale sans erreur.",
+      a: "Oui, simplement. Selon la règle DGI, une facture déjà émise ne s'efface pas : Ceilow crée en un clic une facture d'avoir normalisée qui corrige ou annule la facture d'origine.",
     },
     {
       q: "Comment mes clients reçoivent-ils leurs factures ?",
-      a: "Vous pouvez télécharger la facture au format PDF officiel prêt à imprimer, ou l'envoyer directement en un clic à votre client par email ou par message WhatsApp avec son lien de vérification officiel.",
+      a: "Vous téléchargez la facture au format PDF prête à imprimer, ou vous l'envoyez directement par e-mail ou par WhatsApp.",
     },
   ];
 
@@ -124,67 +120,76 @@ export default function FacturationDgiPage() {
             fill: #FFD946; stroke: #332E29; stroke-width: 1;
             animation: popSparkle 3.4s ease-in-out infinite;
           }
+          @media (prefers-reduced-motion: reduce) {
+            .laser-line,
+            .ticket-anim,
+            .stamp-anim,
+            .sparkle-star {
+              animation: none;
+            }
+          }
         `}</style>
 
-        {/* ── 1. HERO SECTION SPLIT SCREEN (Inspiré du modèle Fonctionnalités) ── */}
+        {/* HERO SECTION SPLIT SCREEN */}
         <section className="w-full py-14 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/fonctionnalites">Fonctionnalités</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Facturation DGI e-MECeF</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Promesse de valeur & Conversion */}
               <div className="lg:col-span-7 flex flex-col items-start space-y-6">
                 
-                {/* Repère de conformité sobre (ancré, sans badge flottant) */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background-secondary border border-border text-xs font-semibold text-ink">
-                  <span className="w-2 h-2 rounded-full bg-success" />
-                  <span>Système e-MECeF DGI Bénin</span>
-                </div>
+                <span className="text-xs uppercase tracking-widest font-bold text-text-muted">
+                  Facturation officielle DGI Bénin
+                </span>
 
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-clash text-ink leading-[1.12] tracking-tight">
-                  Facturation normalisée e-MECeF au Bénin en{" "}
-                  <span className="text-ink bg-primary px-2 py-0.5 rounded-lg">
-                    3 secondes chrono
-                  </span>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-display text-ink leading-[1.12] tracking-tight">
+                  Facturation normalisée e-MECeF au Bénin, sans boîtier
                 </h1>
 
                 <p className="text-base sm:text-lg text-text-muted max-w-xl leading-relaxed">
-                  Émettez chaque facture normalisée conforme aux exigences de la DGI au Bénin avec QR code certifié et signature électronique. Plus de machine physique encombrante, plus de risque d&apos;amende fiscale.
+                  Émettez vos factures certifiées DGI avec QR code officiel et signature électronique en quelques secondes. Vous facturez depuis votre ordinateur ou téléphone, sans acheter de machine physique.
                 </p>
 
-                {/* Petite note manuscrite humaine */}
-                <div className="flex items-center gap-2 text-sm text-text-muted">
-                  <span className="font-serif italic text-ink font-semibold">
-                    Zéro installation de logiciel :
-                  </span>
-                  <span>tout fonctionne directement dans votre navigateur web.</span>
-                </div>
+                <p className="text-sm text-text-muted">
+                  <span className="font-semibold text-ink">Aucune installation :</span> tout fonctionne directement dans votre navigateur.
+                </p>
 
-                {/* 3 Garanties directes ancrées */}
+                {/* 3 Garanties directes */}
                 <div className="flex flex-col space-y-3 pt-1 w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-success text-ink flex items-center justify-center font-bold text-xs shrink-0">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      QR code officiel e-MECeF délivré instantanément par la DGI
+                      QR code officiel e-MECeF délivré immédiatement par la DGI
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-success text-ink flex items-center justify-center font-bold text-xs shrink-0">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Recherche instantanée de vos clients professionnels par numéro IFU
+                      Recherche automatique de vos clients professionnels par numéro IFU
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-success text-ink flex items-center justify-center font-bold text-xs shrink-0">
-                      ✓
-                    </div>
+                    <Check className="w-4 h-4 text-success-deep shrink-0" />
                     <span className="text-sm sm:text-base text-ink font-medium">
-                      Devis, factures d&apos;acompte et factures d&apos;avoir gérés en un clic
+                      Devis, factures d&apos;acompte et factures d&apos;avoir en un clic
                     </span>
                   </div>
                 </div>
@@ -195,7 +200,7 @@ export default function FacturationDgiPage() {
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl transition-all shadow-xs min-h-[48px]"
                   >
-                    <span>Créer ma première facture</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
 
@@ -203,13 +208,13 @@ export default function FacturationDgiPage() {
                     href="/demo"
                     className="inline-flex items-center justify-center border border-border bg-background hover:bg-background-secondary text-ink font-bold text-sm sm:text-base px-7 py-3.5 rounded-xl transition-all min-h-[48px]"
                   >
-                    <span>Voir la démonstration</span>
+                    <span>Voir la démo</span>
                   </Link>
                 </div>
 
                 <div className="text-xs text-text-muted flex items-center gap-2 pt-1">
-                  <ShieldCheck className="w-4 h-4 text-success-deep" />
-                  <span>10 factures d&apos;essai offertes par mois, sans carte bancaire requise</span>
+                  <ShieldCheck className="w-4 h-4 text-success-deep shrink-0" />
+                  <span>14 jours d&apos;essai gratuit, sans carte bancaire requise</span>
                 </div>
               </div>
 
@@ -261,14 +266,11 @@ export default function FacturationDgiPage() {
                     <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary laser-line pointer-events-none" />
 
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-success" />
-                        <span className="text-xs font-bold text-ink">
-                          Certification DGI e-MECeF
-                        </span>
-                      </div>
-                      <span className="text-[11px] font-mono text-text-muted">
-                        Temps : 0.14s
+                      <span className="text-xs font-bold text-ink">
+                        Certification DGI e-MECeF
+                      </span>
+                      <span className="text-[11px] font-mono text-success-deep font-semibold">
+                        Validée
                       </span>
                     </div>
 
@@ -298,7 +300,7 @@ export default function FacturationDgiPage() {
                             {/* Ligne pointillée de découpe */}
                             <line x1="85" y1="98" x2="195" y2="98" stroke="#D8D5D0" strokeWidth="1" strokeDasharray="3 2" />
                             <text x="140" y="114" textAnchor="middle" fill="#332E29" fontSize="8" fontWeight="bold" fontFamily="'Inter', sans-serif">
-                              DGI e-MECeF • 1 180 000 F
+                              DGI e-MECeF - 1 180 000 F
                             </text>
                           </g>
 
@@ -327,35 +329,28 @@ export default function FacturationDgiPage() {
                           <span>MCF-01-2026-08194</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-ink font-semibold">Délai : </span>
-                          <span className="text-success-deep font-bold">0.14 seconde</span>
+                          <span className="text-ink font-semibold">Statut : </span>
+                          <span className="text-success-deep font-bold">En temps réel</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Statut confirmé net (solide, sans glassmorphisme) */}
-                    <div className="mt-2 p-2 rounded-lg bg-success text-ink font-bold text-xs flex items-center justify-center gap-1.5">
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Signature électronique validée en temps réel</span>
+                    {/* Statut confirmé sobre */}
+                    <div className="mt-2 p-2.5 rounded-lg bg-background-secondary border border-border text-ink font-semibold text-xs flex items-center justify-center gap-1.5">
+                      <Check className="w-4 h-4 text-success-deep stroke-[2.5] shrink-0" />
+                      <span>Signature électronique validée par la DGI</span>
                     </div>
                   </div>
 
-                  {/* Actions de partage */}
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <button
-                      type="button"
-                      className="py-2 px-3 rounded-lg bg-background-secondary border border-border text-xs font-semibold text-ink hover:bg-border/60 transition-colors flex items-center justify-center gap-1.5 min-h-[44px]"
+                  {/* Action réelle vers la démo */}
+                  <div className="pt-1">
+                    <Link
+                      href="/demo"
+                      className="w-full py-2.5 px-4 rounded-xl bg-background-secondary border border-border text-xs font-bold text-ink hover:border-ink transition-colors flex items-center justify-center gap-2 min-h-[44px]"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Télécharger PDF</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="py-2 px-3 rounded-lg bg-background-secondary border border-border text-xs font-semibold text-ink hover:bg-border/60 transition-colors flex items-center justify-center gap-1.5 min-h-[44px]"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Partager WhatsApp</span>
-                    </button>
+                      <span>Tester l&apos;envoi PDF et WhatsApp</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -364,7 +359,7 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 2. RUBAN DE RÉASSURANCE TECHNIQUE (4 Colonnes sobres) ── */}
+        {/* 2. RUBAN DE RÉASSURANCE TECHNIQUE */}
         <section className="w-full bg-background-secondary border-b border-border py-8">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border">
@@ -374,8 +369,8 @@ export default function FacturationDgiPage() {
                   <Clock className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-ink font-mono">Moins de 2s</div>
-                  <p className="text-xs text-text-muted">Délai moyen d&apos;obtention du visa officiel e-MECeF</p>
+                  <div className="text-lg font-bold text-ink font-mono">Rapide</div>
+                  <p className="text-xs text-text-muted">Visa officiel e-MECeF délivré en quelques secondes</p>
                 </div>
               </div>
 
@@ -384,8 +379,8 @@ export default function FacturationDgiPage() {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-ink font-mono">100% Conforme</div>
-                  <p className="text-xs text-text-muted">Validé aux normes du Code Général des Impôts</p>
+                  <div className="text-lg font-bold text-ink font-mono">Conforme DGI</div>
+                  <p className="text-xs text-text-muted">Validé selon les règles du Code Général des Impôts</p>
                 </div>
               </div>
 
@@ -395,7 +390,7 @@ export default function FacturationDgiPage() {
                 </div>
                 <div>
                   <div className="text-lg font-bold text-ink font-mono">Archivage 10 ans</div>
-                  <p className="text-xs text-text-muted">Conservation sécurisée pour tout audit fiscal futur</p>
+                  <p className="text-xs text-text-muted">Conservation sécurisée pour tout contrôle fiscal</p>
                 </div>
               </div>
 
@@ -404,8 +399,8 @@ export default function FacturationDgiPage() {
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-ink font-mono">50+ Entreprises</div>
-                  <p className="text-xs text-text-muted">Facturent quotidiennement au Bénin avec Ceilow</p>
+                  <div className="text-lg font-bold text-ink font-mono">Zéro boîtier</div>
+                  <p className="text-xs text-text-muted">Facturez sur mobile ou PC sans machine physique</p>
                 </div>
               </div>
 
@@ -413,18 +408,18 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 3. DÉMONSTRATEUR INTERACTIF : RECHERCHE IFU INSTANTANÉE ── */}
+        {/* 3. DÉMONSTRATEUR INTERACTIF : RECHERCHE IFU */}
         <section className="w-full py-16 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center mb-10">
-              <span className="text-xs font-bold text-ink uppercase tracking-wider bg-primary/20 px-3 py-1 rounded-full">
+              <span className="text-xs uppercase tracking-widest font-bold text-text-muted">
                 Gain de temps au comptoir
               </span>
-              <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight mt-3">
-                Trouvez les informations de vos clients en un clin d&apos;œil
+              <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight mt-3">
+                Retrouvez les coordonnées de vos clients par numéro IFU
               </h2>
               <p className="text-sm sm:text-base text-text-muted mt-2 leading-relaxed">
-                Fini les erreurs sur les noms d&apos;entreprises ou les numéros fiscaux. Saisissez le numéro IFU et Ceilow remplit automatiquement le nom légal et le régime d&apos;imposition.
+                Fini les fautes de frappe sur les noms d&apos;entreprises. Saisissez le numéro IFU et Ceilow remplit le nom officiel et le régime fiscal du client.
               </p>
             </div>
 
@@ -435,6 +430,7 @@ export default function FacturationDgiPage() {
                     type="text"
                     value={searchIfu}
                     onChange={(e) => setSearchIfu(e.target.value)}
+                    aria-label="Numéro IFU du client"
                     placeholder="Entrez un numéro IFU (ex: 32018104928174)"
                     className="w-full h-12 px-4 rounded-xl bg-background border border-border text-ink text-sm font-mono outline-none focus:border-ink transition-colors"
                   />
@@ -449,16 +445,17 @@ export default function FacturationDgiPage() {
                 </button>
               </form>
 
-              {/* Résultat simulé net */}
+              {/* Résultat de simulation */}
               {hasSearched && (
-                <div className="mt-6 p-5 bg-background rounded-xl border border-border space-y-3 animate-fade-in text-xs">
-                  <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div className="mt-6 p-5 bg-background rounded-xl border border-border space-y-3 text-xs">
+                  <div className="flex items-center justify-between pb-3 border-b border-border gap-3">
                     <div>
-                      <div className="text-[10px] text-text-muted uppercase font-bold">Raison sociale identifiée</div>
+                      <div className="text-[10px] text-text-muted uppercase font-bold">Nom légal identifié</div>
                       <div className="text-base font-bold text-ink mt-0.5">GROUPE ATLANTIQUE LOGISTIQUE SARL</div>
                     </div>
-                    <span className="px-2.5 py-1 rounded bg-success text-ink font-bold text-[11px]">
-                      IFU Valide
+                    <span className="text-xs font-bold text-success-deep flex items-center gap-1 shrink-0">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>IFU actif</span>
                     </span>
                   </div>
 
@@ -472,8 +469,8 @@ export default function FacturationDgiPage() {
                       <span>Réel Normal (RN)</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-ink">Assujettissement TVA : </span>
-                      <span className="text-ink font-semibold">Oui (Taux standard 18%)</span>
+                      <span className="font-semibold text-ink">Soumis à la TVA : </span>
+                      <span className="text-ink font-semibold">Oui (Taux 18 %)</span>
                     </div>
                     <div>
                       <span className="font-semibold text-ink">Statut e-MECeF : </span>
@@ -486,50 +483,51 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 3B. VITRINE TERRAIN : COMMERCE ET PRESTATIONS À COTONOU SANS MACHINE ── */}
+        {/* 3B. VITRINE TERRAIN : COMMERCE ET PRESTATIONS À COTONOU SANS MACHINE */}
         <section className="w-full py-16 bg-background-secondary border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-5 order-2 lg:order-1">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background shadow-xs">
-                  <Image
-                    src="/images/commercante-cotonou.jpg"
-                    alt="Entrepreneure commerçante à Cotonou émettant une facture e-MECeF sur tablette"
-                    width={600}
-                    height={420}
-                    className="w-full h-[340px] sm:h-[400px] object-cover"
-                    priority
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/commercante-cotonou.jpg"
+                      alt="Entrepreneure commerçante à Cotonou émettant une facture e-MECeF sur tablette"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <p className="text-xs font-semibold text-ink">
-                      « Plus de rouleaux thermiques en panne ni de machine bloquée. Je remets le reçu par WhatsApp ou en direct à chaque vente. »
+                      &laquo; Plus de rouleaux papier en panne ni de machine bloquée. J&apos;envoie le reçu par WhatsApp ou en direct à chaque vente. &raquo;
                     </p>
                     <p className="text-[11px] text-text-muted mt-1">
-                      Amina S., Gérante de boutique de mode et cosmétiques, Akpakpa Cotonou
+                      Témoignage illustratif - Commerce à Akpakpa, Cotonou
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="lg:col-span-7 order-1 lg:order-2 flex flex-col items-start space-y-4">
-                <span className="text-xs uppercase tracking-wider font-bold text-ink bg-primary/20 px-3 py-1 rounded-full">
-                  Économie immédiate : 280 000 FCFA
+                <span className="text-xs uppercase tracking-widest font-bold text-text-muted">
+                  Sans matériel à acheter
                 </span>
-                <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight">
+                <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight">
                   Adieu la machine physique e-MECeF encombrante
                 </h2>
                 <p className="text-sm sm:text-base text-text-muted leading-relaxed">
-                  L&apos;achat d&apos;une machine physique coûte entre 250 000 et 350 000 FCFA, sans compter le papier thermique et les frais de réparation. Avec Ceilow, votre smartphone, tablette ou ordinateur suffit pour émettre des factures 100% en règle avec la DGI.
+                  Un boîtier physique coûte entre 250 000 et 350 000 FCFA, sans compter les rouleaux de papier et les réparations. Avec Ceilow, votre smartphone, tablette ou ordinateur suffit pour facturer légalement auprès de la DGI.
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-2">
                   <div className="p-3.5 rounded-xl bg-background border border-border">
                     <div className="font-bold text-ink text-sm">Zéro panne matérielle</div>
-                    <p className="text-xs text-text-muted mt-1">Accédez à votre compte depuis n&apos;importe quel appareil connecté à Internet.</p>
+                    <p className="text-xs text-text-muted mt-1">Accédez à votre espace depuis n&apos;importe quel appareil connecté à Internet.</p>
                   </div>
                   <div className="p-3.5 rounded-xl bg-background border border-border">
-                    <div className="font-bold text-ink text-sm">Envoi WhatsApp immédiat</div>
-                    <p className="text-xs text-text-muted mt-1">Votre client reçoit instantanément son reçu certifié sur son téléphone.</p>
+                    <div className="font-bold text-ink text-sm">Envoi WhatsApp direct</div>
+                    <p className="text-xs text-text-muted mt-1">Votre client reçoit son reçu certifié sur son téléphone en un clic.</p>
                   </div>
                 </div>
 
@@ -538,7 +536,7 @@ export default function FacturationDgiPage() {
                     href="/register"
                     className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-ink font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-xs min-h-[44px]"
                   >
-                    <span>Démarrer sans matériel payant</span>
+                    <span>Démarrer gratuitement</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
@@ -547,15 +545,15 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 4. LE PARCOURS EN 3 ÉTAPES (Modèle accordéon interactif) ── */}
+        {/* 4. LE PARCOURS EN 3 ÉTAPES */}
         <section className="w-full py-16 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-2xl sm:text-4xl font-bold font-clash text-ink tracking-tight">
-                Comment se passe l&apos;émission d&apos;une facture ?
+              <h2 className="text-2xl sm:text-4xl font-bold font-display text-ink tracking-tight">
+                Comment se passe la création d&apos;une facture ?
               </h2>
               <p className="text-sm sm:text-base text-text-muted mt-2">
-                Un fonctionnement transparent et guidé, de la saisie à la réception par votre client.
+                Un parcours simple en 3 étapes, de la saisie jusqu&apos;à la remise au client.
               </p>
             </div>
 
@@ -563,105 +561,117 @@ export default function FacturationDgiPage() {
               
               {/* Étape 1 */}
               <div
-                onClick={() => setActiveStep(1)}
-                className={`p-6 rounded-2xl border transition-all cursor-pointer ${
+                className={`p-6 rounded-2xl border transition-all ${
                   activeStep === 1
                     ? "border-primary bg-background shadow-xs"
                     : "border-border bg-background-secondary hover:bg-background"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep(1)}
+                  aria-expanded={activeStep === 1}
+                  className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
+                >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center ${
+                      className={`w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 ${
                         activeStep === 1 ? "bg-primary text-ink" : "bg-border text-text-muted"
                       }`}
                     >
                       1
                     </span>
                     <h3 className="text-base sm:text-lg font-bold text-ink">
-                      Vous créez la facture en 30 secondes
+                      Vous saisissez la facture en 30 secondes
                     </h3>
                   </div>
                   {activeStep === 1 ? (
-                    <ChevronUp className="w-5 h-5 text-ink" />
+                    <ChevronUp className="w-5 h-5 text-ink shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-text-muted" />
+                    <ChevronDown className="w-5 h-5 text-text-muted shrink-0" />
                   )}
-                </div>
+                </button>
                 {activeStep === 1 && (
                   <p className="mt-3 pl-10 text-sm text-text-muted leading-relaxed">
-                    Sélectionnez votre client ou entrez son numéro IFU. Ajoutez vos prestations ou marchandises. Ceilow applique automatiquement le bon taux de taxe (18% ou exonération légale) sans que vous ayez à sortir une calculatrice.
+                    Choisissez votre client ou entrez son numéro IFU. Ajoutez vos produits ou services : Ceilow applique la bonne taxe (18 % ou exonération légale) sans calcul manuel.
                   </p>
                 )}
               </div>
 
               {/* Étape 2 */}
               <div
-                onClick={() => setActiveStep(2)}
-                className={`p-6 rounded-2xl border transition-all cursor-pointer ${
+                className={`p-6 rounded-2xl border transition-all ${
                   activeStep === 2
                     ? "border-primary bg-background shadow-xs"
                     : "border-border bg-background-secondary hover:bg-background"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep(2)}
+                  aria-expanded={activeStep === 2}
+                  className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
+                >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center ${
+                      className={`w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 ${
                         activeStep === 2 ? "bg-primary text-ink" : "bg-border text-text-muted"
                       }`}
                     >
                       2
                     </span>
                     <h3 className="text-base sm:text-lg font-bold text-ink">
-                      La DGI valide et signe le document immédiatement
+                      La DGI valide et signe le document en direct
                     </h3>
                   </div>
                   {activeStep === 2 ? (
-                    <ChevronUp className="w-5 h-5 text-ink" />
+                    <ChevronUp className="w-5 h-5 text-ink shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-text-muted" />
+                    <ChevronDown className="w-5 h-5 text-text-muted shrink-0" />
                   )}
-                </div>
+                </button>
                 {activeStep === 2 && (
                   <p className="mt-3 pl-10 text-sm text-text-muted leading-relaxed">
-                    Dès que vous confirmez, Ceilow communique de façon sécurisée avec la plateforme de la Direction Générale des Impôts. Le document reçoit son numéro machine unique, ses compteurs officiels et son QR code certifié.
+                    Dès que vous confirmez, Ceilow transmet le document à la plateforme officielle de la DGI. Votre facture reçoit immédiatement son numéro, ses compteurs et son QR code certifié.
                   </p>
                 )}
               </div>
 
               {/* Étape 3 */}
               <div
-                onClick={() => setActiveStep(3)}
-                className={`p-6 rounded-2xl border transition-all cursor-pointer ${
+                className={`p-6 rounded-2xl border transition-all ${
                   activeStep === 3
                     ? "border-primary bg-background shadow-xs"
                     : "border-border bg-background-secondary hover:bg-background"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep(3)}
+                  aria-expanded={activeStep === 3}
+                  className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
+                >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center ${
+                      className={`w-7 h-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 ${
                         activeStep === 3 ? "bg-primary text-ink" : "bg-border text-text-muted"
                       }`}
                     >
                       3
                     </span>
                     <h3 className="text-base sm:text-lg font-bold text-ink">
-                      Votre client reçoit sa facture et peut la payer
+                      Votre client reçoit sa facture officielle
                     </h3>
                   </div>
                   {activeStep === 3 ? (
-                    <ChevronUp className="w-5 h-5 text-ink" />
+                    <ChevronUp className="w-5 h-5 text-ink shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-text-muted" />
+                    <ChevronDown className="w-5 h-5 text-text-muted shrink-0" />
                   )}
-                </div>
+                </button>
                 {activeStep === 3 && (
                   <p className="mt-3 pl-10 text-sm text-text-muted leading-relaxed">
-                    Téléchargez le document officiel au format PDF ou envoyez-le directement par WhatsApp. Votre client peut scanner le QR code avec n&apos;importe quel smartphone pour vérifier sa légalité sur le portail officiel de l&apos;État béninois.
+                    Téléchargez le PDF prêt à imprimer ou partagez-le par WhatsApp. Votre client peut scanner le QR code avec son téléphone pour vérifier la validité de la facture sur le portail de la DGI.
                   </p>
                 )}
               </div>
@@ -670,47 +680,47 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 5. SECTION AUTORITÉ SOMBRE : GARANTIE ZÉRO PÉNALITÉ ── */}
+        {/* 5. SECTION AUTORITÉ SOMBRE : GARANTIE ZÉRO PÉNALITÉ */}
         <section className="w-full bg-ink text-white py-16 lg:py-20 border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="text-2xl sm:text-4xl font-bold font-clash text-white tracking-tight">
-                La garantie de zéro pénalité fiscale
+              <h2 className="text-2xl sm:text-4xl font-bold font-display text-white tracking-tight">
+                Protégez votre entreprise contre les pénalités fiscales
               </h2>
               <p className="text-sm sm:text-base text-white/70 mt-2">
-                Une sérénité totale pour votre société face à la rigueur des contrôles fiscaux.
+                Travaillez l&apos;esprit tranquille grâce à des documents toujours conformes aux contrôles DGI.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              <div className="bg-[#3D3830] border border-[#474138] p-6 rounded-2xl space-y-3">
+              <div className="bg-ink-surface border border-ink-border p-6 rounded-2xl space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary text-ink flex items-center justify-center font-bold">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Conformité permanente</h3>
+                <h3 className="text-base font-bold text-white">Règles toujours à jour</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Ceilow est continuellement mis à jour dès que la loi des finances ou les spécifications techniques de la DGI évoluent. Vous n&apos;avez aucune mise à jour manuelle à payer.
+                  Dès que la loi de finances ou les règles e-MECeF évoluent au Bénin, Ceilow est mis à jour automatiquement sans aucun frais supplémentaire.
                 </p>
               </div>
 
-              <div className="bg-[#3D3830] border border-[#474138] p-6 rounded-2xl space-y-3">
+              <div className="bg-ink-surface border border-ink-border p-6 rounded-2xl space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary text-ink flex items-center justify-center font-bold">
                   <FileText className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Archives infalsifiables</h3>
+                <h3 className="text-base font-bold text-white">Archives conservées 10 ans</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Chaque facture émise est conservée avec son horodatage certifié pendant la durée légale de 10 ans. En cas de contrôle, vous exportez tout votre dossier en un clic.
+                  Toutes vos factures restent archivées en sécurité pendant la durée légale de 10 ans. En cas de contrôle, vous retrouvez chaque document en un clic.
                 </p>
               </div>
 
-              <div className="bg-[#3D3830] border border-[#474138] p-6 rounded-2xl space-y-3">
+              <div className="bg-ink-surface border border-ink-border p-6 rounded-2xl space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary text-ink flex items-center justify-center font-bold">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white">Zéro rupture de service</h3>
+                <h3 className="text-base font-bold text-white">Ventes jamais bloquées</h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  Même en cas de ralentissement ponctuel des serveurs centraux, Ceilow met vos émissions en file d&apos;attente sécurisée pour certifier vos documents sans bloquer vos ventes.
+                  Si les serveurs nationaux ralentissent temporairement, Ceilow met vos factures en attente sécurisée puis récupère le QR code dès le retour de la connexion.
                 </p>
               </div>
 
@@ -718,15 +728,15 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 5 BIS. MAILLAGE INTERNE CONTEXTUEL VERS LES SOLUTIONS CONNECTÉES ── */}
+        {/* 5 BIS. MAILLAGE INTERNE CONTEXTUEL */}
         <section className="w-full py-12 bg-background-secondary border-b border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-8">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Écosystème Connecté
+                Suite complète
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
-                Une facture émise alimente immédiatement toute votre gestion
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink mt-1">
+                Chaque facture met immédiatement vos comptes à jour
               </h2>
             </div>
 
@@ -736,16 +746,16 @@ export default function FacturationDgiPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
                     <span>Comptabilité SYSCOHADA</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Vos ventes sont automatiquement enregistrées en comptabilité générale selon le plan SYSCOHADA révisé, sans aucune ressaisie.
+                    Vos ventes s&apos;inscrivent automatiquement dans vos livres comptables conformes OHADA, sans rien recopier.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir le module comptable
+                  Voir la comptabilité
                 </span>
               </Link>
 
@@ -754,16 +764,16 @@ export default function FacturationDgiPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Rapprochement Mobile Money</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Trésorerie Mobile Money</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Associez immédiatement vos encaissements MTN MoMo ou Moov Money aux factures émises pour un lettrage sans erreur.
+                    Reliez directement vos paiements MTN MoMo ou Moov Money à vos factures pour savoir qui a payé en un coup d&apos;œil.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la trésorerie MoMo
+                  Voir la trésorerie
                 </span>
               </Link>
 
@@ -772,30 +782,48 @@ export default function FacturationDgiPage() {
                 className="p-5 rounded-xl bg-background border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Déclarations Fiscales DGI</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Déclarations fiscales DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Vos bases de TVA et retenues AIB sont calculées en temps réel pour préparer votre déclaration mensuelle à la DGI.
+                    Vos montants de TVA et retenues AIB se cumulent automatiquement pour préparer votre déclaration du 10 du mois.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la téléprocédure DGI
+                  Voir les déclarations
                 </span>
+              </Link>
+            </div>
+
+            <div className="mt-6 p-5 rounded-xl bg-background border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-text-muted block">
+                  Ressource pratique gratuite
+                </span>
+                <p className="text-sm font-semibold text-ink mt-0.5">
+                  Comprendre les groupes A à F, l&apos;AIB et les avoirs FA sur le système DGI béninois
+                </p>
+              </div>
+              <Link
+                href="/ressources/guide-facturation-emecef-benin"
+                className="inline-flex items-center gap-2 text-xs font-bold text-ink bg-background-secondary border border-border hover:border-ink px-4 py-2.5 rounded-lg transition-colors shrink-0 min-h-[44px]"
+              >
+                <span>Lire le guide e-MECeF</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
         </section>
 
-        {/* ── 6. FOIRE AUX QUESTIONS DÉDIÉE À LA FACTURATION DGI ── */}
+        {/* 6. FOIRE AUX QUESTIONS */}
         <section className="w-full py-16 lg:py-20 bg-background border-b border-border">
           <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Réponses Claires
+                Réponses claires
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold font-clash text-ink mt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink mt-2">
                 Questions fréquentes sur la facturation e-MECeF
               </h2>
             </div>
@@ -811,7 +839,8 @@ export default function FacturationDgiPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full px-5 py-4 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-ink hover:bg-background-secondary/60 transition-colors cursor-pointer"
+                      aria-expanded={isOpen}
+                      className="w-full px-5 py-4 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-ink hover:bg-background-secondary/60 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{item.q}</span>
                       <ChevronDown
@@ -832,19 +861,19 @@ export default function FacturationDgiPage() {
           </div>
         </section>
 
-        {/* ── 7. BANNIÈRE DE CONVERSION FINALE (Fond sombre solide sans glass) ── */}
+        {/* 7. BANNIÈRE DE CONVERSION FINALE */}
         <section className="w-full bg-ink text-white py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
             <div className="w-12 h-12 rounded-xl bg-primary text-ink flex items-center justify-center mb-4 font-bold shadow-xs">
               <QrCode className="w-6 h-6" />
             </div>
 
-            <h2 className="text-2xl sm:text-4xl font-bold font-clash text-white mb-3 tracking-tight">
-              Facturez en toute conformité dès aujourd&apos;hui
+            <h2 className="text-2xl sm:text-4xl font-bold font-display text-white mb-3 tracking-tight">
+              Facturez en toute règle dès aujourd&apos;hui
             </h2>
 
             <p className="text-sm sm:text-base text-white/75 max-w-xl mb-8 leading-relaxed">
-              Activez votre compte gratuit en 2 minutes. Notre équipe basée à Cotonou vous accompagne pour démarrer sereinement.
+              Créez votre compte en 2 minutes. Notre équipe basée à Cotonou vous accompagne pour démarrer sereinement.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
@@ -852,21 +881,21 @@ export default function FacturationDgiPage() {
                 href="/register"
                 className="w-full sm:w-auto px-8 py-3.5 bg-primary text-ink text-sm font-bold rounded-xl shadow-xs hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 min-h-[48px]"
               >
-                <span>Créer mon compte gratuit</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
-                className="w-full sm:w-auto px-8 py-3.5 bg-[#3D3830] text-white border border-[#474138] text-sm font-bold rounded-xl hover:bg-[#474138] transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+                className="w-full sm:w-auto px-8 py-3.5 bg-ink-surface text-white border border-ink-border text-sm font-bold rounded-xl hover:bg-ink-border transition-colors flex items-center justify-center gap-2 min-h-[48px]"
               >
-                <span>Planifier une démonstration</span>
+                <span>Voir la démo</span>
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-white/60 text-xs mt-6 pt-4 border-t border-[#474138]">
-              <span>10 factures gratuites par mois</span>
-              <span>Sans engagement de durée</span>
-              <span>Assistance directe à Cotonou</span>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-white/60 text-xs mt-6 pt-4 border-t border-ink-border">
+              <span>14 jours d&apos;essai gratuit</span>
+              <span>Sans engagement</span>
+              <span>Support basé à Cotonou</span>
             </div>
           </div>
         </section>

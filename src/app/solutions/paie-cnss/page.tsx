@@ -4,23 +4,26 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Users,
   ArrowRight,
   Check,
-  Download,
+  Printer,
   FileText,
   Calculator,
   ShieldCheck,
   ChevronDown,
   ChevronUp,
   Building2,
-  Calendar,
-  AlertCircle,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function PaieCnssPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -54,7 +57,10 @@ export default function PaieCnssPage() {
     return new Intl.NumberFormat("fr-FR").format(val) + " FCFA";
   };
 
-  const handleSimulateDownload = () => {
+  const handlePrintSample = () => {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 3000);
   };
@@ -65,26 +71,26 @@ export default function PaieCnssPage() {
 
   const faqs = [
     {
-      q: "Le bulletin de paie généré par Ceilow est-il conforme au Code du Travail béninois ?",
-      a: "Oui, il intègre l'ensemble des mentions légales obligatoires au Bénin : identifiant employeur, numéro employeur CNSS, numéro IFU, matricule du salarié, numéro d'affiliation CNSS, ventilation détaillée des cotisations et congés payés.",
+      q: "Le bulletin de paie créé par Ceilow est-il conforme au Code du Travail béninois ?",
+      a: "Oui, il contient toutes les mentions obligatoires au Bénin : nom et numéro employeur CNSS, numéro IFU, matricule du salarié, numéro CNSS du salarié, détail des cotisations et solde de congés.",
     },
     {
-      q: "Comment sont gérés les déclarations e-Cotisations CNSS trimestrielles ?",
-      a: "Ceilow génère en un clic le récapitulatif nominatif exact au format exigé par le portail officiel e-Cotisations de la CNSS Bénin. Vous n'avez plus qu'à importer le fichier sans ressaisir chaque salarié.",
+      q: "Comment se préparent les déclarations e-Cotisations CNSS ?",
+      a: "Ceilow prépare en un clic la liste nominative exacte demandée par le portail e-Cotisations de la CNSS Bénin (déclaration trimestrielle avant le 15 sous 20 salariés, ou mensuelle avant le 10 dès 20 salariés), sans tout retaper salarié par salarié.",
     },
     {
-      q: "Le calcul de l'IPTS prend-il en compte la situation de famille et les déductions ?",
-      a: "Tout à fait. Le module de paie Ceilow intègre le barème officiel de la Direction Générale des Impôts du Bénin avec la déduction des charges de famille (enfants à charge) et les exonérations légales prévues au Code Général des Impôts.",
+      q: "Le calcul de l'IPTS tient-il compte des enfants à charge ?",
+      a: "Oui. Ceilow applique le barème officiel de la DGI du Bénin avec les réductions prévues selon les charges de famille déclarées par chaque salarié.",
     },
     {
-      q: "Puis-je envoyer les fiches de paie directement par e-mail ou WhatsApp aux salariés ?",
-      a: "Oui, chaque collaborateur peut recevoir son bulletin de paie au format PDF sécurisé par e-mail ou via un lien individuel confidentiel dès la validation de la période par le gérant ou le responsable RH.",
+      q: "Puis-je envoyer les fiches de paie par e-mail ou WhatsApp aux salariés ?",
+      a: "Oui, dès que vous validez la paie du mois, chaque employé peut recevoir son bulletin au format PDF par e-mail ou via un lien sécurisé.",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col font-sans selection:bg-primary selection:text-ink">
-      {/* ── STYLE DÉDIÉ POUR ANIMATION SVG LOTTIE-LIKE BULLETIN DE PAIE & CNSS ── */}
+      {/* STYLE DÉDIÉ ANIMATION BULLETIN DE PAIE */}
       <style jsx global>{`
         @keyframes payslipSlide {
           0%, 15% { transform: translateY(28px); opacity: 0; }
@@ -113,6 +119,13 @@ export default function PaieCnssPage() {
           fill: #FFD946; stroke: #332E29; stroke-width: 1;
           animation: sparklePayPop 3.6s ease-in-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) {
+          .payslip-anim,
+          .calc-anim,
+          .sparkle-pay {
+            animation: none;
+          }
+        }
       `}</style>
 
       <PublicHeader />
@@ -121,21 +134,34 @@ export default function PaieCnssPage() {
         {/* HERO SECTION SPLIT SCREEN */}
         <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 border-b border-border bg-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Accueil</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/fonctionnalites">Fonctionnalités</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Paie &amp; CNSS Bénin</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
               {/* Colonne gauche : Copywriting clair et convertisseur */}
               <div className="lg:col-span-7 flex flex-col items-start">
                 <span className="text-xs uppercase tracking-widest font-bold text-text-muted mb-3 block">
-                  Salaires &amp; Cotisations Sociales au Bénin
+                  Salaires &amp; cotisations sociales au Bénin
                 </span>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-clash">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink leading-tight mb-4 font-display">
                   Gestion de paie et déclarations CNSS au Bénin sans erreur
                 </h1>
-                <p className="font-serif italic text-base md:text-lg text-text-muted mb-4">
-                  (Fini les formules Excel compliquées et les pénalités de retard CNSS)
-                </p>
                 <p className="text-base sm:text-lg text-text-muted leading-relaxed mb-6">
-                  Éditez chaque bulletin de paie conforme au Code du Travail béninois en quelques clics. Cotisations CNSS (3,6% salarié, 15,4% patronale), retenues IPTS et VPS sont calculées automatiquement pour générer vos déclarations prêtes pour la téléprocédure.
+                  Éditez des bulletins de paie conformes au Code du Travail béninois en quelques clics. Les cotisations CNSS (3,6 % salarié, 15,4 % employeur), l&apos;impôt IPTS et le VPS (4 %) se calculent automatiquement sans tableur compliqué.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
@@ -143,21 +169,21 @@ export default function PaieCnssPage() {
                     href="/register"
                     className="bg-primary text-ink font-bold px-7 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Générer ma première fiche</span>
+                    <span>Tester gratuitement</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
                     href="/demo"
                     className="bg-background-secondary text-ink font-bold px-7 py-3.5 rounded-xl border border-border hover:border-ink transition-all text-center min-h-[48px] flex items-center justify-center"
                   >
-                    Voir la démonstration
+                    Voir la démo
                   </Link>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-text-muted">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>CNSS Ouvrière 3.6% &amp; Patronale 15.4%</span>
+                    <span>CNSS salarié 3,6 % &amp; employeur 15,4 %</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
@@ -165,7 +191,7 @@ export default function PaieCnssPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink" />
-                    <span>Export e-Cotisations prêt à déposer</span>
+                    <span>Prêt pour portail e-Cotisations</span>
                   </div>
                 </div>
               </div>
@@ -173,21 +199,23 @@ export default function PaieCnssPage() {
               {/* Colonne droite : Photo réelle Gestionnaire RH Bénin */}
               <div className="lg:col-span-5">
                 <div className="relative rounded-2xl overflow-hidden border border-border bg-background-secondary shadow-xs">
-                  <Image
-                    src="/images/conseillere-cotonou.jpg"
-                    alt="Responsable des ressources humaines gérant la paie d'entreprise à Cotonou"
-                    width={600}
-                    height={440}
-                    className="w-full h-[360px] sm:h-[420px] object-cover"
-                    priority
-                  />
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src="/images/conseillere-cotonou.jpg"
+                      alt="Responsable des ressources humaines gérant la paie d'entreprise à Cotonou"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                   <div className="p-4 bg-background border-t border-border">
                     <div className="flex items-center justify-between text-xs font-bold text-ink mb-1">
                       <span>Bulletins de paie du mois validés</span>
-                      <span className="text-success-deep font-semibold">100% Conforme CNSS</span>
+                      <span className="text-success-deep font-semibold">Conforme CNSS</span>
                     </div>
                     <p className="text-[11px] text-text-muted">
-                      Déclaration e-Cotisations prête pour télédéclaration sans ressaisie.
+                      Liste prête pour e-Cotisations sans double saisie.
                     </p>
                   </div>
                 </div>
@@ -263,11 +291,11 @@ export default function PaieCnssPage() {
               </svg>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink tracking-tight">
-              Chaque bulletin calculé au centime près
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
+              Chaque bulletin calculé au franc près
             </h2>
             <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              Renseignez simplement le salaire brut et laissez Ceilow calculer les retenues CNSS et IPTS selon le barème officiel béninois.
+              Indiquez le salaire brut et laissez Ceilow calculer les cotisations CNSS et l&apos;IPTS selon les taux officiels au Bénin.
             </p>
           </div>
         </section>
@@ -277,13 +305,13 @@ export default function PaieCnssPage() {
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
-                Simulateur dynamique
+                Simulateur interactif
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
-                Simulez un bulletin de salaire selon le barème officiel du Bénin
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight mb-3">
+                Simulez un bulletin de salaire selon les taux du Bénin
               </h2>
               <p className="text-sm sm:text-base text-text-muted max-w-2xl">
-                Ajustez le salaire brut mensuel pour observer la décomposition automatique des cotisations salariales, fiscales et patronales.
+                Faites varier le salaire brut pour voir immédiatement le salaire net à payer, les cotisations CNSS, l&apos;IPTS et le coût total employeur.
               </p>
             </div>
 
@@ -296,15 +324,16 @@ export default function PaieCnssPage() {
                 </h3>
 
                 <div className="mb-6">
-                  <label className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">
-                    Salaire Brut Mensuel
+                  <label htmlFor="salaire-brut-range" className="text-xs font-bold text-text-muted uppercase tracking-wider block mb-2">
+                    Salaire brut mensuel
                   </label>
                   <div className="text-2xl font-bold font-mono tabular-nums text-ink mb-3">
                     {formatFcfa(salaireBrut)}
                   </div>
                   <input
+                    id="salaire-brut-range"
                     type="range"
-                    min="60000"
+                    min="52000"
                     max="1500000"
                     step="10000"
                     value={salaireBrut}
@@ -319,13 +348,13 @@ export default function PaieCnssPage() {
 
                 <div className="space-y-3 pt-4 border-t border-border">
                   <div className="text-xs font-bold text-text-muted uppercase mb-2">
-                    Paliers fréquents
+                    Exemples fréquents
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setSalaireBrut(150000)}
-                      className={`text-xs font-bold py-2 px-3 rounded-lg border transition-all ${
+                      className={`text-xs font-bold min-h-[44px] py-2 px-3 rounded-lg border transition-all cursor-pointer ${
                         salaireBrut === 150000
                           ? "bg-primary text-ink border-primary"
                           : "bg-background-secondary text-ink border-border hover:border-ink"
@@ -336,7 +365,7 @@ export default function PaieCnssPage() {
                     <button
                       type="button"
                       onClick={() => setSalaireBrut(350000)}
-                      className={`text-xs font-bold py-2 px-3 rounded-lg border transition-all ${
+                      className={`text-xs font-bold min-h-[44px] py-2 px-3 rounded-lg border transition-all cursor-pointer ${
                         salaireBrut === 350000
                           ? "bg-primary text-ink border-primary"
                           : "bg-background-secondary text-ink border-border hover:border-ink"
@@ -347,7 +376,7 @@ export default function PaieCnssPage() {
                     <button
                       type="button"
                       onClick={() => setSalaireBrut(750000)}
-                      className={`text-xs font-bold py-2 px-3 rounded-lg border transition-all ${
+                      className={`text-xs font-bold min-h-[44px] py-2 px-3 rounded-lg border transition-all cursor-pointer ${
                         salaireBrut === 750000
                           ? "bg-primary text-ink border-primary"
                           : "bg-background-secondary text-ink border-border hover:border-ink"
@@ -360,13 +389,13 @@ export default function PaieCnssPage() {
 
                 <div className="mt-8 pt-6 border-t border-border">
                   <div className="text-xs uppercase font-bold text-text-muted mb-2">
-                    Coût global employeur
+                    Coût total pour l&apos;employeur
                   </div>
                   <div className="text-xl font-bold font-mono tabular-nums text-ink mb-1">
                     {formatFcfa(totalCoutEntreprise)}
                   </div>
                   <p className="text-xs text-text-muted">
-                    Inclut CNSS patronale (15.4%) et VPS (4%).
+                    Inclut la part employeur CNSS (15,4 %) et le VPS (4 %).
                   </p>
                 </div>
               </div>
@@ -376,7 +405,7 @@ export default function PaieCnssPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-border gap-4">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted block">
-                      Aperçu bulletin de salaire certifié
+                      Aperçu de fiche de paie
                     </span>
                     <h4 className="text-base font-bold text-ink">
                       Période : Mars 2026
@@ -384,37 +413,37 @@ export default function PaieCnssPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={handleSimulateDownload}
-                    className="bg-background-secondary text-ink font-bold text-xs px-4 py-2 rounded-xl border border-border hover:border-ink transition-all flex items-center justify-center gap-2 min-h-[40px]"
+                    onClick={handlePrintSample}
+                    className="bg-background-secondary text-ink font-bold text-xs px-4 py-2 rounded-xl border border-border hover:border-ink transition-all flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
                   >
-                    <Download className="w-3.5 h-3.5 text-ink" />
-                    <span>Télécharger l&apos;exemple PDF</span>
+                    <Printer className="w-3.5 h-3.5 text-ink" />
+                    <span>Imprimer l&apos;exemple</span>
                   </button>
                 </div>
 
                 {downloadSuccess && (
                   <div className="mb-4 p-3 rounded-xl bg-background-secondary border border-border text-xs text-ink flex items-center gap-2">
                     <Check className="w-4 h-4 text-ink shrink-0" />
-                    <span>Spécimen de bulletin généré avec succès avec mentions légales Bénin.</span>
+                    <span>Fenêtre d&apos;impression ouverte pour enregistrer ou imprimer ce spécimen.</span>
                   </div>
                 )}
 
                 <div className="space-y-4 font-mono text-xs">
                   <div className="p-4 rounded-xl bg-background-secondary border border-border flex justify-between items-center">
-                    <span className="font-sans font-bold text-ink">Salaire de Base Brut</span>
+                    <span className="font-sans font-bold text-ink">Salaire de base brut</span>
                     <span className="font-bold text-ink tabular-nums">{formatFcfa(salaireBrut)}</span>
                   </div>
 
                   <div className="p-4 rounded-xl bg-background-secondary border border-border space-y-3">
                     <div className="font-sans text-[11px] uppercase font-bold text-text-muted pb-2 border-b border-border">
-                      Retenues sur salaire (part salariale)
+                      Retenues sur le salaire (part salarié)
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-sans text-text-muted">Cotisation CNSS Ouvrière (3.6%)</span>
+                      <span className="font-sans text-text-muted">Cotisation CNSS salarié (3,6 %)</span>
                       <span className="text-ink font-bold tabular-nums">- {formatFcfa(cnssSalarie)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-sans text-text-muted">Retenue à la source IPTS (DGI)</span>
+                      <span className="font-sans text-text-muted">Impôt sur salaire IPTS (DGI)</span>
                       <span className="text-ink font-bold tabular-nums">- {formatFcfa(ipts)}</span>
                     </div>
                   </div>
@@ -435,21 +464,21 @@ export default function PaieCnssPage() {
 
                   <div className="p-4 rounded-xl bg-background-secondary border border-border space-y-2">
                     <div className="font-sans text-[11px] uppercase font-bold text-text-muted pb-2 border-b border-border">
-                      Charges patronales de l&apos;entreprise
+                      Cotisations payées par l&apos;employeur
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-sans text-text-muted">CNSS Patronale (15.4% prestations familiales &amp; retraite)</span>
+                      <span className="font-sans text-text-muted">CNSS employeur (15,4 % retraite &amp; allocations)</span>
                       <span className="text-ink tabular-nums">{formatFcfa(cnssPatronale)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-sans text-text-muted">Versement Patronal sur Salaires VPS (4%)</span>
+                      <span className="font-sans text-text-muted">Versement Patronal sur Salaires VPS (4 %)</span>
                       <span className="text-ink tabular-nums">{formatFcfa(vpsPatronale)}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-text-muted">
-                  <span>Conforme Loi 98-004 portant Code du travail en République du Bénin</span>
+                <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-text-muted">
+                  <span>Conforme au Code du travail en République du Bénin</span>
                   <span className="font-bold text-ink">SYSCOHADA Compte 661</span>
                 </div>
               </div>
@@ -462,10 +491,10 @@ export default function PaieCnssPage() {
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-16">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
-                Simplicité &amp; Sérénité
+                Simplicité
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-                Une paie conforme sans casse-tête juridique
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
+                Une paie conforme sans calculs compliqués
               </h2>
             </div>
 
@@ -475,10 +504,10 @@ export default function PaieCnssPage() {
                   <FileText className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Bulletins de paie prêts en quelques minutes
+                  Bulletins prêts en quelques minutes
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Renseignez les éventuelles primes, avances ou heures supplémentaires de la période. Tous les bulletins de votre équipe sont mis à jour et prêts à être distribués sans recalcul manuel.
+                  Ajoutez vos primes, avances sur salaire ou heures supplémentaires du mois. Tous les bulletins de votre équipe se mettent à jour automatiquement.
                 </p>
               </div>
 
@@ -487,10 +516,10 @@ export default function PaieCnssPage() {
                   <Building2 className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Déclaration e-Cotisations CNSS sans ressaisie
+                  Fichier CNSS prêt sans tout recopier
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Exportez directement l&apos;état nominatif des salaires au format requis par le télé-service de la Caisse Nationale de Sécurité Sociale du Bénin. Évitez toute majoration pour déclaration tardive.
+                  Exportez directement la liste des salaires au format attendu par le portail e-Cotisations de la CNSS Bénin et évitez les pénalités de retard.
                 </p>
               </div>
 
@@ -499,44 +528,44 @@ export default function PaieCnssPage() {
                   <ShieldCheck className="w-6 h-6 text-ink" />
                 </div>
                 <h3 className="text-lg font-bold text-ink mb-3">
-                  Écritures comptables de paie automatiques
+                  Comptabilité de paie mise à jour toute seule
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed">
-                  Chaque clôture de paie génère automatiquement les écritures aux comptes 661 (Rémunérations), 421 (Personnel), 431 (CNSS) et 447 (État IPTS). Votre comptable n&apos;a plus besoin de ressaisir chaque ligne.
+                  Chaque paie validée inscrit automatiquement les charges de personnel et cotisations sociales dans vos comptes 661, 421, 431 et 447.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* MAILLAGE INTERNE CONTEXTUEL VERS LES MODULES ASSOCIÉS */}
+        {/* MAILLAGE INTERNE CONTEXTUEL */}
         <section className="py-12 bg-background border-t border-border">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mb-8">
               <span className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                Gestion Sociale et Fiscale Intégrée
+                Suite complète
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold font-clash text-ink mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-ink mt-1">
                 Vos salaires reliés à votre comptabilité et au calendrier fiscal
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
                 href="/solutions/comptabilite-syscohada"
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
                     <span>Comptabilité SYSCOHADA</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Les charges de personnel et cotisations patronales sont passées directement dans vos journaux sans intervention manuelle.
+                    Les charges salariales et cotisations employeur passent automatiquement dans vos journaux comptables.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir les écritures de paie
+                  Voir la comptabilité
                 </span>
               </Link>
 
@@ -545,16 +574,16 @@ export default function PaieCnssPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Déclarations Fiscales DGI</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Déclarations fiscales DGI</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Retrouvez vos montants d&apos;IPTS et de Versement Patronal sur Salaires (VPS) prêts pour votre télépaiement mensuel.
+                    Retrouvez vos montants d&apos;IPTS et de VPS prêts pour votre paiement mensuel à la DGI.
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Découvrir la téléprocédure DGI
+                  Voir les déclarations
                 </span>
               </Link>
 
@@ -563,16 +592,34 @@ export default function PaieCnssPage() {
                 className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-ink group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Calendrier Social & Fiscal</span>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Calendrier fiscal 2026</span>
                     <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                    Ne ratez aucune date limite : la déclaration CNSS et le paiement de l&apos;IPTS interviennent au plus tard le 10 de chaque mois.
+                    Ne ratez aucune date limite : l&apos;IPTS est dû le 10 de chaque mois et la CNSS trimestrielle le 15 (ou mensuelle le 10 dès 20 salariés).
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
-                  Consulter les échéances officielles
+                  Voir le calendrier
+                </span>
+              </Link>
+
+              <Link
+                href="/ressources/bareme-cotisations-cnss-benin"
+                className="p-5 rounded-xl bg-background-secondary border border-border hover:border-ink transition-colors flex flex-col justify-between group"
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-ink group-hover:underline transition-colors flex items-center justify-between">
+                    <span>Barème CNSS &amp; ITS 2026</span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-xs text-text-muted mt-2 leading-relaxed">
+                    Détail officiel des taux employeur (16,4 % à 19,4 %), part salarié (3,6 %), ITS par tranche et VPS.
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-ink mt-4 pt-3 border-t border-border">
+                  Voir le barème
                 </span>
               </Link>
             </div>
@@ -586,7 +633,7 @@ export default function PaieCnssPage() {
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
                 Questions fréquentes
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-ink tracking-tight">
                 Tout savoir sur la paie et la CNSS avec Ceilow
               </h2>
             </div>
@@ -602,7 +649,8 @@ export default function PaieCnssPage() {
                     <button
                       type="button"
                       onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors"
+                      aria-expanded={isOpen}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-ink text-base hover:bg-background-secondary/50 transition-colors cursor-pointer min-h-[48px]"
                     >
                       <span>{faq.q}</span>
                       {isOpen ? (
@@ -626,25 +674,25 @@ export default function PaieCnssPage() {
         {/* BANNIÈRE D'ACTION */}
         <section className="py-16 bg-ink text-background">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 text-background">
-              Éditez vos premiers bulletins de paie béninois en 5 minutes.
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display tracking-tight mb-4 text-background">
+              Éditez vos premiers bulletins de paie en quelques minutes.
             </h2>
             <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto mb-8">
-              Configurez votre entreprise et vos salariés en quelques clics. Testez gratuitement pendant 14 jours.
+              Ajoutez votre entreprise et vos salariés en quelques clics. Testez gratuitement pendant 14 jours.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="bg-primary text-ink font-bold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all text-center min-h-[48px] flex items-center justify-center gap-2"
               >
-                <span>Créer mon compte</span>
+                <span>Créer un compte</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/demo"
                 className="bg-transparent text-background font-bold px-8 py-3.5 rounded-xl border border-white/20 hover:border-white transition-all text-center min-h-[48px] flex items-center justify-center"
               >
-                Tester la démo en ligne
+                Voir la démo
               </Link>
             </div>
           </div>

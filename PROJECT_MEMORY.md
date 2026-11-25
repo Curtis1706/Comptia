@@ -2,6 +2,42 @@
 
 Ce document trace l'historique continu des actions, décisions techniques et orientations du projet Ceilow (SaaS comptable, fiscal et social Bénin / SYSCOHADA).
 
+### 2026-11-26 : Optimisations On-Page « Quick Wins » Search Console (Phase 2)
+
+- **Actions Réalisées sur les Pages Existantes** :
+  - [src/app/ressources/guide-tva-benin/page.tsx](file:///e:/Comptia/src/app/ressources/guide-tva-benin/page.tsx) : ajout du titre H2 explicite « Comment déclarer et payer la TVA en ligne au Bénin (calendrier et e-Services) » ciblant les requêtes `tva au benin` et `comment payer la tva`, avec encadré et lien vers le guide e-Services DGI.
+  - [src/app/solutions/comptabilite-syscohada/page.tsx](file:///e:/Comptia/src/app/solutions/comptabilite-syscohada/page.tsx) : intégration du paragraphe métier détaillant la structure de la balance générale à 6 colonnes (soldes d'ouverture, mouvements de la période, soldes de clôture) et son articulation avec la liasse DSF annuelle, ciblant `balance à 6 colonnes syscohada` et `logiciel comptable syscohada`.
+  - [src/app/ressources/plan-comptable-syscohada-pdf/page.tsx](file:///e:/Comptia/src/app/ressources/plan-comptable-syscohada-pdf/page.tsx) : création d'une section dédiée à la balance à 6 colonnes SYSCOHADA avec grille des 3 paires de colonnes et lien vers la solution comptable.
+  - [src/app/ressources/bareme-cotisations-cnss-benin/page.tsx](file:///e:/Comptia/src/app/ressources/bareme-cotisations-cnss-benin/page.tsx) : ajout de la synthèse immédiate des taux (Part salarié 3,6 %, Part employeur 16,4 % à 19,4 %, assiette 100 % du brut sans plafond) directement sous l'introduction pour capter la position zéro sur `taux de cotisation cnss bénin`.
+  - Phase 3 confirmée : requêtes parasites (`solution visioconférence entreprise bénin`, `boa benin`) délibérément écartées pour préserver l'autorité thématique du domaine.
+- **Vérification** : `npx tsc --noEmit` et `pnpm build` validés avec succès (code `0`, `86/86` pages statiques générées).
+
+### 2026-11-26 : Création des 3 Guides Piliers Stratégiques Search Console (`/ressources/*`)
+
+- **Contexte & Requêtes Traitées** :
+  - Guide 2 : `/ressources/teledeclaration-paiement-impots-dgi-benin` (cibles : `teledeclaration impot`, `comment payer la tva`, `e-tps`, `regime tps`). Procédure pas-à-pas en 5 étapes pour télédéclarer et télépayer sur `eservices.impots.bj`, calendrier des échéances TVA (10/15) et acomptes TPS, tableau des moyens de télépaiement (MTN MoMo, Moov, Celtiis, Virement Trésor Public, Carte bancaire) et sanctions en cas de retard.
+  - Guide 3 : `/ressources/odoo-emecef-facture-normalisee-benin-comparatif` (cibles : `odoo e-mecef`, `facture normalisée odoo`, `sfe approuvé bénin`, `sfe bénin`). Comparatif objectif en 7 critères techniques et financiers (coûts de mise en service, connecteur API DGI, maintenance lors des montées de version, comptabilité SYSCOHADA révisée native, Mobile Money local, support Cotonou).
+  - Guide 4 : `/ressources/creer-compte-facture-normalisee-dgi-benin` (cibles : `créer un compte pour facture normalisée`, `nouvelle facture normalisée en ligne`, `dgi facture normalisée`). Parcours d'onboarding complet en 5 étapes pour PME et indépendants sans achat de machine physique, avec checklist interactive des prérequis administratifs (IFU 13 chiffres, choix du SFE, groupes A à F).
+- **Intégration & Conformité Technique** :
+  - Balisage Schema.org complet sur chaque nouveau layout : `Article`, `BreadcrumbList`, `HowTo` (sur les guides 2 et 4) et `FAQPage` (4 questions interactives sur chaque guide).
+  - Ajout des 3 guides dans le catalogue [src/app/ressources/page.tsx](file:///e:/Comptia/src/app/ressources/page.tsx) avec le filtre de thèmes mis à jour (`Tous les guides (10)`).
+  - Inscription des 3 nouvelles URLs dans [src/app/sitemap.ts](file:///e:/Comptia/src/app/sitemap.ts) et [scripts/submit-indexnow.mjs](file:///e:/Comptia/scripts/submit-indexnow.mjs).
+- **Vérification** : `npx tsc --noEmit` et `pnpm build` validés avec succès (code `0`, `86/86` pages statiques générées), audit de métadonnées conforme (`43/43` routes sans erreur).
+
+### 2026-11-25 : Création du Guide Pilier « Comment Annuler une Facture Normalisée au Bénin » (`/ressources/comment-annuler-facture-normalisee-benin`)
+
+- **Origine & Données Réelles Search Console** : Exploitation directe du rapport de requêtes de la Search Console (`comment annuler une facture normalisée en ligne au bénin` : 11 impressions, requête à plus fort potentiel de conversion immédiate).
+- **Actions Réalisées** :
+  - Création de la route `/ressources/comment-annuler-facture-normalisee-benin` (`layout.tsx` + `page.tsx`) selon les compétences `/copywriting` et `/seo-partner`.
+  - Contenu pédagogique pas-à-pas en 5 étapes : impossibilité légale de supprimer une facture certifiée e-MECeF, choix entre annulation totale et rectification partielle, émission d'un avoir normalisé, validation auprès de la DGI et écriture comptable SYSCOHADA (comptes 70/709, 443, 411).
+  - Intégration d'un simulateur interactif d'avoir normalisé calculant la base HT, la TVA 18 % ou le groupe E (TPS), et générant la mention textuelle obligatoire.
+  - Balisage Schema.org complet dans `layout.tsx` : `Article`, `BreadcrumbList`, `HowTo` (5 étapes) et `FAQPage` (4 questions/réponses).
+  - Intégration dans le catalogue du hub [src/app/ressources/page.tsx](file:///e:/Comptia/src/app/ressources/page.tsx) avec mise à jour du filtre de thèmes (7 guides) et mise en avant dans les ressources associées de [guide-facturation-emecef-benin/page.tsx](file:///e:/Comptia/src/app/ressources/guide-facturation-emecef-benin/page.tsx).
+  - Mise à jour de [src/app/sitemap.ts](file:///e:/Comptia/src/app/sitemap.ts) et [scripts/submit-indexnow.mjs](file:///e:/Comptia/scripts/submit-indexnow.mjs) avec la nouvelle URL.
+  - Mise à jour de [src/app/robots.ts](file:///e:/Comptia/src/app/robots.ts) : ajout de `allow: ["/", "/_next/static/"]` pour garantir l'exploration sans entrave des ressources CSS/JS/fonts par Googlebot.
+  - Fortification de [src/components/seo/JsonLd.tsx](file:///e:/Comptia/src/components/seo/JsonLd.tsx) avec vérification de validité de `JSON.stringify`.
+- **Vérification** : `npx tsc --noEmit` et `pnpm build` validés avec succès (code `0`, `83/83` pages statiques générées avec pré-rendu complet du guide), audit de métadonnées validé (`40/40` routes conformes).
+
 ### 2026-11-10 : Blocage d'Indexation `X-Robots-Tag` sur `*.vercel.app` (`next.config.ts`)
 
 - **Constat** : `https://studio-comptia.vercel.app/` répondait en `HTTP/1.1 200 OK` sans redirection ni directive `noindex`, apparaissant dans les pages d'origine Search Console comme copie du site principal `ceilow.com`.

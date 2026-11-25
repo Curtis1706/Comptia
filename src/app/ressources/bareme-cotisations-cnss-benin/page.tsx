@@ -201,6 +201,26 @@ export default function BaremeCotisationsCnssBeninPage() {
                   Comprendre les <strong className="text-ink font-semibold">cotisations CNSS au Bénin</strong> évite les mauvaises surprises sur votre budget salarial. Consultez les taux officiels 2026 (part employeur de <span className="font-mono font-semibold text-ink">16,4 % à 19,4 %</span>, part salarié de <span className="font-mono font-semibold text-ink">3,6 %</span>, sans plafond), le barème de l&apos;impôt ITS, le VPS à 4 % et testez notre calculateur en direct.
                 </p>
 
+                {/* Synthèse immédiate des taux CNSS pour Featured Snippet / Réponse directe */}
+                <div className="w-full p-4 rounded-xl bg-background-secondary border border-border mb-6">
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted block mb-2">
+                    Taux officiels des cotisations CNSS Bénin (Synthèse 2026) :
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="p-2.5 rounded-lg bg-background border border-border flex justify-between items-center">
+                      <span className="font-medium text-ink">Part Salarié (Retraite) :</span>
+                      <strong className="font-mono font-bold text-ink text-sm">3,6 %</strong>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-background border border-border flex justify-between items-center">
+                      <span className="font-medium text-ink">Part Employeur (Prestations + Risques) :</span>
+                      <strong className="font-mono font-bold text-ink text-sm">16,4 % à 19,4 %</strong>
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-text-muted block mt-2">
+                    Base de calcul : 100 % du salaire brut sans plafond mensuel. Versement au plus tard le 10 ou 15 selon la taille.
+                  </span>
+                </div>
+
                 <div className="w-full p-4 rounded-xl bg-background-secondary border border-border grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-text-muted mb-6">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-success-deep shrink-0" />

@@ -40,6 +40,64 @@ interface ResourceArticle {
 
 const RESOURCE_ARTICLES: ResourceArticle[] = [
   {
+    id: "teledeclaration-impots",
+    title: "Télédéclaration et paiement des impôts en ligne au Bénin : guide e-Services DGI",
+    excerpt:
+      "TVA au 10/15 du mois, acomptes TPS et AIB : apprenez à télédéclarer sur eservices.impots.bj et à régler en direct par Mobile Money ou virement bancaire.",
+    category: "Fiscalité & Déclarations",
+    theme: "fiscalite",
+    imageUrl: "/images/ressources/guide-tva-benin.jpg",
+    imageAlt:
+      "Comptable à Cotonou effectuant une télédéclaration fiscale sur le portail e-Services DGI Bénin",
+    href: "/ressources/teledeclaration-paiement-impots-dgi-benin",
+    readTimeMinutes: 7,
+    toolIncluded: "Procédure pas-à-pas DGI",
+    featured: true,
+  },
+  {
+    id: "odoo-vs-sfe",
+    title: "Facture normalisée e-MECeF au Bénin : Odoo vs Ceilow et solutions certifiées",
+    excerpt:
+      "Comparatif technique et financier : connecter Odoo à l'API DGI avec un connecteur tiers ou choisir un SFE natif SYSCOHADA sans frais de développement.",
+    category: "Comparatif & ERP",
+    theme: "facturation",
+    imageUrl: "/images/ressources/guide-emecef-benin.jpg",
+    imageAlt:
+      "Comparatif des logiciels de facturation normalisée e-MECeF et ERP pour entreprises au Bénin",
+    href: "/ressources/odoo-emecef-facture-normalisee-benin-comparatif",
+    readTimeMinutes: 8,
+    toolIncluded: "Matrice comparative 7 critères",
+  },
+  {
+    id: "creer-compte-facture",
+    title: "Comment créer son compte et démarrer la facture normalisée au Bénin",
+    excerpt:
+      "Numéro IFU, choix de la machine virtuelle DGI, paramétrage des groupes A à F : le guide d'onboarding complet pour émettre sa première facture certifiée.",
+    category: "Démarrage & PME",
+    theme: "facturation",
+    imageUrl: "/images/ressources/guide-emecef-benin.jpg",
+    imageAlt:
+      "Création de compte de facturation normalisée e-MECeF DGI pour entreprise au Bénin",
+    href: "/ressources/creer-compte-facture-normalisee-dgi-benin",
+    readTimeMinutes: 6,
+    toolIncluded: "Checklist de préparation",
+  },
+  {
+    id: "annuler-facture-emecef",
+    title: "Comment annuler une facture normalisée en ligne au Bénin : procédure DGI et avoir",
+    excerpt:
+      "Erreur de montant, de client ou de TVA ? Découvrez la procédure légale DGI pour émettre un avoir certifié e-MECeF, les mentions obligatoires et le calcul sans risque fiscal.",
+    category: "Facturation DGI",
+    theme: "facturation",
+    imageUrl: "/images/ressources/guide-emecef-benin.jpg",
+    imageAlt:
+      "Gestionnaire comptable à Cotonou régularisant une facture normalisée e-MECeF par un avoir certifié",
+    href: "/ressources/comment-annuler-facture-normalisee-benin",
+    readTimeMinutes: 6,
+    toolIncluded: "Simulateur d'Avoir DGI",
+    featured: true,
+  },
+  {
     id: "guide-emecef",
     title: "Facture normalisée e-MECeF au Bénin : comment facturer aux normes sans erreur",
     excerpt:
@@ -129,7 +187,7 @@ const RESOURCE_ARTICLES: ResourceArticle[] = [
 ];
 
 const THEME_FILTERS: Array<{ id: ResourceTheme; label: string }> = [
-  { id: "tous", label: "Tous les guides (6)" },
+  { id: "tous", label: "Tous les guides (10)" },
   { id: "facturation", label: "Facturation DGI" },
   { id: "fiscalite", label: "TVA, TPS & Échéances" },
   { id: "comptabilite", label: "Comptabilité SYSCOHADA" },

@@ -466,10 +466,10 @@ export default function ComptabiliteSyscohadaPage() {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold font-display text-ink tracking-tight">
-              Des comptes équilibrés, sans calcul manuel
+              Balance à 6 colonnes SYSCOHADA révisée et comptes équilibrés
             </h2>
-            <p className="text-sm text-text-muted max-w-lg mx-auto mt-1">
-              Chaque mouvement équilibre automatiquement les débits et les crédits selon le plan SYSCOHADA. Votre balance reste juste en permanence.
+            <p className="text-sm text-text-muted max-w-xl mx-auto mt-2 leading-relaxed">
+              Dans le SYSCOHADA révisé, la balance générale s&apos;articule rigoureusement sur 6 colonnes : soldes d&apos;ouverture (débit/crédit), mouvements de la période (débit/crédit) et soldes de clôture (débit/crédit). Ceilow génère automatiquement cette balance officielle en temps réel pour faciliter l&apos;audit comptable et le montage de votre liasse DSF annuelle.
             </p>
           </div>
         </section>

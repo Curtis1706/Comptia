@@ -1028,7 +1028,7 @@ export default function GuideFacturationEmecefBeninPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Link
-                href="/solutions/facturation-dgi"
+                href="/ressources/comment-annuler-facture-normalisee-benin"
                 className="group p-6 rounded-2xl bg-background-secondary border border-border hover:border-ink transition-all flex flex-col justify-between"
               >
                 <div>
@@ -1036,14 +1036,14 @@ export default function GuideFacturationEmecefBeninPage() {
                     <Receipt className="w-5 h-5 text-ink" />
                   </div>
                   <h3 className="text-base font-bold text-ink mb-2 group-hover:underline">
-                    Facturation e-MECeF avec Ceilow
+                    Annuler une Facture Normalisée DGI
                   </h3>
                   <p className="text-xs text-text-muted leading-relaxed mb-4">
-                    Créez vos factures officielles avec QR code en 3 secondes depuis votre téléphone, sans acheter de machine.
+                    La procédure légale en 5 étapes pour créer un avoir certifié e-MECeF en cas d&apos;erreur sans risque de redressement.
                   </p>
                 </div>
                 <span className="text-xs font-bold text-ink inline-flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
-                  <span>Découvrir le module</span>
+                  <span>Lire le guide d&apos;annulation</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </Link>

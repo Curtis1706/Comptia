@@ -734,6 +734,50 @@ export default function PlanComptableSyscohadaPdfPage() {
           </div>
         </section>
 
+        {/* ── 5B. FOCUS BALANCE À 6 COLONNES SYSCOHADA ── */}
+        <section className="w-full py-12 bg-background-secondary border-b border-border print:hidden">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="p-6 sm:p-8 rounded-2xl bg-background border border-border">
+              <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
+                Norme Comptable OHADA
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-ink mb-3">
+                La balance à 6 colonnes dans le SYSCOHADA révisé
+              </h2>
+              <p className="text-sm text-text-muted leading-relaxed mb-6">
+                Pour vérifier la cohérence des comptes et préparer la Déclaration Statistique et Fiscale (DSF) déposée au plus tard le 30 avril à la DGI, le droit comptable OHADA impose l&apos;établissement d&apos;une balance générale à 6 colonnes :
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs mb-6">
+                <div className="p-4 rounded-xl bg-background-secondary border border-border">
+                  <span className="font-bold text-ink block mb-1">Colonnes 1 &amp; 2 : Soldes d&apos;ouverture</span>
+                  <span className="text-text-muted">Débit et Crédit initiaux reportés du bilan de clôture de l&apos;exercice précédent.</span>
+                </div>
+                <div className="p-4 rounded-xl bg-background-secondary border border-border">
+                  <span className="font-bold text-ink block mb-1">Colonnes 3 &amp; 4 : Mouvements de la période</span>
+                  <span className="text-text-muted">Cumul de tous les débits et crédits enregistrés sur les journaux au cours du mois ou de l&apos;année.</span>
+                </div>
+                <div className="p-4 rounded-xl bg-background-secondary border border-border">
+                  <span className="font-bold text-ink block mb-1">Colonnes 5 &amp; 6 : Soldes définitifs de clôture</span>
+                  <span className="text-text-muted">Différence nette (solde débiteur ou créditeur) servant à renseigner le Bilan et le Compte de Résultat.</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-border text-xs">
+                <span className="text-text-muted">
+                  Ceilow édite votre balance à 6 colonnes en temps réel sans calcul sur tableur :
+                </span>
+                <Link
+                  href="/solutions/comptabilite-syscohada"
+                  className="font-bold text-ink underline hover:opacity-80"
+                >
+                  Découvrir le logiciel comptable SYSCOHADA
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── 6. FAQ (Alignée sur FAQPage JSON-LD) ── */}
         <section id="faq" className="w-full py-16 bg-background-secondary border-b border-border scroll-mt-24 print:hidden">
           <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

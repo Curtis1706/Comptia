@@ -108,6 +108,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/ressources/comment-annuler-facture-normalisee-benin`,
+      lastModified: currentDate,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ressources/teledeclaration-paiement-impots-dgi-benin`,
+      lastModified: currentDate,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ressources/odoo-emecef-facture-normalisee-benin-comparatif`,
+      lastModified: currentDate,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ressources/creer-compte-facture-normalisee-dgi-benin`,
+      lastModified: currentDate,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/ressources/guide-tva-benin`,
       lastModified: currentDate,
       changeFrequency: "monthly",

@@ -11,12 +11,15 @@ interface JsonLdProps {
  * Échappe le caractère '<' pour prévenir toute vulnérabilité d'injection XSS.
  */
 export function JsonLd({ data }: JsonLdProps) {
-  const items = Array.isArray(data) ? data : [data];
+  const rawItems = Array.isArray(data) ? data : [data];
+  const items = rawItems.filter(Boolean);
 
   return (
     <>
       {items.map((item, index) => {
-        const jsonString = JSON.stringify(item).replace(/</g, "\\u003c");
+        const json = JSON.stringify(item);
+        if (!json) return null;
+        const jsonString = json.replace(/</g, "\\u003c");
         return (
           <script
             key={index}

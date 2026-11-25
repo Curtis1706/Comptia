@@ -733,14 +733,25 @@ export default function GuideTvaBeninPage() {
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mb-12">
               <span className="text-xs uppercase tracking-widest font-bold text-text-muted block mb-2">
-                Dépôt Mensuel sur e-Services
+                Dépôt Mensuel sur e-Services DGI
               </span>
               <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
-                Les 4 étapes pour déclarer votre TVA avant le 10 du mois
+                Comment déclarer et payer la TVA en ligne au Bénin (calendrier et e-Services)
               </h2>
-              <p className="text-sm sm:text-base text-text-muted leading-relaxed">
+              <p className="text-sm sm:text-base text-text-muted leading-relaxed mb-4">
                 La déclaration couvre toutes vos factures du mois précédent. Même si vous n&apos;avez réalisé aucune vente sur le mois, vous devez déposer une déclaration « Néant » pour éviter une pénalité.
               </p>
+              <div className="p-4 rounded-xl bg-background-secondary border border-border flex items-center justify-between gap-4 text-xs">
+                <span className="text-text-muted">
+                  Procédure pas-à-pas détaillée pour télédéclarer et payer par Mobile Money :
+                </span>
+                <Link
+                  href="/ressources/teledeclaration-paiement-impots-dgi-benin"
+                  className="font-bold text-ink underline hover:opacity-80 shrink-0"
+                >
+                  Lire le guide e-Services DGI
+                </Link>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
